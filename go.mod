@@ -3,6 +3,7 @@ module github.com/linzeyan/ops-cli
 go 1.18
 
 require (
+	github.com/linzeyan/expandUrl v0.2.0
 	github.com/linzeyan/qrcode v0.0.1
 	github.com/spf13/cobra v1.5.0
 )

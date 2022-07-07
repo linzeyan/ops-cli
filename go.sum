@@ -1,6 +1,8 @@
 github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/inconshreveable/mousetrap v1.0.0 h1:Z8tu5sraLXCXIcARxBp/8cbvlwVa7Z1NHg9XEKhtSvM=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
+github.com/linzeyan/expandUrl v0.2.0 h1:PA8FMEjPxew2urYV1mREIRlaXrC15xA4lF0RbNwT8HA=
+github.com/linzeyan/expandUrl v0.2.0/go.mod h1:kFfj1cLkAEcIEmAcYmCquaQZfH6v/X8AiH4XD1Rc8o0=
 github.com/linzeyan/qrcode v0.0.1 h1:90LN9q6ppSW+YXSDDj6UBesenR/mlFnmf3BapC2GOAo=
 github.com/linzeyan/qrcode v0.0.1/go.mod h1:gIH7z2lJ3HaTPXzbXU4sljuD4WtW1o6Dxu5rrBR+M24=
 github.com/makiuchi-d/gozxing v0.1.1 h1:xxqijhoedi+/lZlhINteGbywIrewVdVv2wl9r5O9S1I=

@@ -1,6 +1,9 @@
 # github.com/inconshreveable/mousetrap v1.0.0
 ## explicit
 github.com/inconshreveable/mousetrap
+# github.com/linzeyan/expandUrl v0.2.0
+## explicit; go 1.18
+github.com/linzeyan/expandUrl
 # github.com/linzeyan/qrcode v0.0.1
 ## explicit; go 1.18
 github.com/linzeyan/qrcode
