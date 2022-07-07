@@ -48,17 +48,16 @@ var qrcodeCmd = &cobra.Command{
 				return
 			}
 			fmt.Println(result)
-			return
-		}
-		err := qrcode.GenerateQRCode(message, size, output)
-		if err != nil {
-			log.Println(err)
-			return
+		} else if messages != "" {
+			err := qrcode.GenerateQRCode(messages, size, output)
+			if err != nil {
+				log.Println(err)
+			}
 		}
 	},
 }
 
-var fileInput, message, output string
+var fileInput, messages, output string
 var size int
 
 func init() {
@@ -74,7 +73,7 @@ func init() {
 	// is called directly, e.g.:
 	// qrcodeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	qrcodeCmd.Flags().StringVarP(&fileInput, "file", "f", "", "Specify file path to read")
-	qrcodeCmd.Flags().StringVarP(&message, "message", "m", "", "Input message")
+	qrcodeCmd.Flags().StringVarP(&messages, "message", "m", "", "Input message")
 	qrcodeCmd.Flags().StringVarP(&output, "output", "o", "./qrcode.png", "Output QRCode file path")
 	qrcodeCmd.Flags().IntVarP(&size, "size", "s", 600, "Specify QRCode generate size")
 	qrcodeCmd.MarkFlagsMutuallyExclusive("file", "message")
