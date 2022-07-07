@@ -4,6 +4,9 @@ github.com/inconshreveable/mousetrap
 # github.com/linzeyan/expandUrl v0.2.0
 ## explicit; go 1.18
 github.com/linzeyan/expandUrl
+# github.com/linzeyan/password v0.3.4
+## explicit; go 1.17
+github.com/linzeyan/password
 # github.com/linzeyan/qrcode v0.0.1
 ## explicit; go 1.18
 github.com/linzeyan/qrcode
@@ -28,6 +31,10 @@ github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.5
 ## explicit; go 1.12
 github.com/spf13/pflag
+# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+## explicit; go 1.17
+golang.org/x/crypto/bcrypt
+golang.org/x/crypto/blowfish
 # golang.org/x/text v0.3.7
 ## explicit; go 1.17
 golang.org/x/text/encoding
