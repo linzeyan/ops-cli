@@ -43,9 +43,9 @@ var randomCmd = &cobra.Command{
 		switch mode {
 		case "all":
 			result = password.GenAll(length)
-		case "number":
+		case "num", "number":
 			result = password.GenNumber(length)
-		case "symbol":
+		case "sym", "symbol":
 			result = password.GenSymbol(length)
 		case "upper", "uppercase":
 			result = password.GenUpper(length)
