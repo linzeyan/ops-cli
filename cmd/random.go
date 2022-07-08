@@ -39,11 +39,27 @@ var randomCmd = &cobra.Command{
 	// This application is a tool to generate the needed files
 	// to quickly create a Cobra application.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		fmt.Println(password.GeneratePassword(length, minLower, minUpper, minSymbol, minNumber))
+		var result string
+		switch mode {
+		case "all":
+			result = password.GenAll(length)
+		case "number":
+			result = password.GenNumber(length)
+		case "symbol":
+			result = password.GenSymbol(length)
+		case "upper", "uppercase":
+			result = password.GenUpper(length)
+		case "lower", "lowercase":
+			result = password.GenLower(length)
+		default:
+			result = password.GeneratePassword(length, minLower, minUpper, minSymbol, minNumber)
+		}
+		fmt.Println(result)
 	},
 }
 
 var length, minLower, minUpper, minSymbol, minNumber uint
+var mode string
 
 func init() {
 	rootCmd.AddCommand(randomCmd)
@@ -57,9 +73,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// randomCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	randomCmd.Flags().UintVarP(&length, "length", "a", 24, "Specify the string length")
-	randomCmd.Flags().UintVarP(&minLower, "lower", "l", 4, "Number of lowercase letters to include in the string")
+	randomCmd.Flags().UintVarP(&length, "length", "l", 24, "Specify the string length")
+	randomCmd.Flags().UintVarP(&minLower, "lower", "o", 4, "Number of lowercase letters to include in the string")
 	randomCmd.Flags().UintVarP(&minUpper, "upper", "u", 4, "Number of uppercase letters to include in the string")
 	randomCmd.Flags().UintVarP(&minSymbol, "symbol", "s", 4, "Number of symbols to include in the string")
 	randomCmd.Flags().UintVarP(&minNumber, "number", "n", 4, "Number of digits to include in the string")
+	randomCmd.Flags().StringVarP(&mode, "type", "t", "default", "Specifies the string type, which can be number, symbol, upper(case), lower(case), or all but unspecified number of characters")
 }
