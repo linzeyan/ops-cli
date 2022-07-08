@@ -64,4 +64,5 @@ func init() {
 	// is called directly, e.g.:
 	// urlCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	urlCmd.Flags().StringVarP(&url, "url", "u", "", "Specify URL to expand")
+	urlCmd.MarkFlagRequired("url")
 }
