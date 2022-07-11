@@ -185,6 +185,8 @@ github.com/linzeyan/password v0.3.4 h1:MsgPHrrzBhLVI8g+aSyU07Xx8RC3bamGWdW49kO02
 github.com/linzeyan/password v0.3.4/go.mod h1:AzgHaCEjUVGdil4l8ReolCwumaOllFPmn9rdCMH8zPk=
 github.com/linzeyan/qrcode v0.0.1 h1:90LN9q6ppSW+YXSDDj6UBesenR/mlFnmf3BapC2GOAo=
 github.com/linzeyan/qrcode v0.0.1/go.mod h1:gIH7z2lJ3HaTPXzbXU4sljuD4WtW1o6Dxu5rrBR+M24=
+github.com/linzeyan/tlsCheck v0.0.1 h1:Xd59Vb6P4WfeRslopMqQs4asVB2pHeV0gsbwoIJNe+o=
+github.com/linzeyan/tlsCheck v0.0.1/go.mod h1:tdJNRVIi2wrxsCUCo4yw105ysRER14TlPrv3mJ1Jy/0=
 github.com/magiconair/properties v1.8.5 h1:b6kJs+EmPFMYGkow9GiUyCyOvIwYetYJ3fSaWak/Gls=
 github.com/magiconair/properties v1.8.5/go.mod h1:y3VJvCyxH9uVvJTWEGAELF3aiYNyPKd5NZ3oSwXrF60=
 github.com/makiuchi-d/gozxing v0.1.1 h1:xxqijhoedi+/lZlhINteGbywIrewVdVv2wl9r5O9S1I=
