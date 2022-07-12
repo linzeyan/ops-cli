@@ -14,4 +14,17 @@ build() {
     go build -a -trimpath -ldflags="-X 'github.com/linzeyan/ops-cli/cmd.appVersion=$(git describe --tags)' -X 'github.com/linzeyan/ops-cli/cmd.appBuildTime=$(date)' -X 'github.com/linzeyan/ops-cli/cmd.appCommit=$(git rev-parse HEAD)' -X 'github.com/linzeyan/ops-cli/cmd.appPlatform=${GOOS}/${GOARCH}'" -o $(basename ${PWD})_${GOOS}_${GOARCH} .
 }
 
+version() {
+    echo "$(git describe --tags)" >version.txt
+    echo "BuildTime: $(date)" >>version.txt
+    echo "GitCommit: $(git rev-parse HEAD)" >>version.txt
+    echo "Platform:  ${GOOS}/${GOARCH}" >>version.txt
+}
+
+generate() {
+    go generate cmd/*
+    export CGO_ENABLED=0
+    go build -a -trimpath -o $(basename ${PWD}) .
+}
+
 $1

@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -33,7 +34,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "ops-cli",
 	Short:   "OPS useful tools",
-	Version: fmt.Sprintf("%s\nBuildTime: %s\nGitCommit: %s\nPlatform:  %s", appVersion, appBuildTime, appCommit, appPlatform),
+	Version: outputVersion(),
 	Args:    cobra.OnlyValidArgs,
 
 	// 	Long: `A longer description that spans multiple lines and likely contains
@@ -46,6 +47,10 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, _ []string) { cmd.Help() },
 }
+
+//go:generate /usr/local/bin/bash ../build.bash version
+//go:embed version.txt
+var version string
 
 var appVersion, appBuildTime, appCommit, appPlatform string
 
@@ -69,4 +74,12 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func outputVersion() string {
+	if appVersion != "" {
+		return fmt.Sprintf("%s\nBuildTime: %s\nGitCommit: %s\nPlatform:  %s", appVersion, appBuildTime, appCommit, appPlatform)
+	} else {
+		return version
+	}
 }
