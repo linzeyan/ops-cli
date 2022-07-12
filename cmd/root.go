@@ -36,7 +36,6 @@ var rootCmd = &cobra.Command{
 	Short:   "OPS useful tools",
 	Version: outputVersion(),
 	Args:    cobra.OnlyValidArgs,
-
 	// 	Long: `A longer description that spans multiple lines and likely contains
 	// examples and usage of using your application. For example:
 
@@ -48,9 +47,11 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) { cmd.Help() },
 }
 
+/*
 //go:generate /usr/local/bin/bash ../build.bash version
 //go:embed version.txt
 var version string
+*/
 
 var appVersion, appBuildTime, appCommit, appPlatform string
 
@@ -79,7 +80,6 @@ func init() {
 func outputVersion() string {
 	if appVersion != "" {
 		return fmt.Sprintf("%s\nBuildTime: %s\nGitCommit: %s\nPlatform:  %s", appVersion, appBuildTime, appCommit, appPlatform)
-	} else {
-		return version
 	}
+	return "v0.0.6"
 }
