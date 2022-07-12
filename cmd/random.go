@@ -56,6 +56,14 @@ var randomCmd = &cobra.Command{
 		}
 		fmt.Println(result)
 	},
+	Example: `ops-cli random
+ops-cli random -l 32
+ops-cli random -l 32 -s 10 -o 10 -u 10 -n 2
+ops-cli random -t number -l 100
+ops-cli random -t symbol
+ops-cli random -t upper
+ops-cli random -t lower
+ops-cli random -t all`,
 }
 
 var length, minLower, minUpper, minSymbol, minNumber uint

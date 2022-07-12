@@ -42,6 +42,7 @@ var otpCmd = &cobra.Command{
 		var result = password.OTP.TOTP(secret)
 		fmt.Println(result)
 	},
+	Example: `ops-cli otp -s 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7`,
 }
 
 var secret string

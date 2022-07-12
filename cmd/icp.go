@@ -43,6 +43,8 @@ var icpCmd = &cobra.Command{
 		result := icp.Check()
 		fmt.Println(icp.Domain, result)
 	},
+	Example: `ops-cli icp -d apple.com
+ops-cli icp -c ~/.env -d baidu.com`,
 }
 
 func init() {

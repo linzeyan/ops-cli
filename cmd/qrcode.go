@@ -57,6 +57,9 @@ var qrcodeCmd = &cobra.Command{
 			cmd.Help()
 		}
 	},
+	Example: `ops-cli qrcode -f qrcode.png
+ops-cli qrcode -m https://www.google.com -o out.png
+ops-cli qrcode -m https://www.google.com -o out.png -s 500`,
 }
 
 var fileInput, messages, output string

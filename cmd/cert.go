@@ -50,6 +50,10 @@ var certCmd = &cobra.Command{
 		}
 		cmd.Help()
 	},
+	Example: `ops-cli cert -d www.google.com:443
+ops-cli cert -d www.google.com:443 -i -n -p
+ops-cli cert -f example.com.crt
+ops-cli cert -f example.com.crt -i -n`,
 }
 
 var crt, host string
