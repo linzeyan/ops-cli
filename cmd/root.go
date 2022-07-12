@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -32,8 +33,9 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "ops-cli",
 	Short:   "OPS useful tools",
-	Version: "v0.0.1",
+	Version: fmt.Sprintf("%s\nBuildTime: %s\nGitCommit: %s\nPlatform:  %s", appVersion, appBuildTime, appCommit, appPlatform),
 	Args:    cobra.OnlyValidArgs,
+
 	// 	Long: `A longer description that spans multiple lines and likely contains
 	// examples and usage of using your application. For example:
 
@@ -44,6 +46,8 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, _ []string) { cmd.Help() },
 }
+
+var appVersion, appBuildTime, appCommit, appPlatform string
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
