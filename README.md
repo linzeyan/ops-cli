@@ -1,6 +1,18 @@
 # ops-cli
 
 Try to collect tools.
+## Installation
+
+### Go Install
+
+```bash
+go install github.com/linzeyan/ops-cli@latest
+```
+### Go Build
+
+```bash
+go build .
+```
 
 ## Usage
 
@@ -12,6 +24,7 @@ Usage:
   ops-cli [command]
 
 Available Commands:
+  cert        Check tls cert
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
   icp         Check ICP status
