@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -38,7 +39,11 @@ var whoisCmd = &cobra.Command{
 		if whoisDomain != "" {
 			switch whoisServer {
 			case "WhoisXML", "whoisxml", "WHOISXML":
-				whois.WhoisXMLAPIKey = whoisKey
+				if whoisKey != "" {
+					whois.WhoisXMLAPIKey = whoisKey
+				} else {
+					whois.WhoisXMLAPIKey = whoisWhoisXMLAPIKey
+				}
 				result, err := whois.RequestWhoisXML(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -51,7 +56,11 @@ var whoisCmd = &cobra.Command{
 				}
 				fmt.Println(string(out))
 			case "IP2Whois", "ip2whois", "IP2WHOIS":
-				whois.IP2WhoisKey = whoisKey
+				if whoisKey != "" {
+					whois.IP2WhoisKey = whoisKey
+				} else {
+					whois.IP2WhoisKey = whoisIP2WhoisKey
+				}
 				result, err := whois.RequestIp2Whois(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -64,7 +73,11 @@ var whoisCmd = &cobra.Command{
 				}
 				fmt.Println(string(out))
 			case "WhoApi", "whoapi", "WHOAPI":
-				whois.WhoApiKey = whoisKey
+				if whoisKey != "" {
+					whois.WhoApiKey = whoisKey
+				} else {
+					whois.WhoApiKey = whoisWhoApiKey
+				}
 				result, err := whois.RequestWhoApi(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -77,7 +90,11 @@ var whoisCmd = &cobra.Command{
 				}
 				fmt.Println(string(out))
 			case "ApiNinjas", "apininjas", "APININJAS":
-				whois.ApiNinjasKey = whoisKey
+				if whoisKey != "" {
+					whois.ApiNinjasKey = whoisKey
+				} else {
+					whois.ApiNinjasKey = whoisApiNinjasKey
+				}
 				result, err := whois.RequestApiNinjas(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -90,7 +107,11 @@ var whoisCmd = &cobra.Command{
 				}
 				fmt.Println(string(out))
 			default:
-				whois.ApiNinjasKey = whoisKey
+				if whoisKey != "" {
+					whois.ApiNinjasKey = whoisKey
+				} else {
+					whois.ApiNinjasKey = whoisApiNinjasKey
+				}
 				result, err := whois.RequestApiNinjas(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -108,6 +129,18 @@ var whoisCmd = &cobra.Command{
 		cmd.Help()
 	},
 }
+
+//go:embed key_whoisxmlapi
+var whoisWhoisXMLAPIKey string
+
+//go:embed key_ip2whois
+var whoisIP2WhoisKey string
+
+//go:embed key_whoapi
+var whoisWhoApiKey string
+
+//go:embed key_apininjas
+var whoisApiNinjasKey string
 
 var whoisDomain, whoisServer, whoisKey string
 
