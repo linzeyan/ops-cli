@@ -40,7 +40,7 @@ var urlCmd = &cobra.Command{
 	// This application is a tool to generate the needed files
 	// to quickly create a Cobra application.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		result, err := expandUrl.Expand(url)
+		result, err := expandUrl.Expand(urlUrl)
 		if err != nil {
 			log.Println(err)
 			return
@@ -50,7 +50,7 @@ var urlCmd = &cobra.Command{
 	Example: `ops-cli url -u https://goo.gl/maps/b37Aq3Anc7taXQDd9`,
 }
 
-var url string
+var urlUrl string
 
 func init() {
 	rootCmd.AddCommand(urlCmd)
@@ -64,6 +64,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// urlCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	urlCmd.Flags().StringVarP(&url, "url", "u", "", "Specify URL to expand")
+	urlCmd.Flags().StringVarP(&urlUrl, "url", "u", "", "Specify URL to expand")
 	urlCmd.MarkFlagRequired("url")
 }

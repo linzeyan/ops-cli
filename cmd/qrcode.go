@@ -41,15 +41,15 @@ var qrcodeCmd = &cobra.Command{
 	// to quickly create a Cobra application.`,
 	Args: cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
-		if fileInput != "" {
-			result, err := qrcode.ReadQRCode(fileInput)
+		if qrcodeFileInput != "" {
+			result, err := qrcode.ReadQRCode(qrcodeFileInput)
 			if err != nil {
 				log.Println(err)
 				return
 			}
 			fmt.Println(result)
-		} else if messages != "" {
-			err := qrcode.GenerateQRCode(messages, size, output)
+		} else if qrcodeMessage != "" {
+			err := qrcode.GenerateQRCode(qrcodeMessage, qrcodeSize, qrcodeOutput)
 			if err != nil {
 				log.Println(err)
 			}
@@ -62,8 +62,8 @@ ops-cli qrcode -m https://www.google.com -o out.png
 ops-cli qrcode -m https://www.google.com -o out.png -s 500`,
 }
 
-var fileInput, messages, output string
-var size int
+var qrcodeFileInput, qrcodeMessage, qrcodeOutput string
+var qrcodeSize int
 
 func init() {
 	rootCmd.AddCommand(qrcodeCmd)
@@ -77,10 +77,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// qrcodeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	qrcodeCmd.Flags().StringVarP(&fileInput, "file", "f", "", "Specify file path to read")
-	qrcodeCmd.Flags().StringVarP(&messages, "message", "m", "", "Input message")
-	qrcodeCmd.Flags().StringVarP(&output, "output", "o", "./qrcode.png", "Output QRCode file path")
-	qrcodeCmd.Flags().IntVarP(&size, "size", "s", 600, "Specify QRCode generate size")
+	qrcodeCmd.Flags().StringVarP(&qrcodeFileInput, "file", "f", "", "Specify file path to read")
+	qrcodeCmd.Flags().StringVarP(&qrcodeMessage, "message", "m", "", "Input message")
+	qrcodeCmd.Flags().StringVarP(&qrcodeOutput, "output", "o", "./qrcode.png", "Output QRCode file path")
+	qrcodeCmd.Flags().IntVarP(&qrcodeSize, "size", "s", 600, "Specify QRCode generate size")
 	qrcodeCmd.MarkFlagsMutuallyExclusive("file", "message")
 	qrcodeCmd.MarkFlagsRequiredTogether("message", "output")
 }

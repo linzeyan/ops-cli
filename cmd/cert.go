@@ -41,10 +41,10 @@ var certCmd = &cobra.Command{
 	// This application is a tool to generate the needed files
 	// to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, _ []string) {
-		if host != "domain:port" {
+		if certHost != "domain:port" {
 			outputByHost()
 			return
-		} else if crt != "" {
+		} else if certCrt != "" {
 			outputByFile()
 			return
 		}
@@ -56,8 +56,8 @@ ops-cli cert -f example.com.crt
 ops-cli cert -f example.com.crt -i -n`,
 }
 
-var crt, host string
-var ip, expiry, dns, issuer bool
+var certCrt, certHost string
+var certIP, certExpiry, certDNS, certIssuer bool
 
 func init() {
 	rootCmd.AddCommand(certCmd)
@@ -71,38 +71,38 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// certCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	certCmd.Flags().StringVarP(&crt, "file", "f", "", "Specify .crt file path")
-	certCmd.Flags().StringVarP(&host, "domain", "d", "domain:port", "Specify domain and host port")
+	certCmd.Flags().StringVarP(&certCrt, "file", "f", "", "Specify .crt file path")
+	certCmd.Flags().StringVarP(&certHost, "domain", "d", "domain:port", "Specify domain and host port")
 	certCmd.MarkFlagsMutuallyExclusive("file", "domain")
-	certCmd.Flags().BoolVarP(&ip, "ip", "p", false, "Print IP")
-	certCmd.Flags().BoolVarP(&expiry, "expiry", "e", true, "Print expiry time")
-	certCmd.Flags().BoolVarP(&dns, "dns", "n", false, "Print DNS names")
-	certCmd.Flags().BoolVarP(&issuer, "issuer", "i", false, "Print issuer")
+	certCmd.Flags().BoolVarP(&certIP, "ip", "p", false, "Print IP")
+	certCmd.Flags().BoolVarP(&certExpiry, "expiry", "e", true, "Print expiry time")
+	certCmd.Flags().BoolVarP(&certDNS, "dns", "n", false, "Print DNS names")
+	certCmd.Flags().BoolVarP(&certIssuer, "issuer", "i", false, "Print issuer")
 }
 
 func outputByHost() {
-	conn, err := tlsCheck.CheckByHost(host)
+	conn, err := tlsCheck.CheckByHost(certHost)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	cert := conn.ConnectionState().PeerCertificates[0]
-	if expiry {
+	if certExpiry {
 		fmt.Println("Expiry time:", cert.NotAfter.Local().Format(time.RFC3339))
 	}
-	if ip {
+	if certIP {
 		fmt.Println("Server IP:", conn.RemoteAddr().String())
 	}
-	if dns {
+	if certDNS {
 		fmt.Println("DNS:", cert.DNSNames)
 	}
-	if issuer {
+	if certIssuer {
 		fmt.Println("Issuer:", cert.Issuer.String())
 	}
 }
 
 func outputByFile() {
-	cert, err := tlsCheck.CheckByFile(crt)
+	cert, err := tlsCheck.CheckByFile(certCrt)
 	if err != nil {
 		log.Println(err)
 		return
@@ -111,13 +111,13 @@ func outputByFile() {
 		log.Println(cert)
 		return
 	}
-	if expiry {
+	if certExpiry {
 		fmt.Println("Expiry time:", cert[0].NotAfter.Local().Format(time.RFC3339))
 	}
-	if dns {
+	if certDNS {
 		fmt.Println("DNS:", cert[0].DNSNames)
 	}
-	if issuer {
+	if certIssuer {
 		fmt.Println("Issuer:", cert[0].Issuer.String())
 	}
 }

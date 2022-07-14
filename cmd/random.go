@@ -40,19 +40,19 @@ var randomCmd = &cobra.Command{
 	// to quickly create a Cobra application.`,
 	Run: func(_ *cobra.Command, _ []string) {
 		var result string
-		switch mode {
+		switch randomMode {
 		case "all":
-			result = password.GenAll(length)
+			result = password.GenAll(randomLength)
 		case "num", "number":
-			result = password.GenNumber(length)
+			result = password.GenNumber(randomLength)
 		case "sym", "symbol":
-			result = password.GenSymbol(length)
+			result = password.GenSymbol(randomLength)
 		case "upper", "uppercase":
-			result = password.GenUpper(length)
+			result = password.GenUpper(randomLength)
 		case "lower", "lowercase":
-			result = password.GenLower(length)
+			result = password.GenLower(randomLength)
 		default:
-			result = password.GeneratePassword(length, minLower, minUpper, minSymbol, minNumber)
+			result = password.GeneratePassword(randomLength, randomLower, randomUpper, randomSymbol, randomNumber)
 		}
 		fmt.Println(result)
 	},
@@ -66,8 +66,8 @@ ops-cli random -t lower
 ops-cli random -t all`,
 }
 
-var length, minLower, minUpper, minSymbol, minNumber uint
-var mode string
+var randomLength, randomLower, randomUpper, randomSymbol, randomNumber uint
+var randomMode string
 
 func init() {
 	rootCmd.AddCommand(randomCmd)
@@ -81,10 +81,10 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// randomCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	randomCmd.Flags().UintVarP(&length, "length", "l", 24, "Specify the string length")
-	randomCmd.Flags().UintVarP(&minLower, "lower", "o", 4, "Number of lowercase letters to include in the string")
-	randomCmd.Flags().UintVarP(&minUpper, "upper", "u", 4, "Number of uppercase letters to include in the string")
-	randomCmd.Flags().UintVarP(&minSymbol, "symbol", "s", 4, "Number of symbols to include in the string")
-	randomCmd.Flags().UintVarP(&minNumber, "number", "n", 4, "Number of digits to include in the string")
-	randomCmd.Flags().StringVarP(&mode, "type", "t", "default", "Specifies the string type, which can be number, symbol, upper(case), lower(case), or all but unspecified number of characters")
+	randomCmd.Flags().UintVarP(&randomLength, "length", "l", 24, "Specify the string length")
+	randomCmd.Flags().UintVarP(&randomLower, "lower", "o", 4, "Number of lowercase letters to include in the string")
+	randomCmd.Flags().UintVarP(&randomUpper, "upper", "u", 4, "Number of uppercase letters to include in the string")
+	randomCmd.Flags().UintVarP(&randomSymbol, "symbol", "s", 4, "Number of symbols to include in the string")
+	randomCmd.Flags().UintVarP(&randomNumber, "number", "n", 4, "Number of digits to include in the string")
+	randomCmd.Flags().StringVarP(&randomMode, "type", "t", "default", "Specifies the string type, which can be number, symbol, upper(case), lower(case), or all but unspecified number of characters")
 }

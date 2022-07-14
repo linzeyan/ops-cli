@@ -39,13 +39,13 @@ var otpCmd = &cobra.Command{
 	// This application is a tool to generate the needed files
 	// to quickly create a Cobra application.`,
 	Run: func(_ *cobra.Command, _ []string) {
-		var result = password.OTP.TOTP(secret)
+		var result = password.OTP.TOTP(otpSecret)
 		fmt.Println(result)
 	},
 	Example: `ops-cli otp -s 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7`,
 }
 
-var secret string
+var otpSecret string
 
 func init() {
 	rootCmd.AddCommand(otpCmd)
@@ -59,6 +59,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// otpCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	otpCmd.Flags().StringVarP(&secret, "secret", "s", "", "Specify TOTP secret key")
+	otpCmd.Flags().StringVarP(&otpSecret, "secret", "s", "", "Specify TOTP secret key")
 	otpCmd.MarkFlagRequired("secret")
 }
