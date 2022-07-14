@@ -8,6 +8,7 @@ require (
 	github.com/linzeyan/password v0.3.4
 	github.com/linzeyan/qrcode v0.0.1
 	github.com/linzeyan/tlsCheck v0.0.1
+	github.com/linzeyan/whois v0.0.3
 	github.com/spf13/cobra v1.5.0
 )
 
