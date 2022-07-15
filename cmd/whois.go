@@ -107,21 +107,12 @@ var whoisCmd = &cobra.Command{
 				}
 				fmt.Println(string(out))
 			default:
-				first, err := whois.RequestVerisign(whoisDomain)
+				result, err := whois.RequestVerisign(whoisDomain)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				outVer := whois.ParseVerisign(first)
-
-				second, err := whois.RequestIana(whoisDomain)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				org := whois.ParseIana(second)
-				outVer["Registrant"] = org
-				out, err := json.MarshalIndent(outVer, "", "  ")
+				out, err := json.MarshalIndent(whois.ParseVerisign(result), "", "  ")
 				if err != nil {
 					log.Println(err)
 					return
