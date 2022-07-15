@@ -49,7 +49,7 @@ var whoisCmd = &cobra.Command{
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParserWhoisXML(result), "", "  ")
+				out, err := json.MarshalIndent(whois.ParseWhoisXML(result), "", "  ")
 				if err != nil {
 					log.Println(err)
 					return
@@ -66,7 +66,7 @@ var whoisCmd = &cobra.Command{
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParserIp2Whois(result), "", "  ")
+				out, err := json.MarshalIndent(whois.ParseIp2Whois(result), "", "  ")
 				if err != nil {
 					log.Println(err)
 					return
@@ -83,7 +83,7 @@ var whoisCmd = &cobra.Command{
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParserWhoApi(result), "", "  ")
+				out, err := json.MarshalIndent(whois.ParseWhoApi(result), "", "  ")
 				if err != nil {
 					log.Println(err)
 					return
@@ -100,24 +100,28 @@ var whoisCmd = &cobra.Command{
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParserApiNinjas(result), "", "  ")
+				out, err := json.MarshalIndent(whois.ParseApiNinjas(result), "", "  ")
 				if err != nil {
 					log.Println(err)
 					return
 				}
 				fmt.Println(string(out))
 			default:
-				if whoisKey != "" {
-					whois.ApiNinjasKey = whoisKey
-				} else {
-					whois.ApiNinjasKey = whoisApiNinjasKey
-				}
-				result, err := whois.RequestApiNinjas(whoisDomain)
+				first, err := whois.RequestVerisign(whoisDomain)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParserApiNinjas(result), "", "  ")
+				outVer := whois.ParseVerisign(first)
+
+				second, err := whois.RequestIana(whoisDomain)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				org := whois.ParseIana(second)
+				outVer["Registrant"] = org
+				out, err := json.MarshalIndent(outVer, "", "  ")
 				if err != nil {
 					log.Println(err)
 					return
@@ -157,6 +161,6 @@ func init() {
 	// is called directly, e.g.:
 	// whoisCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	whoisCmd.Flags().StringVarP(&whoisDomain, "domain", "d", "", "Specify domain")
-	whoisCmd.Flags().StringVarP(&whoisServer, "server", "s", "ApiNinjas", "Specify request server, can be WhoisXML, IP2Whois, WhoApi, ApiNinjas")
+	whoisCmd.Flags().StringVarP(&whoisServer, "server", "s", "Iana", "Specify request server, can be WhoisXML, IP2Whois, WhoApi, ApiNinjas")
 	whoisCmd.Flags().StringVarP(&whoisKey, "key", "k", "", "Specify API Key")
 }
