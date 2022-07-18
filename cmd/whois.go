@@ -123,18 +123,20 @@ var whoisCmd = &cobra.Command{
 		}
 		cmd.Help()
 	},
+	Example: `ops-cli whois -d apple.com
+ops-cli whois -s ApiNinjas -k your_api_key -d google.com`,
 }
 
-//go:embed key_whoisxmlapi
+// go:embed key_whoisxmlapi
 var whoisWhoisXMLAPIKey string
 
-//go:embed key_ip2whois
+// go:embed key_ip2whois
 var whoisIP2WhoisKey string
 
-//go:embed key_whoapi
+// go:embed key_whoapi
 var whoisWhoApiKey string
 
-//go:embed key_apininjas
+// go:embed key_apininjas
 var whoisApiNinjasKey string
 
 var whoisDomain, whoisServer, whoisKey string
@@ -152,6 +154,6 @@ func init() {
 	// is called directly, e.g.:
 	// whoisCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	whoisCmd.Flags().StringVarP(&whoisDomain, "domain", "d", "", "Specify domain")
-	whoisCmd.Flags().StringVarP(&whoisServer, "server", "s", "Iana", "Specify request server, can be WhoisXML, IP2Whois, WhoApi, ApiNinjas")
+	whoisCmd.Flags().StringVarP(&whoisServer, "server", "s", "whois.verisign-grs.com", "Specify request server, can be WhoisXML, IP2Whois, WhoApi, ApiNinjas")
 	whoisCmd.Flags().StringVarP(&whoisKey, "key", "k", "", "Specify API Key")
 }
