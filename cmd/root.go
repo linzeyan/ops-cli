@@ -34,7 +34,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:     "ops-cli",
 	Short:   "OPS useful tools",
-	Version: outputVersion(),
+	Version: rootOutputVersion(),
 	Args:    cobra.OnlyValidArgs,
 	// 	Long: `A longer description that spans multiple lines and likely contains
 	// examples and usage of using your application. For example:
@@ -77,7 +77,7 @@ func init() {
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-func outputVersion() string {
+func rootOutputVersion() string {
 	if appVersion != "" {
 		return fmt.Sprintf("%s\nBuildTime: %s\nGitCommit: %s\nPlatform:  %s", appVersion, appBuildTime, appCommit, appPlatform)
 	}

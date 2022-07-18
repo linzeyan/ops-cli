@@ -42,10 +42,10 @@ var certCmd = &cobra.Command{
 	// to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		if certHost != "domain:port" {
-			outputByHost()
+			certOutputByHost()
 			return
 		} else if certCrt != "" {
-			outputByFile()
+			certOutputByFile()
 			return
 		}
 		cmd.Help()
@@ -80,7 +80,7 @@ func init() {
 	certCmd.Flags().BoolVarP(&certIssuer, "issuer", "i", false, "Print issuer")
 }
 
-func outputByHost() {
+func certOutputByHost() {
 	conn, err := tlsCheck.CheckByHost(certHost)
 	if err != nil {
 		log.Println(err)
@@ -101,7 +101,7 @@ func outputByHost() {
 	}
 }
 
-func outputByFile() {
+func certOutputByFile() {
 	cert, err := tlsCheck.CheckByFile(certCrt)
 	if err != nil {
 		log.Println(err)

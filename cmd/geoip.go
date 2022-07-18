@@ -37,11 +37,11 @@ var geoipCmd = &cobra.Command{
 	// to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, _ []string) {
 		if geoipInput != "" {
-			requestSingle()
+			geoipRequestSingle()
 			return
 		}
 		if geoipBatch != nil {
-			requestBatch()
+			geoipRequestBatch()
 			return
 		}
 		cmd.Help()
@@ -88,7 +88,7 @@ type GeoIPSingle struct {
 	Query       string `json:"query"`
 }
 
-func requestSingle() error {
+func geoipRequestSingle() error {
 	apiUrl := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 
 	var client = &http.Client{
@@ -129,7 +129,7 @@ func requestSingle() error {
 
 type GeoIPBatch []GeoIPSingle
 
-func requestBatch() error {
+func geoipRequestBatch() error {
 	apiUrl := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
 
 	var client = &http.Client{
