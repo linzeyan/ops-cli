@@ -22,8 +22,10 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/linzeyan/qrcode"
 	"github.com/spf13/cobra"
@@ -40,30 +42,22 @@ var qrcodeCmd = &cobra.Command{
 	// This application is a tool to generate the needed files
 	// to quickly create a Cobra application.`,
 	Args: cobra.OnlyValidArgs,
-	Run: func(cmd *cobra.Command, _ []string) {
-		if qrcodeFileInput != "" {
-			result, err := qrcode.ReadQRCode(qrcodeFileInput)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			fmt.Println(result)
-		} else if qrcodeMessage != "" {
-			err := qrcode.GenerateQRCode(qrcodeMessage, qrcodeSize, qrcodeOutput)
-			if err != nil {
-				log.Println(err)
-			}
-		} else {
-			cmd.Help()
-		}
+	Run: func(_ *cobra.Command, _ []string) {
+		qrcodeOptions()
 	},
 	Example: `ops-cli qrcode -f qrcode.png
-ops-cli qrcode -m https://www.google.com -o out.png
-ops-cli qrcode -m https://www.google.com -o out.png -s 500`,
+ops-cli qrcode -g -m https://www.google.com -o out.png
+ops-cli qrcode -g -m https://www.google.com -o out.png -s 500
+ops-cli qrcode -g -t wifi --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid`,
 }
+
+var qrcodeGenerate bool
 
 var qrcodeFileInput, qrcodeMessage, qrcodeOutput string
 var qrcodeSize int
+
+var qrcodeType string
+var qrcodeWIFIType, qrcodeWIFIPass, qrcodeWIFISsid string
 
 func init() {
 	rootCmd.AddCommand(qrcodeCmd)
@@ -77,10 +71,57 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// qrcodeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	qrcodeCmd.Flags().BoolVarP(&qrcodeGenerate, "generate", "g", false, "Generate QRcode")
 	qrcodeCmd.Flags().StringVarP(&qrcodeFileInput, "file", "f", "", "Specify file path to read")
+
+	qrcodeCmd.Flags().StringVarP(&qrcodeType, "type", "t", "normal", "Generate type(normal, WiFi)")
 	qrcodeCmd.Flags().StringVarP(&qrcodeMessage, "message", "m", "", "Input message")
+
+	qrcodeCmd.Flags().StringVarP(&qrcodeWIFIPass, "wifi-pass", "", "", "Specify password")
+	qrcodeCmd.Flags().StringVarP(&qrcodeWIFISsid, "wifi-ssid", "", "", "Specify SSID")
+	qrcodeCmd.Flags().StringVarP(&qrcodeWIFIType, "wifi-type", "", "WPA", "WPA/WEP/nopass")
+
 	qrcodeCmd.Flags().StringVarP(&qrcodeOutput, "output", "o", "./qrcode.png", "Output QRCode file path")
 	qrcodeCmd.Flags().IntVarP(&qrcodeSize, "size", "s", 600, "Specify QRCode generate size")
-	qrcodeCmd.MarkFlagsMutuallyExclusive("file", "message")
-	qrcodeCmd.MarkFlagsRequiredTogether("message", "output")
+	qrcodeCmd.MarkFlagsRequiredTogether("output", "size")
+	qrcodeCmd.MarkFlagsRequiredTogether("wifi-pass", "wifi-ssid", "wifi-type")
+}
+
+func qrcodeOptions() {
+	if !qrcodeGenerate && qrcodeFileInput != "" {
+		result, err := qrcode.ReadQRCode(qrcodeFileInput)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fmt.Println(result)
+		return
+	}
+
+	if qrcodeGenerate {
+		switch strings.ToLower(qrcodeType) {
+		case "wifi":
+			qrcodeMessage = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`, qrcodeWIFISsid, qrcodeWIFIType, qrcodeWIFIPass)
+			err := qrcodeGenPng()
+			if err != nil {
+				log.Println(err)
+			}
+		default:
+			err := qrcodeGenPng()
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+}
+
+func qrcodeGenPng() error {
+	if qrcodeMessage == "" {
+		return errors.New("message is empty")
+	}
+	err := qrcode.GenerateQRCode(qrcodeMessage, qrcodeSize, qrcodeOutput)
+	if err != nil {
+		return err
+	}
+	return nil
 }

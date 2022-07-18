@@ -81,5 +81,5 @@ func outputVersion() string {
 	if appVersion != "" {
 		return fmt.Sprintf("%s\nBuildTime: %s\nGitCommit: %s\nPlatform:  %s", appVersion, appBuildTime, appCommit, appPlatform)
 	}
-	return "v0.0.6"
+	return "v0.0.8"
 }
