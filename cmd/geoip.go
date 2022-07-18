@@ -46,6 +46,8 @@ var geoipCmd = &cobra.Command{
 		}
 		cmd.Help()
 	},
+	Example: `ops-cli geoip -s 1.1.1.1
+ops-cli geoip -b 1.1.1.1 -b 8.8.8.8`,
 }
 
 var geoipInput string
@@ -135,9 +137,12 @@ func requestBatch() error {
 			DisableKeepAlives: true,
 		},
 	}
-	fmt.Println()
-	reqData := strings.NewReader(fmt.Sprintf("%s", geoipBatch))
-	req, err := http.NewRequest(http.MethodGet, apiUrl, reqData)
+	var ips string = `[`
+	for i := range geoipBatch {
+		ips = ips + fmt.Sprintf(`"%s", `, geoipBatch[i])
+	}
+	ips = strings.TrimRight(ips, `, `) + `]`
+	req, err := http.NewRequest(http.MethodPost, apiUrl, strings.NewReader(ips))
 	if err != nil {
 		return err
 	}
@@ -153,7 +158,6 @@ func requestBatch() error {
 		if err != nil {
 			return err
 		}
-		fmt.Println(content)
 		var data GeoIPBatch
 		err = json.Unmarshal(content, &data)
 		if err != nil {
