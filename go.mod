@@ -6,7 +6,7 @@ require (
 	github.com/linzeyan/expandUrl v0.2.0
 	github.com/linzeyan/icp v0.3.0
 	github.com/linzeyan/password v0.3.4
-	github.com/linzeyan/qrcode v0.0.1
+	github.com/linzeyan/qrcode v0.0.3
 	github.com/linzeyan/tlsCheck v0.0.1
 	github.com/linzeyan/whois v0.0.7
 	github.com/spf13/cobra v1.5.0
