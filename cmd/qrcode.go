@@ -48,7 +48,8 @@ var qrcodeCmd = &cobra.Command{
 	Example: `ops-cli qrcode -f qrcode.png
 ops-cli qrcode -g -m https://www.google.com -o out.png
 ops-cli qrcode -g -m https://www.google.com -o out.png -s 500
-ops-cli qrcode -g -t wifi --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid`,
+ops-cli qrcode -g -t wifi --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid
+ops-cli qrcode -g -t otp --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --otp-issuer aws`,
 }
 
 var qrcodeGenerate bool
@@ -58,6 +59,7 @@ var qrcodeSize int
 
 var qrcodeType string
 var qrcodeWIFIType, qrcodeWIFIPass, qrcodeWIFISsid string
+var qrcodeOtpAccount, qrcodeOtpSecret, qrcodeOtpIssuer string
 
 func init() {
 	rootCmd.AddCommand(qrcodeCmd)
@@ -74,17 +76,23 @@ func init() {
 	qrcodeCmd.Flags().BoolVarP(&qrcodeGenerate, "generate", "g", false, "Generate QRcode")
 	qrcodeCmd.Flags().StringVarP(&qrcodeFileInput, "file", "f", "", "Specify file path to read")
 
-	qrcodeCmd.Flags().StringVarP(&qrcodeType, "type", "t", "normal", "Generate type(normal, WiFi)")
+	qrcodeCmd.Flags().StringVarP(&qrcodeType, "type", "t", "normal", "Generate type(normal, otp, WiFi)")
+	/* Type: normal */
 	qrcodeCmd.Flags().StringVarP(&qrcodeMessage, "message", "m", "", "Input message")
-
+	/* Type: wifi */
 	qrcodeCmd.Flags().StringVarP(&qrcodeWIFIPass, "wifi-pass", "", "", "Specify password")
 	qrcodeCmd.Flags().StringVarP(&qrcodeWIFISsid, "wifi-ssid", "", "", "Specify SSID")
 	qrcodeCmd.Flags().StringVarP(&qrcodeWIFIType, "wifi-type", "", "WPA", "WPA/WEP/nopass")
-
+	/* Type: otp */
+	qrcodeCmd.Flags().StringVarP(&qrcodeOtpAccount, "otp-account", "", "", "Specify account")
+	qrcodeCmd.Flags().StringVarP(&qrcodeOtpIssuer, "otp-issuer", "", "", "Specify issuer")
+	qrcodeCmd.Flags().StringVarP(&qrcodeOtpSecret, "otp-secret", "", "", "Specify secret")
+	/* output arguments */
 	qrcodeCmd.Flags().StringVarP(&qrcodeOutput, "output", "o", "./qrcode.png", "Output QRCode file path")
 	qrcodeCmd.Flags().IntVarP(&qrcodeSize, "size", "s", 600, "Specify QRCode generate size")
 	qrcodeCmd.MarkFlagsRequiredTogether("output", "size")
 	qrcodeCmd.MarkFlagsRequiredTogether("wifi-pass", "wifi-ssid", "wifi-type")
+	qrcodeCmd.MarkFlagsRequiredTogether("otp-account", "otp-issuer", "otp-secret")
 }
 
 func qrcodeOptions() {
@@ -102,6 +110,12 @@ func qrcodeOptions() {
 		switch strings.ToLower(qrcodeType) {
 		case "wifi":
 			qrcodeMessage = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`, qrcodeWIFISsid, qrcodeWIFIType, qrcodeWIFIPass)
+			err := qrcodeGenPng()
+			if err != nil {
+				log.Println(err)
+			}
+		case "otp":
+			qrcodeMessage = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`, qrcodeOtpIssuer, qrcodeOtpAccount, qrcodeOtpSecret, qrcodeOtpIssuer)
 			err := qrcodeGenPng()
 			if err != nil {
 				log.Println(err)
