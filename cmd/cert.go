@@ -30,16 +30,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// certCmd represents the cert command
 var certCmd = &cobra.Command{
 	Use:   "cert",
 	Short: "Check tls cert",
-	// 	Long: `A longer description that spans multiple lines and likely contains examples
-	// and usage of using your command. For example:
-
-	// Cobra is a CLI library for Go that empowers applications.
-	// This application is a tool to generate the needed files
-	// to quickly create a Cobra application.`,
+	Args:  cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		if certHost != "domain:port" {
 			certOutputByHost()
@@ -69,15 +63,6 @@ var certIP, certExpiry, certDNS, certIssuer bool
 func init() {
 	rootCmd.AddCommand(certCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// certCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// certCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	certCmd.Flags().StringVarP(&certCrt, "file", "f", "", "Specify .crt file path")
 	certCmd.Flags().StringVarP(&certHost, "domain", "d", "domain:port", "Specify domain and host port")
 	certCmd.MarkFlagsMutuallyExclusive("file", "domain")

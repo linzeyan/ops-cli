@@ -25,16 +25,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// whoisCmd represents the whois command
 var whoisCmd = &cobra.Command{
 	Use:   "whois",
 	Short: "List domain name information",
-	// 	Long: `A longer description that spans multiple lines and likely contains examples
-	// and usage of using your command. For example:
-
-	// Cobra is a CLI library for Go that empowers applications.
-	// This application is a tool to generate the needed files
-	// to quickly create a Cobra application.`,
+	Args:  cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		if whoisDomain != "" {
 			switch whoisServer {
@@ -147,15 +141,6 @@ var whoisDomain, whoisServer, whoisKey string
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// whoisCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// whoisCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	whoisCmd.Flags().StringVarP(&whoisDomain, "domain", "d", "", "Specify domain")
 	whoisCmd.Flags().StringVarP(&whoisServer, "server", "s", "whois.verisign-grs.com", "Specify request server, can be WhoisXML, IP2Whois, WhoApi, ApiNinjas")
 	whoisCmd.Flags().StringVarP(&whoisKey, "key", "k", "", "Specify API Key")

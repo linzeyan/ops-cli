@@ -31,17 +31,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// qrcodeCmd represents the qrcode command
 var qrcodeCmd = &cobra.Command{
 	Use:   "qrcode",
 	Short: "Read or output QR Code",
-	// 	Long: `A longer description that spans multiple lines and likely contains examples
-	// and usage of using your command. For example:
-
-	// Cobra is a CLI library for Go that empowers applications.
-	// This application is a tool to generate the needed files
-	// to quickly create a Cobra application.`,
-	Args: cobra.OnlyValidArgs,
+	Args:  cobra.OnlyValidArgs,
 	Run: func(_ *cobra.Command, _ []string) {
 		qrcodeOptions()
 	},
@@ -71,15 +64,6 @@ var qrcodeOtpAccount, qrcodeOtpSecret, qrcodeOtpIssuer string
 func init() {
 	rootCmd.AddCommand(qrcodeCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// qrcodeCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// qrcodeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	qrcodeCmd.Flags().BoolVarP(&qrcodeGenerate, "generate", "g", false, "Generate QRcode")
 	qrcodeCmd.Flags().StringVarP(&qrcodeFileInput, "file", "f", "", "Specify file path to read")
 

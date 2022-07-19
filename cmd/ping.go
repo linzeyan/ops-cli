@@ -26,16 +26,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// pingCmd represents the ping command
 var pingCmd = &cobra.Command{
 	Use:   "ping",
 	Short: "Send ICMP echo packets to host",
-	// 	Long: `A longer description that spans multiple lines and likely contains examples
-	// and usage of using your command. For example:
-
-	// Cobra is a CLI library for Go that empowers applications.
-	// This application is a tool to generate the needed files
-	// to quickly create a Cobra application.`,
+	Args:  cobra.OnlyValidArgs,
 	Run: func(_ *cobra.Command, _ []string) {
 		pingExec()
 	},
@@ -52,15 +46,6 @@ var pingCount, pingInterval, pingSize int
 func init() {
 	rootCmd.AddCommand(pingCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// pingCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// pingCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	pingCmd.Flags().StringVarP(&pingDomain, "domain", "d", "", "Specify host")
 	pingCmd.Flags().IntVarP(&pingCount, "count", "c", 5, "Specify counts")
 	pingCmd.Flags().IntVarP(&pingInterval, "interval", "i", 1, "Specify the packet send time interval")
