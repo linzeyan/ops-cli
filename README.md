@@ -13,6 +13,10 @@ go install github.com/linzeyan/ops-cli@latest
 ```bash
 go build .
 ```
+or
+```bash
+bash ./build.bash build
+```
 
 ## Usage
 
@@ -26,12 +30,15 @@ Usage:
 Available Commands:
   cert        Check tls cert
   completion  Generate the autocompletion script for the specified shell
+  geoip       Print IP geographic information
   help        Help about any command
   icp         Check ICP status
   otp         Calculate passcode
-  qrcode      Read or output QRCode
+  ping        Send ICMP echo packets to host
+  qrcode      Read or output QR Code
   random      Generate random string
   url         Expand shorten url
+  whois       List domain name information
 
 Flags:
   -h, --help      help for ops-cli
