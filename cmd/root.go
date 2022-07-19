@@ -27,6 +27,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -45,6 +46,11 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, _ []string) { cmd.Help() },
+}
+
+func Examples(s string) string {
+	c := color.New(color.FgYellow)
+	return c.Sprintf(`%s`, s)
 }
 
 /*

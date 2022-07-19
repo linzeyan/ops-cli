@@ -3,6 +3,7 @@ module github.com/linzeyan/ops-cli
 go 1.18
 
 require (
+	github.com/fatih/color v1.7.0
 	github.com/linzeyan/expandUrl v0.2.0
 	github.com/linzeyan/icp v0.3.0
 	github.com/linzeyan/password v0.3.4
@@ -18,6 +19,8 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/makiuchi-d/gozxing v0.1.1 // indirect
+	github.com/mattn/go-colorable v0.0.9 // indirect
+	github.com/mattn/go-isatty v0.0.3 // indirect
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/pelletier/go-toml v1.9.3 // indirect
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e // indirect

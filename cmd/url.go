@@ -47,7 +47,8 @@ var urlCmd = &cobra.Command{
 		}
 		fmt.Println(result)
 	},
-	Example: `ops-cli url -u https://goo.gl/maps/b37Aq3Anc7taXQDd9`,
+	Example: Examples(`# Get the real URL from the shortened URL
+ops-cli url -u https://goo.gl/maps/b37Aq3Anc7taXQDd9`),
 }
 
 var urlUrl string

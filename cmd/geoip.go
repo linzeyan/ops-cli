@@ -28,7 +28,7 @@ import (
 // geoipCmd represents the geoip command
 var geoipCmd = &cobra.Command{
 	Use:   "geoip",
-	Short: "List IP informations",
+	Short: "Print IP geographic information",
 	// 	Long: `A longer description that spans multiple lines and likely contains examples
 	// and usage of using your command. For example:
 
@@ -46,8 +46,11 @@ var geoipCmd = &cobra.Command{
 		}
 		cmd.Help()
 	},
-	Example: `ops-cli geoip -s 1.1.1.1
-ops-cli geoip -b 1.1.1.1 -b 8.8.8.8`,
+	Example: Examples(`# Print IP geographic information
+ops-cli geoip -s 1.1.1.1
+
+# Print multiple IP geographic information
+ops-cli geoip -b 1.1.1.1 -b 8.8.8.8`),
 }
 
 var geoipInput string

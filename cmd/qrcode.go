@@ -34,7 +34,7 @@ import (
 // qrcodeCmd represents the qrcode command
 var qrcodeCmd = &cobra.Command{
 	Use:   "qrcode",
-	Short: "Read or output QRCode",
+	Short: "Read or output QR Code",
 	// 	Long: `A longer description that spans multiple lines and likely contains examples
 	// and usage of using your command. For example:
 
@@ -45,11 +45,18 @@ var qrcodeCmd = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		qrcodeOptions()
 	},
-	Example: `ops-cli qrcode -f qrcode.png
+	Example: Examples(`# Read QR code and print message
+ops-cli qrcode -f qrcode.png
+
+# Generate QR code with message
 ops-cli qrcode -g -m https://www.google.com -o out.png
 ops-cli qrcode -g -m https://www.google.com -o out.png -s 500
+
+# Generate WiFi QR code
 ops-cli qrcode -g -t wifi --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid
-ops-cli qrcode -g -t otp --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --otp-issuer aws`,
+
+# Generate OTP QR code
+ops-cli qrcode -g -t otp --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --otp-issuer aws`),
 }
 
 var qrcodeGenerate bool

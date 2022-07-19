@@ -50,10 +50,17 @@ var certCmd = &cobra.Command{
 		}
 		cmd.Help()
 	},
-	Example: `ops-cli cert -d www.google.com:443
+	Example: Examples(`# Print certificate expiration time
+ops-cli cert -d www.google.com:443
+
+# Print certificate expiration time, DNS, IP and issuer
 ops-cli cert -d www.google.com:443 -i -n -p
+
+# Print certificate expiration time
 ops-cli cert -f example.com.crt
-ops-cli cert -f example.com.crt -i -n`,
+
+# Print certificate expiration time, DNS and issuer
+ops-cli cert -f example.com.crt -i -n`),
 }
 
 var certCrt, certHost string

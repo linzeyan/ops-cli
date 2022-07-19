@@ -56,14 +56,29 @@ var randomCmd = &cobra.Command{
 		}
 		fmt.Println(result)
 	},
-	Example: `ops-cli random
+	Example: Examples(`# Generate a random string
+ops-cli random
+
+# Generate a random string of length 32
 ops-cli random -l 32
+
+# Generate a random string of length 32 consisting of 10 symbols, 10 lowercase letters, 10 uppercase letters, 2 numbers
 ops-cli random -l 32 -s 10 -o 10 -u 10 -n 2
+
+# Generate a random string of numbers of length 100
 ops-cli random -t number -l 100
+
+# Generate a random string of symbols
 ops-cli random -t symbol
+
+# Generate a random string of uppercase letters
 ops-cli random -t upper
+
+# Generate a random string of lowercase letters
 ops-cli random -t lower
-ops-cli random -t all`,
+
+# Generate a random string
+ops-cli random -t all`),
 }
 
 var randomLength, randomLower, randomUpper, randomSymbol, randomNumber uint

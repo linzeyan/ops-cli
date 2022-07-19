@@ -52,11 +52,20 @@ var otpCmd = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		otpOptions()
 	},
-	Example: `ops-cli otp -s 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
+	Example: Examples(`# Calculate the passcode for the specified secret
+ops-cli otp -s 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
+
+# Generate OTP and specify a period of 15 seconds
 ops-cli otp -g -p 15
+
+# Generate OTP and specify SHA256 algorithm
 ops-cli otp -g -a sha256
+
+# Generate OTP and specify SHA512 algorithm, the period is 15 seconds
 ops-cli otp -g -a sha512 -p 15
-ops-cli otp -s T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`,
+
+# Calculate the passcode of the specified secret, the period is 15 seconds, and the number of digits is 7
+ops-cli otp -s T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`),
 }
 
 var otpSecret string

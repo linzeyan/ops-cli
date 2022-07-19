@@ -123,8 +123,11 @@ var whoisCmd = &cobra.Command{
 		}
 		cmd.Help()
 	},
-	Example: `ops-cli whois -d apple.com
-ops-cli whois -s ApiNinjas -k your_api_key -d google.com`,
+	Example: Examples(`# Search domain
+ops-cli whois -d apple.com
+
+# Search domains using the specified whois server that requires an api key
+ops-cli whois -s ApiNinjas -k your_api_key -d google.com`),
 }
 
 // go:embed key_whoisxmlapi
