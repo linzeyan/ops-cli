@@ -29,7 +29,12 @@ var whoisCmd = &cobra.Command{
 	Use:   "whois",
 	Short: "List domain name information",
 	Args:  cobra.OnlyValidArgs,
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 1 {
+			cmd.Help()
+			return
+		}
+		var whoisDomain = args[0]
 		if whoisDomain != "" {
 			switch whoisServer {
 			case "WhoisXML", "whoisxml", "WHOISXML":
@@ -118,10 +123,10 @@ var whoisCmd = &cobra.Command{
 		cmd.Help()
 	},
 	Example: Examples(`# Search domain
-ops-cli whois -d apple.com
+ops-cli whois apple.com
 
 # Search domains using the specified whois server that requires an api key
-ops-cli whois -s ApiNinjas -k your_api_key -d google.com`),
+ops-cli whois -s ApiNinjas -k your_api_key google.com`),
 }
 
 // go:embed key_whoisxmlapi
@@ -136,12 +141,11 @@ var whoisWhoApiKey string
 // go:embed key_apininjas
 var whoisApiNinjasKey string
 
-var whoisDomain, whoisServer, whoisKey string
+var whoisServer, whoisKey string
 
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
-	whoisCmd.Flags().StringVarP(&whoisDomain, "domain", "d", "", "Specify domain")
 	whoisCmd.Flags().StringVarP(&whoisServer, "server", "s", "whois.verisign-grs.com", "Specify request server, can be WhoisXML, IP2Whois, WhoApi, ApiNinjas")
 	whoisCmd.Flags().StringVarP(&whoisKey, "key", "k", "", "Specify API Key")
 }
