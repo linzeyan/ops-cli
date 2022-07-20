@@ -37,8 +37,26 @@ var otpCmd = &cobra.Command{
 	Use:   "otp",
 	Short: "Calculate passcode",
 	Args:  cobra.OnlyValidArgs,
-	Run: func(_ *cobra.Command, _ []string) {
-		otpOptions()
+	Run: func(cmd *cobra.Command, _ []string) {
+		if !otpGenerateSecret && otpSecret != "" {
+			var result, err = otpTOTP(otpSecret)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			fmt.Println(result)
+			return
+		}
+		if otpGenerateSecret {
+			var secret, err = otpGenSecret()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			fmt.Println(secret)
+			return
+		}
+		cmd.Help()
 	},
 	Example: Examples(`# Calculate the passcode for the specified secret
 ops-cli otp -s 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
@@ -69,26 +87,6 @@ func init() {
 	otpCmd.Flags().StringVarP(&otpAlgorithm, "algorithm", "a", "SHA1", "The hash algorithm used by the credential(SHA1/SHA256/SHA512)")
 	otpCmd.Flags().Int8VarP(&otpPeriod, "period", "p", 30, "The period parameter defines a validity period in seconds for the TOTP code(15/30/60)")
 	otpCmd.Flags().Int8VarP(&otpDigits, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
-}
-
-func otpOptions() {
-	if !otpGenerateSecret && otpSecret != "" {
-		var result, err = otpTOTP(otpSecret)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		fmt.Println(result)
-		return
-	}
-	if otpGenerateSecret {
-		var secret, err = otpGenSecret()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		fmt.Println(secret)
-	}
 }
 
 func otpSetTimeInterval() int64 {
