@@ -28,7 +28,6 @@ import (
 var qrcodeCmd = &cobra.Command{
 	Use:   "qrcode",
 	Short: "Read or output QR Code",
-	Args:  cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		if !qrcodeGenerate && qrcodeFileInput != "" {
 			result, err := qrcode.ReadQRCode(qrcodeFileInput)

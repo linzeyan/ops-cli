@@ -27,7 +27,6 @@ import (
 var certCmd = &cobra.Command{
 	Use:   "cert",
 	Short: "Check tls cert",
-	Args:  cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		if certHost != "domain:port" {
 			certOutputByHost()

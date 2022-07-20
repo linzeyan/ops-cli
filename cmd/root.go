@@ -18,7 +18,6 @@ package cmd
 import (
 	_ "embed"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/fatih/color"
@@ -29,7 +28,6 @@ var rootCmd = &cobra.Command{
 	Use:     "ops-cli",
 	Short:   "OPS useful tools",
 	Version: rootOutputVersion(),
-	Args:    cobra.OnlyValidArgs,
 	Run:     func(cmd *cobra.Command, _ []string) { cmd.Help() },
 }
 
@@ -49,7 +47,6 @@ var appVersion, appBuildTime, appCommit, appPlatform string
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		log.Println(err)
 		os.Exit(1)
 	}
 }

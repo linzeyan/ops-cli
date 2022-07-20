@@ -25,7 +25,6 @@ import (
 var icpCmd = &cobra.Command{
 	Use:   "icp",
 	Short: "Check ICP status",
-	Args:  cobra.OnlyValidArgs,
 	Run: func(_ *cobra.Command, _ []string) {
 		icp.ReadConf()
 		result := icp.Check()

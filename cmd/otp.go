@@ -36,7 +36,6 @@ import (
 var otpCmd = &cobra.Command{
 	Use:   "otp",
 	Short: "Calculate passcode",
-	Args:  cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, _ []string) {
 		if !otpGenerateSecret && otpSecret != "" {
 			var result, err = otpTOTP(otpSecret)

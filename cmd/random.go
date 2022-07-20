@@ -25,7 +25,6 @@ import (
 var randomCmd = &cobra.Command{
 	Use:   "random",
 	Short: "Generate random string",
-	Args:  cobra.OnlyValidArgs,
 	Run: func(_ *cobra.Command, _ []string) {
 		var result string
 		switch randomMode {

@@ -28,33 +28,26 @@ import (
 var geoipCmd = &cobra.Command{
 	Use:   "geoip",
 	Short: "Print IP geographic information",
-	Args:  cobra.OnlyValidArgs,
-	Run: func(cmd *cobra.Command, _ []string) {
-		if geoipInput != "" {
-			geoipRequestSingle()
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 1 {
+			geoipRequestSingle(args[0])
 			return
 		}
-		if geoipBatch != nil {
-			geoipRequestBatch()
+		if len(args) > 1 {
+			geoipRequestBatch(args)
 			return
 		}
 		cmd.Help()
 	},
 	Example: Examples(`# Print IP geographic information
-ops-cli geoip -s 1.1.1.1
+ops-cli geoip 1.1.1.1
 
 # Print multiple IP geographic information
-ops-cli geoip -b 1.1.1.1 -b 8.8.8.8`),
+ops-cli geoip 1.1.1.1 8.8.8.8`),
 }
-
-var geoipInput string
-var geoipBatch []string
 
 func init() {
 	rootCmd.AddCommand(geoipCmd)
-
-	geoipCmd.Flags().StringVarP(&geoipInput, "source", "s", "", "Specify IP or domain")
-	geoipCmd.Flags().StringArrayVarP(&geoipBatch, "batch", "b", nil, "Enter multiple IPs or domains")
 }
 
 type GeoIPSingle struct {
@@ -76,7 +69,7 @@ type GeoIPSingle struct {
 	Query       string `json:"query"`
 }
 
-func geoipRequestSingle() error {
+func geoipRequestSingle(geoipInput string) error {
 	apiUrl := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 
 	var client = &http.Client{
@@ -117,7 +110,7 @@ func geoipRequestSingle() error {
 
 type GeoIPBatch []GeoIPSingle
 
-func geoipRequestBatch() error {
+func geoipRequestBatch(geoipBatch []string) error {
 	apiUrl := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
 
 	var client = &http.Client{

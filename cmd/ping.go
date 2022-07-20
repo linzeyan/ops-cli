@@ -29,7 +29,6 @@ import (
 var pingCmd = &cobra.Command{
 	Use:   "ping",
 	Short: "Send ICMP echo packets to host",
-	Args:  cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			cmd.Help()
