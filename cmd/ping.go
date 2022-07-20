@@ -30,69 +30,68 @@ var pingCmd = &cobra.Command{
 	Use:   "ping",
 	Short: "Send ICMP echo packets to host",
 	Args:  cobra.OnlyValidArgs,
-	Run: func(_ *cobra.Command, _ []string) {
-		pingExec()
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) != 1 {
+			cmd.Help()
+			return
+		}
+		var pingDomain = args[0]
+		pinger, err := ping.NewPinger(pingDomain)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		pinger.Count = pingCount
+		pinger.Interval = time.Second * time.Duration(pingInterval)
+		pinger.Size = pingSize
+
+		// Listen for Ctrl-C.
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		go func() {
+			for range c {
+				pinger.Stop()
+			}
+		}()
+
+		pinger.OnRecv = func(pkt *ping.Packet) {
+			fmt.Printf("%d bytes from %s: icmp_seq=%d time=%v\n",
+				pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Rtt)
+		}
+
+		pinger.OnDuplicateRecv = func(pkt *ping.Packet) {
+			fmt.Printf("%d bytes from %s: icmp_seq=%d time=%v ttl=%v (DUP!)\n",
+				pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Rtt, pkt.Ttl)
+		}
+
+		pinger.OnFinish = func(stats *ping.Statistics) {
+			fmt.Printf("\n--- %s ping statistics ---\n", stats.Addr)
+			fmt.Printf("%d packets transmitted, %d packets received, %v%% packet loss\n",
+				stats.PacketsSent, stats.PacketsRecv, stats.PacketLoss)
+			fmt.Printf("round-trip min/avg/max/stddev = %v/%v/%v/%v\n",
+				stats.MinRtt, stats.AvgRtt, stats.MaxRtt, stats.StdDevRtt)
+		}
+
+		fmt.Printf("PING %s (%s):\n", pinger.Addr(), pinger.IPAddr())
+		err = pinger.Run()
+		if err != nil {
+			log.Println(err)
+			return
+		}
 	},
 	Example: Examples(`# Ping www.google.com
-ops-cli ping -d www.google.com
+ops-cli ping www.google.com
 
-# Ping www.google.com and specify packet send interval
-ops-cli ping -d www.google.com -t 2`),
+# Ping 1.1.1.1 and specify packet send interval
+ops-cli ping 1.1.1.1 -t 2`),
 }
 
-var pingDomain string
 var pingCount, pingInterval, pingSize int
 
 func init() {
 	rootCmd.AddCommand(pingCmd)
 
-	pingCmd.Flags().StringVarP(&pingDomain, "domain", "d", "", "Specify host")
 	pingCmd.Flags().IntVarP(&pingCount, "count", "c", 5, "Specify counts")
 	pingCmd.Flags().IntVarP(&pingInterval, "interval", "i", 1, "Specify the packet send time interval")
 	pingCmd.Flags().IntVarP(&pingSize, "size", "s", 24, "Specify the packet size")
-}
-
-func pingExec() {
-	pinger, err := ping.NewPinger(pingDomain)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	pinger.Count = pingCount
-	pinger.Interval = time.Second * time.Duration(pingInterval)
-	pinger.Size = pingSize
-
-	// Listen for Ctrl-C.
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			pinger.Stop()
-		}
-	}()
-
-	pinger.OnRecv = func(pkt *ping.Packet) {
-		fmt.Printf("%d bytes from %s: icmp_seq=%d time=%v\n",
-			pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Rtt)
-	}
-
-	pinger.OnDuplicateRecv = func(pkt *ping.Packet) {
-		fmt.Printf("%d bytes from %s: icmp_seq=%d time=%v ttl=%v (DUP!)\n",
-			pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Rtt, pkt.Ttl)
-	}
-
-	pinger.OnFinish = func(stats *ping.Statistics) {
-		fmt.Printf("\n--- %s ping statistics ---\n", stats.Addr)
-		fmt.Printf("%d packets transmitted, %d packets received, %v%% packet loss\n",
-			stats.PacketsSent, stats.PacketsRecv, stats.PacketLoss)
-		fmt.Printf("round-trip min/avg/max/stddev = %v/%v/%v/%v\n",
-			stats.MinRtt, stats.AvgRtt, stats.MaxRtt, stats.StdDevRtt)
-	}
-
-	fmt.Printf("PING %s (%s):\n", pinger.Addr(), pinger.IPAddr())
-	err = pinger.Run()
-	if err != nil {
-		log.Println(err)
-		return
-	}
 }
