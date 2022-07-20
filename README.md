@@ -1,6 +1,7 @@
 # ops-cli
 
-Try to collect tools.
+Try to collect useful tools for ops.
+
 ## Installation
 
 ### Go Install
@@ -8,6 +9,7 @@ Try to collect tools.
 ```bash
 go install github.com/linzeyan/ops-cli@latest
 ```
+
 ### Go Build
 
 ```bash
@@ -30,6 +32,7 @@ Usage:
 Available Commands:
   cert        Check tls cert
   completion  Generate the autocompletion script for the specified shell
+  dns         Resolve domain name
   geoip       Print IP geographic information
   help        Help about any command
   icp         Check ICP status
