@@ -37,11 +37,7 @@ var whoisCmd = &cobra.Command{
 		if whoisDomain != "" {
 			switch whoisServer {
 			case "WhoisXML", "whoisxml", "WHOISXML":
-				if whoisKey != "" {
-					whois.WhoisXMLAPIKey = whoisKey
-				} else {
-					whois.WhoisXMLAPIKey = whoisWhoisXMLAPIKey
-				}
+				whois.WhoisXMLAPIKey = whoisKey
 				result, err := whois.RequestWhoisXML(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -54,11 +50,7 @@ var whoisCmd = &cobra.Command{
 				}
 				fmt.Println(string(out))
 			case "IP2Whois", "ip2whois", "IP2WHOIS":
-				if whoisKey != "" {
-					whois.IP2WhoisKey = whoisKey
-				} else {
-					whois.IP2WhoisKey = whoisIP2WhoisKey
-				}
+				whois.IP2WhoisKey = whoisKey
 				result, err := whois.RequestIp2Whois(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -71,11 +63,7 @@ var whoisCmd = &cobra.Command{
 				}
 				fmt.Println(string(out))
 			case "WhoApi", "whoapi", "WHOAPI":
-				if whoisKey != "" {
-					whois.WhoApiKey = whoisKey
-				} else {
-					whois.WhoApiKey = whoisWhoApiKey
-				}
+				whois.WhoApiKey = whoisKey
 				result, err := whois.RequestWhoApi(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -88,11 +76,7 @@ var whoisCmd = &cobra.Command{
 				}
 				fmt.Println(string(out))
 			case "ApiNinjas", "apininjas", "APININJAS":
-				if whoisKey != "" {
-					whois.ApiNinjasKey = whoisKey
-				} else {
-					whois.ApiNinjasKey = whoisApiNinjasKey
-				}
+				whois.ApiNinjasKey = whoisKey
 				result, err := whois.RequestApiNinjas(whoisDomain)
 				if err != nil {
 					log.Println(err)
@@ -127,18 +111,6 @@ ops-cli whois apple.com
 # Search domains using the specified whois server that requires an api key
 ops-cli whois -s ApiNinjas -k your_api_key google.com`),
 }
-
-// go:embed key_whoisxmlapi
-var whoisWhoisXMLAPIKey string
-
-// go:embed key_ip2whois
-var whoisIP2WhoisKey string
-
-// go:embed key_whoapi
-var whoisWhoApiKey string
-
-// go:embed key_apininjas
-var whoisApiNinjasKey string
 
 var whoisServer, whoisKey string
 
