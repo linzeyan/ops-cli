@@ -27,10 +27,13 @@ import (
 )
 
 var dnsCmd = &cobra.Command{
-	Use:       "dns",
-	Short:     "Resolve domain name",
-	ValidArgs: []string{"A", "AAAA", "CNAME", "MX", "NS", "TXT", "ALL", "a", "aaaa", "cname", "mx", "ns", "txt", "all"},
-	Args:      cobra.OnlyValidArgs,
+	Use:   "dns",
+	Short: "Resolve domain name",
+	ValidArgs: []string{
+		"A", "AAAA", "CNAME", "MX", "NS", "PTR", "TXT", "ALL",
+		"a", "aaaa", "cname", "mx", "ns", "ptr", "txt", "all",
+	},
+	Args: cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		if dnsDomain != "" {
 			var r dnsResolver
@@ -55,6 +58,8 @@ var dnsCmd = &cobra.Command{
 					r.dnsLookupMX(dnsDomain)
 				case "ns":
 					r.dnsLookupNS(dnsDomain)
+				case "ptr":
+					r.dnsLookupAddr(dnsDomain)
 				case "txt":
 					r.dnsLookupTXT(dnsDomain)
 				case "all":
@@ -137,6 +142,25 @@ func (d *dnsResolver) dnsLookupA(t, domain string) {
 	}
 }
 
+func (d *dnsResolver) dnsLookupAddr(ip string) {
+	/* Valid IP */
+	if net.ParseIP(ip) == nil {
+		log.Println("not a valid IP")
+		return
+	}
+	res, err := d.resolve.LookupAddr(context.Background(), ip)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if len(res) == 0 {
+		return
+	}
+	for i := range res {
+		d.dnsPrintln("PTR", res[i])
+	}
+}
+
 func (d *dnsResolver) dnsLookupCNAME(domain string) {
 	res, err := d.resolve.LookupCNAME(context.Background(), domain)
 	if err != nil {
@@ -202,7 +226,7 @@ func (d *dnsResolver) dnsLookupTXT(domain string) {
 }
 
 func (d *dnsResolver) dnsTitle() {
-	fmt.Println("Domain", "\t\t\t", "Type", "\t\t", "Address")
+	fmt.Println("Name", "\t\t\t", "Type", "\t\t", "Address")
 }
 
 func (d *dnsResolver) dnsPrintln(t, addr string) {
