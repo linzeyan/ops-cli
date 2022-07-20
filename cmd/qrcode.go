@@ -29,8 +29,40 @@ var qrcodeCmd = &cobra.Command{
 	Use:   "qrcode",
 	Short: "Read or output QR Code",
 	Args:  cobra.OnlyValidArgs,
-	Run: func(_ *cobra.Command, _ []string) {
-		qrcodeOptions()
+	Run: func(cmd *cobra.Command, _ []string) {
+		if !qrcodeGenerate && qrcodeFileInput != "" {
+			result, err := qrcode.ReadQRCode(qrcodeFileInput)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			fmt.Println(result)
+			return
+		}
+
+		if qrcodeGenerate {
+			switch strings.ToLower(qrcodeType) {
+			case "wifi":
+				qrcodeMessage = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`, qrcodeWIFISsid, qrcodeWIFIType, qrcodeWIFIPass)
+				err := qrcodeGenPng()
+				if err != nil {
+					log.Println(err)
+				}
+			case "otp":
+				qrcodeMessage = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`, qrcodeOtpIssuer, qrcodeOtpAccount, qrcodeOtpSecret, qrcodeOtpIssuer)
+				err := qrcodeGenPng()
+				if err != nil {
+					log.Println(err)
+				}
+			default:
+				err := qrcodeGenPng()
+				if err != nil {
+					log.Println(err)
+				}
+			}
+			return
+		}
+		cmd.Help()
 	},
 	Example: Examples(`# Read QR code and print message
 ops-cli qrcode -f qrcode.png
@@ -78,40 +110,6 @@ func init() {
 	qrcodeCmd.MarkFlagsRequiredTogether("output", "size")
 	qrcodeCmd.MarkFlagsRequiredTogether("wifi-pass", "wifi-ssid", "wifi-type")
 	qrcodeCmd.MarkFlagsRequiredTogether("otp-account", "otp-issuer", "otp-secret")
-}
-
-func qrcodeOptions() {
-	if !qrcodeGenerate && qrcodeFileInput != "" {
-		result, err := qrcode.ReadQRCode(qrcodeFileInput)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		fmt.Println(result)
-		return
-	}
-
-	if qrcodeGenerate {
-		switch strings.ToLower(qrcodeType) {
-		case "wifi":
-			qrcodeMessage = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`, qrcodeWIFISsid, qrcodeWIFIType, qrcodeWIFIPass)
-			err := qrcodeGenPng()
-			if err != nil {
-				log.Println(err)
-			}
-		case "otp":
-			qrcodeMessage = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`, qrcodeOtpIssuer, qrcodeOtpAccount, qrcodeOtpSecret, qrcodeOtpIssuer)
-			err := qrcodeGenPng()
-			if err != nil {
-				log.Println(err)
-			}
-		default:
-			err := qrcodeGenPng()
-			if err != nil {
-				log.Println(err)
-			}
-		}
-	}
 }
 
 func qrcodeGenPng() error {
