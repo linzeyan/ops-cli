@@ -25,22 +25,24 @@ import (
 var icpCmd = &cobra.Command{
 	Use:   "icp",
 	Short: "Check ICP status",
-	Run: func(_ *cobra.Command, _ []string) {
-		icp.ReadConf()
-		result := icp.Check()
-		fmt.Println(icp.Domain, result)
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 1 {
+			icp.Domain = args[0]
+			icp.ReadConf()
+			fmt.Println(icp.Domain, icp.Check())
+			return
+		}
+		cmd.Help()
 	},
 	Example: Examples(`# Print the ICP status of the domain
-ops-cli icp -d apple.com
+ops-cli icp apple.com
 
 # Print the ICP status of the domain and specify the configuration path
-ops-cli icp -c ~/.env -d baidu.com`),
+ops-cli icp -c ~/.env baidu.com`),
 }
 
 func init() {
 	rootCmd.AddCommand(icpCmd)
 
 	icpCmd.Flags().StringVarP(&icp.ConfigFile, "config", "c", "", "Specify config file")
-	icpCmd.Flags().StringVarP(&icp.Domain, "domain", "d", "", "Specify domain name")
-	icpCmd.MarkFlagRequired("domain")
 }
