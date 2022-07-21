@@ -39,12 +39,17 @@ var dnsCmd = &cobra.Command{
 		var r dnsResolver
 		r.dnsResolver()
 		if lens == 1 {
-			r.dnsTitle()
 			r.dnsLookupA("a", dnsDomain)
+			if dnsOutput == nil {
+				return
+			}
+			r.dnsTitle()
+			for i := range dnsOutput {
+				fmt.Println(dnsOutput[i])
+			}
 			return
 		}
 		if lens > 1 {
-			r.dnsTitle()
 			for i := range args[1:] {
 				switch t := strings.ToLower(args[1:][i]); t {
 				case "a":
@@ -69,6 +74,13 @@ var dnsCmd = &cobra.Command{
 					r.dnsLookupTXT(dnsDomain)
 				}
 			}
+			if dnsOutput == nil {
+				return
+			}
+			r.dnsTitle()
+			for i := range dnsOutput {
+				fmt.Println(dnsOutput[i])
+			}
 			return
 		}
 	},
@@ -83,6 +95,7 @@ ops-cli dns 8.8.8.8 PTR`),
 }
 
 var dnsResolverServer, dnsDomain string
+var dnsOutput []string
 
 func init() {
 	rootCmd.AddCommand(dnsCmd)
@@ -131,13 +144,13 @@ func (d *dnsResolver) dnsLookupA(t, domain string) {
 	}
 	if t == "all" {
 		for i := range ips {
-			d.dnsPrintln(ips[i], i)
+			dnsOutput = append(dnsOutput, d.dnsSprintf(ips[i], i))
 		}
 		return
 	}
 	for i := range ips {
 		if ips[i] == strings.ToUpper(t) {
-			d.dnsPrintln(ips[i], i)
+			dnsOutput = append(dnsOutput, d.dnsSprintf(ips[i], i))
 		}
 	}
 }
@@ -157,7 +170,7 @@ func (d *dnsResolver) dnsLookupAddr(ip string) {
 		return
 	}
 	for i := range res {
-		d.dnsPrintln("PTR", res[i])
+		dnsOutput = append(dnsOutput, d.dnsSprintf("PTR", res[i]))
 	}
 }
 
@@ -170,7 +183,7 @@ func (d *dnsResolver) dnsLookupCNAME(domain string) {
 	if res == "" || strings.TrimRight(res, ".") == domain {
 		return
 	}
-	d.dnsPrintln("CNAME", res)
+	dnsOutput = append(dnsOutput, d.dnsSprintf("CNAME", res))
 }
 
 func (d *dnsResolver) dnsLookupMX(domain string) {
@@ -186,8 +199,7 @@ func (d *dnsResolver) dnsLookupMX(domain string) {
 		return
 	}
 	for i := range res {
-
-		d.dnsPrintln("MX", fmt.Sprintf(`%d %s`, res[i].Pref, res[i].Host))
+		dnsOutput = append(dnsOutput, d.dnsSprintf("MX", fmt.Sprintf(`%d %s`, res[i].Pref, res[i].Host)))
 	}
 }
 
@@ -204,7 +216,7 @@ func (d *dnsResolver) dnsLookupNS(domain string) {
 		return
 	}
 	for i := range res {
-		d.dnsPrintln("NS", res[i].Host)
+		dnsOutput = append(dnsOutput, d.dnsSprintf("NS", res[i].Host))
 	}
 }
 
@@ -221,14 +233,14 @@ func (d *dnsResolver) dnsLookupTXT(domain string) {
 		return
 	}
 	for i := range res {
-		d.dnsPrintln("TXT", res[i])
+		dnsOutput = append(dnsOutput, d.dnsSprintf("TXT", res[i]))
 	}
 }
 
 func (d *dnsResolver) dnsTitle() {
-	fmt.Println("Name", "\t\t\t", "Type", "\t\t", "Address")
+	fmt.Println("Name\t\t\tType\t\tAddress")
 }
 
-func (d *dnsResolver) dnsPrintln(t, addr string) {
-	fmt.Println(dnsDomain, "\t\t", strings.ToUpper(t), "\t\t", addr)
+func (d *dnsResolver) dnsSprintf(t, addr string) string {
+	return fmt.Sprintf("%s\t\t%s\t\t%s", dnsDomain, strings.ToUpper(t), addr)
 }
