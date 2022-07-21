@@ -20,6 +20,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"time"
 
 	"github.com/go-ping/ping"
@@ -43,6 +44,13 @@ var pingCmd = &cobra.Command{
 		pinger.Count = pingCount
 		pinger.Interval = time.Second * time.Duration(pingInterval)
 		pinger.Size = pingSize
+		if !pingTimeout {
+			pinger.Timeout = time.Second * 600
+		}
+		pinger.TTL = pingTTL
+		if runtime.GOOS == "windows" {
+			pinger.SetPrivileged(true)
+		}
 
 		// Listen for Ctrl-C.
 		c := make(chan os.Signal, 1)
@@ -54,13 +62,13 @@ var pingCmd = &cobra.Command{
 		}()
 
 		pinger.OnRecv = func(pkt *ping.Packet) {
-			fmt.Printf("%d bytes from %s: icmp_seq=%d time=%v\n",
-				pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Rtt)
+			fmt.Printf("%d bytes from %s: icmp_seq=%d ttl=%v time=%v\n",
+				pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Ttl, pkt.Rtt)
 		}
 
 		pinger.OnDuplicateRecv = func(pkt *ping.Packet) {
-			fmt.Printf("%d bytes from %s: icmp_seq=%d time=%v ttl=%v (DUP!)\n",
-				pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Rtt, pkt.Ttl)
+			fmt.Printf("%d bytes from %s: icmp_seq=%d ttl=%v time=%v (DUP!)\n",
+				pkt.Nbytes, pkt.IPAddr, pkt.Seq, pkt.Ttl, pkt.Rtt)
 		}
 
 		pinger.OnFinish = func(stats *ping.Statistics) {
@@ -71,7 +79,7 @@ var pingCmd = &cobra.Command{
 				stats.MinRtt, stats.AvgRtt, stats.MaxRtt, stats.StdDevRtt)
 		}
 
-		fmt.Printf("PING %s (%s):\n", pinger.Addr(), pinger.IPAddr())
+		fmt.Printf("PING %s (%s): %d data bytes\n", pinger.Addr(), pinger.IPAddr(), pinger.Size)
 		err = pinger.Run()
 		if err != nil {
 			log.Println(err)
@@ -82,15 +90,18 @@ var pingCmd = &cobra.Command{
 ops-cli ping www.google.com
 
 # Ping 1.1.1.1 and specify packet send interval
-ops-cli ping 1.1.1.1 -t 2`),
+ops-cli ping 1.1.1.1 -i 2`),
 }
 
-var pingCount, pingInterval, pingSize int
+var pingCount, pingInterval, pingSize, pingTTL int
+var pingTimeout bool
 
 func init() {
 	rootCmd.AddCommand(pingCmd)
 
-	pingCmd.Flags().IntVarP(&pingCount, "count", "c", 5, "Specify counts")
+	pingCmd.Flags().IntVarP(&pingCount, "count", "c", 5, "Specify echo counts")
 	pingCmd.Flags().IntVarP(&pingInterval, "interval", "i", 1, "Specify the packet send time interval")
 	pingCmd.Flags().IntVarP(&pingSize, "size", "s", 24, "Specify the packet size")
+	pingCmd.Flags().BoolVarP(&pingTimeout, "timeout", "t", false, "Do not timeout before exiting")
+	pingCmd.Flags().IntVarP(&pingTTL, "ttl", "", 64, "Specify the packet ttl")
 }
