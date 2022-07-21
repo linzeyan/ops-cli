@@ -27,27 +27,26 @@ import (
 )
 
 var dnsCmd = &cobra.Command{
-	Use:   "dns",
+	Use:   "dns [host]",
 	Short: "Resolve domain name",
-	ValidArgs: []string{
-		"A", "AAAA", "CNAME", "MX", "NS", "PTR", "TXT", "ALL",
-		"a", "aaaa", "cname", "mx", "ns", "ptr", "txt", "all",
-	},
-	Args: cobra.OnlyValidArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		if dnsDomain != "" {
-			var r dnsResolver
-			r.dnsResolver()
-
-			if len(args) == 0 {
-				r.dnsTitle()
-				r.dnsLookupA("a", dnsDomain)
-				return
-			}
-
+		var lens = len(args)
+		if lens == 0 {
+			cmd.Help()
+			return
+		}
+		dnsDomain = args[0]
+		var r dnsResolver
+		r.dnsResolver()
+		if lens == 1 {
 			r.dnsTitle()
-			for i := range args {
-				switch t := strings.ToLower(args[i]); t {
+			r.dnsLookupA("a", dnsDomain)
+			return
+		}
+		if lens > 1 {
+			r.dnsTitle()
+			for i := range args[1:] {
+				switch t := strings.ToLower(args[1:][i]); t {
 				case "a":
 					r.dnsLookupA(t, dnsDomain)
 				case "aaaa":
@@ -72,13 +71,15 @@ var dnsCmd = &cobra.Command{
 			}
 			return
 		}
-		cmd.Help()
 	},
 	Example: Examples(`# Query A record
-ops-cli dns -d google.com
+ops-cli dns google.com
 
 # Query CNAME record
-ops-cli dns -d google.com CNAME`),
+ops-cli dns google.com CNAME
+
+# Query PTR record
+ops-cli dns 8.8.8.8 PTR`),
 }
 
 var dnsResolverServer, dnsDomain string
@@ -87,7 +88,6 @@ func init() {
 	rootCmd.AddCommand(dnsCmd)
 
 	dnsCmd.Flags().StringVarP(&dnsResolverServer, "resolver", "r", "", "Specify DNS server for lookup")
-	dnsCmd.Flags().StringVarP(&dnsDomain, "domain", "d", "", "Specify domain")
 }
 
 type dnsResolver struct {
