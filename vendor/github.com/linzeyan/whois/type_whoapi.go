@@ -34,7 +34,10 @@ type WhoApi struct {
 }
 
 func (w WhoApi) Request(domain string) (*Response, error) {
-	apiUrl := fmt.Sprintf("http://api.whoapi.com/?r=whois&apikey=%s&domain=%s", WhoApiKey, domain)
+	if WhoApiKey != "" {
+		Key = WhoApiKey
+	}
+	apiUrl := fmt.Sprintf("http://api.whoapi.com/?r=whois&apikey=%s&domain=%s", Key, domain)
 	var client = &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true,

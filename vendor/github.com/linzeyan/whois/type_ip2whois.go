@@ -25,7 +25,10 @@ type Ip2Whois struct {
 }
 
 func (w Ip2Whois) Request(domain string) (*Response, error) {
-	apiUrl := fmt.Sprintf("https://api.ip2whois.com/v2?key=%s&domain=%s", IP2WhoisKey, domain)
+	if IP2WhoisKey != "" {
+		Key = IP2WhoisKey
+	}
+	apiUrl := fmt.Sprintf("https://api.ip2whois.com/v2?key=%s&domain=%s", Key, domain)
 	var client = &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true,

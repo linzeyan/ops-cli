@@ -27,6 +27,21 @@ var WhoApiKey string
 // go:embed key_apininjas
 var ApiNinjasKey string
 
+var Key string
+
+type Server interface {
+	Request(string) (*Response, error)
+}
+
+func Request(s Server, domain string) *Response {
+	resp, err := s.Request(domain)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return resp
+}
+
 type Response struct {
 	Registrar   string   `json:"Registrar" yaml:"Registrar"`
 	CreatedDate string   `json:"CreatedDate" yaml:"CreatedDate"`
@@ -62,33 +77,30 @@ func (r Response) Yaml() {
 	fmt.Println(string(out))
 }
 
-func RequestVerisign(domain string) (string, error) {
+type Verisign struct{}
+
+func (w Verisign) Request(domain string) (*Response, error) {
 	conn, err := net.Dial("tcp", "whois.verisign-grs.com:43")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if conn != nil {
 		defer conn.Close()
 	}
 	_, err = conn.Write([]byte(domain + "\n"))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	result, err := ioutil.ReadAll(conn)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(result), nil
 
-}
-
-func ParseVerisign(data string) *Response {
-	var r Response
-	replace := strings.ReplaceAll(data, ": ", ";")
+	replace := strings.ReplaceAll(string(result), ": ", ";")
 	replace1 := strings.ReplaceAll(replace, "\r\n", ",")
 	split := strings.Split(replace1, ",")
 	var ns []string
-
+	var r Response
 	for i := range split {
 		if strings.Contains(split[i], "Updated Date") {
 			v := strings.Split(split[i], ";")
@@ -114,7 +126,7 @@ func ParseVerisign(data string) *Response {
 		}
 	}
 	r.NameServers = ns
-	return &r
+	return &r, nil
 }
 
 func RequestIana(domain string) (string, error) {

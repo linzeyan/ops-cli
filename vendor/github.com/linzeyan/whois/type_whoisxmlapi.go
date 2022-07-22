@@ -12,7 +12,10 @@ type WhoisXML struct {
 }
 
 func (w WhoisXML) Request(domain string) (*Response, error) {
-	apiUrl := fmt.Sprintf("https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=%s&domainName=%s&outputFormat=JSON", WhoisXMLAPIKey, domain)
+	if WhoisXMLAPIKey != "" {
+		Key = WhoisXMLAPIKey
+	}
+	apiUrl := fmt.Sprintf("https://www.whoisxmlapi.com/whoisserver/WhoisService?apiKey=%s&domainName=%s&outputFormat=JSON", Key, domain)
 
 	var client = &http.Client{
 		Transport: &http.Transport{

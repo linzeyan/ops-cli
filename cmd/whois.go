@@ -17,7 +17,6 @@ package cmd
 
 import (
 	_ "embed"
-	"log"
 	"strings"
 
 	"github.com/linzeyan/whois"
@@ -34,50 +33,21 @@ var whoisCmd = &cobra.Command{
 		}
 		var whoisDomain = args[0]
 		var resp *whois.Response
-		var err error
+		var data whois.Server
 		if whoisDomain != "" {
 			switch strings.ToLower(whoisServer) {
 			case "whoisxml":
-				whois.WhoisXMLAPIKey = whoisKey
-				var data whois.WhoisXML
-				resp, err = data.Request(whoisDomain)
-				if err != nil {
-					log.Println(err)
-					return
-				}
+				data = &whois.WhoisXML{}
 			case "ip2whois":
-				whois.IP2WhoisKey = whoisKey
-				var data whois.Ip2Whois
-				resp, err = data.Request(whoisDomain)
-				if err != nil {
-					log.Println(err)
-					return
-				}
+				data = &whois.Ip2Whois{}
 			case "whoapi":
-				whois.WhoApiKey = whoisKey
-				var data whois.WhoApi
-				resp, err = data.Request(whoisDomain)
-				if err != nil {
-					log.Println(err)
-					return
-				}
+				data = &whois.WhoApi{}
 			case "apininjas":
-				whois.ApiNinjasKey = whoisKey
-				var data whois.ApiNinjas
-				resp, err = data.Request(whoisDomain)
-				if err != nil {
-					log.Println(err)
-					return
-				}
+				data = &whois.ApiNinjas{}
 			default:
-				var result string
-				result, err = whois.RequestVerisign(whoisDomain)
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				resp = whois.ParseVerisign(result)
+				data = &whois.Verisign{}
 			}
+			resp = whois.Request(data, whoisDomain)
 			if rootOutputJson {
 				resp.Json()
 			} else if rootOutputYaml {
@@ -96,11 +66,11 @@ ops-cli whois apple.com
 ops-cli whois -s ApiNinjas -k your_api_key google.com`),
 }
 
-var whoisServer, whoisKey string
+var whoisServer string
 
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
 	whoisCmd.Flags().StringVarP(&whoisServer, "server", "s", "whois.verisign-grs.com", "Specify request server, can be WhoisXML, IP2Whois, WhoApi, ApiNinjas")
-	whoisCmd.Flags().StringVarP(&whoisKey, "key", "k", "", "Specify API Key")
+	whoisCmd.Flags().StringVarP(&whois.Key, "key", "k", "", "Specify API Key")
 }

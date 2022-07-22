@@ -39,7 +39,10 @@ func (w ApiNinjas) Request(domain string) (*Response, error) {
 		return nil, err
 	}
 	req.Header.Set("User-Agent", ua)
-	req.Header.Set("X-Api-Key", ApiNinjasKey)
+	if ApiNinjasKey != "" {
+		Key = ApiNinjasKey
+	}
+	req.Header.Set("X-Api-Key", Key)
 
 	resp, err := client.Do(req)
 	if resp != nil {
