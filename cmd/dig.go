@@ -68,15 +68,11 @@ var digCmd = &cobra.Command{
 					digNewClient(dns.TypeNS)
 				case "ptr":
 					digNewClient(dns.TypePTR)
+				case "soa":
+					digNewClient(dns.TypeSOA)
+				case "srv":
+					digNewClient(dns.TypeSRV)
 				case "txt":
-					digNewClient(dns.TypeTXT)
-				case "all":
-					digNewClient(dns.TypeA)
-					digNewClient(dns.TypeAAAA)
-					digNewClient(dns.TypeCNAME)
-					digNewClient(dns.TypeMX)
-					digNewClient(dns.TypeNS)
-					digNewClient(dns.TypePTR)
 					digNewClient(dns.TypeTXT)
 				}
 			}
@@ -107,7 +103,7 @@ func digNewClient(digType uint16) {
 	if digServer == "" {
 		digServer = "8.8.8.8"
 	}
-	resp, rtt, err := client.Exchange(&message, digServer+":53")
+	resp, _, err := client.Exchange(&message, digServer+":53")
 	if err != nil {
 		log.Println(err)
 		log.Println(digType)
@@ -117,10 +113,10 @@ func digNewClient(digType uint16) {
 		return
 	}
 	for i := range resp.Answer {
-		digOutput = append(digOutput, fmt.Sprintf("%s\t\t%s", resp.Answer[i], rtt))
+		digOutput = append(digOutput, fmt.Sprintf("%s", resp.Answer[i]))
 	}
 }
 
 func digTitle() {
-	fmt.Println("NAME\t\tTTL\tCLASS\tTYPE\tADDRESS\t\t\tQueryTime")
+	fmt.Println("NAME\t\tTTL\tCLASS\tTYPE\tADDRESS")
 }
