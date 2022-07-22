@@ -11,7 +11,7 @@ require (
 	github.com/linzeyan/password v0.3.4
 	github.com/linzeyan/qrcode v0.0.3
 	github.com/linzeyan/tlsCheck v0.0.1
-	github.com/linzeyan/whois v0.0.12
+	github.com/linzeyan/whois v0.0.13
 	github.com/miekg/dns v1.1.25
 	github.com/spf13/cobra v1.5.0
 	gopkg.in/yaml.v3 v3.0.1

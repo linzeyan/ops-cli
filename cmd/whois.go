@@ -17,6 +17,7 @@ package cmd
 
 import (
 	_ "embed"
+	"log"
 	"strings"
 
 	"github.com/linzeyan/whois"
@@ -33,21 +34,26 @@ var whoisCmd = &cobra.Command{
 		}
 		var whoisDomain = args[0]
 		var resp *whois.Response
-		var data whois.Server
+		var err error
+		var data whois.Servers
 		if whoisDomain != "" {
 			switch strings.ToLower(whoisServer) {
 			case "whoisxml":
-				data = &whois.WhoisXML{}
+				data = whois.WhoisXML{}
 			case "ip2whois":
-				data = &whois.Ip2Whois{}
+				data = whois.Ip2Whois{}
 			case "whoapi":
-				data = &whois.WhoApi{}
+				data = whois.WhoApi{}
 			case "apininjas":
-				data = &whois.ApiNinjas{}
+				data = whois.ApiNinjas{}
 			default:
-				data = &whois.Verisign{}
+				data = whois.Verisign{}
 			}
-			resp = whois.Request(data, whoisDomain)
+			resp, err = whois.Request(data, whoisDomain)
+			if err != nil {
+				log.Println(err)
+				return
+			}
 			if rootOutputJson {
 				resp.Json()
 			} else if rootOutputYaml {

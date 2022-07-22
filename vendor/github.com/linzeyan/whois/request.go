@@ -29,17 +29,17 @@ var ApiNinjasKey string
 
 var Key string
 
-type Server interface {
+type Servers interface {
 	Request(string) (*Response, error)
 }
 
-func Request(s Server, domain string) *Response {
+func Request(s Servers, domain string) (*Response, error) {
 	resp, err := s.Request(domain)
 	if err != nil {
 		log.Println(err)
-		return nil
+		return nil, err
 	}
-	return resp
+	return resp, nil
 }
 
 type Response struct {
