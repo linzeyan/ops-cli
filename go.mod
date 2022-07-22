@@ -12,7 +12,7 @@ require (
 	github.com/linzeyan/qrcode v0.0.3
 	github.com/linzeyan/tlsCheck v0.0.1
 	github.com/linzeyan/whois v0.0.11
-	github.com/miekg/dns v1.0.14
+	github.com/miekg/dns v1.1.25
 	github.com/spf13/cobra v1.5.0
 	gopkg.in/yaml.v3 v3.0.1
 )
