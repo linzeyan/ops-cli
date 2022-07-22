@@ -47,37 +47,41 @@ var digCmd = &cobra.Command{
 		}
 
 		if lens > 1 {
-			a := args[1:]
-			for i := range a {
-				if strings.Contains(a[i], "@") {
-					digServer = strings.Replace(a[i], "@", "", 1)
+			argWithoutDomain := args[1:]
+			var argType []string
+			for i := range argWithoutDomain {
+				if strings.Contains(argWithoutDomain[i], "@") {
+					digServer = strings.Replace(argWithoutDomain[i], "@", "", 1)
+					/* Copy args and remove @x.x.x.x */
+					argType = append(argWithoutDomain[:i], argWithoutDomain[i+1:]...)
 					break
+				} else {
+					argType = append(argType, argWithoutDomain[0])
 				}
 			}
-			for i := range a {
-				switch strings.ToLower(a[i]) {
-				case "a":
-					digNewClient(dns.TypeA)
-				case "aaaa":
-					digNewClient(dns.TypeAAAA)
-				case "cname":
-					digNewClient(dns.TypeCNAME)
-				case "mx":
-					digNewClient(dns.TypeMX)
-				case "ns":
-					digNewClient(dns.TypeNS)
-				case "ptr":
-					digNewClient(dns.TypePTR)
-				case "soa":
-					digNewClient(dns.TypeSOA)
-				case "srv":
-					digNewClient(dns.TypeSRV)
-				case "txt":
-					digNewClient(dns.TypeTXT)
-				default:
-					digNewClient(dns.TypeA)
-				}
+			switch strings.ToLower(argType[0]) {
+			case "a":
+				digNewClient(dns.TypeA)
+			case "aaaa":
+				digNewClient(dns.TypeAAAA)
+			case "cname":
+				digNewClient(dns.TypeCNAME)
+			case "mx":
+				digNewClient(dns.TypeMX)
+			case "ns":
+				digNewClient(dns.TypeNS)
+			case "ptr":
+				digNewClient(dns.TypePTR)
+			case "soa":
+				digNewClient(dns.TypeSOA)
+			case "srv":
+				digNewClient(dns.TypeSRV)
+			case "txt":
+				digNewClient(dns.TypeTXT)
+			default:
+				digNewClient(dns.TypeA)
 			}
+
 			if digOutput != nil {
 				digTitle()
 				for i := range digOutput {
@@ -102,7 +106,7 @@ var digOutput []string
 func init() {
 	rootCmd.AddCommand(digCmd)
 
-	digCmd.Flags().StringVarP(&digNetwork, "net", "n", "udp", "udp/tcp")
+	digCmd.Flags().StringVarP(&digNetwork, "net", "n", "tcp", "udp/tcp")
 }
 
 func digNewClient(digType uint16) {
