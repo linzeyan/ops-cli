@@ -26,7 +26,7 @@ import (
 
 // digCmd represents the dig command
 var digCmd = &cobra.Command{
-	Use:   "dig",
+	Use:   "dig [host] [@server] [type]",
 	Short: "Resolve domain name",
 	Run: func(cmd *cobra.Command, args []string) {
 		var lens = len(args)
@@ -74,6 +74,8 @@ var digCmd = &cobra.Command{
 					digNewClient(dns.TypeSRV)
 				case "txt":
 					digNewClient(dns.TypeTXT)
+				default:
+					digNewClient(dns.TypeA)
 				}
 			}
 			if digOutput != nil {
@@ -85,6 +87,13 @@ var digCmd = &cobra.Command{
 			return
 		}
 	},
+	Example: Examples(`# Query A record
+ops-cli dig google.com
+ops-cli dig google.com A
+ops-cli dig google.com AAAA
+
+# Query CNAME record
+ops-cli dig tw.yahoo.com CNAME`),
 }
 
 var digNetwork, digDomain, digServer string
@@ -106,7 +115,6 @@ func digNewClient(digType uint16) {
 	resp, _, err := client.Exchange(&message, digServer+":53")
 	if err != nil {
 		log.Println(err)
-		log.Println(digType)
 		return
 	}
 	if len(resp.Answer) == 0 {
