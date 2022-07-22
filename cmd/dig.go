@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -38,10 +39,7 @@ var digCmd = &cobra.Command{
 		if lens == 1 {
 			digNewClient(dns.TypeA)
 			if digOutput != nil {
-				digTitle()
-				for i := range digOutput {
-					fmt.Println(digOutput[i])
-				}
+				digPrint()
 			}
 			return
 		}
@@ -64,6 +62,8 @@ var digCmd = &cobra.Command{
 				digNewClient(dns.TypeA)
 			case "aaaa":
 				digNewClient(dns.TypeAAAA)
+			case "caa":
+				digNewClient(dns.TypeCAA)
 			case "cname":
 				digNewClient(dns.TypeCNAME)
 			case "mx":
@@ -78,15 +78,14 @@ var digCmd = &cobra.Command{
 				digNewClient(dns.TypeSRV)
 			case "txt":
 				digNewClient(dns.TypeTXT)
+			case "any":
+				digNewClient(dns.TypeANY)
 			default:
 				digNewClient(dns.TypeA)
 			}
 
 			if digOutput != nil {
-				digTitle()
-				for i := range digOutput {
-					fmt.Println(digOutput[i])
-				}
+				digPrint()
 			}
 			return
 		}
@@ -97,11 +96,14 @@ ops-cli dig google.com A
 ops-cli dig google.com AAAA
 
 # Query CNAME record
-ops-cli dig tw.yahoo.com CNAME`),
+ops-cli dig tw.yahoo.com CNAME
+
+# Query ANY record
+ops-cli dig google.com ANY`),
 }
 
 var digNetwork, digDomain, digServer string
-var digOutput []string
+var digOutput digResponseOutput
 
 func init() {
 	rootCmd.AddCommand(digCmd)
@@ -110,6 +112,15 @@ func init() {
 }
 
 func digNewClient(digType uint16) {
+	// if dns.TypeToString[digType] == "PTR" {
+	// 	var err error
+	// 	digDomain, err = dns.ReverseAddr(digDomain)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 		return
+	// 	}
+	// }
+
 	var message = dns.Msg{}
 	message.SetQuestion(digDomain+".", digType)
 	var client = dns.Client{Net: digNetwork}
@@ -124,11 +135,50 @@ func digNewClient(digType uint16) {
 	if len(resp.Answer) == 0 {
 		return
 	}
+
 	for i := range resp.Answer {
-		digOutput = append(digOutput, fmt.Sprintf("%s", resp.Answer[i]))
+		elements := strings.Fields(fmt.Sprintf("%s ", resp.Answer[i]))
+		var d = digResponseFormat{
+			NAME:   elements[0],
+			TTL:    elements[1],
+			CLASS:  elements[2],
+			TYPE:   elements[3],
+			RECORD: elements[4],
+		}
+		digOutput = append(digOutput, d)
 	}
 }
 
-func digTitle() {
-	fmt.Println("NAME\t\tTTL\tCLASS\tTYPE\tADDRESS")
+type digResponseFormat struct {
+	NAME   string `json:"Name"`
+	TTL    string `json:"TTL"`
+	CLASS  string `json:"Class"`
+	TYPE   string `json:"Type"`
+	RECORD string `json:"Record"`
+}
+
+type digResponseOutput []digResponseFormat
+
+func (d digResponseOutput) String() {
+	for i := range d {
+		fmt.Printf("%-20s\t%s\t%s\t%s\t%s\n", d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD)
+	}
+
+}
+
+func (d *digResponseOutput) Json() {
+	out, err := json.MarshalIndent(d, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func digPrint() {
+	if rootOutputJson {
+		digOutput.Json()
+		return
+	}
+	digOutput.String()
 }
