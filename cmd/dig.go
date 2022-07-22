@@ -27,7 +27,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// digCmd represents the dig command
 var digCmd = &cobra.Command{
 	Use:   "dig [host] [@server] [type]",
 	Short: "Resolve domain name",
