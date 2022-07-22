@@ -24,6 +24,7 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 // digCmd represents the dig command
@@ -167,11 +168,11 @@ func digNewClient(digType uint16) {
 }
 
 type digResponseFormat struct {
-	NAME   string `json:"Name"`
-	TTL    string `json:"TTL"`
-	CLASS  string `json:"Class"`
-	TYPE   string `json:"Type"`
-	RECORD string `json:"Record"`
+	NAME   string `json:"Name" yaml:"Name"`
+	TTL    string `json:"TTL" yaml:"TTL"`
+	CLASS  string `json:"Class" yaml:"Class"`
+	TYPE   string `json:"Type" yaml:"Type"`
+	RECORD string `json:"Record" yaml:"Record"`
 }
 
 type digResponseOutput []digResponseFormat
@@ -192,9 +193,22 @@ func (d *digResponseOutput) Json() {
 	fmt.Println(string(out))
 }
 
+func (d *digResponseOutput) Yaml() {
+	out, err := yaml.Marshal(d)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
 func digPrint() {
 	if rootOutputJson {
 		digOutput.Json()
+		return
+	}
+	if rootOutputYaml {
+		digOutput.Yaml()
 		return
 	}
 	digOutput.String()

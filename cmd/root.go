@@ -43,7 +43,7 @@ var version string
 */
 
 var appVersion, appBuildTime, appCommit, appPlatform string
-var rootOutputJson bool
+var rootOutputJson, rootOutputYaml bool
 
 func Execute() {
 	err := rootCmd.Execute()
@@ -54,6 +54,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJson, "json", "j", false, "Output JSON format")
+	rootCmd.PersistentFlags().BoolVarP(&rootOutputYaml, "yaml", "y", false, "Output YAML format")
 }
 
 func rootOutputVersion() string {

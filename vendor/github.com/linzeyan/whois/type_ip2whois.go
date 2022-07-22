@@ -1,5 +1,12 @@
 package whois
 
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
+
 type Ip2Whois struct {
 	Domain      string    `json:"domain"`
 	DomainID    string    `json:"domain_id"`
@@ -15,6 +22,50 @@ type Ip2Whois struct {
 	Tech        Admin     `json:"tech"`
 	Billing     Admin     `json:"billing"`
 	Nameservers []string  `json:"nameservers"`
+}
+
+func (w Ip2Whois) Request(domain string) (*Response, error) {
+	apiUrl := fmt.Sprintf("https://api.ip2whois.com/v2?key=%s&domain=%s", IP2WhoisKey, domain)
+	var client = &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
+	}
+
+	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", ua)
+
+	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode == http.StatusOK {
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		var w Ip2Whois
+		err = json.Unmarshal(content, &w)
+		if err != nil {
+			return nil, err
+		}
+		var r = Response{
+			CreatedDate: w.CreateDate,
+			UpdatedDate: w.UpdateDate,
+			ExpiresDate: w.ExpireDate,
+			NameServers: w.Nameservers,
+			Registrar:   w.Registrar.Name,
+		}
+		return &r, nil
+	}
+	return nil, err
 }
 
 type Admin struct {

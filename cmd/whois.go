@@ -17,9 +17,8 @@ package cmd
 
 import (
 	_ "embed"
-	"encoding/json"
-	"fmt"
 	"log"
+	"strings"
 
 	"github.com/linzeyan/whois"
 	"github.com/spf13/cobra"
@@ -34,72 +33,57 @@ var whoisCmd = &cobra.Command{
 			return
 		}
 		var whoisDomain = args[0]
+		var resp *whois.Response
+		var err error
 		if whoisDomain != "" {
-			switch whoisServer {
-			case "WhoisXML", "whoisxml", "WHOISXML":
+			switch strings.ToLower(whoisServer) {
+			case "whoisxml":
 				whois.WhoisXMLAPIKey = whoisKey
-				result, err := whois.RequestWhoisXML(whoisDomain)
+				var data whois.WhoisXML
+				resp, err = data.Request(whoisDomain)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParseWhoisXML(result), "", "  ")
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				fmt.Println(string(out))
-			case "IP2Whois", "ip2whois", "IP2WHOIS":
+			case "ip2whois":
 				whois.IP2WhoisKey = whoisKey
-				result, err := whois.RequestIp2Whois(whoisDomain)
+				var data whois.Ip2Whois
+				resp, err = data.Request(whoisDomain)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParseIp2Whois(result), "", "  ")
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				fmt.Println(string(out))
-			case "WhoApi", "whoapi", "WHOAPI":
+			case "whoapi":
 				whois.WhoApiKey = whoisKey
-				result, err := whois.RequestWhoApi(whoisDomain)
+				var data whois.WhoApi
+				resp, err = data.Request(whoisDomain)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParseWhoApi(result), "", "  ")
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				fmt.Println(string(out))
-			case "ApiNinjas", "apininjas", "APININJAS":
+			case "apininjas":
 				whois.ApiNinjasKey = whoisKey
-				result, err := whois.RequestApiNinjas(whoisDomain)
+				var data whois.ApiNinjas
+				resp, err = data.Request(whoisDomain)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParseApiNinjas(result), "", "  ")
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				fmt.Println(string(out))
 			default:
-				result, err := whois.RequestVerisign(whoisDomain)
+				var result string
+				result, err = whois.RequestVerisign(whoisDomain)
 				if err != nil {
 					log.Println(err)
 					return
 				}
-				out, err := json.MarshalIndent(whois.ParseVerisign(result), "", "  ")
-				if err != nil {
-					log.Println(err)
-					return
-				}
-				fmt.Println(string(out))
+				resp = whois.ParseVerisign(result)
+			}
+			if rootOutputJson {
+				resp.Json()
+			} else if rootOutputYaml {
+				resp.Yaml()
+			} else {
+				resp.String()
 			}
 			return
 		}
