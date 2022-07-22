@@ -21,6 +21,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )
@@ -35,8 +36,9 @@ var digCmd = &cobra.Command{
 			cmd.Help()
 			return
 		}
-		digDomain = args[0]
+
 		if lens == 1 {
+			digDomain = args[0]
 			digNewClient(dns.TypeA)
 			if digOutput != nil {
 				digPrint()
@@ -45,19 +47,37 @@ var digCmd = &cobra.Command{
 		}
 
 		if lens > 1 {
-			argWithoutDomain := args[1:]
-			var argType []string
-			for i := range argWithoutDomain {
-				if strings.Contains(argWithoutDomain[i], "@") {
-					digServer = strings.Replace(argWithoutDomain[i], "@", "", 1)
-					/* Copy args and remove @x.x.x.x */
-					argType = append(argWithoutDomain[:i], argWithoutDomain[i+1:]...)
+			var argsWithoutDomain []string
+			var argsType []string
+
+			for i := range args {
+				if govalidator.IsDNSName(args[i]) {
+					digDomain = args[i]
+					argsWithoutDomain = append(args[:i], args[i+1:]...)
 					break
-				} else {
-					argType = append(argType, argWithoutDomain[0])
 				}
 			}
-			switch strings.ToLower(argType[0]) {
+			switch lens {
+			case 2:
+				if strings.Contains(argsWithoutDomain[0], "@") {
+					digServer = strings.Replace(argsWithoutDomain[0], "@", "", 1)
+					argsType = append(argsType, "A")
+				} else {
+					argsType = append(argsType, argsWithoutDomain[0])
+				}
+
+			default:
+				for i := range argsWithoutDomain {
+					if strings.Contains(argsWithoutDomain[i], "@") {
+						digServer = strings.Replace(argsWithoutDomain[i], "@", "", 1)
+						/* Copy args and remove @x.x.x.x */
+						argsType = append(argsWithoutDomain[:i], argsWithoutDomain[i+1:]...)
+						break
+					}
+				}
+			}
+
+			switch strings.ToLower(argsType[0]) {
 			case "a":
 				digNewClient(dns.TypeA)
 			case "aaaa":
@@ -80,10 +100,7 @@ var digCmd = &cobra.Command{
 				digNewClient(dns.TypeTXT)
 			case "any":
 				digNewClient(dns.TypeANY)
-			default:
-				digNewClient(dns.TypeA)
 			}
-
 			if digOutput != nil {
 				digPrint()
 			}
