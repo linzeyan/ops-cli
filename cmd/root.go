@@ -17,7 +17,6 @@ package cmd
 
 import (
 	_ "embed"
-	"fmt"
 	"os"
 
 	"github.com/fatih/color"
@@ -25,10 +24,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "ops-cli",
-	Short:   "OPS useful tools",
-	Version: rootOutputVersion(),
-	Run:     func(cmd *cobra.Command, _ []string) { cmd.Help() },
+	Use:   "ops-cli",
+	Short: "OPS useful tools",
+	Run:   func(cmd *cobra.Command, _ []string) { cmd.Help() },
 }
 
 func Examples(s string) string {
@@ -42,7 +40,6 @@ func Examples(s string) string {
 var version string
 */
 
-var appVersion, appBuildTime, appCommit, appPlatform string
 var rootOutputJson, rootOutputYaml bool
 
 func Execute() {
@@ -55,11 +52,4 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJson, "json", "j", false, "Output JSON format")
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYaml, "yaml", "y", false, "Output YAML format")
-}
-
-func rootOutputVersion() string {
-	if appVersion != "" {
-		return fmt.Sprintf("%s\nBuildTime: %s\nGitCommit: %s\nPlatform:  %s", appVersion, appBuildTime, appCommit, appPlatform)
-	}
-	return "v0.0.9"
 }
