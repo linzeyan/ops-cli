@@ -35,19 +35,17 @@ var versionCmd = &cobra.Command{
 			appVersion = "v0.0.9"
 		}
 		var v = version{
-			Version:   appVersion,
-			BuildTime: appBuildTime,
-			GitCommit: appCommit,
-			Platform:  fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
-			GoVersion: runtime.Version(),
-			Compiler:  runtime.Compiler,
+			Version: appVersion,
+			Commit:  appCommit,
+			Date:    appBuildTime,
+			Runtime: fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
 		}
 
 		if rootOutputYaml {
 			v.Yaml()
 		} else if rootOutputJson {
 			v.Json()
-		} else if versionAll {
+		} else if versionComplete {
 			v.String()
 		} else {
 			v.Json()
@@ -56,21 +54,19 @@ var versionCmd = &cobra.Command{
 }
 
 var appVersion, appBuildTime, appCommit string
-var versionAll bool
+var versionComplete bool
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
 
-	versionCmd.Flags().BoolVarP(&versionAll, "complete", "c", false, "Print version information completely")
+	versionCmd.Flags().BoolVarP(&versionComplete, "complete", "c", false, "Print version information completely")
 }
 
 type version struct {
-	Version   string `json:"Version,omitempty" yaml:"Version,omitempty"`
-	GitCommit string `json:"GitCommit,omitempty" yaml:"GitCommit,omitempty"`
-	Platform  string `json:"Platform,omitempty" yaml:"Platform,omitempty"`
-	BuildTime string `json:"BuildTime,omitempty" yaml:"BuildTime,omitempty"`
-	GoVersion string `json:"GoVersion,omitempty" yaml:"GoVersion,omitempty"`
-	Compiler  string `json:"Compiler,omitempty" yaml:"Compiler,omitempty"`
+	Version string `json:"Version,omitempty" yaml:"Version,omitempty"`
+	Commit  string `json:"Commit,omitempty" yaml:"Commit,omitempty"`
+	Date    string `json:"Date,omitempty" yaml:"Date,omitempty"`
+	Runtime string `json:"Runtime,omitempty" yaml:"Runtime,omitempty"`
 }
 
 func (r version) Json() {
@@ -96,6 +92,7 @@ func (r version) String() {
 	var ver strings.Builder
 	f := reflect.ValueOf(&r).Elem()
 	t := f.Type()
+	ver.WriteString(fmt.Sprintf("%-10s\t%v\n", "App", "ops-cli"))
 	for i := 0; i < f.NumField(); i++ {
 		_, err := ver.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
 		//f.Field(i).Type()
@@ -104,5 +101,7 @@ func (r version) String() {
 			return
 		}
 	}
+	ver.WriteString("Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>\n")
+	ver.WriteString("Source available at https://github.com/linzeyan/ops-cli")
 	fmt.Println(ver.String())
 }
