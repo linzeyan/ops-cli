@@ -51,7 +51,7 @@ var digCmd = &cobra.Command{
 			var argsType []string
 
 			for i := range args {
-				if govalidator.IsDNSName(args[i]) {
+				if govalidator.IsDNSName(args[i]) || govalidator.IsIP(args[i]) {
 					digDomain = args[i]
 					argsWithoutDomain = append(args[:i], args[i+1:]...)
 					break
@@ -129,14 +129,15 @@ func init() {
 }
 
 func digNewClient(digType uint16) {
-	// if dns.TypeToString[digType] == "PTR" {
-	// 	var err error
-	// 	digDomain, err = dns.ReverseAddr(digDomain)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 		return
-	// 	}
-	// }
+	if dns.TypeToString[digType] == "PTR" {
+		var err error
+		digDomain, err = dns.ReverseAddr(digDomain)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		digDomain = strings.TrimRight(digDomain, ".")
+	}
 
 	var message = dns.Msg{}
 	message.SetQuestion(digDomain+".", digType)
@@ -154,13 +155,30 @@ func digNewClient(digType uint16) {
 	}
 
 	for i := range resp.Answer {
+		var d digResponseFormat
 		elements := strings.Fields(fmt.Sprintf("%s ", resp.Answer[i]))
-		var d = digResponseFormat{
-			NAME:   elements[0],
-			TTL:    elements[1],
-			CLASS:  elements[2],
-			TYPE:   elements[3],
-			RECORD: elements[4],
+		if len(elements) == 5 {
+			d = digResponseFormat{
+				NAME:   elements[0],
+				TTL:    elements[1],
+				CLASS:  elements[2],
+				TYPE:   elements[3],
+				RECORD: elements[4],
+			}
+		} else if len(elements) > 5 {
+			var remain string
+			slice := elements[4:]
+			for i := range slice {
+				remain = remain + " " + slice[i]
+			}
+
+			d = digResponseFormat{
+				NAME:   elements[0],
+				TTL:    elements[1],
+				CLASS:  elements[2],
+				TYPE:   elements[3],
+				RECORD: remain,
+			}
 		}
 		digOutput = append(digOutput, d)
 	}
