@@ -44,7 +44,7 @@ var digCmd = &cobra.Command{
 				log.Println("response is empty")
 				return
 			}
-			digPrint()
+			outputDefaultString(&digOutput)
 			return
 		}
 
@@ -107,7 +107,7 @@ var digCmd = &cobra.Command{
 				log.Println("response is empty")
 				return
 			}
-			digPrint()
+			outputDefaultString(&digOutput)
 		}
 	},
 	Example: Examples(`# Query A record
@@ -220,16 +220,4 @@ func (d *digResponseOutput) Yaml() {
 		return
 	}
 	fmt.Println(string(out))
-}
-
-func digPrint() {
-	if rootOutputJson {
-		digOutput.Json()
-		return
-	}
-	if rootOutputYaml {
-		digOutput.Yaml()
-		return
-	}
-	digOutput.String()
 }

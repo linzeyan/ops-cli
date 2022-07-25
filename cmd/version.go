@@ -41,15 +41,11 @@ var versionCmd = &cobra.Command{
 			Runtime: fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
 		}
 
-		if rootOutputYaml {
-			v.Yaml()
-		} else if rootOutputJson {
-			v.Json()
-		} else if versionComplete {
+		if versionComplete {
 			v.String()
-		} else {
-			v.Json()
+			return
 		}
+		outputDefaultJson(v)
 	},
 }
 

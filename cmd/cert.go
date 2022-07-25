@@ -52,13 +52,7 @@ var certCmd = &cobra.Command{
 			log.Println("response is empty")
 			return
 		}
-		if rootOutputJson {
-			out.Json()
-		} else if rootOutputYaml {
-			out.Yaml()
-		} else {
-			out.String()
-		}
+		outputDefaultString(out)
 	},
 	Example: Examples(`# Print certificate expiration time, DNS, IP and issuer
 ops-cli cert -d www.google.com:443
@@ -103,18 +97,18 @@ func (c certOutput) Yaml() {
 }
 
 func (c certOutput) String() {
-	var ver strings.Builder
+	var s strings.Builder
 	f := reflect.ValueOf(&c).Elem()
 	t := f.Type()
 	for i := 0; i < f.NumField(); i++ {
-		_, err := ver.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
+		_, err := s.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
 		//f.Field(i).Type()
 		if err != nil {
 			log.Println(err)
 			return
 		}
 	}
-	fmt.Println(ver.String())
+	fmt.Println(s.String())
 }
 
 func certOutputByHost() (*certOutput, error) {

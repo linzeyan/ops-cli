@@ -53,3 +53,35 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJson, "json", "j", false, "Output JSON format")
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYaml, "yaml", "y", false, "Output YAML format")
 }
+
+type rootOutput interface {
+	Json()
+	String()
+	Yaml()
+}
+
+func outputDefaultString(r rootOutput) {
+	if rootOutputJson {
+		r.Json()
+	} else if rootOutputYaml {
+		r.Yaml()
+	} else {
+		r.String()
+	}
+}
+
+func outputDefaultJson(r rootOutput) {
+	if rootOutputYaml {
+		r.Yaml()
+	} else {
+		r.Json()
+	}
+}
+
+func outputDefaultYaml(r rootOutput) {
+	if rootOutputJson {
+		r.Json()
+	} else {
+		r.Yaml()
+	}
+}

@@ -19,22 +19,37 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var geoipCmd = &cobra.Command{
 	Use:   "geoip",
 	Short: "Print IP geographic information",
 	Run: func(cmd *cobra.Command, args []string) {
+		var out rootOutput
+		var err error
 		if len(args) == 1 {
-			geoipRequestSingle(args[0])
+			out, err = geoipRequestSingle(args[0])
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			outputDefaultJson(out)
 			return
 		}
 		if len(args) > 1 {
-			geoipRequestBatch(args)
+			out, err = geoipRequestBatch(args)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			outputDefaultJson(out)
 			return
 		}
 		cmd.Help()
@@ -69,7 +84,39 @@ type GeoIPSingle struct {
 	Query       string `json:"query"`
 }
 
-func geoipRequestSingle(geoipInput string) error {
+func (g GeoIPSingle) Json() {
+	out, err := json.MarshalIndent(g, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func (g GeoIPSingle) Yaml() {
+	out, err := yaml.Marshal(g)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func (g GeoIPSingle) String() {
+	var s strings.Builder
+	f := reflect.ValueOf(&g).Elem()
+	t := f.Type()
+	for i := 0; i < f.NumField(); i++ {
+		_, err := s.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+	fmt.Println(s.String())
+}
+
+func geoipRequestSingle(geoipInput string) (*GeoIPSingle, error) {
 	apiUrl := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 
 	var client = &http.Client{
@@ -79,38 +126,65 @@ func geoipRequestSingle(geoipInput string) error {
 	}
 	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	resp, err := client.Do(req)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if resp.StatusCode == http.StatusOK {
 		content, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		var data GeoIPSingle
 		err = json.Unmarshal(content, &data)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		out, err := json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			return err
-		}
-		fmt.Println(string(out))
-		return nil
+		return &data, nil
 	}
-	return err
+	return nil, err
 }
 
 type GeoIPBatch []GeoIPSingle
 
-func geoipRequestBatch(geoipBatch []string) error {
+func (g GeoIPBatch) Json() {
+	out, err := json.MarshalIndent(g, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func (g GeoIPBatch) Yaml() {
+	out, err := yaml.Marshal(g)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func (g GeoIPBatch) String() {
+	var s strings.Builder
+	f := reflect.ValueOf(&g).Elem()
+	t := f.Type()
+	for i := 0; i < f.NumField(); i++ {
+		_, err := s.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+	fmt.Println(s.String())
+}
+
+func geoipRequestBatch(geoipBatch []string) (*GeoIPBatch, error) {
 	apiUrl := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
 
 	var client = &http.Client{
@@ -125,31 +199,26 @@ func geoipRequestBatch(geoipBatch []string) error {
 	ips = strings.TrimRight(ips, `, `) + `]`
 	req, err := http.NewRequest(http.MethodPost, apiUrl, strings.NewReader(ips))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	resp, err := client.Do(req)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if resp.StatusCode == http.StatusOK {
 		content, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		var data GeoIPBatch
 		err = json.Unmarshal(content, &data)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		out, err := json.MarshalIndent(data, "", "  ")
-		if err != nil {
-			return err
-		}
-		fmt.Println(string(out))
-		return nil
+		return &data, nil
 	}
-	return err
+	return nil, err
 }
