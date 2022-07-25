@@ -35,7 +35,8 @@ var geoipCmd = &cobra.Command{
 		var out rootOutput
 		var err error
 		if len(args) == 1 {
-			out, err = geoipRequestSingle(args[0])
+			var r GeoIPSingle
+			out, err = r.Request(args[0])
 			if err != nil {
 				log.Println(err)
 				return
@@ -44,7 +45,8 @@ var geoipCmd = &cobra.Command{
 			return
 		}
 		if len(args) > 1 {
-			out, err = geoipRequestBatch(args)
+			var r GeoIPBatch
+			out, err = r.Request(args)
 			if err != nil {
 				log.Println(err)
 				return
@@ -116,7 +118,7 @@ func (g GeoIPSingle) String() {
 	fmt.Println(s.String())
 }
 
-func geoipRequestSingle(geoipInput string) (*GeoIPSingle, error) {
+func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 	apiUrl := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 
 	var client = &http.Client{
@@ -184,7 +186,7 @@ func (g GeoIPBatch) String() {
 	fmt.Println(s.String())
 }
 
-func geoipRequestBatch(geoipBatch []string) (*GeoIPBatch, error) {
+func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
 	apiUrl := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
 
 	var client = &http.Client{
