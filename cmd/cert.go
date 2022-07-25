@@ -16,42 +16,58 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/linzeyan/tlsCheck"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var certCmd = &cobra.Command{
 	Use:   "cert",
 	Short: "Check tls cert",
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(_ *cobra.Command, _ []string) {
+		var out *certOutput
+		var err error
+
 		if certHost != "domain:port" {
-			certOutputByHost()
-			return
+			out, err = certOutputByHost()
+			if err != nil {
+				log.Println(err)
+				return
+			}
 		} else if certCrt != "" {
-			certOutputByFile()
+			out, err = certOutputByFile()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+		}
+		if out == nil {
+			log.Println("response is empty")
 			return
 		}
-		cmd.Help()
+		if rootOutputJson {
+			out.Json()
+		} else if rootOutputYaml {
+			out.Yaml()
+		} else {
+			out.String()
+		}
 	},
-	Example: Examples(`# Print certificate expiration time
+	Example: Examples(`# Print certificate expiration time, DNS, IP and issuer
 ops-cli cert -d www.google.com:443
-
-# Print certificate expiration time, DNS, IP and issuer
-ops-cli cert -d www.google.com:443 -i -n -p
-
-# Print certificate expiration time
-ops-cli cert -f example.com.crt
 
 # Print certificate expiration time, DNS and issuer
 ops-cli cert -f example.com.crt -i -n`),
 }
 
 var certCrt, certHost string
-var certIP, certExpiry, certDNS, certIssuer bool
 
 func init() {
 	rootCmd.AddCommand(certCmd)
@@ -59,50 +75,78 @@ func init() {
 	certCmd.Flags().StringVarP(&certCrt, "file", "f", "", "Specify .crt file path")
 	certCmd.Flags().StringVarP(&certHost, "domain", "d", "domain:port", "Specify domain and host port")
 	certCmd.MarkFlagsMutuallyExclusive("file", "domain")
-	certCmd.Flags().BoolVarP(&certIP, "ip", "p", false, "Print IP")
-	certCmd.Flags().BoolVarP(&certExpiry, "expiry", "e", true, "Print expiry time")
-	certCmd.Flags().BoolVarP(&certDNS, "dns", "n", false, "Print DNS names")
-	certCmd.Flags().BoolVarP(&certIssuer, "issuer", "i", false, "Print issuer")
 }
 
-func certOutputByHost() {
+type certOutput struct {
+	ExpiryTime string   `json:"ExpiryTime" yaml:"ExpiryTime"`
+	Issuer     string   `json:"Issuer,omitempty" yaml:"Issuer,omitempty"`
+	ServerIP   string   `json:"ServerIP,omitempty" yaml:"ServerIP,omitempty"`
+	DNS        []string `json:"DNS,omitempty" yaml:"DNS,omitempty"`
+}
+
+func (c certOutput) Json() {
+	out, err := json.MarshalIndent(c, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func (c certOutput) Yaml() {
+	out, err := yaml.Marshal(c)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func (c certOutput) String() {
+	var ver strings.Builder
+	f := reflect.ValueOf(&c).Elem()
+	t := f.Type()
+	for i := 0; i < f.NumField(); i++ {
+		_, err := ver.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
+		//f.Field(i).Type()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}
+	fmt.Println(ver.String())
+}
+
+func certOutputByHost() (*certOutput, error) {
 	conn, err := tlsCheck.CheckByHost(certHost)
 	if err != nil {
 		log.Println(err)
-		return
+		return nil, err
 	}
 	cert := conn.ConnectionState().PeerCertificates[0]
-	if certExpiry {
-		fmt.Println("Expiry time:", cert.NotAfter.Local().Format(time.RFC3339))
+	var out = certOutput{
+		ExpiryTime: cert.NotAfter.Local().Format(time.RFC3339),
+		DNS:        cert.DNSNames,
+		Issuer:     cert.Issuer.String(),
+		ServerIP:   conn.RemoteAddr().String(),
 	}
-	if certIP {
-		fmt.Println("Server IP:", conn.RemoteAddr().String())
-	}
-	if certDNS {
-		fmt.Println("DNS:", cert.DNSNames)
-	}
-	if certIssuer {
-		fmt.Println("Issuer:", cert.Issuer.String())
-	}
+	return &out, nil
 }
 
-func certOutputByFile() {
+func certOutputByFile() (*certOutput, error) {
 	cert, err := tlsCheck.CheckByFile(certCrt)
 	if err != nil {
 		log.Println(err)
-		return
+		return nil, err
 	}
 	if cert == nil {
 		log.Println(cert)
-		return
+		return nil, err
 	}
-	if certExpiry {
-		fmt.Println("Expiry time:", cert[0].NotAfter.Local().Format(time.RFC3339))
+	var out = certOutput{
+		ExpiryTime: cert[0].NotAfter.Local().Format(time.RFC3339),
+		DNS:        cert[0].DNSNames,
+		Issuer:     cert[0].Issuer.String(),
 	}
-	if certDNS {
-		fmt.Println("DNS:", cert[0].DNSNames)
-	}
-	if certIssuer {
-		fmt.Println("Issuer:", cert[0].Issuer.String())
-	}
+	return &out, nil
 }

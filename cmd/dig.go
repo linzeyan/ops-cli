@@ -40,9 +40,11 @@ var digCmd = &cobra.Command{
 		if lens == 1 {
 			digDomain = args[0]
 			digNewClient(dns.TypeA)
-			if digOutput != nil {
-				digPrint()
+			if digOutput == nil {
+				log.Println("response is empty")
+				return
 			}
+			digPrint()
 			return
 		}
 
@@ -101,10 +103,11 @@ var digCmd = &cobra.Command{
 			case "any":
 				digNewClient(dns.TypeANY)
 			}
-			if digOutput != nil {
-				digPrint()
+			if digOutput == nil {
+				log.Println("response is empty")
+				return
 			}
-			return
+			digPrint()
 		}
 	},
 	Example: Examples(`# Query A record

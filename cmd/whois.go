@@ -54,6 +54,10 @@ var whoisCmd = &cobra.Command{
 				log.Println(err)
 				return
 			}
+			if resp == nil {
+				log.Println("response is empty")
+				return
+			}
 			if rootOutputJson {
 				resp.Json()
 			} else if rootOutputYaml {
