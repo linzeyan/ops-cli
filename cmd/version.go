@@ -61,7 +61,7 @@ var versionAll bool
 func init() {
 	rootCmd.AddCommand(versionCmd)
 
-	rootCmd.Flags().BoolVarP(&versionAll, "complete", "c", false, "Print version information completely")
+	versionCmd.Flags().BoolVarP(&versionAll, "complete", "c", false, "Print version information completely")
 }
 
 type version struct {
