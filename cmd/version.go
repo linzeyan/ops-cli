@@ -32,7 +32,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print version information",
 	Run: func(_ *cobra.Command, _ []string) {
 		if appVersion == "" {
-			appVersion = "v0.0.9"
+			appVersion = "v0.0.10"
 		}
 		var v = version{
 			Version: appVersion,
