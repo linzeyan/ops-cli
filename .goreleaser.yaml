@@ -25,18 +25,34 @@ builds:
     goarm:
       - "7"
     ldflags:
-      - -s -w -X github.com/linzeyan/ops-cli/cmd.appVersion={{.Tag}} -X github.com/linzeyan/ops-cli/cmd.appBuildTime={{.Date}} -X github.com/linzeyan/ops-cli/cmd.appCommit={{.Commit}}
+      - -s -w -X github.com/linzeyan/ops-cli/cmd.appVersion={{ .Tag} } -X github.com/linzeyan/ops-cli/cmd.appBuildTime={{ .Date }} -X github.com/linzeyan/ops-cli/cmd.appCommit={{ .Commit }}
+
+snapshot:
+  name_template: "{{ .Tag }}_{{ .ShortCommit }}"
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
 
 archives:
+  - files:
+      - LICENSE
+      - README.md
+    format_overrides:
+      - goos: windows
+        format: zip
+    wrap_in_directory: true
+
   - replacements:
       darwin: Darwin
       linux: Linux
       windows: Windows
       386: i386
       amd64: x86_64
-# changelog:
-#   sort: asc
-#   filters:
-#     exclude:
-#       - "^docs:"
-#       - "^test:"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
