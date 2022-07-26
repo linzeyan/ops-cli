@@ -13,12 +13,11 @@ go install github.com/linzeyan/ops-cli@latest
 ### Go Build
 
 ```bash
-go build .
+go build . -trimpath -ldflags='-s -w'
 ```
-or
-```bash
-bash ./build.bash build
-```
+
+### [Download Page](https://github.com/linzeyan/ops-cli/releases/latest)
+
 
 ## Usage
 
@@ -32,7 +31,7 @@ Usage:
 Available Commands:
   cert        Check tls cert
   completion  Generate the autocompletion script for the specified shell
-  dns         Resolve domain name
+  dig         Resolve domain name
   geoip       Print IP geographic information
   help        Help about any command
   icp         Check ICP status
@@ -41,9 +40,11 @@ Available Commands:
   qrcode      Read or output QR Code
   random      Generate random string
   url         Expand shorten url
+  version     Print version information
   whois       List domain name information
 
 Flags:
-  -h, --help      help for ops-cli
-  -v, --version   version for ops-cli
+  -h, --help   help for ops-cli
+  -j, --json   Output JSON format
+  -y, --yaml   Output YAML format
 ```
