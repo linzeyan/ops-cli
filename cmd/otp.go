@@ -55,7 +55,7 @@ var otpCmd = &cobra.Command{
 			fmt.Println(secret)
 			return
 		}
-		cmd.Help()
+		_ = cmd.Help()
 	},
 	Example: Examples(`# Calculate the passcode for the specified secret
 ops-cli otp -s 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
@@ -92,11 +92,11 @@ func otpSetTimeInterval() int64 {
 	t := time.Now().Local().Unix()
 	switch otpPeriod {
 	case 15:
-		t = t / 15
+		t /= 15
 	case 60:
-		t = t / 60
+		t /= 60
 	default:
-		t = t / 30
+		t /= 30
 	}
 	return t
 }
@@ -146,7 +146,7 @@ func otpHOTP(secret string, timeInterval int64) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var digits [2]int = otpSetDigits()
+	var digits = otpSetDigits()
 	h12 := (int(data) & 0x7fffffff) % digits[1]
 	passcode := strconv.Itoa(h12)
 

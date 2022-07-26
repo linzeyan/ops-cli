@@ -45,7 +45,7 @@ var versionCmd = &cobra.Command{
 			v.String()
 			return
 		}
-		outputDefaultJson(v)
+		outputDefaultJSON(v)
 	},
 }
 
@@ -59,13 +59,13 @@ func init() {
 }
 
 type version struct {
-	Version string `json:"Version,omitempty" yaml:"Version,omitempty"`
-	Commit  string `json:"Commit,omitempty" yaml:"Commit,omitempty"`
-	Date    string `json:"Date,omitempty" yaml:"Date,omitempty"`
-	Runtime string `json:"Runtime,omitempty" yaml:"Runtime,omitempty"`
+	Version string `json:"version,omitempty" yaml:"version,omitempty"`
+	Commit  string `json:"commit,omitempty" yaml:"commit,omitempty"`
+	Date    string `json:"date,omitempty" yaml:"date,omitempty"`
+	Runtime string `json:"runtime,omitempty" yaml:"runtime,omitempty"`
 }
 
-func (r version) Json() {
+func (r version) JSON() {
 	out, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -74,7 +74,7 @@ func (r version) Json() {
 	fmt.Println(string(out))
 }
 
-func (r version) Yaml() {
+func (r version) YAML() {
 	out, err := yaml.Marshal(r)
 	if err != nil {
 		log.Println(err)
@@ -91,7 +91,7 @@ func (r version) String() {
 	ver.WriteString(fmt.Sprintf("%-10s\t%v\n", "App", "ops-cli"))
 	for i := 0; i < f.NumField(); i++ {
 		_, err := ver.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
-		//f.Field(i).Type()
+		// f.Field(i).Type()
 		if err != nil {
 			log.Println(err)
 			return

@@ -33,7 +33,7 @@ var digCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		var lens = len(args)
 		if lens == 0 {
-			cmd.Help()
+			_ = cmd.Help()
 			return
 		}
 
@@ -188,11 +188,11 @@ func digNewClient(digType uint16) {
 }
 
 type digResponseFormat struct {
-	NAME   string `json:"Name" yaml:"Name"`
-	TTL    string `json:"TTL" yaml:"TTL"`
-	CLASS  string `json:"Class" yaml:"Class"`
-	TYPE   string `json:"Type" yaml:"Type"`
-	RECORD string `json:"Record" yaml:"Record"`
+	NAME   string `json:"name" yaml:"name"`
+	TTL    string `json:"ttl" yaml:"ttl"`
+	CLASS  string `json:"class" yaml:"class"`
+	TYPE   string `json:"type" yaml:"type"`
+	RECORD string `json:"record" yaml:"record"`
 }
 
 type digResponseOutput []digResponseFormat
@@ -201,10 +201,9 @@ func (d digResponseOutput) String() {
 	for i := range d {
 		fmt.Printf("%-20s\t%s\t%s\t%s\t%s\n", d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD)
 	}
-
 }
 
-func (d *digResponseOutput) Json() {
+func (d *digResponseOutput) JSON() {
 	out, err := json.MarshalIndent(d, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -213,7 +212,7 @@ func (d *digResponseOutput) Json() {
 	fmt.Println(string(out))
 }
 
-func (d *digResponseOutput) Yaml() {
+func (d *digResponseOutput) YAML() {
 	out, err := yaml.Marshal(d)
 	if err != nil {
 		log.Println(err)

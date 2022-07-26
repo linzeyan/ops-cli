@@ -25,7 +25,7 @@ import (
 var rootCmd = &cobra.Command{
 	Use:   "ops-cli",
 	Short: "OPS useful tools",
-	Run:   func(cmd *cobra.Command, _ []string) { cmd.Help() },
+	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
 func Examples(s string) string {
@@ -39,7 +39,7 @@ func Examples(s string) string {
 var version string
 */
 
-var rootOutputJson, rootOutputYaml bool
+var rootOutputJSON, rootOutputYAML bool
 
 func Execute() {
 	err := rootCmd.Execute()
@@ -49,38 +49,39 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(&rootOutputJson, "json", "j", false, "Output JSON format")
-	rootCmd.PersistentFlags().BoolVarP(&rootOutputYaml, "yaml", "y", false, "Output YAML format")
+	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, "Output JSON format")
+	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, "Output YAML format")
 }
 
 type rootOutput interface {
-	Json()
+	JSON()
+	YAML()
 	String()
-	Yaml()
 }
 
 func outputDefaultString(r rootOutput) {
-	if rootOutputJson {
-		r.Json()
-	} else if rootOutputYaml {
-		r.Yaml()
-	} else {
+	switch {
+	case rootOutputJSON:
+		r.JSON()
+	case rootOutputYAML:
+		r.YAML()
+	default:
 		r.String()
 	}
 }
 
-func outputDefaultJson(r rootOutput) {
-	if rootOutputYaml {
-		r.Yaml()
+func outputDefaultJSON(r rootOutput) {
+	if rootOutputYAML {
+		r.YAML()
 	} else {
-		r.Json()
+		r.JSON()
 	}
 }
 
-func outputDefaultYaml(r rootOutput) {
-	if rootOutputJson {
-		r.Json()
-	} else {
-		r.Yaml()
-	}
-}
+// func outputDefaultYAML(r rootOutput) {
+// 	if rootOutputJSON {
+// 		r.JSON()
+// 	} else {
+// 		r.YAML()
+// 	}
+// }

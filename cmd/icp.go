@@ -32,7 +32,7 @@ var icpCmd = &cobra.Command{
 			fmt.Println(icp.Domain, icp.Check())
 			return
 		}
-		cmd.Help()
+		_ = cmd.Help()
 	},
 	Example: Examples(`# Print the ICP status of the domain
 ops-cli icp apple.com

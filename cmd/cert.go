@@ -83,13 +83,13 @@ func init() {
 }
 
 type certOutput struct {
-	ExpiryTime string   `json:"ExpiryTime,omitempty" yaml:"ExpiryTime,omitempty"`
-	Issuer     string   `json:"Issuer,omitempty" yaml:"Issuer,omitempty"`
-	ServerIP   string   `json:"ServerIP,omitempty" yaml:"ServerIP,omitempty"`
-	DNS        []string `json:"DNS,omitempty" yaml:"DNS,omitempty"`
+	ExpiryTime string   `json:"expiryTime,omitempty" yaml:"expiryTime,omitempty"`
+	Issuer     string   `json:"issuer,omitempty" yaml:"issuer,omitempty"`
+	ServerIP   string   `json:"serverIp,omitempty" yaml:"serverIp,omitempty"`
+	DNS        []string `json:"dns,omitempty" yaml:"dns,omitempty"`
 }
 
-func (c certOutput) Json() {
+func (c certOutput) JSON() {
 	out, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -98,7 +98,7 @@ func (c certOutput) Json() {
 	fmt.Println(string(out))
 }
 
-func (c certOutput) Yaml() {
+func (c certOutput) YAML() {
 	out, err := yaml.Marshal(c)
 	if err != nil {
 		log.Println(err)
@@ -130,7 +130,7 @@ func (c certOutput) String() {
 	t := f.Type()
 	for i := 0; i < f.NumField(); i++ {
 		_, err := s.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
-		//f.Field(i).Type()
+		// f.Field(i).Type()
 		if err != nil {
 			log.Println(err)
 			return

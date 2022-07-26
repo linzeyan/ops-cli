@@ -41,7 +41,7 @@ var geoipCmd = &cobra.Command{
 				log.Println(err)
 				return
 			}
-			outputDefaultJson(out)
+			outputDefaultJSON(out)
 			return
 		}
 		if len(args) > 1 {
@@ -51,10 +51,10 @@ var geoipCmd = &cobra.Command{
 				log.Println(err)
 				return
 			}
-			outputDefaultJson(out)
+			outputDefaultJSON(out)
 			return
 		}
-		cmd.Help()
+		_ = cmd.Help()
 	},
 	Example: Examples(`# Print IP geographic information
 ops-cli geoip 1.1.1.1
@@ -86,7 +86,7 @@ type GeoIPSingle struct {
 	Query       string `json:"query"`
 }
 
-func (g GeoIPSingle) Json() {
+func (g GeoIPSingle) JSON() {
 	out, err := json.MarshalIndent(g, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -95,7 +95,7 @@ func (g GeoIPSingle) Json() {
 	fmt.Println(string(out))
 }
 
-func (g GeoIPSingle) Yaml() {
+func (g GeoIPSingle) YAML() {
 	out, err := yaml.Marshal(g)
 	if err != nil {
 		log.Println(err)
@@ -119,14 +119,14 @@ func (g GeoIPSingle) String() {
 }
 
 func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
-	apiUrl := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
+	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 
 	var client = &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true,
 		},
 	}
-	req, err := http.NewRequest(http.MethodGet, apiUrl, nil)
+	req, err := http.NewRequest(http.MethodGet, apiURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 
 type GeoIPBatch []GeoIPSingle
 
-func (g GeoIPBatch) Json() {
+func (g GeoIPBatch) JSON() {
 	out, err := json.MarshalIndent(g, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -163,7 +163,7 @@ func (g GeoIPBatch) Json() {
 	fmt.Println(string(out))
 }
 
-func (g GeoIPBatch) Yaml() {
+func (g GeoIPBatch) YAML() {
 	out, err := yaml.Marshal(g)
 	if err != nil {
 		log.Println(err)
@@ -187,19 +187,19 @@ func (g GeoIPBatch) String() {
 }
 
 func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
-	apiUrl := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
+	apiURL := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
 
 	var client = &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true,
 		},
 	}
-	var ips string = `[`
+	var ips = `[`
 	for i := range geoipBatch {
-		ips = ips + fmt.Sprintf(`"%s", `, geoipBatch[i])
+		ips += fmt.Sprintf(`"%s", `, geoipBatch[i])
 	}
 	ips = strings.TrimRight(ips, `, `) + `]`
-	req, err := http.NewRequest(http.MethodPost, apiUrl, strings.NewReader(ips))
+	req, err := http.NewRequest(http.MethodPost, apiURL, strings.NewReader(ips))
 	if err != nil {
 		return nil, err
 	}

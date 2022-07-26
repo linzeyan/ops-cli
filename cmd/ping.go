@@ -32,7 +32,7 @@ var pingCmd = &cobra.Command{
 	Short: "Send ICMP echo packets to host",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			cmd.Help()
+			_ = cmd.Help()
 			return
 		}
 		var pingDomain = args[0]

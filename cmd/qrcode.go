@@ -61,7 +61,7 @@ var qrcodeCmd = &cobra.Command{
 			}
 			return
 		}
-		cmd.Help()
+		_ = cmd.Help()
 	},
 	Example: Examples(`# Read QR code and print message
 ops-cli qrcode -f qrcode.png

@@ -33,7 +33,7 @@ var whoisCmd = &cobra.Command{
 	Short: "List domain name information",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
-			cmd.Help()
+			_ = cmd.Help()
 			return
 		}
 		var whoisDomain = args[0]
@@ -66,11 +66,11 @@ func init() {
 }
 
 type whoisResponse struct {
-	Registrar   string   `json:"Registrar" yaml:"Registrar"`
-	CreatedDate string   `json:"CreatedDate" yaml:"CreatedDate"`
-	ExpiresDate string   `json:"ExpiresDate" yaml:"ExpiresDate"`
-	UpdatedDate string   `json:"UpdatedDate" yaml:"UpdatedDate"`
-	NameServers []string `json:"NameServers" yaml:"NameServers"`
+	Registrar   string   `json:"registrar" yaml:"registrar"`
+	CreatedDate string   `json:"createdDate" yaml:"createdDate"`
+	ExpiresDate string   `json:"expiresDate" yaml:"expiresDate"`
+	UpdatedDate string   `json:"updatedDate" yaml:"updatedDate"`
+	NameServers []string `json:"nameServers" yaml:"nameServers"`
 }
 
 func (r whoisResponse) String() {
@@ -93,7 +93,7 @@ func (r whoisResponse) String() {
 	}
 }
 
-func (r whoisResponse) Json() {
+func (r whoisResponse) JSON() {
 	out, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -102,7 +102,7 @@ func (r whoisResponse) Json() {
 	fmt.Println(string(out))
 }
 
-func (r whoisResponse) Yaml() {
+func (r whoisResponse) YAML() {
 	out, err := yaml.Marshal(r)
 	if err != nil {
 		log.Println(err)
