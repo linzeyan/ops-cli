@@ -16,12 +16,16 @@ limitations under the License.
 package cmd
 
 import (
-	_ "embed"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"net"
+	"reflect"
 	"strings"
 
-	"github.com/linzeyan/whois"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var whoisCmd = &cobra.Command{
@@ -33,48 +37,128 @@ var whoisCmd = &cobra.Command{
 			return
 		}
 		var whoisDomain = args[0]
-		var resp *whois.Response
+		var resp *whoisResponse
 		var err error
-		var data whois.Servers
-		if whoisDomain != "" {
-			switch strings.ToLower(whoisServer) {
-			case "whoisxml":
-				data = whois.WhoisXML{}
-			case "ip2whois":
-				data = whois.Ip2Whois{}
-			case "whoapi":
-				data = whois.WhoApi{}
-			case "apininjas":
-				data = whois.ApiNinjas{}
-			default:
-				data = whois.Verisign{}
-			}
-			resp, err = whois.Request(data, whoisDomain)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			if resp == nil {
-				log.Println("response is empty")
-				return
-			}
-			outputDefaultString(resp)
+		var req whoisVerisign
+		resp, err = req.Request(whoisDomain)
+		if err != nil {
+			log.Println(err)
 			return
 		}
-		cmd.Help()
+		if resp == nil {
+			log.Println("response is empty")
+			return
+		}
+		outputDefaultString(resp)
 	},
 	Example: Examples(`# Search domain
-ops-cli whois apple.com
-
-# Search domains using the specified whois server that requires an api key
-ops-cli whois -s ApiNinjas -k your_api_key google.com`),
+ops-cli whois apple.com`),
 }
 
-var whoisServer string
+var whoisNameServer, whoisExpiry, whoisRegistrar bool
 
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
-	whoisCmd.Flags().StringVarP(&whoisServer, "server", "s", "whois.verisign-grs.com", "Specify request server, can be WhoisXML, IP2Whois, WhoApi, ApiNinjas")
-	whoisCmd.Flags().StringVarP(&whois.Key, "key", "k", "", "Specify API Key")
+	whoisCmd.Flags().BoolVarP(&whoisNameServer, "ns", "n", false, "Print Name Servers")
+	whoisCmd.Flags().BoolVarP(&whoisExpiry, "expiry", "e", false, "Print expiry time")
+	whoisCmd.Flags().BoolVarP(&whoisRegistrar, "registrar", "r", false, "Print Registrar")
+}
+
+type whoisResponse struct {
+	Registrar   string   `json:"Registrar" yaml:"Registrar"`
+	CreatedDate string   `json:"CreatedDate" yaml:"CreatedDate"`
+	ExpiresDate string   `json:"ExpiresDate" yaml:"ExpiresDate"`
+	UpdatedDate string   `json:"UpdatedDate" yaml:"UpdatedDate"`
+	NameServers []string `json:"NameServers" yaml:"NameServers"`
+}
+
+func (r whoisResponse) String() {
+	if whoisExpiry {
+		fmt.Println(r.ExpiresDate)
+		return
+	}
+	if whoisNameServer {
+		fmt.Println(r.NameServers)
+		return
+	}
+	if whoisRegistrar {
+		fmt.Println(r.Registrar)
+		return
+	}
+	f := reflect.ValueOf(&r).Elem()
+	t := f.Type()
+	for i := 0; i < f.NumField(); i++ {
+		fmt.Printf("%s\t%v\n", t.Field(i).Name, f.Field(i).Interface())
+	}
+}
+
+func (r whoisResponse) Json() {
+	out, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func (r whoisResponse) Yaml() {
+	out, err := yaml.Marshal(r)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+type whoisVerisign struct{}
+
+func (w whoisVerisign) Request(domain string) (*whoisResponse, error) {
+	conn, err := net.Dial("tcp", "whois.verisign-grs.com:43")
+	if err != nil {
+		return nil, err
+	}
+	if conn != nil {
+		defer conn.Close()
+	}
+	_, err = conn.Write([]byte(domain + "\n"))
+	if err != nil {
+		return nil, err
+	}
+	result, err := ioutil.ReadAll(conn)
+	if err != nil {
+		return nil, err
+	}
+
+	replace := strings.ReplaceAll(string(result), ": ", ";")
+	replace1 := strings.ReplaceAll(replace, "\r\n", ",")
+	split := strings.Split(replace1, ",")
+	var ns []string
+	var r whoisResponse
+	for i := range split {
+		if strings.Contains(split[i], "Updated Date") {
+			v := strings.Split(split[i], ";")
+			r.UpdatedDate = v[1]
+		}
+		if strings.Contains(split[i], "Creation Date") {
+			v := strings.Split(split[i], ";")
+			r.CreatedDate = v[1]
+		}
+		if strings.Contains(split[i], "Registry Expiry Date") {
+			v := strings.Split(split[i], ";")
+			r.ExpiresDate = v[1]
+		}
+		if strings.Contains(split[i], "Registrar") {
+			v := strings.Split(split[i], ";")
+			if strings.TrimSpace(v[0]) == "Registrar" {
+				r.Registrar = v[1]
+			}
+		}
+		if strings.Contains(split[i], "Name Server") {
+			v := strings.Split(split[i], ";")
+			ns = append(ns, v[1])
+		}
+	}
+	r.NameServers = ns
+	return &r, nil
 }
