@@ -57,11 +57,18 @@ var certCmd = &cobra.Command{
 	Example: Examples(`# Print certificate expiration time, DNS, IP and issuer
 ops-cli cert -d www.google.com:443
 
+# Print certificate expiration time
+ops-cli cert -d www.google.com:443 --expiry
+
+# Print certificate DNS
+ops-cli cert -d www.google.com:443 --dns
+
 # Print certificate expiration time, DNS and issuer
-ops-cli cert -f example.com.crt -i -n`),
+ops-cli cert -f example.com.crt`),
 }
 
 var certCrt, certHost string
+var certIP, certExpiry, certDNS, certIssuer bool
 
 func init() {
 	rootCmd.AddCommand(certCmd)
@@ -69,10 +76,14 @@ func init() {
 	certCmd.Flags().StringVarP(&certCrt, "file", "f", "", "Specify .crt file path")
 	certCmd.Flags().StringVarP(&certHost, "domain", "d", "domain:port", "Specify domain and host port")
 	certCmd.MarkFlagsMutuallyExclusive("file", "domain")
+	certCmd.Flags().BoolVarP(&certIP, "ip", "", false, "Print IP")
+	certCmd.Flags().BoolVarP(&certExpiry, "expiry", "", false, "Print expiry time")
+	certCmd.Flags().BoolVarP(&certDNS, "dns", "", false, "Print DNS names")
+	certCmd.Flags().BoolVarP(&certIssuer, "issuer", "", false, "Print issuer")
 }
 
 type certOutput struct {
-	ExpiryTime string   `json:"ExpiryTime" yaml:"ExpiryTime"`
+	ExpiryTime string   `json:"ExpiryTime,omitempty" yaml:"ExpiryTime,omitempty"`
 	Issuer     string   `json:"Issuer,omitempty" yaml:"Issuer,omitempty"`
 	ServerIP   string   `json:"ServerIP,omitempty" yaml:"ServerIP,omitempty"`
 	DNS        []string `json:"DNS,omitempty" yaml:"DNS,omitempty"`
@@ -97,6 +108,23 @@ func (c certOutput) Yaml() {
 }
 
 func (c certOutput) String() {
+	if certIP {
+		fmt.Println(c.ServerIP)
+		return
+	}
+	if certDNS {
+		fmt.Println(c.DNS)
+		return
+	}
+	if certExpiry {
+		fmt.Println(c.ExpiryTime)
+		return
+	}
+	if certIssuer {
+		fmt.Println(c.Issuer)
+		return
+	}
+
 	var s strings.Builder
 	f := reflect.ValueOf(&c).Elem()
 	t := f.Type()
