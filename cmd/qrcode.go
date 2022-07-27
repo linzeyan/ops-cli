@@ -43,21 +43,13 @@ var qrcodeCmd = &cobra.Command{
 			switch strings.ToLower(qrcodeType) {
 			case "wifi":
 				qrcodeMessage = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`, qrcodeWIFISsid, qrcodeWIFIType, qrcodeWIFIPass)
-				err := qrcodeGenPng()
-				if err != nil {
-					log.Println(err)
-				}
 			case "otp":
 				qrcodeMessage = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`, qrcodeOtpIssuer, qrcodeOtpAccount, qrcodeOtpSecret, qrcodeOtpIssuer)
-				err := qrcodeGenPng()
-				if err != nil {
-					log.Println(err)
-				}
-			default:
-				err := qrcodeGenPng()
-				if err != nil {
-					log.Println(err)
-				}
+			}
+			var qr qrcodeGeneratePng
+			err := qr.Generate()
+			if err != nil {
+				log.Println(err)
 			}
 			return
 		}
@@ -111,7 +103,9 @@ func init() {
 	qrcodeCmd.MarkFlagsRequiredTogether("otp-account", "otp-issuer", "otp-secret")
 }
 
-func qrcodeGenPng() error {
+type qrcodeGeneratePng struct{}
+
+func (q qrcodeGeneratePng) Generate() error {
 	if qrcodeMessage == "" {
 		return errors.New("message is empty")
 	}
