@@ -16,37 +16,49 @@ limitations under the License.
 package cmd
 
 import (
+	"bufio"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
+	"errors"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/linzeyan/tlsCheck"
+	"github.com/asaskevich/govalidator"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
 var certCmd = &cobra.Command{
 	Use:   "cert",
-	Short: "Check tls cert",
-	Run: func(_ *cobra.Command, _ []string) {
-		var out *certOutput
+	Short: "Check tls cert expiry time",
+	Run: func(cmd *cobra.Command, args []string) {
+		var out *certResponse
 		var err error
-
-		if certHost != "domain:port" {
-			out, err = certOutputByHost()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-		} else if certCrt != "" {
-			out, err = certOutputByFile()
-			if err != nil {
-				log.Println(err)
-				return
-			}
+		if len(args) == 0 {
+			_ = cmd.Help()
+			return
+		}
+		input := args[0]
+		_, err = os.Stat(input)
+		switch {
+		case err == nil:
+			out, err = out.CheckFile(input)
+		case govalidator.IsDNSName(input) || govalidator.IsIPv4(input):
+			out, err = out.CheckHost(input + ":" + certPort)
+		default:
+			_ = cmd.Help()
+			return
+		}
+		if err != nil {
+			log.Println(err)
+			return
 		}
 		if out == nil {
 			log.Println("response is empty")
@@ -55,41 +67,39 @@ var certCmd = &cobra.Command{
 		outputDefaultString(out)
 	},
 	Example: Examples(`# Print certificate expiration time, DNS, IP and issuer
-ops-cli cert -d www.google.com:443
+ops-cli cert www.google.com
 
-# Print certificate expiration time
-ops-cli cert -d www.google.com:443 --expiry
+# Only print certificate expiration time
+ops-cli cert 1.1.1.1 --expiry
 
-# Print certificate DNS
-ops-cli cert -d www.google.com:443 --dns
+# Only print certificate DNS
+ops-cli cert www.google.com --dns
 
 # Print certificate expiration time, DNS and issuer
-ops-cli cert -f example.com.crt`),
+ops-cli cert example.com.crt`),
 }
 
-var certCrt, certHost string
+var certPort string
 var certIP, certExpiry, certDNS, certIssuer bool
 
 func init() {
 	rootCmd.AddCommand(certCmd)
 
-	certCmd.Flags().StringVarP(&certCrt, "file", "f", "", "Specify .crt file path")
-	certCmd.Flags().StringVarP(&certHost, "domain", "d", "domain:port", "Specify domain and host port")
-	certCmd.MarkFlagsMutuallyExclusive("file", "domain")
-	certCmd.Flags().BoolVarP(&certIP, "ip", "", false, "Print IP")
-	certCmd.Flags().BoolVarP(&certExpiry, "expiry", "", false, "Print expiry time")
-	certCmd.Flags().BoolVarP(&certDNS, "dns", "", false, "Print DNS names")
-	certCmd.Flags().BoolVarP(&certIssuer, "issuer", "", false, "Print issuer")
+	certCmd.Flags().StringVarP(&certPort, "port", "p", "443", "Specify host port")
+	certCmd.Flags().BoolVar(&certIP, "ip", false, "Only print IP")
+	certCmd.Flags().BoolVar(&certExpiry, "expiry", false, "Only print expiry time")
+	certCmd.Flags().BoolVar(&certDNS, "dns", false, "Only print DNS names")
+	certCmd.Flags().BoolVar(&certIssuer, "issuer", false, "Only print issuer")
 }
 
-type certOutput struct {
+type certResponse struct {
 	ExpiryTime string   `json:"expiryTime,omitempty" yaml:"expiryTime,omitempty"`
 	Issuer     string   `json:"issuer,omitempty" yaml:"issuer,omitempty"`
 	ServerIP   string   `json:"serverIp,omitempty" yaml:"serverIp,omitempty"`
 	DNS        []string `json:"dns,omitempty" yaml:"dns,omitempty"`
 }
 
-func (c certOutput) JSON() {
+func (c certResponse) JSON() {
 	out, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -98,7 +108,7 @@ func (c certOutput) JSON() {
 	fmt.Println(string(out))
 }
 
-func (c certOutput) YAML() {
+func (c certResponse) YAML() {
 	out, err := yaml.Marshal(c)
 	if err != nil {
 		log.Println(err)
@@ -107,7 +117,7 @@ func (c certOutput) YAML() {
 	fmt.Println(string(out))
 }
 
-func (c certOutput) String() {
+func (c certResponse) String() {
 	if certIP {
 		fmt.Println(c.ServerIP)
 		return
@@ -139,14 +149,15 @@ func (c certOutput) String() {
 	fmt.Println(s.String())
 }
 
-func certOutputByHost() (*certOutput, error) {
-	conn, err := tlsCheck.CheckByHost(certHost)
+func (c *certResponse) CheckHost(host string) (*certResponse, error) {
+	conn, err := tls.Dial("tcp", host, nil)
 	if err != nil {
-		log.Println(err)
 		return nil, err
 	}
+	defer conn.Close()
+
 	cert := conn.ConnectionState().PeerCertificates[0]
-	var out = certOutput{
+	var out = certResponse{
 		ExpiryTime: cert.NotAfter.Local().Format(time.RFC3339),
 		DNS:        cert.DNSNames,
 		Issuer:     cert.Issuer.String(),
@@ -155,17 +166,41 @@ func certOutputByHost() (*certOutput, error) {
 	return &out, nil
 }
 
-func certOutputByFile() (*certOutput, error) {
-	cert, err := tlsCheck.CheckByFile(certCrt)
+func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
+	f, err := os.Open(fileName)
 	if err != nil {
-		log.Println(err)
+		return nil, err
+	}
+	defer f.Close()
+	reader := bufio.NewReader(f)
+	buf := make([]byte, 4096*3)
+	var t int
+	for {
+		n, err := reader.Read(buf)
+		if n == 0 {
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				log.Println(err)
+				break
+			}
+		}
+		t = n
+	}
+	buf = buf[0:t]
+	crtPem, _ := pem.Decode(buf)
+	if crtPem == nil {
+		return nil, errors.New("file type not correct")
+	}
+	cert, err := x509.ParseCertificates(crtPem.Bytes)
+	if err != nil {
 		return nil, err
 	}
 	if cert == nil {
-		log.Println(cert)
-		return nil, err
+		return nil, errors.New("can not correctly parse")
 	}
-	var out = certOutput{
+	var out = certResponse{
 		ExpiryTime: cert[0].NotAfter.Local().Format(time.RFC3339),
 		DNS:        cert[0].DNSNames,
 		Issuer:     cert[0].Issuer.String(),
