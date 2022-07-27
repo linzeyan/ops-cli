@@ -35,7 +35,8 @@ checksum:
   algorithm: sha256
 
 archives:
-  - files:
+  - name_template: '{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
+    files:
       - LICENSE
       - README.md
     format_overrides:
@@ -44,11 +45,11 @@ archives:
     wrap_in_directory: true
 
   - replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
+      # darwin: Darwin
+      # linux: Linux
+      # windows: Windows
       386: i386
-      amd64: x86_64
+      # amd64: x86_64
 
 changelog:
   sort: asc
