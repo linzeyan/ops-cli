@@ -31,27 +31,22 @@ var digCmd = &cobra.Command{
 	Use:   "dig [host] [@server] [type]",
 	Short: "Resolve domain name",
 	Run: func(cmd *cobra.Command, args []string) {
-		var lens = len(args)
-		if lens == 0 {
+		var argsWithoutDomain []string
+		var argsType []string
+		switch lens := len(args); {
+		case lens == 0:
 			_ = cmd.Help()
 			return
-		}
-
-		if lens == 1 {
+		case lens == 1:
 			digDomain = args[0]
-			digNewClient(dns.TypeA)
+			digOutput.Request(dns.TypeA)
 			if digOutput == nil {
 				log.Println("response is empty")
 				return
 			}
 			outputDefaultString(&digOutput)
 			return
-		}
-
-		if lens > 1 {
-			var argsWithoutDomain []string
-			var argsType []string
-
+		case lens > 1:
 			for i := range args {
 				if govalidator.IsDNSName(args[i]) || govalidator.IsIP(args[i]) {
 					digDomain = args[i]
@@ -67,7 +62,6 @@ var digCmd = &cobra.Command{
 				} else {
 					argsType = append(argsType, argsWithoutDomain[0])
 				}
-
 			default:
 				for i := range argsWithoutDomain {
 					if strings.Contains(argsWithoutDomain[i], "@") {
@@ -78,37 +72,36 @@ var digCmd = &cobra.Command{
 					}
 				}
 			}
-
-			switch strings.ToLower(argsType[0]) {
-			case "a":
-				digNewClient(dns.TypeA)
-			case "aaaa":
-				digNewClient(dns.TypeAAAA)
-			case "caa":
-				digNewClient(dns.TypeCAA)
-			case "cname":
-				digNewClient(dns.TypeCNAME)
-			case "mx":
-				digNewClient(dns.TypeMX)
-			case "ns":
-				digNewClient(dns.TypeNS)
-			case "ptr":
-				digNewClient(dns.TypePTR)
-			case "soa":
-				digNewClient(dns.TypeSOA)
-			case "srv":
-				digNewClient(dns.TypeSRV)
-			case "txt":
-				digNewClient(dns.TypeTXT)
-			case "any":
-				digNewClient(dns.TypeANY)
-			}
-			if digOutput == nil {
-				log.Println("response is empty")
-				return
-			}
-			outputDefaultString(&digOutput)
 		}
+		switch strings.ToLower(argsType[0]) {
+		case "a":
+			digOutput.Request(dns.TypeA)
+		case "aaaa":
+			digOutput.Request(dns.TypeAAAA)
+		case "caa":
+			digOutput.Request(dns.TypeCAA)
+		case "cname":
+			digOutput.Request(dns.TypeCNAME)
+		case "mx":
+			digOutput.Request(dns.TypeMX)
+		case "ns":
+			digOutput.Request(dns.TypeNS)
+		case "ptr":
+			digOutput.Request(dns.TypePTR)
+		case "soa":
+			digOutput.Request(dns.TypeSOA)
+		case "srv":
+			digOutput.Request(dns.TypeSRV)
+		case "txt":
+			digOutput.Request(dns.TypeTXT)
+		case "any":
+			digOutput.Request(dns.TypeANY)
+		}
+		if digOutput == nil {
+			log.Println("response is empty")
+			return
+		}
+		outputDefaultString(&digOutput)
 	},
 	Example: Examples(`# Query A record
 ops-cli dig google.com
@@ -123,7 +116,7 @@ ops-cli dig google.com ANY`),
 }
 
 var digNetwork, digDomain, digServer string
-var digOutput digResponseOutput
+var digOutput digResponse
 
 func init() {
 	rootCmd.AddCommand(digCmd)
@@ -131,7 +124,17 @@ func init() {
 	digCmd.Flags().StringVarP(&digNetwork, "net", "n", "tcp", "udp/tcp")
 }
 
-func digNewClient(digType uint16) {
+type digResponseFormat struct {
+	NAME   string `json:"name" yaml:"name"`
+	TTL    string `json:"ttl" yaml:"ttl"`
+	CLASS  string `json:"class" yaml:"class"`
+	TYPE   string `json:"type" yaml:"type"`
+	RECORD string `json:"record" yaml:"record"`
+}
+
+type digResponse []digResponseFormat
+
+func (digResponse) Request(digType uint16) {
 	if dns.TypeToString[digType] == "PTR" {
 		var err error
 		digDomain, err = dns.ReverseAddr(digDomain)
@@ -186,24 +189,13 @@ func digNewClient(digType uint16) {
 		digOutput = append(digOutput, d)
 	}
 }
-
-type digResponseFormat struct {
-	NAME   string `json:"name" yaml:"name"`
-	TTL    string `json:"ttl" yaml:"ttl"`
-	CLASS  string `json:"class" yaml:"class"`
-	TYPE   string `json:"type" yaml:"type"`
-	RECORD string `json:"record" yaml:"record"`
-}
-
-type digResponseOutput []digResponseFormat
-
-func (d digResponseOutput) String() {
+func (d digResponse) String() {
 	for i := range d {
 		fmt.Printf("%-20s\t%s\t%s\t%s\t%s\n", d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD)
 	}
 }
 
-func (d *digResponseOutput) JSON() {
+func (d *digResponse) JSON() {
 	out, err := json.MarshalIndent(d, "", "  ")
 	if err != nil {
 		log.Println(err)
@@ -212,7 +204,7 @@ func (d *digResponseOutput) JSON() {
 	fmt.Println(string(out))
 }
 
-func (d *digResponseOutput) YAML() {
+func (d *digResponse) YAML() {
 	out, err := yaml.Marshal(d)
 	if err != nil {
 		log.Println(err)
