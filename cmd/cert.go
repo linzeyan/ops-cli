@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"reflect"
 	"strings"
@@ -50,7 +51,7 @@ var certCmd = &cobra.Command{
 		switch {
 		case err == nil:
 			out, err = out.CheckFile(input)
-		case govalidator.IsDNSName(input) || govalidator.IsIPv4(input):
+		case govalidator.IsDNSName(input) || net.ParseIP(input).To4() != nil:
 			out, err = out.CheckHost(input + ":" + certPort)
 		default:
 			_ = cmd.Help()
