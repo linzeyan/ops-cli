@@ -31,30 +31,22 @@ import (
 var geoipCmd = &cobra.Command{
 	Use:   "geoip",
 	Short: "Print IP geographic information",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 		var out rootOutput
 		var err error
-		if len(args) == 1 {
+		switch l := len(args); {
+		case l == 1:
 			var r GeoIPSingle
 			out, err = r.Request(args[0])
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			outputDefaultJSON(out)
-			return
-		}
-		if len(args) > 1 {
+		case l > 1:
 			var r GeoIPBatch
 			out, err = r.Request(args)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			outputDefaultJSON(out)
+		}
+		if err != nil {
+			log.Println(err)
 			return
 		}
-		_ = cmd.Help()
+		outputDefaultJSON(out)
 	},
 	Example: Examples(`# Print IP geographic information
 ops-cli geoip 1.1.1.1
