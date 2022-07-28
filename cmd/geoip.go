@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"reflect"
 	"strings"
@@ -188,7 +189,16 @@ func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
 	}
 	var ips = `[`
 	for i := range geoipBatch {
-		ips += fmt.Sprintf(`"%s", `, geoipBatch[i])
+		switch {
+		case net.ParseIP(geoipBatch[i]) != nil:
+			ips += fmt.Sprintf(`"%s", `, geoipBatch[i])
+		default:
+			ip, err := net.LookupIP(geoipBatch[i])
+			if err != nil {
+				return nil, err
+			}
+			ips += fmt.Sprintf(`"%s", `, ip[0])
+		}
 	}
 	ips = strings.TrimRight(ips, `, `) + `]`
 	req, err := http.NewRequest(http.MethodPost, apiURL, strings.NewReader(ips))
