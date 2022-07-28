@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"strings"
 
 	"github.com/asaskevich/govalidator"
@@ -48,7 +49,7 @@ var digCmd = &cobra.Command{
 			return
 		case lens > 1:
 			for i := range args {
-				if govalidator.IsDNSName(args[i]) || govalidator.IsIP(args[i]) {
+				if govalidator.IsDNSName(args[i]) || net.ParseIP(args[i]) != nil {
 					digDomain = args[i]
 					argsWithoutDomain = append(args[:i], args[i+1:]...)
 					break
@@ -105,14 +106,17 @@ var digCmd = &cobra.Command{
 	},
 	Example: Examples(`# Query A record
 ops-cli dig google.com
-ops-cli dig google.com A
-ops-cli dig google.com AAAA
+ops-cli dig @1.1.1.1 google.com A
+ops-cli dig @8.8.8.8 google.com AAAA
 
 # Query CNAME record
 ops-cli dig tw.yahoo.com CNAME
 
 # Query ANY record
-ops-cli dig google.com ANY`),
+ops-cli dig google.com ANY
+
+# Query PTR record
+ops-cli dig 1.1.1.1 PTR`),
 }
 
 var digNetwork, digDomain, digServer string
@@ -134,7 +138,7 @@ type digResponseFormat struct {
 
 type digResponse []digResponseFormat
 
-func (digResponse) Request(digType uint16) {
+func (d digResponse) Request(digType uint16) {
 	if dns.TypeToString[digType] == "PTR" {
 		var err error
 		digDomain, err = dns.ReverseAddr(digDomain)
@@ -147,9 +151,9 @@ func (digResponse) Request(digType uint16) {
 
 	var message = dns.Msg{}
 	message.SetQuestion(digDomain+".", digType)
-	var client = dns.Client{Net: digNetwork}
+	var client = &dns.Client{Net: digNetwork}
 	if digServer == "" {
-		digServer = "8.8.8.8"
+		digServer = d.GetLocalServer()
 	}
 	resp, _, err := client.Exchange(&message, digServer+":53")
 	if err != nil {
@@ -189,6 +193,17 @@ func (digResponse) Request(digType uint16) {
 		digOutput = append(digOutput, d)
 	}
 }
+
+func (d digResponse) GetLocalServer() string {
+	const resolvConfig = "/etc/resolv.conf"
+	s, err := dns.ClientConfigFromFile(resolvConfig)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	return s.Servers[0]
+}
+
 func (d digResponse) String() {
 	for i := range d {
 		fmt.Printf("%-20s\t%s\t%s\t%s\t%s\n", d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD)
