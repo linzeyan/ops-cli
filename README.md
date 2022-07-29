@@ -16,6 +16,13 @@ go install github.com/linzeyan/ops-cli@latest
 go build . -trimpath -ldflags='-s -w'
 ```
 
+### Homebrew
+
+```bash
+brew tap linzeyan/tools
+brew install ops-cli
+```
+
 ### [Download Page](https://github.com/linzeyan/ops-cli/releases/latest)
 
 
@@ -29,15 +36,16 @@ Usage:
   ops-cli [command]
 
 Available Commands:
-  cert        Check tls cert
+  cert        Check tls cert expiry time
   completion  Generate the autocompletion script for the specified shell
   dig         Resolve domain name
+  doc         Generate documents
   geoip       Print IP geographic information
   help        Help about any command
   icp         Check ICP status
   otp         Calculate passcode
   ping        Send ICMP echo packets to host
-  qrcode      Read or output QR Code
+  qrcode      Read or generate QR Code
   random      Generate random string
   url         Expand shorten url
   version     Print version information
