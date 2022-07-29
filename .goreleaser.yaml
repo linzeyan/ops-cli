@@ -8,7 +8,7 @@ before:
   hooks:
     # You may remove this if you don't use go modules.
     - go mod tidy
-    - rm -rf dist
+    - ./scripts/generate.bash
     # you may remove this if you don't need go generate
     # - go generate ./...
 
@@ -57,3 +57,48 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+nfpms:
+  - id: packages
+    file_name_template: "{{ .ConventionalFileName }}"
+    maintainer: ZeYanLin <zeyanlin@outlook.com>
+    license: Apache-2.0
+    homepage: https://github.com/linzeyan/ops-cli
+    bindir: /usr/bin
+    contents:
+      - src: ./completion/ops-cli.bash
+        dst: /usr/share/bash-completion/completions/ops-cli
+        file_info:
+          mode: 0644
+      - src: ./completion/ops-cli.fish
+        dst: /usr/share/fish/completions/ops-cli.fish
+        file_info:
+          mode: 0644
+      - src: ./completion/ops-cli.zsh
+        dst: /usr/share/zsh/vendor-completions/_ops-cli
+        file_info:
+          mode: 0644
+      - src: ./doc/*
+        dst: /usr/share/man/man3/
+        file_info:
+          mode: 0644
+      - src: ./LICENSE
+        dst: /usr/share/doc/ops-cli/copyright
+        file_info:
+          mode: 0644
+    formats:
+      - apk
+      - deb
+      - rpm
+    # dependencies:
+    #   - git
+    # recommends:
+    #   - golang
+    version_metadata: git
+
+brews:
+  - name: "{{ .ProjectName }}"
+    homepage: https://github.com/linzeyan/homebrew-tools
+    tap:
+      owner: linzeyan
+      name: homebrew-tools

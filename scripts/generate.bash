@@ -14,4 +14,5 @@ completion() {
     go run . completion fish &>completion/ops-cli.fish
 }
 
-$1
+completion
+doc
