@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"log"
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -33,11 +32,6 @@ var docCmd = &cobra.Command{
 			return
 		}
 		var d docGenerate
-		err := os.Mkdir(docDir, 0755)
-		if err != nil {
-			log.Println(err)
-			return
-		}
 		switch strings.ToLower(args[0]) {
 		case "man":
 			d.Man()
