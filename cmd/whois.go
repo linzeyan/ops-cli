@@ -60,9 +60,9 @@ var whoisNameServer, whoisExpiry, whoisRegistrar bool
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
-	whoisCmd.Flags().BoolVarP(&whoisNameServer, "ns", "n", false, "Print Name Servers")
-	whoisCmd.Flags().BoolVarP(&whoisExpiry, "expiry", "e", false, "Print expiry time")
-	whoisCmd.Flags().BoolVarP(&whoisRegistrar, "registrar", "r", false, "Print Registrar")
+	whoisCmd.Flags().BoolVarP(&whoisNameServer, "ns", "n", false, "Only print Name Servers")
+	whoisCmd.Flags().BoolVarP(&whoisExpiry, "expiry", "e", false, "Only print expiry time")
+	whoisCmd.Flags().BoolVarP(&whoisRegistrar, "registrar", "r", false, "Only print Registrar")
 }
 
 type whoisResponse struct {
