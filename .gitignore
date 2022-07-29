@@ -15,5 +15,6 @@
 # vendor/
 key_*
 
+completion/
 dist/
 doc/
