@@ -49,7 +49,11 @@ var versionCmd = &cobra.Command{
 	},
 }
 
-var appVersion, appBuildTime, appCommit string
+var (
+	appVersion   = "dev"
+	appBuildTime = "unknown"
+	appCommit    = "unknown"
+)
 var versionComplete bool
 
 func init() {
