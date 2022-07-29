@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -112,6 +113,10 @@ func (g GeoIPSingle) String() {
 }
 
 func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
+	/* Valid IP */
+	if net.ParseIP(geoipInput) == nil {
+		return nil, errors.New("not a valid IP")
+	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 
 	var client = &http.Client{
@@ -180,14 +185,8 @@ func (g GeoIPBatch) String() {
 }
 
 func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
-	apiURL := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
-
-	var client = &http.Client{
-		Transport: &http.Transport{
-			DisableKeepAlives: true,
-		},
-	}
 	var ips = `[`
+	/* Valid IP and combine args */
 	for i := range geoipBatch {
 		switch {
 		case net.ParseIP(geoipBatch[i]) != nil:
@@ -201,6 +200,14 @@ func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
 		}
 	}
 	ips = strings.TrimRight(ips, `, `) + `]`
+
+	apiURL := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
+	var client = &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
+	}
+
 	req, err := http.NewRequest(http.MethodPost, apiURL, strings.NewReader(ips))
 	if err != nil {
 		return nil, err
