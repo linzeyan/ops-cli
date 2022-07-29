@@ -3,7 +3,6 @@ module github.com/linzeyan/ops-cli
 go 1.18
 
 require (
-	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/fatih/color v1.13.0
 	github.com/go-ping/ping v1.1.0
 	github.com/linzeyan/expandUrl v0.2.0

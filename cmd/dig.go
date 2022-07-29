@@ -22,7 +22,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -49,7 +48,7 @@ var digCmd = &cobra.Command{
 			return
 		case lens > 1:
 			for i := range args {
-				if govalidator.IsDNSName(args[i]) || net.ParseIP(args[i]) != nil {
+				if validDomain(args[i]) || net.ParseIP(args[i]) != nil {
 					digDomain = args[i]
 					argsWithoutDomain = append(args[:i], args[i+1:]...)
 					break

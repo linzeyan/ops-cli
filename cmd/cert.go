@@ -28,10 +28,10 @@ import (
 	"net"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -51,7 +51,7 @@ var certCmd = &cobra.Command{
 		switch {
 		case err == nil:
 			out, err = out.CheckFile(input)
-		case govalidator.IsDNSName(input) || net.ParseIP(input).To4() != nil:
+		case validDomain(input) || net.ParseIP(input).To4() != nil:
 			out, err = out.CheckHost(input + ":" + certPort)
 		default:
 			_ = cmd.Help()
@@ -91,6 +91,22 @@ func init() {
 	certCmd.Flags().BoolVar(&certExpiry, "expiry", false, "Only print expiry time")
 	certCmd.Flags().BoolVar(&certDNS, "dns", false, "Only print DNS names")
 	certCmd.Flags().BoolVar(&certIssuer, "issuer", false, "Only print issuer")
+}
+
+func validDomain(i interface{}) bool {
+	if val, ok := i.(string); ok {
+		slice := strings.Split(val, ".")
+		l := len(slice)
+		if l > 1 {
+			n, err := strconv.Atoi(slice[l-1])
+			if err != nil {
+				return true
+			}
+			s := strconv.Itoa(n)
+			return slice[l-1] != s
+		}
+	}
+	return false
 }
 
 type certResponse struct {
