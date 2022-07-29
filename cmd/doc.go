@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -25,13 +26,21 @@ import (
 
 var docCmd = &cobra.Command{
 	Use:   "doc [type]",
-	Short: "Generate documents",
+	Short: "Generate documentation",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) != 1 {
 			_ = cmd.Help()
 			return
 		}
 		var d docGenerate
+		_, err := os.Stat(docDir)
+		if err != nil {
+			mkErr := os.Mkdir(docDir, 0755)
+			if mkErr != nil {
+				log.Println(mkErr)
+				return
+			}
+		}
 		switch strings.ToLower(args[0]) {
 		case "man":
 			d.Man()
@@ -52,10 +61,12 @@ ops-cli doc rest
 ops-cli doc yaml`),
 }
 
-const docDir = "doc"
+var docDir string
 
 func init() {
 	rootCmd.AddCommand(docCmd)
+
+	docCmd.Flags().StringVarP(&docDir, "dir", "d", "doc", "Specify the path to generate documentation")
 }
 
 type docGenerate struct{}
