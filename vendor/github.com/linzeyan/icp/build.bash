@@ -7,15 +7,15 @@ PACKAGE=$(basename ${PWD})
 TARGET="bin"
 
 build() {
-    GOOS=darwin GOARCH=amd64
+    GOOS=darwin GOARCH=amd64 CGO_ENABLED=0
     go build -a -trimpath -o ${TARGET}/${PACKAGE}_${VERSION}_${GOOS}_${GOARCH} cmd/main.go
     # Linux
-    GOOS=linux GOARCH=amd64
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=0
     go build -a -trimpath -o ${TARGET}/${PACKAGE}_${VERSION}_${GOOS}_${GOARCH} cmd/main.go
-    GOOS=linux GOARCH=arm64
+    GOOS=linux GOARCH=arm64 CGO_ENABLED=0
     go build -a -trimpath -o ${TARGET}/${PACKAGE}_${VERSION}_${GOOS}_${GOARCH} cmd/main.go
     # Windows
-    GOOS=windows GOARCH=amd64
+    GOOS=windows GOARCH=amd64 CGO_ENABLED=0
     go build -a -trimpath -o ${TARGET}/${PACKAGE}_${VERSION}_${GOOS}_${GOARCH} cmd/main.go
 }
 

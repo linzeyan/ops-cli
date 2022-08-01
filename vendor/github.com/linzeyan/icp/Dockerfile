@@ -1,16 +1,11 @@
-ARG dist="/tmp/checkicp"
-ARG projectDir="/icp"
-
-FROM golang:1.16-alpine3.14 AS builder
+FROM golang:1.17-alpine3.14 AS builder
 RUN apk add build-base upx
-ARG dist
-ARG projectDir
-WORKDIR ${projectDir}
+WORKDIR /go/src/icp
 COPY . .
-RUN go build -trimpath -mod vendor -o icp cmd/main.go &&\
-  upx -9 -o ${dist} icp
+RUN go mod vendor
+RUN CGO_ENABLED=0 go build -trimpath -mod vendor -o icp cmd/main.go &&\
+  upx -9 -o /go/bin/checkicp icp
 
-
-FROM alpine
-ARG dist
-COPY --from=builder ${dist} /usr/local/bin/checkicp
+FROM gcr.io/distroless/base-debian11:nonroot
+COPY --from=builder /go/bin/checkicp /bin/checkicp
+ENTRYPOINT ["/bin/checkicp"]

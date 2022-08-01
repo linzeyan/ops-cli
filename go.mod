@@ -6,7 +6,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/go-ping/ping v1.1.0
 	github.com/linzeyan/expandUrl v0.2.0
-	github.com/linzeyan/icp v0.3.0
+	github.com/linzeyan/icp v0.3.1
 	github.com/linzeyan/password v0.3.4
 	github.com/linzeyan/qrcode v0.0.3
 	github.com/miekg/dns v1.1.47

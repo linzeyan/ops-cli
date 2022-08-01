@@ -17,7 +17,8 @@ import (
 )
 
 var (
-	ConfigFile, Domain string
+	ConfigFile, Domain      string
+	WestAccount, WestApiKey string
 )
 
 type West struct {
@@ -34,22 +35,21 @@ func md5encode(v string) string {
 }
 
 func requestURI() (uri string) {
-	account := viper.GetString("west_api.account")
-	key := viper.GetString("west_api.key")
 	/* MD5 Hash */
-	var hash_data string = account + key + "domainname"
+	var hash_data string = WestAccount + WestApiKey + "domainname"
 	sig := md5encode(hash_data)
 	rawCmd := fmt.Sprintf("domainname\r\ncheck\r\nentityname:icp\r\ndomains:%s\r\n.\r\n", Domain)
 	/* URL Encoding */
 	strCmd := url.QueryEscape(rawCmd)
-	return fmt.Sprintf(`http://api.west263.com/api/?userid=%s&strCmd=%s&versig=%s`, account, strCmd, sig)
+	return fmt.Sprintf(`http://api.west263.com/api/?userid=%s&strCmd=%s&versig=%s`, WestAccount, strCmd, sig)
 }
 
 func httpPOST() (content []byte, err error) {
-	var client = &http.Client{}
+	var tr = &http.Transport{DisableKeepAlives: true}
+	var client = &http.Client{Transport: tr}
 	uri := requestURI()
 	data := strings.NewReader(``)
-	req, err := http.NewRequest("POST", uri, data)
+	req, err := http.NewRequest(http.MethodPost, uri, data)
 	if err != nil {
 		fmt.Println("Resquest error.")
 		fmt.Println(err)
@@ -58,12 +58,16 @@ func httpPOST() (content []byte, err error) {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
 	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+
 	if err != nil {
 		fmt.Println("Response error.")
 		fmt.Println(err)
 		return nil, err
 	}
-	defer resp.Body.Close()
+
 	/* Convert GBK to UTF-8 */
 	reader := simplifiedchinese.GB18030.NewDecoder().Reader(resp.Body)
 	content, err = ioutil.ReadAll(reader)
@@ -95,13 +99,13 @@ func ReadConf() {
 		viper.SetConfigType("toml")
 		viper.SetConfigFile(ConfigFile)
 	} else {
-		viper.SetConfigType("toml")
-		viper.AddConfigPath("$HOME")
-		viper.SetConfigName(".env")
+		return
 	}
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Println(err)
 		os.Exit(2)
 	}
+	WestAccount = viper.GetString("west_api.account")
+	WestApiKey = viper.GetString("west_api.key")
 }
