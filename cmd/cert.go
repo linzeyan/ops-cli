@@ -155,6 +155,7 @@ func (c certResponse) String() {
 	}
 	if certRemainDays {
 		fmt.Println(c.Days)
+		return
 	}
 
 	var s strings.Builder

@@ -23,6 +23,7 @@ import (
 	"net"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -55,7 +56,7 @@ var whoisCmd = &cobra.Command{
 ops-cli whois apple.com`),
 }
 
-var whoisNameServer, whoisExpiry, whoisRegistrar bool
+var whoisNameServer, whoisExpiry, whoisRegistrar, whoisRemainDays bool
 
 func init() {
 	rootCmd.AddCommand(whoisCmd)
@@ -63,6 +64,7 @@ func init() {
 	whoisCmd.Flags().BoolVarP(&whoisNameServer, "ns", "n", false, "Only print Name Servers")
 	whoisCmd.Flags().BoolVarP(&whoisExpiry, "expiry", "e", false, "Only print expiry time")
 	whoisCmd.Flags().BoolVarP(&whoisRegistrar, "registrar", "r", false, "Only print Registrar")
+	whoisCmd.Flags().BoolVarP(&whoisRemainDays, "days", "d", false, "Only print the remaining days")
 }
 
 type whoisResponse struct {
@@ -70,6 +72,7 @@ type whoisResponse struct {
 	CreatedDate string   `json:"createdDate" yaml:"createdDate"`
 	ExpiresDate string   `json:"expiresDate" yaml:"expiresDate"`
 	UpdatedDate string   `json:"updatedDate" yaml:"updatedDate"`
+	RemainDays  int      `json:"remainDays" yaml:"remainDays"`
 	NameServers []string `json:"nameServers" yaml:"nameServers"`
 }
 
@@ -84,6 +87,10 @@ func (r whoisResponse) String() {
 	}
 	if whoisRegistrar {
 		fmt.Println(r.Registrar)
+		return
+	}
+	if whoisRemainDays {
+		fmt.Println(r.RemainDays)
 		return
 	}
 	f := reflect.ValueOf(&r).Elem()
@@ -138,15 +145,16 @@ func (w whoisVerisign) Request(domain string) (*whoisResponse, error) {
 	for i := range split {
 		if strings.Contains(split[i], "Updated Date") {
 			v := strings.Split(split[i], ";")
-			r.UpdatedDate = v[1]
+			r.UpdatedDate = w.ParseTime(v[1])
 		}
 		if strings.Contains(split[i], "Creation Date") {
 			v := strings.Split(split[i], ";")
-			r.CreatedDate = v[1]
+			r.CreatedDate = w.ParseTime(v[1])
 		}
 		if strings.Contains(split[i], "Registry Expiry Date") {
 			v := strings.Split(split[i], ";")
-			r.ExpiresDate = v[1]
+			r.ExpiresDate = w.ParseTime(v[1])
+			r.RemainDays = w.CalculateDays(v[1])
 		}
 		if strings.Contains(split[i], "Registrar") {
 			v := strings.Split(split[i], ";")
@@ -161,4 +169,23 @@ func (w whoisVerisign) Request(domain string) (*whoisResponse, error) {
 	}
 	r.NameServers = ns
 	return &r, nil
+}
+
+func (w whoisVerisign) ParseTime(t string) string {
+	/* 1997-09-15T04:00:00Z */
+	s, err := time.Parse("2006-01-02T03:04:05Z", t)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	return s.Local().Format(time.RFC3339)
+}
+
+func (w whoisVerisign) CalculateDays(t string) int {
+	s, err := time.Parse("2006-01-02T03:04:05Z", t)
+	if err != nil {
+		log.Println(err)
+		return 0
+	}
+	return int(s.Local().Sub(rootNow.Local()).Hours() / 24)
 }
