@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"os"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -40,6 +41,7 @@ var version string
 */
 
 var rootOutputJSON, rootOutputYAML bool
+var rootNow = time.Now().Local()
 
 func Execute() {
 	err := rootCmd.Execute()

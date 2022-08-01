@@ -81,7 +81,7 @@ ops-cli cert example.com.crt`),
 }
 
 var certPort string
-var certIP, certExpiry, certDNS, certIssuer bool
+var certIP, certExpiry, certRemainDays, certDNS, certIssuer bool
 
 func init() {
 	rootCmd.AddCommand(certCmd)
@@ -91,6 +91,7 @@ func init() {
 	certCmd.Flags().BoolVar(&certExpiry, "expiry", false, "Only print expiry time")
 	certCmd.Flags().BoolVar(&certDNS, "dns", false, "Only print DNS names")
 	certCmd.Flags().BoolVar(&certIssuer, "issuer", false, "Only print issuer")
+	certCmd.Flags().BoolVar(&certRemainDays, "days", false, "Only print the remaining days")
 }
 
 func validDomain(i interface{}) bool {
@@ -111,6 +112,7 @@ func validDomain(i interface{}) bool {
 
 type certResponse struct {
 	ExpiryTime string   `json:"expiryTime,omitempty" yaml:"expiryTime,omitempty"`
+	Days       int      `json:"days,omitempty" yaml:"days,omitempty"`
 	Issuer     string   `json:"issuer,omitempty" yaml:"issuer,omitempty"`
 	ServerIP   string   `json:"serverIp,omitempty" yaml:"serverIp,omitempty"`
 	DNS        []string `json:"dns,omitempty" yaml:"dns,omitempty"`
@@ -151,6 +153,9 @@ func (c certResponse) String() {
 		fmt.Println(c.Issuer)
 		return
 	}
+	if certRemainDays {
+		fmt.Println(c.Days)
+	}
 
 	var s strings.Builder
 	f := reflect.ValueOf(&c).Elem()
@@ -174,11 +179,13 @@ func (c *certResponse) CheckHost(host string) (*certResponse, error) {
 	defer conn.Close()
 
 	cert := conn.ConnectionState().PeerCertificates[0]
+	dayRemain := cert.NotAfter.Local().Sub(rootNow)
 	var out = certResponse{
 		ExpiryTime: cert.NotAfter.Local().Format(time.RFC3339),
 		DNS:        cert.DNSNames,
 		Issuer:     cert.Issuer.String(),
 		ServerIP:   conn.RemoteAddr().String(),
+		Days:       int(dayRemain.Hours() / 24),
 	}
 	return &out, nil
 }
@@ -217,10 +224,13 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 	if cert == nil {
 		return nil, errors.New("can not correctly parse")
 	}
+
+	dayRemain := cert[0].NotAfter.Local().Sub(rootNow)
 	var out = certResponse{
 		ExpiryTime: cert[0].NotAfter.Local().Format(time.RFC3339),
 		DNS:        cert[0].DNSNames,
 		Issuer:     cert[0].Issuer.String(),
+		Days:       int(dayRemain.Hours() / 24),
 	}
 	return &out, nil
 }
