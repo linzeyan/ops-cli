@@ -36,8 +36,7 @@ var otpCmd = &cobra.Command{
 	Use:   "otp",
 	Short: "Calculate passcode",
 	Run: func(cmd *cobra.Command, args []string) {
-		var o otpCal
-		if !otpGenerateSecret {
+		if !o.secret {
 			var secret string
 			switch l := len(args); {
 			case l == 1:
@@ -58,7 +57,7 @@ var otpCmd = &cobra.Command{
 			fmt.Println(result)
 			return
 		}
-		if otpGenerateSecret {
+		if o.secret {
 			var secret, err = o.GenSecret()
 			if err != nil {
 				log.Println(err)
@@ -86,61 +85,66 @@ ops-cli otp -g -a sha256
 ops-cli otp -g -a sha512 -p 15`),
 }
 
-var otpGenerateSecret bool
-var otpAlgorithm string
-var otpPeriod, otpDigits int8
+var o otpCal
 
 func init() {
 	rootCmd.AddCommand(otpCmd)
 
-	otpCmd.Flags().BoolVarP(&otpGenerateSecret, "generate", "g", false, "Generate secret key")
-	otpCmd.Flags().StringVarP(&otpAlgorithm, "algorithm", "a", "SHA1", "The hash algorithm used by the credential(SHA1/SHA256/SHA512)")
-	otpCmd.Flags().Int8VarP(&otpPeriod, "period", "p", 30, "The period parameter defines a validity period in seconds for the TOTP code(15/30/60)")
-	otpCmd.Flags().Int8VarP(&otpDigits, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
+	otpCmd.Flags().BoolVarP(&o.secret, "generate", "g", false, "Generate secret key")
+	otpCmd.Flags().StringVarP(&o.alg, "algorithm", "a", "SHA1", "The hash algorithm used by the credential(SHA1/SHA256/SHA512)")
+	otpCmd.Flags().Int8VarP(&o.period, "period", "p", 30, "The period parameter defines a validity period in seconds for the TOTP code(15/30/60)")
+	otpCmd.Flags().Int8VarP(&o.digit, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
 }
 
 type otpCal struct {
-	/* time interval */
-	period int64
-	digits [2]int
-	/* algorithm */
-	alg func() hash.Hash
+	/* Bind flags */
+	/* The period parameter defines a validity period in seconds */
+	period int8
+	/* The number of digits in a one-time password */
+	digit int8
+	/* The algorithm of OTP */
+	alg string
+	/* Generate secret key or not */
+	secret bool
 }
 
 func (o otpCal) SetTimeInterval() int64 {
-	switch otpPeriod {
+	var timeInterval int64
+	switch o.period {
 	case 15:
-		o.period = rootNow.Unix() / 15
+		timeInterval = rootNow.Unix() / 15
 	case 60:
-		o.period = rootNow.Unix() / 60
+		timeInterval = rootNow.Unix() / 60
 	default:
-		o.period = rootNow.Unix() / 30
+		timeInterval = rootNow.Unix() / 30
 	}
-	return o.period
+	return timeInterval
 }
 
 func (o otpCal) SetDigits() [2]int {
-	switch otpDigits {
+	var digits [2]int
+	switch o.digit {
 	case 7:
-		o.digits = [2]int{7, 10000000}
+		digits = [2]int{7, 10000000}
 	case 8:
-		o.digits = [2]int{8, 100000000}
+		digits = [2]int{8, 100000000}
 	default:
-		o.digits = [2]int{6, 1000000}
+		digits = [2]int{6, 1000000}
 	}
-	return o.digits
+	return digits
 }
 
 func (o otpCal) SetAlgorithm() func() hash.Hash {
-	switch strings.ToLower(otpAlgorithm) {
+	var algorithm func() hash.Hash
+	switch strings.ToLower(o.alg) {
 	case "sha256":
-		o.alg = sha256.New
+		algorithm = sha256.New
 	case "sha512":
-		o.alg = sha512.New
+		algorithm = sha512.New
 	default:
-		o.alg = sha1.New
+		algorithm = sha1.New
 	}
-	return o.alg
+	return algorithm
 }
 
 func (o otpCal) HOTP(secret string, timeInterval int64) (string, error) {
@@ -150,8 +154,7 @@ func (o otpCal) HOTP(secret string, timeInterval int64) (string, error) {
 	}
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(timeInterval))
-	alg := o.SetAlgorithm()
-	hasher := hmac.New(alg, key)
+	hasher := hmac.New(o.SetAlgorithm(), key)
 	hasher.Write(buf)
 	h := hasher.Sum(nil)
 	offset := h[len(h)-1] & 0xf
@@ -186,8 +189,7 @@ func (o otpCal) GenSecret() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	alg := o.SetAlgorithm()
-	hasher := hmac.New(alg, buf.Bytes())
+	hasher := hmac.New(o.SetAlgorithm(), buf.Bytes())
 	secret := base32.StdEncoding.EncodeToString(hasher.Sum(nil))
 	return secret, nil
 }

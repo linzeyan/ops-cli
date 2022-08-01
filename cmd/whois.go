@@ -37,11 +37,9 @@ var whoisCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		var whoisDomain = args[0]
 		var resp *whoisResponse
 		var err error
-		var req whoisVerisign
-		resp, err = req.Request(whoisDomain)
+		resp, err = w.Request(args[0])
 		if err != nil {
 			log.Println(err)
 			return
@@ -56,15 +54,15 @@ var whoisCmd = &cobra.Command{
 ops-cli whois apple.com`),
 }
 
-var whoisNameServer, whoisExpiry, whoisRegistrar, whoisRemainDays bool
+var w whoisVerisign
 
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
-	whoisCmd.Flags().BoolVarP(&whoisNameServer, "ns", "n", false, "Only print Name Servers")
-	whoisCmd.Flags().BoolVarP(&whoisExpiry, "expiry", "e", false, "Only print expiry time")
-	whoisCmd.Flags().BoolVarP(&whoisRegistrar, "registrar", "r", false, "Only print Registrar")
-	whoisCmd.Flags().BoolVarP(&whoisRemainDays, "days", "d", false, "Only print the remaining days")
+	whoisCmd.Flags().BoolVarP(&w.ns, "ns", "n", false, "Only print Name Servers")
+	whoisCmd.Flags().BoolVarP(&w.expiry, "expiry", "e", false, "Only print expiry time")
+	whoisCmd.Flags().BoolVarP(&w.registrar, "registrar", "r", false, "Only print Registrar")
+	whoisCmd.Flags().BoolVarP(&w.days, "days", "d", false, "Only print the remaining days")
 }
 
 type whoisResponse struct {
@@ -77,19 +75,19 @@ type whoisResponse struct {
 }
 
 func (r whoisResponse) String() {
-	if whoisExpiry {
+	if w.expiry {
 		fmt.Println(r.ExpiresDate)
 		return
 	}
-	if whoisNameServer {
+	if w.ns {
 		fmt.Println(r.NameServers)
 		return
 	}
-	if whoisRegistrar {
+	if w.registrar {
 		fmt.Println(r.Registrar)
 		return
 	}
-	if whoisRemainDays {
+	if w.days {
 		fmt.Println(r.RemainDays)
 		return
 	}
@@ -118,7 +116,10 @@ func (r whoisResponse) YAML() {
 	fmt.Println(string(out))
 }
 
-type whoisVerisign struct{}
+type whoisVerisign struct {
+	/* Bind flags */
+	ns, expiry, registrar, days bool
+}
 
 func (w whoisVerisign) Request(domain string) (*whoisResponse, error) {
 	conn, err := net.Dial("tcp", "whois.verisign-grs.com:43")

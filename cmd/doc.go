@@ -32,10 +32,10 @@ var docCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		var d docGenerate
-		_, err := os.Stat(docDir)
+
+		_, err := os.Stat(d.dir)
 		if err != nil {
-			mkErr := os.Mkdir(docDir, 0755)
+			mkErr := os.Mkdir(d.dir, 0755)
 			if mkErr != nil {
 				log.Println(mkErr)
 				return
@@ -61,43 +61,45 @@ ops-cli doc rest
 ops-cli doc yaml`),
 }
 
-var docDir string
+var d docGenerate
 
 func init() {
 	rootCmd.AddCommand(docCmd)
 
-	docCmd.Flags().StringVarP(&docDir, "dir", "d", "doc", "Specify the path to generate documentation")
+	docCmd.Flags().StringVarP(&d.dir, "dir", "d", "doc", "Specify the path to generate documentation")
 }
 
-type docGenerate struct{}
+type docGenerate struct {
+	dir string
+}
 
 func (docGenerate) Man() {
 	header := &doc.GenManHeader{
 		Title:   "MINE",
 		Section: "3",
 	}
-	err := doc.GenManTree(rootCmd, header, docDir)
+	err := doc.GenManTree(rootCmd, header, d.dir)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 func (docGenerate) Markdown() {
-	err := doc.GenMarkdownTree(rootCmd, docDir)
+	err := doc.GenMarkdownTree(rootCmd, d.dir)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 func (docGenerate) Rest() {
-	err := doc.GenReSTTree(rootCmd, docDir)
+	err := doc.GenReSTTree(rootCmd, d.dir)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 func (docGenerate) Yaml() {
-	err := doc.GenYamlTree(rootCmd, docDir)
+	err := doc.GenYamlTree(rootCmd, d.dir)
 	if err != nil {
 		log.Println(err)
 	}
