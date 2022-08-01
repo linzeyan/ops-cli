@@ -28,7 +28,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -100,45 +99,48 @@ func init() {
 	otpCmd.Flags().Int8VarP(&otpDigits, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
 }
 
-type otpCal struct{}
+type otpCal struct {
+	/* time interval */
+	period int64
+	digits [2]int
+	/* algorithm */
+	alg func() hash.Hash
+}
 
 func (o otpCal) SetTimeInterval() int64 {
-	t := time.Now().Local().Unix()
 	switch otpPeriod {
 	case 15:
-		t /= 15
+		o.period = rootNow.Unix() / 15
 	case 60:
-		t /= 60
+		o.period = rootNow.Unix() / 60
 	default:
-		t /= 30
+		o.period = rootNow.Unix() / 30
 	}
-	return t
+	return o.period
 }
 
 func (o otpCal) SetDigits() [2]int {
-	var digits [2]int
 	switch otpDigits {
 	case 7:
-		digits = [2]int{7, 10000000}
+		o.digits = [2]int{7, 10000000}
 	case 8:
-		digits = [2]int{8, 100000000}
+		o.digits = [2]int{8, 100000000}
 	default:
-		digits = [2]int{6, 1000000}
+		o.digits = [2]int{6, 1000000}
 	}
-	return digits
+	return o.digits
 }
 
 func (o otpCal) SetAlgorithm() func() hash.Hash {
-	var alg func() hash.Hash
 	switch strings.ToLower(otpAlgorithm) {
 	case "sha256":
-		alg = sha256.New
+		o.alg = sha256.New
 	case "sha512":
-		alg = sha512.New
+		o.alg = sha512.New
 	default:
-		alg = sha1.New
+		o.alg = sha1.New
 	}
-	return alg
+	return o.alg
 }
 
 func (o otpCal) HOTP(secret string, timeInterval int64) (string, error) {

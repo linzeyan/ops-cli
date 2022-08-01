@@ -55,4 +55,5 @@ func init() {
 	icpCmd.Flags().StringVarP(&icp.ConfigFile, "config", "c", "", "Specify config file")
 	icpCmd.Flags().StringVarP(&icp.WestAccount, "account", "a", "", "Enter the WEST account")
 	icpCmd.Flags().StringVarP(&icp.WestApiKey, "key", "k", "", "Enter the WEST api key")
+	icpCmd.MarkFlagsRequiredTogether("account", "key")
 }
