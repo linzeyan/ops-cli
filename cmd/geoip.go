@@ -124,7 +124,7 @@ func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 			DisableKeepAlives: true,
 		},
 	}
-	req, err := http.NewRequest(http.MethodGet, apiURL, nil)
+	req, err := http.NewRequestWithContext(rootContext, http.MethodGet, apiURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +208,7 @@ func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
 		},
 	}
 
-	req, err := http.NewRequest(http.MethodPost, apiURL, strings.NewReader(ips))
+	req, err := http.NewRequestWithContext(rootContext, http.MethodPost, apiURL, strings.NewReader(ips))
 	if err != nil {
 		return nil, err
 	}

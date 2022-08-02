@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"net/url"
 	"os"
 	"strconv"
@@ -45,6 +46,7 @@ var version string
 
 var rootOutputJSON, rootOutputYAML bool
 var rootNow = time.Now().Local()
+var rootContext = context.Background()
 
 func Execute() {
 	err := rootCmd.Execute()

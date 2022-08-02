@@ -122,7 +122,6 @@ func (t telegramFlag) Audio(api *tg.BotAPI) {
 func (t telegramFlag) ChatDescription(api *tg.BotAPI) {
 	input := tg.NewChatDescription(t.chat, t.arg)
 	t.send(api, input)
-
 }
 
 func (t telegramFlag) ChatPhoto(api *tg.BotAPI) {
