@@ -27,9 +27,13 @@ import (
 )
 
 var telegramCmd = &cobra.Command{
-	Use:   "telegram",
+	Use:   "telegram [function]",
 	Short: "Send message to telegram",
 	Run: func(cmd *cobra.Command, args []string) {
+		if t.token == "" {
+			_ = cmd.Help()
+			return
+		}
 		telegramAPI := t.Init()
 		if telegramAPI == nil || len(args) != 1 {
 			_ = cmd.Help()
@@ -42,10 +46,12 @@ var telegramCmd = &cobra.Command{
 		}
 		input = args[0]
 		switch strings.ToLower(input) {
-		case "msg", "message":
-			t.Msg(telegramAPI)
+		case "audio":
+			t.Audio(telegramAPI)
 		case "doc", "document":
 			t.Doc(telegramAPI)
+		case "msg", "message":
+			t.Msg(telegramAPI)
 		case "photo":
 			t.Photo(telegramAPI)
 		}
@@ -66,11 +72,10 @@ var t telegramFlag
 func init() {
 	rootCmd.AddCommand(telegramCmd)
 
-	telegramCmd.Flags().StringVarP(&t.token, "token", "t", "", "Bot token")
+	telegramCmd.Flags().StringVarP(&t.token, "token", "t", "", "Bot token (required)")
 	telegramCmd.Flags().Int64VarP(&t.chat, "chat-id", "c", 0, "Chat ID")
 	telegramCmd.Flags().StringVarP(&t.arg, "arg", "a", "", "Input argument")
 	telegramCmd.Flags().StringVarP(&t.caption, "caption", "", "", "Add caption for document of photo")
-	_ = telegramCmd.MarkFlagRequired("token")
 }
 
 type telegramFlag struct {
@@ -102,9 +107,36 @@ func (t telegramFlag) Init() *tg.BotAPI {
 	return api
 }
 
+func (t telegramFlag) Animation(api *tg.BotAPI) {
+	input := tg.NewAnimation(t.chat, t.parseFile(t.arg))
+	input.Caption = t.caption
+	t.send(api, input)
+}
+
 func (t telegramFlag) Audio(api *tg.BotAPI) {
 	input := tg.NewAudio(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
+	t.send(api, input)
+}
+
+func (t telegramFlag) ChatDescription(api *tg.BotAPI) {
+	input := tg.NewChatDescription(t.chat, t.arg)
+	t.send(api, input)
+
+}
+
+func (t telegramFlag) ChatPhoto(api *tg.BotAPI) {
+	input := tg.NewChatPhoto(t.chat, t.parseFile(t.arg))
+	t.send(api, input)
+}
+
+func (t telegramFlag) ChatTitle(api *tg.BotAPI) {
+	input := tg.NewChatTitle(t.chat, t.arg)
+	t.send(api, input)
+}
+
+func (t telegramFlag) Dice(api *tg.BotAPI) {
+	input := tg.NewDice(t.chat)
 	t.send(api, input)
 }
 
@@ -123,6 +155,18 @@ func (t telegramFlag) Msg(api *tg.BotAPI) {
 
 func (t telegramFlag) Photo(api *tg.BotAPI) {
 	input := tg.NewPhoto(t.chat, t.parseFile(t.arg))
+	input.Caption = t.caption
+	t.send(api, input)
+}
+
+func (t telegramFlag) Video(api *tg.BotAPI) {
+	input := tg.NewVideo(t.chat, t.parseFile(t.arg))
+	input.Caption = t.caption
+	t.send(api, input)
+}
+
+func (t telegramFlag) Voice(api *tg.BotAPI) {
+	input := tg.NewVoice(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	t.send(api, input)
 }
