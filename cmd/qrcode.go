@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/linzeyan/qrcode"
@@ -36,9 +35,8 @@ var qrcodeCmd = &cobra.Command{
 			return
 		case l == 1:
 			input := args[0]
-			_, err := os.Stat(input)
 			switch {
-			case err == nil:
+			case ValidFile(input):
 				result, err := qrcode.ReadQRCode(input)
 				if err != nil {
 					log.Println(err)

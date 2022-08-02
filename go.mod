@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/fatih/color v1.13.0
-	github.com/go-ping/ping v1.1.0
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/linzeyan/expandUrl v0.2.0
 	github.com/linzeyan/icp v0.3.1
 	github.com/linzeyan/password v0.3.4
@@ -17,7 +17,6 @@ require (
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/google/uuid v1.2.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
@@ -39,7 +38,6 @@ require (
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/tools v0.1.10 // indirect

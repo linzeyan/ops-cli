@@ -44,11 +44,11 @@ var digCmd = &cobra.Command{
 				log.Println("response is empty")
 				return
 			}
-			outputDefaultString(&digOutput)
+			OutputDefaultString(&digOutput)
 			return
 		case lens > 1:
 			for i := range args {
-				if validDomain(args[i]) || net.ParseIP(args[i]) != nil {
+				if ValidDomain(args[i]) || net.ParseIP(args[i]) != nil {
 					digDomain = args[i]
 					argsWithoutDomain = append(args[:i], args[i+1:]...)
 					break
@@ -101,7 +101,7 @@ var digCmd = &cobra.Command{
 			log.Println("response is empty")
 			return
 		}
-		outputDefaultString(&digOutput)
+		OutputDefaultString(&digOutput)
 	},
 	Example: Examples(`# Query A record
 ops-cli dig google.com

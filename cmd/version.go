@@ -45,7 +45,7 @@ var versionCmd = &cobra.Command{
 			v.String()
 			return
 		}
-		outputDefaultJSON(v)
+		OutputDefaultJSON(v)
 	},
 }
 

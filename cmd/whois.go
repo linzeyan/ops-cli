@@ -48,7 +48,7 @@ var whoisCmd = &cobra.Command{
 			log.Println("response is empty")
 			return
 		}
-		outputDefaultString(resp)
+		OutputDefaultString(resp)
 	},
 	Example: Examples(`# Search domain
 ops-cli whois apple.com`),

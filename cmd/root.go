@@ -16,7 +16,10 @@ limitations under the License.
 package cmd
 
 import (
+	"net/url"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -61,7 +64,7 @@ type rootOutput interface {
 	String()
 }
 
-func outputDefaultString(r rootOutput) {
+func OutputDefaultString(r rootOutput) {
 	switch {
 	case rootOutputJSON:
 		r.JSON()
@@ -72,7 +75,7 @@ func outputDefaultString(r rootOutput) {
 	}
 }
 
-func outputDefaultJSON(r rootOutput) {
+func OutputDefaultJSON(r rootOutput) {
 	if rootOutputYAML {
 		r.YAML()
 	} else {
@@ -80,10 +83,39 @@ func outputDefaultJSON(r rootOutput) {
 	}
 }
 
-// func outputDefaultYAML(r rootOutput) {
-// 	if rootOutputJSON {
-// 		r.JSON()
-// 	} else {
-// 		r.YAML()
-// 	}
-// }
+func OutputDefaultYAML(r rootOutput) {
+	if rootOutputJSON {
+		r.JSON()
+	} else {
+		r.YAML()
+	}
+}
+
+/* If i is a domain return true */
+func ValidDomain(i interface{}) bool {
+	if val, ok := i.(string); ok {
+		slice := strings.Split(val, ".")
+		l := len(slice)
+		if l > 1 {
+			n, err := strconv.Atoi(slice[l-1])
+			if err != nil {
+				return true
+			}
+			s := strconv.Itoa(n)
+			return slice[l-1] != s
+		}
+	}
+	return false
+}
+
+/* If f is a valid path return true */
+func ValidFile(f string) bool {
+	_, err := os.Stat(f)
+	return err == nil
+}
+
+/* If u is a valid url return true */
+func ValidUrl(u string) bool {
+	_, err := url.ParseRequestURI(u)
+	return err == nil
+}

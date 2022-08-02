@@ -48,7 +48,7 @@ var geoipCmd = &cobra.Command{
 			log.Println(err)
 			return
 		}
-		outputDefaultJSON(out)
+		OutputDefaultJSON(out)
 	},
 	Example: Examples(`# Print IP geographic information
 ops-cli geoip 1.1.1.1

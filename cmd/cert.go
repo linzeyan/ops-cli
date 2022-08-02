@@ -28,7 +28,6 @@ import (
 	"net"
 	"os"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
 
@@ -47,11 +46,10 @@ var certCmd = &cobra.Command{
 			return
 		}
 		input := args[0]
-		_, err = os.Stat(input)
 		switch {
-		case err == nil:
+		case ValidFile(input):
 			out, err = out.CheckFile(input)
-		case validDomain(input) || net.ParseIP(input).To4() != nil:
+		case ValidDomain(input) || net.ParseIP(input).To4() != nil:
 			out, err = out.CheckHost(input + ":" + certPort)
 		default:
 			_ = cmd.Help()
@@ -65,7 +63,7 @@ var certCmd = &cobra.Command{
 			log.Println("response is empty")
 			return
 		}
-		outputDefaultString(out)
+		OutputDefaultString(out)
 	},
 	Example: Examples(`# Print certificate expiration time, DNS, IP and issuer
 ops-cli cert www.google.com
@@ -92,22 +90,6 @@ func init() {
 	certCmd.Flags().BoolVar(&certDNS, "dns", false, "Only print DNS names")
 	certCmd.Flags().BoolVar(&certIssuer, "issuer", false, "Only print issuer")
 	certCmd.Flags().BoolVar(&certRemainDays, "days", false, "Only print the remaining days")
-}
-
-func validDomain(i interface{}) bool {
-	if val, ok := i.(string); ok {
-		slice := strings.Split(val, ".")
-		l := len(slice)
-		if l > 1 {
-			n, err := strconv.Atoi(slice[l-1])
-			if err != nil {
-				return true
-			}
-			s := strconv.Itoa(n)
-			return slice[l-1] != s
-		}
-	}
-	return false
 }
 
 type certResponse struct {
