@@ -30,8 +30,8 @@ var telegramCmd = &cobra.Command{
 	Use:   "telegram",
 	Short: "Send message to telegram",
 	Run: func(cmd *cobra.Command, args []string) {
-		telegramApi := t.Init()
-		if telegramApi == nil || len(args) != 1 {
+		telegramAPI := t.Init()
+		if telegramAPI == nil || len(args) != 1 {
 			_ = cmd.Help()
 			return
 		}
@@ -43,11 +43,11 @@ var telegramCmd = &cobra.Command{
 		input = args[0]
 		switch strings.ToLower(input) {
 		case "msg", "message":
-			t.Msg(telegramApi)
+			t.Msg(telegramAPI)
 		case "doc", "document":
-			t.Doc(telegramApi)
+			t.Doc(telegramAPI)
 		case "photo":
-			t.Photo(telegramApi)
+			t.Photo(telegramAPI)
 		}
 	},
 	Example: Examples(`# Send message
@@ -70,7 +70,7 @@ func init() {
 	telegramCmd.Flags().Int64VarP(&t.chat, "chat-id", "c", 0, "Chat ID")
 	telegramCmd.Flags().StringVarP(&t.arg, "arg", "a", "", "Input argument")
 	telegramCmd.Flags().StringVarP(&t.caption, "caption", "", "", "Add caption for document of photo")
-	telegramCmd.MarkFlagRequired("token")
+	_ = telegramCmd.MarkFlagRequired("token")
 }
 
 type telegramFlag struct {
@@ -87,7 +87,7 @@ func (t telegramFlag) parseFile(s string) tg.RequestFileData {
 	switch {
 	case ValidFile(s):
 		return tg.FilePath(s)
-	case ValidUrl(s):
+	case ValidURL(s):
 		return tg.FileURL(s)
 	}
 	return nil

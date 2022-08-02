@@ -91,7 +91,7 @@ func OutputDefaultYAML(r rootOutput) {
 	}
 }
 
-/* If i is a domain return true */
+/* If i is a domain return true. */
 func ValidDomain(i interface{}) bool {
 	if val, ok := i.(string); ok {
 		slice := strings.Split(val, ".")
@@ -108,14 +108,14 @@ func ValidDomain(i interface{}) bool {
 	return false
 }
 
-/* If f is a valid path return true */
+/* If f is a valid path return true. */
 func ValidFile(f string) bool {
 	_, err := os.Stat(f)
 	return err == nil
 }
 
-/* If u is a valid url return true */
-func ValidUrl(u string) bool {
+/* If u is a valid url return true. */
+func ValidURL(u string) bool {
 	_, err := url.ParseRequestURI(u)
 	return err == nil
 }
