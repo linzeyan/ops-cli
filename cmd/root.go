@@ -79,11 +79,18 @@ func Config(subFn string) {
 			i.key = viper.GetString("west.api_key")
 		}
 	case "telegram":
-		if t.token == "" {
-			t.token = viper.GetString("telegram.token")
+		if tg.token == "" {
+			tg.token = viper.GetString("telegram.token")
 		}
-		if t.chat == 0 {
-			t.chat = viper.GetInt64("telegram.chat_id")
+		if tg.chat == 0 {
+			tg.chat = viper.GetInt64("telegram.chat_id")
+		}
+	case "slack":
+		if slk.token == "" {
+			slk.token = viper.GetString("slack.token")
+		}
+		if slk.channel == "" {
+			slk.channel = viper.GetString("slack.channel_id")
 		}
 	}
 }

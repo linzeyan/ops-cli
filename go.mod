@@ -10,6 +10,7 @@ require (
 	github.com/linzeyan/password v0.3.4
 	github.com/linzeyan/qrcode v0.0.3
 	github.com/miekg/dns v1.1.47
+	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -18,6 +19,7 @@ require (
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
