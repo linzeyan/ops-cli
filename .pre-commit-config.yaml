@@ -19,4 +19,3 @@ repos:
     rev: v0.32.1
     hooks:
       - id: markdownlint-fix
-        always_run: true
