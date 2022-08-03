@@ -19,7 +19,6 @@ import (
 	"bufio"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -32,7 +31,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var certCmd = &cobra.Command{
@@ -100,23 +98,9 @@ type certResponse struct {
 	DNS        []string `json:"dns,omitempty" yaml:"dns,omitempty"`
 }
 
-func (c certResponse) JSON() {
-	out, err := json.MarshalIndent(c, "", "  ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (c certResponse) JSON() { PrintJSON(c) }
 
-func (c certResponse) YAML() {
-	out, err := yaml.Marshal(c)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (c certResponse) YAML() { PrintYAML(c) }
 
 func (c certResponse) String() {
 	if certIP {

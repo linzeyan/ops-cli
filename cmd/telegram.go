@@ -16,14 +16,12 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
 
 	tg "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var telegramCmd = &cobra.Command{
@@ -184,20 +182,10 @@ func (t telegramFlag) send(api *tg.BotAPI, c tg.Chattable) {
 	}
 }
 
-func (t telegramFlag) JSON() {
-	out, err := json.MarshalIndent(t.resp, "", "  ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (t telegramFlag) JSON() { PrintJSON(t.resp) }
 
-func (t telegramFlag) YAML() {
-	out, err := yaml.Marshal(t.resp)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
+func (t telegramFlag) YAML() { PrintYAML(t.resp) }
+
+func (t telegramFlag) String() {
+	fmt.Printf(`%v`, t.resp)
 }

@@ -17,6 +17,9 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"strconv"
@@ -25,6 +28,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var rootCmd = &cobra.Command{
@@ -91,6 +95,24 @@ func OutputDefaultYAML(r rootOutput) {
 	} else {
 		r.YAML()
 	}
+}
+
+func PrintJSON(i interface{}) {
+	out, err := json.MarshalIndent(i, "", "  ")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
+}
+
+func PrintYAML(i interface{}) {
+	out, err := yaml.Marshal(i)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	fmt.Println(string(out))
 }
 
 /* If i is a domain return true. */

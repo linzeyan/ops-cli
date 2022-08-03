@@ -27,7 +27,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var geoipCmd = &cobra.Command{
@@ -80,23 +79,9 @@ type GeoIPSingle struct {
 	Query       string `json:"query"`
 }
 
-func (g GeoIPSingle) JSON() {
-	out, err := json.MarshalIndent(g, "", "  ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (g GeoIPSingle) JSON() { PrintJSON(g) }
 
-func (g GeoIPSingle) YAML() {
-	out, err := yaml.Marshal(g)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (g GeoIPSingle) YAML() { PrintYAML(g) }
 
 func (g GeoIPSingle) String() {
 	var s strings.Builder
@@ -152,23 +137,9 @@ func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 
 type GeoIPBatch []GeoIPSingle
 
-func (g GeoIPBatch) JSON() {
-	out, err := json.MarshalIndent(g, "", "  ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (g GeoIPBatch) JSON() { PrintJSON(g) }
 
-func (g GeoIPBatch) YAML() {
-	out, err := yaml.Marshal(g)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (g GeoIPBatch) YAML() { PrintYAML(g) }
 
 func (g GeoIPBatch) String() {
 	var s strings.Builder

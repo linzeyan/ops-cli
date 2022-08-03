@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -24,7 +23,6 @@ import (
 
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var digCmd = &cobra.Command{
@@ -209,20 +207,6 @@ func (d digResponse) String() {
 	}
 }
 
-func (d *digResponse) JSON() {
-	out, err := json.MarshalIndent(d, "", "  ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (d *digResponse) JSON() { PrintJSON(d) }
 
-func (d *digResponse) YAML() {
-	out, err := yaml.Marshal(d)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (d *digResponse) YAML() { PrintYAML(d) }

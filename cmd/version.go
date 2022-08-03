@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"reflect"
@@ -24,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var versionCmd = &cobra.Command{
@@ -69,24 +67,9 @@ type version struct {
 	Runtime string `json:"runtime,omitempty" yaml:"runtime,omitempty"`
 }
 
-func (r version) JSON() {
-	out, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (r version) JSON() { PrintJSON(r) }
 
-func (r version) YAML() {
-	out, err := yaml.Marshal(r)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	fmt.Println(string(out))
-}
+func (r version) YAML() { PrintYAML(r) }
 
 func (r version) String() {
 	var ver strings.Builder

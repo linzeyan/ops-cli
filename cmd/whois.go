@@ -16,7 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -26,7 +25,6 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 var whoisCmd = &cobra.Command{
@@ -98,23 +96,9 @@ func (r whoisResponse) String() {
 	}
 }
 
-func (r whoisResponse) JSON() {
-	out, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (r whoisResponse) JSON() { PrintJSON(r) }
 
-func (r whoisResponse) YAML() {
-	out, err := yaml.Marshal(r)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	fmt.Println(string(out))
-}
+func (r whoisResponse) YAML() { PrintYAML(r) }
 
 type whoisVerisign struct {
 	/* Bind flags */
