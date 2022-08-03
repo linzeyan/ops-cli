@@ -37,7 +37,7 @@ var whoisCmd = &cobra.Command{
 		}
 		var resp *whoisResponse
 		var err error
-		resp, err = w.Request(args[0])
+		resp, err = wf.Request(args[0])
 		if err != nil {
 			log.Println(err)
 			return
@@ -52,15 +52,15 @@ var whoisCmd = &cobra.Command{
 ops-cli whois apple.com`),
 }
 
-var w whoisVerisign
+var wf whoisFlag
 
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
-	whoisCmd.Flags().BoolVarP(&w.ns, "ns", "n", false, "Only print Name Servers")
-	whoisCmd.Flags().BoolVarP(&w.expiry, "expiry", "e", false, "Only print expiry time")
-	whoisCmd.Flags().BoolVarP(&w.registrar, "registrar", "r", false, "Only print Registrar")
-	whoisCmd.Flags().BoolVarP(&w.days, "days", "d", false, "Only print the remaining days")
+	whoisCmd.Flags().BoolVarP(&wf.ns, "ns", "n", false, "Only print Name Servers")
+	whoisCmd.Flags().BoolVarP(&wf.expiry, "expiry", "e", false, "Only print expiry time")
+	whoisCmd.Flags().BoolVarP(&wf.registrar, "registrar", "r", false, "Only print Registrar")
+	whoisCmd.Flags().BoolVarP(&wf.days, "days", "d", false, "Only print the remaining days")
 }
 
 type whoisResponse struct {
@@ -73,19 +73,19 @@ type whoisResponse struct {
 }
 
 func (r whoisResponse) String() {
-	if w.expiry {
+	if wf.expiry {
 		fmt.Println(r.ExpiresDate)
 		return
 	}
-	if w.ns {
+	if wf.ns {
 		fmt.Println(r.NameServers)
 		return
 	}
-	if w.registrar {
+	if wf.registrar {
 		fmt.Println(r.Registrar)
 		return
 	}
-	if w.days {
+	if wf.days {
 		fmt.Println(r.RemainDays)
 		return
 	}
@@ -100,12 +100,12 @@ func (r whoisResponse) JSON() { PrintJSON(r) }
 
 func (r whoisResponse) YAML() { PrintYAML(r) }
 
-type whoisVerisign struct {
+type whoisFlag struct {
 	/* Bind flags */
 	ns, expiry, registrar, days bool
 }
 
-func (w whoisVerisign) Request(domain string) (*whoisResponse, error) {
+func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
 	conn, err := net.Dial("tcp", "whois.verisign-grs.com:43")
 	if err != nil {
 		return nil, err
@@ -156,7 +156,7 @@ func (w whoisVerisign) Request(domain string) (*whoisResponse, error) {
 	return &r, nil
 }
 
-func (w whoisVerisign) ParseTime(t string) string {
+func (w whoisFlag) ParseTime(t string) string {
 	/* 1997-09-15T04:00:00Z */
 	s, err := time.Parse("2006-01-02T03:04:05Z", t)
 	if err != nil {
@@ -166,7 +166,7 @@ func (w whoisVerisign) ParseTime(t string) string {
 	return s.Local().Format(time.RFC3339)
 }
 
-func (w whoisVerisign) CalculateDays(t string) int {
+func (w whoisFlag) CalculateDays(t string) int {
 	s, err := time.Parse("2006-01-02T03:04:05Z", t)
 	if err != nil {
 		log.Println(err)

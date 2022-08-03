@@ -71,7 +71,7 @@ ops-cli qrcode wifi --wifi-type WPA --wifi-pass your_password --wifi-ssid your_w
 ops-cli qrcode otp --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --otp-issuer aws`),
 }
 
-var qr qrcodeGeneratePng
+var qr qrcodeFlag
 
 func init() {
 	rootCmd.AddCommand(qrcodeCmd)
@@ -95,7 +95,7 @@ func init() {
 	qrcodeCmd.MarkFlagsRequiredTogether("otp-account", "otp-issuer", "otp-secret")
 }
 
-type qrcodeGeneratePng struct {
+type qrcodeFlag struct {
 	/* Bind flags */
 	/* QR Code generate file path */
 	output string
@@ -109,7 +109,7 @@ type qrcodeGeneratePng struct {
 	otpAccount, otpSecret, otpIssuer string
 }
 
-func (q qrcodeGeneratePng) Generate() error {
+func (q qrcodeFlag) Generate() error {
 	if qr.message == "" {
 		return errors.New("message is empty")
 	}
