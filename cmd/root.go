@@ -28,6 +28,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
@@ -37,18 +38,13 @@ var rootCmd = &cobra.Command{
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
-func Examples(s string) string {
-	c := color.New(color.FgYellow)
-	return c.Sprintf(`%s`, s)
-}
+/* Flags. */
+var (
+	rootConfig     string
+	rootOutputJSON bool
+	rootOutputYAML bool
+)
 
-/*
-//go:generate /usr/local/bin/bash ../build.bash version
-//go:embed version.txt
-var version string
-*/
-
-var rootOutputJSON, rootOutputYAML bool
 var rootNow = time.Now().Local()
 var rootContext = context.Background()
 
@@ -62,6 +58,40 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, "Output JSON format")
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, "Output YAML format")
+	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", "Specify config")
+}
+
+func Config(subFn string) {
+	if rootConfig == "" {
+		return
+	}
+	viper.SetConfigFile(rootConfig)
+	viper.SetConfigType("toml")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	switch subFn {
+	case "icp":
+		if i.account == "" && i.key == "" {
+			i.account = viper.GetString("west.account")
+			i.key = viper.GetString("west.api_key")
+		}
+	case "telegram":
+		if t.token == "" {
+			t.token = viper.GetString("telegram.token")
+		}
+		if t.chat == 0 {
+			t.chat = viper.GetInt64("telegram.chat_id")
+		}
+	}
+}
+
+/* Print examples with color. */
+func Examples(s string) string {
+	c := color.New(color.FgYellow)
+	return c.Sprintf(`%s`, s)
 }
 
 type rootOutput interface {

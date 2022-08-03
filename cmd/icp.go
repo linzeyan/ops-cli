@@ -28,32 +28,32 @@ var icpCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			icp.Domain = args[0]
-			if icp.ConfigFile != "" {
-				icp.ReadConf()
-			} else if icp.WestAccount == "" && icp.WestApiKey == "" {
+			Config("icp")
+			if i.account == "" && i.key == "" {
 				_ = cmd.Help()
 				return
 			}
+			icp.WestAccount = i.account
+			icp.WestApiKey = i.key
 			fmt.Println(icp.Domain, icp.Check())
 			return
 		}
 		_ = cmd.Help()
 	},
-	Example: Examples(`# Print the ICP status of the domain
-ops-cli icp apple.com
-
-# Print the ICP status of the domain and specify the configuration path
-ops-cli icp -c ~/.env baidu.com
-
-# Print the ICP status and enter the account and key
+	Example: Examples(`# Print the ICP status
 ops-cli icp -a account -k api_key google.com`),
 }
+
+var i icpFlags
 
 func init() {
 	rootCmd.AddCommand(icpCmd)
 
-	icpCmd.Flags().StringVarP(&icp.ConfigFile, "config", "c", "", "Specify config file")
-	icpCmd.Flags().StringVarP(&icp.WestAccount, "account", "a", "", "Enter the WEST account")
-	icpCmd.Flags().StringVarP(&icp.WestApiKey, "key", "k", "", "Enter the WEST api key")
+	icpCmd.Flags().StringVarP(&i.account, "account", "a", "", "Enter the WEST account")
+	icpCmd.Flags().StringVarP(&i.key, "key", "k", "", "Enter the WEST api key")
 	icpCmd.MarkFlagsRequiredTogether("account", "key")
+}
+
+type icpFlags struct {
+	account, key string
 }

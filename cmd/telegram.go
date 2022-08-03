@@ -28,6 +28,7 @@ var telegramCmd = &cobra.Command{
 	Use:   "telegram [function]",
 	Short: "Send message to telegram",
 	Run: func(cmd *cobra.Command, args []string) {
+		Config("telegram")
 		if t.token == "" {
 			_ = cmd.Help()
 			return
@@ -37,16 +38,14 @@ var telegramCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		var input string
 		if args[0] == "" {
 			_ = cmd.Help()
 			return
 		}
-		input = args[0]
-		switch strings.ToLower(input) {
+		switch strings.ToLower(args[0]) {
 		case "audio":
 			t.Audio(telegramAPI)
-		case "doc", "document":
+		case "doc", "file":
 			t.Doc(telegramAPI)
 		case "msg", "message":
 			t.Msg(telegramAPI)
@@ -58,7 +57,7 @@ var telegramCmd = &cobra.Command{
 ops-cli telegram msg -t bot_token -c chat_id -a 'Hello word'
 
 # Send file
-ops-cli telegram doc -t bot_token -c chat_id -a '~/readme.md'
+ops-cli telegram file -t bot_token -c chat_id -a '~/readme.md'
 
 # Send photo
 ops-cli telegram photo -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
