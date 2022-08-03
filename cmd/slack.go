@@ -16,7 +16,15 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
+	"encoding/base64"
+	"fmt"
+	"image/jpeg"
+	"image/png"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"os"
 	"strings"
 
 	"github.com/slack-go/slack"
@@ -46,8 +54,13 @@ var slackCmd = &cobra.Command{
 			return
 		}
 		switch strings.ToLower(args[0]) {
+		case "doc", "file":
+			slk.fileName = args[0]
+			slk.Photo(slackAPI)
 		case "msg", "message":
 			slk.Msg(slackAPI)
+		case "photo":
+			slk.Photo(slackAPI)
 		}
 	}, Example: Examples(`# Send message
 ops-cli slack msg -a "Hello World!"`),
@@ -67,6 +80,8 @@ type slackFlag struct {
 	token   string
 	channel string
 	arg     string
+
+	fileName string
 }
 
 func (s slackFlag) Init() *slack.Client {
@@ -79,4 +94,117 @@ func (s slackFlag) Msg(api *slack.Client) {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (s slackFlag) Photo(api *slack.Client) {
+	var base64Image string
+	switch {
+	case ValidFile(s.arg):
+		base64Image = s.localFile()
+	case ValidURL(s.arg):
+		base64Image = s.remoteFile()
+	}
+
+	uploadFileKey := fmt.Sprintf("upload-f-to-slack-%d", rootNow.UnixNano())
+	decode, err := base64.StdEncoding.DecodeString(base64Image)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	f, err := os.Create(uploadFileKey)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer f.Close()
+	if _, err := f.Write(decode); err != nil {
+		log.Println(err)
+	}
+	if err := f.Sync(); err != nil {
+		log.Println(err)
+	}
+	if s.fileName == "" {
+		s.fileName = "upload.png"
+	}
+	_, err = api.UploadFileContext(rootContext, slack.FileUploadParameters{
+		Filetype: "image/png",
+		Filename: s.fileName,
+		Channels: []string{s.channel},
+		File:     uploadFileKey,
+	})
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if uploadFileKey != "" {
+		if err := os.Remove(uploadFileKey); err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func (s slackFlag) localFile() string {
+	content, err := os.ReadFile(s.arg)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	contentType := http.DetectContentType(content)
+	if contentType == "image/jpeg" {
+		img, err := jpeg.Decode(bytes.NewReader(content))
+		if err != nil {
+			log.Println(err)
+			return ""
+		}
+		var buf bytes.Buffer
+		if err := png.Encode(&buf, img); err != nil {
+			return ""
+		}
+		content = buf.Bytes()
+	}
+	base64Image := base64.StdEncoding.EncodeToString(content)
+	return base64Image
+}
+
+func (s slackFlag) remoteFile() string {
+	var client = &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
+	}
+	req, err := http.NewRequestWithContext(rootContext, http.MethodGet, s.arg, nil)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	var content []byte
+	if resp.StatusCode == http.StatusOK {
+		content, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return ""
+		}
+	}
+	if http.DetectContentType(content) == "image/jpeg" {
+		img, err := jpeg.Decode(bytes.NewReader(content))
+		if err != nil {
+			log.Println(err)
+			return ""
+		}
+		var buf bytes.Buffer
+		if err := png.Encode(&buf, img); err != nil {
+			return ""
+		}
+		content = buf.Bytes()
+	}
+	base64Image := base64.StdEncoding.EncodeToString(content)
+	return base64Image
 }
