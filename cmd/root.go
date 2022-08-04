@@ -39,7 +39,17 @@ const (
 	configLINE     configSelector = "line"
 	configSlack    configSelector = "slack"
 	configTelegram configSelector = "telegram"
+)
 
+type fileSelector string
+
+const (
+	fileJSON fileSelector = "json"
+	fileTOML fileSelector = "toml"
+	fileYAML fileSelector = "yaml"
+)
+
+const (
 	imTypeAudio    = "audio"
 	imTypeDoc      = "doc"
 	imTypeDocument = "document"
