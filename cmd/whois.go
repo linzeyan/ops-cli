@@ -127,6 +127,7 @@ func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
 	split := strings.Split(replace1, ",")
 	var ns []string
 	var r whoisResponse
+	/* Filter field. */
 	for i := range split {
 		if strings.Contains(split[i], "Updated Date") {
 			v := strings.Split(split[i], ";")
@@ -156,6 +157,7 @@ func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
 	return &r, nil
 }
 
+/* Convert time to RFC3339 format. */
 func (w whoisFlag) ParseTime(t string) string {
 	/* 1997-09-15T04:00:00Z */
 	s, err := time.Parse("2006-01-02T03:04:05Z", t)
@@ -166,6 +168,7 @@ func (w whoisFlag) ParseTime(t string) string {
 	return s.Local().Format(time.RFC3339)
 }
 
+/* Convert time to days. */
 func (w whoisFlag) CalculateDays(t string) int {
 	s, err := time.Parse("2006-01-02T03:04:05Z", t)
 	if err != nil {

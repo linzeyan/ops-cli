@@ -45,6 +45,7 @@ var digCmd = &cobra.Command{
 			OutputDefaultString(&digOutput)
 			return
 		case lens > 1:
+			/* Find which arg is domain. */
 			for i := range args {
 				if ValidDomain(args[i]) || net.ParseIP(args[i]) != nil {
 					digDomain = args[i]
@@ -53,6 +54,7 @@ var digCmd = &cobra.Command{
 				}
 			}
 			switch lens {
+			/* Distinguish remain arg is NS Server or DNS Type */
 			case 2:
 				if strings.Contains(argsWithoutDomain[0], "@") {
 					digServer = strings.Replace(argsWithoutDomain[0], "@", "", 1)
@@ -136,6 +138,7 @@ type digResponseFormat struct {
 type digResponse []digResponseFormat
 
 func (d digResponse) Request(digType uint16) {
+	/* If Query type is PTR, need to do reverse. */
 	if dns.TypeToString[digType] == "PTR" {
 		var err error
 		digDomain, err = dns.ReverseAddr(digDomain)

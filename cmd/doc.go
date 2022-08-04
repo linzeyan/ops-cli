@@ -35,6 +35,7 @@ var docCmd = &cobra.Command{
 
 		_, err := os.Stat(df.dir)
 		if err != nil {
+			/* Create directory if not exist. */
 			mkErr := os.Mkdir(df.dir, 0755)
 			if mkErr != nil {
 				log.Println(mkErr)

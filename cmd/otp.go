@@ -36,11 +36,13 @@ var otpCmd = &cobra.Command{
 	Use:   "otp",
 	Short: "Calculate passcode",
 	Run: func(cmd *cobra.Command, args []string) {
+		/* Read secret if not generate. */
 		if !of.secret {
 			var secret string
 			switch l := len(args); {
 			case l == 1:
 				secret = args[0]
+			/* Merge all strings. */
 			case l > 1:
 				for i := range args {
 					secret += args[i]
