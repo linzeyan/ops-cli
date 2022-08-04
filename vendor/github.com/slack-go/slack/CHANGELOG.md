@@ -1,17 +1,14 @@
 ### v0.7.0 - October 2, 2020
-
 full differences can be viewed using `git log --oneline --decorate --color v0.6.6..v0.7.0`
 Thank you for many contributions!
 
 #### Breaking Changes
-
 - Add ScheduledMessage type ([#753])
 - Add description field to option block object ([#783])
 - Fix wrong conditional branch ([#782])
   - The behavior of the user's application may change.(The current behavior is incorrect)
 
 #### Highlights
-
 - example: fix to start up a server ([#773])
 - example: Add explanation how the message could be sent in a proper way ([#787])
 - example: fix typo in error log ([#779])
@@ -46,18 +43,16 @@ Thank you for many contributions!
 [#814]: https://github.com/slack-go/slack/pull/814
 
 ### v0.6.0 - August 31, 2019
-
 full differences can be viewed using `git log --oneline --decorate --color v0.5.0..v0.6.0`
 thanks to everyone who has contributed since January!
 
-#### Breaking Changes
 
+#### Breaking Changes:
 - Info struct has had fields removed related to deprecated functionality by slack.
 - minor adjustments to some structs.
 - some internal default values have changed, usually to be more inline with slack defaults or to correct inability to set a particular value. (Message Parse for example.)
 
-##### Highlights
-
+##### Highlights:
 - new slacktest package easy mocking for slack client. use, enjoy, please submit PRs for improvements and default behaviours! shamelessly taken from the [slack-test repo](https://github.com/lusis/slack-test) thank you lusis for letting us use it and bring it into the slack repo.
 - blocks, blocks, blocks.
 - RTM ManagedConnection has undergone a significant cleanup.
@@ -65,16 +60,12 @@ in particular handles backoffs gracefully, removed many deadlocks,
 and Disconnect is now much more responsive.
 
 ### v0.5.0 - January 20, 2019
-
 full differences can be viewed using `git log --oneline --decorate --color v0.4.0..v0.5.0`
-
 - Breaking changes: various old struct fields have been removed or updated to match slack's api.
 - deadlock fix in RTM disconnect.
 
 ### v0.4.0 - October 06, 2018
-
 full differences can be viewed using `git log --oneline --decorate --color v0.3.0..v0.4.0`
-
 - Breaking Change: renamed ApplyMessageOption, to mark it as unsafe,
 this means it may break without warning in the future.
 - Breaking: Msg structure files field changed to an array.
@@ -86,9 +77,7 @@ this means it may break without warning in the future.
 - Utils: new methods added.
 
 ### v0.3.0 - July 30, 2018
-
 full differences can be viewed using `git log --oneline --decorate --color v0.2.0..v0.3.0`
-
 - slack events initial support added. (still considered experimental and undergoing changes, stability not promised)
 - vendored depedencies using dep, ensure using up to date tooling before filing issues.
 - RTM has improved its ability to identify dead connections and reconnect automatically (worth calling out in case it has unintended side effects).

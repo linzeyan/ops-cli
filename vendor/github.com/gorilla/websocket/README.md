@@ -61,3 +61,4 @@ Notes:
   Read returns when the input buffer is full or a frame boundary is
   encountered. Each call to Write sends a single frame message. The Gorilla
   io.Reader and io.WriteCloser operate on a single WebSocket message.
+

@@ -12,7 +12,6 @@ calls, as well as the Real-Time Messaging protocol over websocket, in
 a fully managed way.
 
 ## Project Status
-
 There is currently no major version released.
 Therefore, minor version releases may include backward incompatible changes.
 
@@ -22,7 +21,7 @@ See [CHANGELOG.md](https://github.com/slack-go/slack/blob/master/CHANGELOG.md) o
 
 ### *go get*
 
-    go get -u github.com/slack-go/slack
+    $ go get -u github.com/slack-go/slack
 
 ## Example
 
@@ -30,24 +29,24 @@ See [CHANGELOG.md](https://github.com/slack-go/slack/blob/master/CHANGELOG.md) o
 
 ```golang
 import (
- "fmt"
+	"fmt"
 
- "github.com/slack-go/slack"
+	"github.com/slack-go/slack"
 )
 
 func main() {
- api := slack.New("YOUR_TOKEN_HERE")
- // If you set debugging, it will log all requests to the console
- // Useful when encountering issues
- // slack.New("YOUR_TOKEN_HERE", slack.OptionDebug(true))
- groups, err := api.GetUserGroups(slack.GetUserGroupsOptionIncludeUsers(false))
- if err != nil {
-  fmt.Printf("%s\n", err)
-  return
- }
- for _, group := range groups {
-  fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
- }
+	api := slack.New("YOUR_TOKEN_HERE")
+	// If you set debugging, it will log all requests to the console
+	// Useful when encountering issues
+	// slack.New("YOUR_TOKEN_HERE", slack.OptionDebug(true))
+	groups, err := api.GetUserGroups(slack.GetUserGroupsOptionIncludeUsers(false))
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		return
+	}
+	for _, group := range groups {
+		fmt.Printf("ID: %s, Name: %s\n", group.ID, group.Name)
+	}
 }
 ```
 
@@ -64,26 +63,28 @@ func main() {
     api := slack.New("YOUR_TOKEN_HERE")
     user, err := api.GetUserInfo("U023BECGF")
     if err != nil {
-     fmt.Printf("%s\n", err)
-     return
+	    fmt.Printf("%s\n", err)
+	    return
     }
     fmt.Printf("ID: %s, Fullname: %s, Email: %s\n", user.ID, user.Profile.RealName, user.Profile.Email)
 }
 ```
 
-## Minimal Socket Mode usage
+## Minimal Socket Mode usage:
 
-See <https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go>
+See https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go
 
-## Minimal RTM usage
 
-As mentioned in <https://api.slack.com/rtm> - for most applications, Socket Mode is a better way to communicate with Slack.
+## Minimal RTM usage:
 
-See <https://github.com/slack-go/slack/blob/master/examples/websocket/websocket.go>
+As mentioned in https://api.slack.com/rtm - for most applications, Socket Mode is a better way to communicate with Slack.
 
-## Minimal EventsAPI usage
+See https://github.com/slack-go/slack/blob/master/examples/websocket/websocket.go
 
-See <https://github.com/slack-go/slack/blob/master/examples/eventsapi/events.go>
+
+## Minimal EventsAPI usage:
+
+See https://github.com/slack-go/slack/blob/master/examples/eventsapi/events.go
 
 ## Socketmode Event Handler (Experimental)
 
@@ -92,7 +93,6 @@ When using socket mode, dealing with an event can be pretty lengthy as it requir
 Instead, you can use `SocketmodeHandler` much like you use an HTTP handler to register which event you would like to listen to and what callback function will process that event when it occurs.
 
 See [./examples/socketmode_handler/socketmode_handler.go](./examples/socketmode_handler/socketmode_handler.go)
-
 ## Contributing
 
 You are more than welcome to contribute to this project.  Fork and

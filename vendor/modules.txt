@@ -30,6 +30,9 @@ github.com/hashicorp/hcl/json/token
 github.com/inconshreveable/mousetrap
 # github.com/kr/pretty v0.3.0
 ## explicit; go 1.12
+# github.com/line/line-bot-sdk-go/v7 v7.16.0
+## explicit; go 1.11
+github.com/line/line-bot-sdk-go/v7/linebot
 # github.com/linzeyan/expandUrl v0.2.0
 ## explicit; go 1.18
 github.com/linzeyan/expandUrl
