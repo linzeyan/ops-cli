@@ -32,7 +32,14 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type configSelector string
+
 const (
+	configICP      configSelector = "icp"
+	configLINE     configSelector = "line"
+	configSlack    configSelector = "slack"
+	configTelegram configSelector = "telegram"
+
 	imTypeAudio    = "audio"
 	imTypeDoc      = "doc"
 	imTypeDocument = "document"
@@ -72,7 +79,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", "Specify config path (toml)")
 }
 
-func Config(subFn string) {
+func Config(subFn configSelector) {
 	if rootConfig == "" {
 		return
 	}
@@ -87,26 +94,26 @@ func Config(subFn string) {
 		return
 	}
 	switch subFn {
-	case "icp":
+	case configICP:
 		if i.account == "" && i.key == "" {
 			i.account = viper.GetString("west.account")
 			i.key = viper.GetString("west.api_key")
 		}
-	case "telegram":
+	case configTelegram:
 		if tg.token == "" {
 			tg.token = viper.GetString("telegram.token")
 		}
 		if tg.chat == 0 {
 			tg.chat = viper.GetInt64("telegram.chat_id")
 		}
-	case "slack":
+	case configSlack:
 		if slk.token == "" {
 			slk.token = viper.GetString("slack.token")
 		}
 		if slk.channel == "" {
 			slk.channel = viper.GetString("slack.channel_id")
 		}
-	case "line":
+	case configLINE:
 		if line.secret == "" && line.token == "" {
 			line.secret = viper.GetString("line.secret")
 			line.token = viper.GetString("line.access_token")

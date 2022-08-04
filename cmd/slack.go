@@ -43,7 +43,7 @@ var slackCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		Config("slack")
+		Config(configSlack)
 		if slk.token == "" {
 			_ = cmd.Help()
 			return

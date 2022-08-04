@@ -35,7 +35,7 @@ var lineCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		Config("line")
+		Config(configLINE)
 		if line.secret == "" || line.token == "" {
 			_ = cmd.Help()
 			return

@@ -36,7 +36,7 @@ var telegramCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		Config("telegram")
+		Config(configTelegram)
 		if tg.token == "" {
 			_ = cmd.Help()
 			return

@@ -28,7 +28,7 @@ var icpCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) == 1 {
 			icp.Domain = args[0]
-			Config("icp")
+			Config(configICP)
 			if i.account == "" && i.key == "" {
 				_ = cmd.Help()
 				return
