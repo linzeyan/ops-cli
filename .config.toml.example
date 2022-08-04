@@ -9,3 +9,7 @@ chat_id=12345678
 [slack]
 token="token"
 channel_id="CHANNEL"
+
+[line]
+secret="Channel Secret"
+access_token="Channel Access Token"
