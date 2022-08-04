@@ -69,11 +69,14 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, "Output JSON format")
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, "Output YAML format")
-	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", "Specify config")
+	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", "Specify config path (toml)")
 }
 
 func Config(subFn string) {
 	if rootConfig == "" {
+		return
+	}
+	if subFn == "" {
 		return
 	}
 	viper.SetConfigFile(rootConfig)
