@@ -29,16 +29,12 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version information",
 	Run: func(_ *cobra.Command, _ []string) {
-		if appVersion == "" {
-			appVersion = "v0.0.10"
-		}
 		var v = version{
 			Version: appVersion,
 			Commit:  appCommit,
 			Date:    appBuildTime,
 			Runtime: fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
 		}
-
 		if versionComplete {
 			v.String()
 			return
