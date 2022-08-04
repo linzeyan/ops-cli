@@ -54,12 +54,12 @@ var slackCmd = &cobra.Command{
 			return
 		}
 		switch strings.ToLower(args[0]) {
-		case "doc", "file":
+		case imTypeDoc, imTypeDocument, imTypeFile:
 			slk.fileName = args[0]
 			slk.Photo(slackAPI)
-		case "msg", "message":
+		case imTypeMsg, imTypeMessage:
 			slk.Msg(slackAPI)
-		case "photo":
+		case imTypePhoto:
 			slk.Photo(slackAPI)
 		}
 	}, Example: Examples(`# Send message

@@ -32,6 +32,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	imTypeAudio    = "audio"
+	imTypeDoc      = "doc"
+	imTypeDocument = "document"
+	imTypeFile     = "file"
+	imTypeMessage  = "message"
+	imTypeMsg      = "msg"
+	imTypePhoto    = "photo"
+	imTypeVideo    = "video"
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "ops-cli",
 	Short: "OPS useful tools",
@@ -96,6 +107,9 @@ func Config(subFn string) {
 		if line.secret == "" && line.token == "" {
 			line.secret = viper.GetString("line.secret")
 			line.token = viper.GetString("line.access_token")
+		}
+		if line.id == "" {
+			line.id = viper.GetString("line.id")
 		}
 	}
 }

@@ -13,3 +13,4 @@ channel_id="CHANNEL"
 [line]
 secret="Channel Secret"
 access_token="Channel Access Token"
+id=""

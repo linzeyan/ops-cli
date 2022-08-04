@@ -47,13 +47,13 @@ var telegramCmd = &cobra.Command{
 			return
 		}
 		switch strings.ToLower(args[0]) {
-		case "audio":
+		case imTypeAudio:
 			tg.Audio(telegramAPI)
-		case "doc", "file":
+		case imTypeDoc, imTypeDocument, imTypeFile:
 			tg.Doc(telegramAPI)
-		case "msg", "message":
+		case imTypeMsg, imTypeMessage:
 			tg.Msg(telegramAPI)
-		case "photo":
+		case imTypePhoto:
 			tg.Photo(telegramAPI)
 		}
 	},
