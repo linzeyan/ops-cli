@@ -11,7 +11,7 @@ linters-settings:
     check-type-assertions: true
 
   gocognit:
-    min-complexity: 20
+    min-complexity: 50
 
   gosec:
     excludes:

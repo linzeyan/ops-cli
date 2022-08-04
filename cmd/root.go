@@ -92,6 +92,11 @@ func Config(subFn string) {
 		if slk.channel == "" {
 			slk.channel = viper.GetString("slack.channel_id")
 		}
+	case "line":
+		if line.secret == "" && line.token == "" {
+			line.secret = viper.GetString("line.secret")
+			line.token = viper.GetString("line.access_token")
+		}
 	}
 }
 
