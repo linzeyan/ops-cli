@@ -29,25 +29,26 @@ var docCmd = &cobra.Command{
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
-var subCmdMan = &cobra.Command{
+var docSubCmdMan = &cobra.Command{
 	Use:   "man",
 	Short: "Generate man page documentation",
 	Run:   func(_ *cobra.Command, _ []string) { df.Man() },
 }
 
-var subCmdMarkdown = &cobra.Command{
-	Use:   "markdown",
-	Short: "Generate markdown documentation",
-	Run:   func(_ *cobra.Command, _ []string) { df.Markdown() },
+var docSubCmdMarkdown = &cobra.Command{
+	Use:     "markdown",
+	Aliases: []string{"md"},
+	Short:   "Generate markdown documentation",
+	Run:     func(_ *cobra.Command, _ []string) { df.Markdown() },
 }
 
-var subCmdRest = &cobra.Command{
+var docSubCmdRest = &cobra.Command{
 	Use:   "rest",
 	Short: "Generate rest documentation",
 	Run:   func(_ *cobra.Command, _ []string) { df.Rest() },
 }
 
-var subCmdYaml = &cobra.Command{
+var docSubCmdYaml = &cobra.Command{
 	Use:   "yaml",
 	Short: "Generate yaml documentation",
 	Run:   func(_ *cobra.Command, _ []string) { df.Yaml() },
@@ -59,10 +60,10 @@ func init() {
 	rootCmd.AddCommand(docCmd)
 
 	docCmd.PersistentFlags().StringVarP(&df.dir, "dir", "d", "doc", "Specify the path to generate documentation")
-	docCmd.AddCommand(subCmdMan)
-	docCmd.AddCommand(subCmdMarkdown)
-	docCmd.AddCommand(subCmdRest)
-	docCmd.AddCommand(subCmdYaml)
+	docCmd.AddCommand(docSubCmdMan)
+	docCmd.AddCommand(docSubCmdMarkdown)
+	docCmd.AddCommand(docSubCmdRest)
+	docCmd.AddCommand(docSubCmdYaml)
 }
 
 type docFlag struct {
