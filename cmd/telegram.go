@@ -25,9 +25,10 @@ import (
 )
 
 var telegramCmd = &cobra.Command{
-	Use:   "telegram",
-	Short: "Send message to telegram",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+	Use:     "telegram",
+	Aliases: []string{"tg"},
+	Short:   "Send message to telegram",
+	Run:     func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
 var telegramSubCmdAudio = &cobra.Command{

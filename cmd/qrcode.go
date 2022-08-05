@@ -25,9 +25,10 @@ import (
 )
 
 var qrcodeCmd = &cobra.Command{
-	Use:   "qrcode",
-	Short: "Read or generate QR Code",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+	Use:     "qrcode",
+	Aliases: []string{"qr"},
+	Short:   "Read or generate QR Code",
+	Run:     func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
 var qrcodeSubCmdRead = &cobra.Command{
