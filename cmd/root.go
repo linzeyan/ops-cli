@@ -66,7 +66,6 @@ const (
 	imTypeMessage  = "message"
 	imTypeMsg      = "msg"
 	imTypePhoto    = "photo"
-	imTypeVideo    = "video"
 )
 
 var rootCmd = &cobra.Command{
