@@ -18,7 +18,6 @@ package cmd
 import (
 	"log"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
@@ -27,39 +26,31 @@ import (
 var docCmd = &cobra.Command{
 	Use:   "doc [type]",
 	Short: "Generate documentation",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			_ = cmd.Help()
-			return
-		}
+	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+}
 
-		_, err := os.Stat(df.dir)
-		if err != nil {
-			/* Create directory if not exist. */
-			mkErr := os.Mkdir(df.dir, 0755)
-			if mkErr != nil {
-				log.Println(mkErr)
-				return
-			}
-		}
-		switch strings.ToLower(args[0]) {
-		case "man":
-			df.Man()
-		case "markdown":
-			df.Markdown()
-		case "rest":
-			df.Rest()
-		case "yaml":
-			df.Yaml()
-		default:
-			_ = cmd.Help()
-		}
-	},
-	Example: Examples(`# Generate different type documents
-ops-cli doc man
-ops-cli doc markdown
-ops-cli doc rest
-ops-cli doc yaml`),
+var subCmdMan = &cobra.Command{
+	Use:   "man",
+	Short: "Generate man page documentation",
+	Run:   func(_ *cobra.Command, _ []string) { df.Man() },
+}
+
+var subCmdMarkdown = &cobra.Command{
+	Use:   "markdown",
+	Short: "Generate markdown documentation",
+	Run:   func(_ *cobra.Command, _ []string) { df.Markdown() },
+}
+
+var subCmdRest = &cobra.Command{
+	Use:   "rest",
+	Short: "Generate rest documentation",
+	Run:   func(_ *cobra.Command, _ []string) { df.Rest() },
+}
+
+var subCmdYaml = &cobra.Command{
+	Use:   "yaml",
+	Short: "Generate yaml documentation",
+	Run:   func(_ *cobra.Command, _ []string) { df.Yaml() },
 }
 
 var df docFlag
@@ -67,14 +58,31 @@ var df docFlag
 func init() {
 	rootCmd.AddCommand(docCmd)
 
-	docCmd.Flags().StringVarP(&df.dir, "dir", "d", "doc", "Specify the path to generate documentation")
+	docCmd.PersistentFlags().StringVarP(&df.dir, "dir", "d", "doc", "Specify the path to generate documentation")
+	docCmd.AddCommand(subCmdMan)
+	docCmd.AddCommand(subCmdMarkdown)
+	docCmd.AddCommand(subCmdRest)
+	docCmd.AddCommand(subCmdYaml)
 }
 
 type docFlag struct {
 	dir string
 }
 
+func (d docFlag) createDir() {
+	_, err := os.Stat(df.dir)
+	if err != nil {
+		/* Create directory if not exist. */
+		mkErr := os.Mkdir(df.dir, 0755)
+		if mkErr != nil {
+			log.Println(mkErr)
+			return
+		}
+	}
+}
+
 func (d docFlag) Man() {
+	d.createDir()
 	header := &doc.GenManHeader{
 		Title:   "MINE",
 		Section: "3",
@@ -86,6 +94,7 @@ func (d docFlag) Man() {
 }
 
 func (d docFlag) Markdown() {
+	d.createDir()
 	err := doc.GenMarkdownTree(rootCmd, d.dir)
 	if err != nil {
 		log.Println(err)
@@ -93,6 +102,7 @@ func (d docFlag) Markdown() {
 }
 
 func (d docFlag) Rest() {
+	d.createDir()
 	err := doc.GenReSTTree(rootCmd, d.dir)
 	if err != nil {
 		log.Println(err)
@@ -100,6 +110,7 @@ func (d docFlag) Rest() {
 }
 
 func (d docFlag) Yaml() {
+	d.createDir()
 	err := doc.GenYamlTree(rootCmd, d.dir)
 	if err != nil {
 		log.Println(err)
