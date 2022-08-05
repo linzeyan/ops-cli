@@ -34,6 +34,10 @@ import (
 
 type configSelector string
 
+func (c configSelector) String() string {
+	return string(c)
+}
+
 const (
 	configICP      configSelector = "icp"
 	configLINE     configSelector = "line"
@@ -42,6 +46,10 @@ const (
 )
 
 type fileSelector string
+
+func (f fileSelector) String() string {
+	return string(f)
+}
 
 const (
 	fileJSON fileSelector = "json"
@@ -98,7 +106,7 @@ func Config(subFn configSelector) {
 		return
 	}
 	viper.SetConfigFile(rootConfig)
-	viper.SetConfigType(string(fileTOML))
+	viper.SetConfigType(fileTOML.String())
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Println(err)

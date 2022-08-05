@@ -43,20 +43,7 @@ var convertCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		cf.inType = fileSelector(slice[0])
-		cf.outType = fileSelector(slice[1])
-
-		switch cf.inType {
-		case fileJSON:
-			cf.ParseJSON()
-			cf.Select()
-		case fileTOML:
-			cf.ParseTOML()
-			cf.Select()
-		case fileYAML:
-			cf.ParseYAML()
-			cf.Select()
-		}
+		cf.Select(slice)
 	},
 	Example: Examples(`# Convert yaml to json
 ops-cli convert yaml2json -i input.yaml -o output.json`),
@@ -85,6 +72,7 @@ func (c *convertFlag) Load() {
 	var err error
 	if c.readFile, err = os.ReadFile(c.inFile); err != nil {
 		log.Println(err)
+		os.Exit(0)
 	}
 }
 
@@ -92,7 +80,7 @@ func (c *convertFlag) ParseJSON() {
 	c.Load()
 	if err := json.Unmarshal(c.readFile, &c.unmarshalData); err != nil {
 		log.Println(err)
-		return
+		os.Exit(0)
 	}
 	c.unmarshalData = c.Convert(c.unmarshalData)
 }
@@ -101,7 +89,7 @@ func (c *convertFlag) ParseTOML() {
 	c.Load()
 	if err := toml.Unmarshal(c.readFile, &c.unmarshalData); err != nil {
 		log.Println(err)
-		return
+		os.Exit(0)
 	}
 	c.unmarshalData = c.Convert(c.unmarshalData)
 }
@@ -110,7 +98,7 @@ func (c *convertFlag) ParseYAML() {
 	c.Load()
 	if err := yaml.Unmarshal(c.readFile, &c.unmarshalData); err != nil {
 		log.Println(err)
-		return
+		os.Exit(0)
 	}
 	c.unmarshalData = c.Convert(c.unmarshalData)
 }
@@ -119,7 +107,7 @@ func (c convertFlag) ToJSON() {
 	out, err := json.MarshalIndent(c.unmarshalData, "", "  ")
 	if err != nil {
 		log.Println(err)
-		return
+		os.Exit(0)
 	}
 	c.WriteFile(out)
 }
@@ -128,7 +116,7 @@ func (c convertFlag) ToTOML() {
 	out, err := toml.Marshal(c.unmarshalData)
 	if err != nil {
 		log.Println(err)
-		return
+		os.Exit(0)
 	}
 	c.WriteFile(out)
 }
@@ -137,7 +125,7 @@ func (c convertFlag) ToYAML() {
 	out, err := yaml.Marshal(c.unmarshalData)
 	if err != nil {
 		log.Println(err)
-		return
+		os.Exit(0)
 	}
 	c.WriteFile(out)
 }
@@ -158,7 +146,22 @@ func (c convertFlag) Convert(i interface{}) interface{} {
 	return i
 }
 
-func (c convertFlag) Select() {
+func (c convertFlag) Select(slice []string) {
+	cf.inType = fileSelector(slice[0])
+	cf.outType = fileSelector(slice[1])
+
+	switch cf.inType {
+	case fileJSON:
+		cf.ParseJSON()
+	case fileTOML:
+		cf.ParseTOML()
+	case fileYAML:
+		cf.ParseYAML()
+	default:
+		log.Println("Input file format not support")
+		os.Exit(0)
+	}
+
 	switch cf.outType {
 	case fileJSON:
 		cf.ToJSON()
@@ -166,6 +169,9 @@ func (c convertFlag) Select() {
 		cf.ToTOML()
 	case fileYAML:
 		cf.ToYAML()
+	default:
+		log.Println("Output file format not support")
+		os.Exit(0)
 	}
 }
 
