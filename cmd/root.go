@@ -98,7 +98,7 @@ func Config(subFn configSelector) {
 		return
 	}
 	viper.SetConfigFile(rootConfig)
-	viper.SetConfigType("toml")
+	viper.SetConfigType(string(fileTOML))
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Println(err)

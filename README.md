@@ -17,7 +17,7 @@ go install github.com/linzeyan/ops-cli@latest
 ### Go Build
 
 ```bash
-go build . -trimpath -ldflags='-s -w'
+go build -trimpath -ldflags='-s -w' .
 ```
 
 ### Homebrew
@@ -41,11 +41,13 @@ Usage:
 Available Commands:
   cert        Check tls cert expiry time
   completion  Generate the autocompletion script for the specified shell
+  convert     Convert data format
   dig         Resolve domain name
   doc         Generate documentation
   geoip       Print IP geographic information
   help        Help about any command
   icp         Check ICP status
+  line        Send message to LINE
   otp         Calculate passcode
   qrcode      Read or generate QR Code
   random      Generate random string
@@ -56,7 +58,7 @@ Available Commands:
   whois       List domain name information
 
 Flags:
-      --config string   Specify config
+      --config string   Specify config path (toml)
   -h, --help            help for ops-cli
   -j, --json            Output JSON format
   -y, --yaml            Output YAML format
