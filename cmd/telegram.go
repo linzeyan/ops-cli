@@ -51,6 +51,8 @@ var telegramCmd = &cobra.Command{
 			tg.Audio(telegramAPI)
 		case imTypeDoc, imTypeDocument, imTypeFile:
 			tg.Doc(telegramAPI)
+		case imTypeID:
+			tg.getUpdate(telegramAPI)
 		case imTypeMsg, imTypeMessage:
 			tg.Msg(telegramAPI)
 		case imTypePhoto:
@@ -65,7 +67,10 @@ ops-cli telegram file -t bot_token -c chat_id -a '~/readme.md'
 
 # Send photo
 ops-cli telegram photo -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
-ops-cli telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'`),
+ops-cli telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'
+
+# Execute the command and enter 'id' in the chat to get the chat id.
+ops-cli telegram id --config ~/.config.toml`),
 }
 
 var tg telegramFlag
@@ -169,6 +174,21 @@ func (t telegramFlag) Voice(api *tgBot.BotAPI) {
 	input := tgBot.NewVoice(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	t.send(api, input)
+}
+
+func (t telegramFlag) getUpdate(api *tgBot.BotAPI) {
+	u := tgBot.NewUpdate(0)
+	u.Timeout = 60
+	updates := api.GetUpdatesChan(u)
+
+	for update := range updates {
+		if update.Message != nil { // If we got a message
+			if update.Message.Text == imTypeID {
+				fmt.Println(update.Message.Chat.ID)
+				break
+			}
+		}
+	}
 }
 
 func (t telegramFlag) send(api *tgBot.BotAPI, c tgBot.Chattable) {
