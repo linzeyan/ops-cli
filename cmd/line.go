@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -23,7 +24,7 @@ import (
 )
 
 var lineCmd = &cobra.Command{
-	Use:   "line [function]",
+	Use:   "line",
 	Short: "Send message to LINE",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
@@ -34,7 +35,7 @@ var lineSubCmdMsg = &cobra.Command{
 	Short:   "Send message to LINE",
 	Example: Examples(`# Send message to LINE chat
 ops-cli line msg -s secret -t token --id GroupID -a 'Hello LINE'`),
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		if err := line.Init(); err != nil {
 			log.Println(err)
 			return
@@ -48,7 +49,7 @@ var lineSubCmdPhoto = &cobra.Command{
 	Short: "Send photo to LINE",
 	Example: Examples(`# Send photo to LINE chat
 ops-cli line photo -s secret -t token --id GroupID -a https://img.url`),
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		if err := line.Init(); err != nil {
 			log.Println(err)
 			return
@@ -62,7 +63,7 @@ var lineSubCmdVideo = &cobra.Command{
 	Short: "Send video to LINE",
 	Example: Examples(`# Send video to LINE chat
 ops-cli line video -s secret -t token --id GroupID -a https://video.url`),
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		if err := line.Init(); err != nil {
 			log.Println(err)
 			return
@@ -92,7 +93,8 @@ type lineFlag struct {
 	id     string
 	arg    string
 
-	api *linebot.Client
+	api  *linebot.Client
+	resp *linebot.BasicResponse
 }
 
 func (l *lineFlag) Init() error {
@@ -105,26 +107,37 @@ func (l *lineFlag) Init() error {
 	return nil
 }
 
-func (l lineFlag) Msg() {
+func (l *lineFlag) Msg() {
 	input := linebot.NewTextMessage(l.arg)
-	_, err := l.api.PushMessage(l.id, input).Do()
+	var err error
+	l.resp, err = l.api.PushMessage(l.id, input).Do()
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func (l lineFlag) Photo() {
+func (l *lineFlag) Photo() {
 	input := linebot.NewImageMessage(l.arg, l.arg)
-	_, err := l.api.PushMessage(l.id, input).Do()
+	var err error
+	l.resp, err = l.api.PushMessage(l.id, input).Do()
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func (l lineFlag) Video() {
+func (l *lineFlag) Video() {
 	input := linebot.NewVideoMessage(l.arg, l.arg)
-	_, err := l.api.PushMessage(l.id, input).Do()
+	var err error
+	l.resp, err = l.api.PushMessage(l.id, input).Do()
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (l lineFlag) JSON() { PrintJSON(l.resp) }
+
+func (l lineFlag) YAML() { PrintYAML(l.resp) }
+
+func (l lineFlag) String() {
+	fmt.Printf(`%v`, l.resp)
 }

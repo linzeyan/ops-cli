@@ -58,14 +58,10 @@ const (
 )
 
 const (
-	imTypeAudio    = "audio"
 	imTypeDoc      = "doc"
 	imTypeDocument = "document"
-	imTypeFile     = "file"
 	imTypeID       = "id"
 	imTypeMessage  = "message"
-	imTypeMsg      = "msg"
-	imTypePhoto    = "photo"
 )
 
 var rootCmd = &cobra.Command{

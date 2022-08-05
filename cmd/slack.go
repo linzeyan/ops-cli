@@ -32,7 +32,7 @@ import (
 )
 
 var slackCmd = &cobra.Command{
-	Use:   "slack [function]",
+	Use:   "slack",
 	Short: "Send message to slack",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
