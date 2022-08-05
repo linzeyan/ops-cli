@@ -18,6 +18,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"image/jpeg"
 	"image/png"
@@ -25,7 +26,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/slack-go/slack"
 	"github.com/spf13/cobra"
@@ -34,46 +34,63 @@ import (
 var slackCmd = &cobra.Command{
 	Use:   "slack [function]",
 	Short: "Send message to slack",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			_ = cmd.Help()
+	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+}
+
+var slackSubCmdFile = &cobra.Command{
+	Use:     "file",
+	Aliases: []string{imTypeDoc, imTypeDocument},
+	Short:   "Send file to slack",
+	Run: func(cmd *cobra.Command, _ []string) {
+		if err := sf.Init(); err != nil {
+			log.Println(err)
 			return
 		}
-		if args[0] == "" {
-			_ = cmd.Help()
+		sf.fileName = cmd.Name()
+		sf.Photo()
+	}, Example: Examples(`# Send message
+ops-cli slack file -a "Hello World!"`),
+}
+
+var slackSubCmdMsg = &cobra.Command{
+	Use:     "msg",
+	Aliases: []string{imTypeMessage},
+	Short:   "Send message to slack",
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := sf.Init(); err != nil {
+			log.Println(err)
 			return
 		}
-		Config(configSlack)
-		if slk.token == "" {
-			_ = cmd.Help()
-			return
-		}
-		slackAPI := slk.Init()
-		if slackAPI == nil {
-			_ = cmd.Help()
-			return
-		}
-		switch strings.ToLower(args[0]) {
-		case imTypeDoc, imTypeDocument, imTypeFile:
-			slk.fileName = args[0]
-			slk.Photo(slackAPI)
-		case imTypeMsg, imTypeMessage:
-			slk.Msg(slackAPI)
-		case imTypePhoto:
-			slk.Photo(slackAPI)
-		}
+		sf.Msg()
 	}, Example: Examples(`# Send message
 ops-cli slack msg -a "Hello World!"`),
 }
 
-var slk slackFlag
+var slackSubCmdPhoto = &cobra.Command{
+	Use:   "photo",
+	Short: "Send photo to slack",
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := sf.Init(); err != nil {
+			log.Println(err)
+			return
+		}
+		sf.Photo()
+	}, Example: Examples(`# Send message
+ops-cli slack photo -a "Hello World!"`),
+}
+
+var sf slackFlag
 
 func init() {
 	rootCmd.AddCommand(slackCmd)
 
-	slackCmd.Flags().StringVarP(&slk.token, "token", "t", "", "Bot token (required)")
-	slackCmd.Flags().StringVarP(&slk.channel, "channel", "c", "", "Channel ID")
-	slackCmd.Flags().StringVarP(&slk.arg, "arg", "a", "", "Input argument")
+	slackCmd.PersistentFlags().StringVarP(&sf.token, "token", "t", "", "Bot token (required)")
+	slackCmd.PersistentFlags().StringVarP(&sf.channel, "channel", "c", "", "Channel ID")
+	slackCmd.PersistentFlags().StringVarP(&sf.arg, "arg", "a", "", "Input argument")
+
+	slackCmd.AddCommand(slackSubCmdFile)
+	slackCmd.AddCommand(slackSubCmdMsg)
+	slackCmd.AddCommand(slackSubCmdPhoto)
 }
 
 type slackFlag struct {
@@ -82,21 +99,30 @@ type slackFlag struct {
 	arg     string
 
 	fileName string
+	api      *slack.Client
 }
 
-func (s slackFlag) Init() *slack.Client {
-	return slack.New(s.token)
+func (s *slackFlag) Init() error {
+	Config(configSlack)
+	if s.token == "" {
+		return errors.New("token is empty")
+	}
+	s.api = slack.New(s.token)
+	if s.api == nil {
+		return errors.New("api init failed")
+	}
+	return nil
 }
 
-func (s slackFlag) Msg(api *slack.Client) {
+func (s slackFlag) Msg() {
 	input := slack.MsgOptionText(s.arg, false)
-	_, _, _, err := api.SendMessageContext(rootContext, s.channel, input)
+	_, _, _, err := s.api.SendMessageContext(rootContext, s.channel, input)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func (s slackFlag) Photo(api *slack.Client) {
+func (s slackFlag) Photo() {
 	var base64Image string
 	switch {
 	case ValidFile(s.arg):
@@ -127,7 +153,7 @@ func (s slackFlag) Photo(api *slack.Client) {
 	if s.fileName == "" {
 		s.fileName = "upload.png"
 	}
-	_, err = api.UploadFileContext(rootContext, slack.FileUploadParameters{
+	_, err = s.api.UploadFileContext(rootContext, slack.FileUploadParameters{
 		Filetype: "image/png",
 		Filename: s.fileName,
 		Channels: []string{s.channel},

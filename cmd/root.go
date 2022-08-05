@@ -125,11 +125,11 @@ func Config(subFn configSelector) {
 			tg.chat = viper.GetInt64("telegram.chat_id")
 		}
 	case configSlack:
-		if slk.token == "" {
-			slk.token = viper.GetString("slack.token")
+		if sf.token == "" {
+			sf.token = viper.GetString("slack.token")
 		}
-		if slk.channel == "" {
-			slk.channel = viper.GetString("slack.channel_id")
+		if sf.channel == "" {
+			sf.channel = viper.GetString("slack.channel_id")
 		}
 	case configLINE:
 		if line.secret == "" && line.token == "" {

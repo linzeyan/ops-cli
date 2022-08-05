@@ -31,12 +31,12 @@ var lineCmd = &cobra.Command{
 var lineSubCmdMsg = &cobra.Command{
 	Use:     "msg",
 	Aliases: []string{imTypeMessage},
+	Short:   "Send message to LINE",
 	Example: Examples(`# Send message to LINE chat
 ops-cli line msg -s secret -t token --id GroupID -a 'Hello LINE'`),
 	Run: func(cmd *cobra.Command, _ []string) {
 		if err := line.Init(); err != nil {
 			log.Println(err)
-			_ = cmd.Help()
 			return
 		}
 		line.Msg()
@@ -44,13 +44,13 @@ ops-cli line msg -s secret -t token --id GroupID -a 'Hello LINE'`),
 }
 
 var lineSubCmdPhoto = &cobra.Command{
-	Use: "photo",
+	Use:   "photo",
+	Short: "Send photo to LINE",
 	Example: Examples(`# Send photo to LINE chat
 ops-cli line photo -s secret -t token --id GroupID -a https://img.url`),
 	Run: func(cmd *cobra.Command, _ []string) {
 		if err := line.Init(); err != nil {
 			log.Println(err)
-			_ = cmd.Help()
 			return
 		}
 		line.Photo()
@@ -58,13 +58,13 @@ ops-cli line photo -s secret -t token --id GroupID -a https://img.url`),
 }
 
 var lineSubCmdVideo = &cobra.Command{
-	Use: "video",
+	Use:   "video",
+	Short: "Send video to LINE",
 	Example: Examples(`# Send video to LINE chat
 ops-cli line video -s secret -t token --id GroupID -a https://video.url`),
 	Run: func(cmd *cobra.Command, _ []string) {
 		if err := line.Init(); err != nil {
 			log.Println(err)
-			_ = cmd.Help()
 			return
 		}
 		line.Video()
