@@ -1,5 +1,9 @@
 # ops-cli
 
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/linzeyan/ops-cli/goreleaser?style=flat-square)](https://github.com/linzeyan/ops-cli/actions?query=workflow%3Agoreleaser)
+[![Release](https://img.shields.io/github/release/linzeyan/ops-cli.svg?style=flat-square)](https://github.com/linzeyan/ops-cli/releases/latest)
+[![Software License](https://img.shields.io/github/license/linzeyan/ops-cli?style=flat-square)](./LICENSE)
+
 Try to collect useful tools for ops.
 
 ## Installation
