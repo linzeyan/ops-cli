@@ -45,16 +45,18 @@ const (
 	configTelegram configSelector = "telegram"
 )
 
-type fileSelector string
-
-func (f fileSelector) String() string {
-	return string(f)
-}
+const (
+	DocTypeMan      = "man"
+	DocTypeMarkdown = "markdown"
+	DocTypeReST     = "rest"
+	DocTypeYaml     = "yaml"
+)
 
 const (
-	fileJSON fileSelector = "json"
-	fileTOML fileSelector = "toml"
-	fileYAML fileSelector = "yaml"
+	FileTypeJSON     = "json"
+	FileTypeMarkdown = "md"
+	FileTypeTOML     = "toml"
+	FileTypeYAML     = "yaml"
 )
 
 const (
@@ -101,7 +103,7 @@ func Config(subFn configSelector) {
 		return
 	}
 	viper.SetConfigFile(rootConfig)
-	viper.SetConfigType(fileTOML.String())
+	viper.SetConfigType(FileTypeTOML)
 	err := viper.ReadInConfig()
 	if err != nil {
 		log.Println(err)

@@ -88,9 +88,9 @@ func init() {
 
 type convertFlag struct {
 	inFile  string
-	inType  fileSelector
+	inType  string
 	outFile string
-	outType fileSelector
+	outType string
 
 	readFile      []byte
 	unmarshalData interface{}
@@ -174,8 +174,14 @@ func (c convertFlag) Convert(i interface{}) interface{} {
 	return i
 }
 
-func (c convertFlag) Run(cmd *cobra.Command, _ []string) {
-	if !ValidFile(cf.inFile) || cf.outFile == "" {
+func (c *convertFlag) WriteFile(content []byte) {
+	if err := os.WriteFile(c.outFile, content, os.ModePerm); err != nil {
+		log.Println(err)
+	}
+}
+
+func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
+	if !ValidFile(c.inFile) || c.outFile == "" {
 		_ = cmd.Help()
 		return
 	}
@@ -184,36 +190,24 @@ func (c convertFlag) Run(cmd *cobra.Command, _ []string) {
 		_ = cmd.Help()
 		return
 	}
-	cf.inType = fileSelector(slice[0])
-	cf.outType = fileSelector(slice[1])
+	c.inType = slice[0]
+	c.outType = slice[1]
 
-	switch cf.inType {
-	case fileJSON:
-		cf.ParseJSON()
-	case fileTOML:
-		cf.ParseTOML()
-	case fileYAML:
-		cf.ParseYAML()
-	default:
-		log.Println("Input file format not support")
-		os.Exit(0)
+	switch c.inType {
+	case FileTypeJSON:
+		c.ParseJSON()
+	case FileTypeTOML:
+		c.ParseTOML()
+	case FileTypeYAML:
+		c.ParseYAML()
 	}
 
-	switch cf.outType {
-	case fileJSON:
-		cf.ToJSON()
-	case fileTOML:
-		cf.ToTOML()
-	case fileYAML:
-		cf.ToYAML()
-	default:
-		log.Println("Output file format not support")
-		os.Exit(0)
-	}
-}
-
-func (c convertFlag) WriteFile(content []byte) {
-	if err := os.WriteFile(c.outFile, content, 0600); err != nil {
-		log.Println(err)
+	switch c.outType {
+	case FileTypeJSON:
+		c.ToJSON()
+	case FileTypeTOML:
+		c.ToTOML()
+	case FileTypeYAML:
+		c.ToYAML()
 	}
 }

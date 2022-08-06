@@ -24,7 +24,7 @@ import (
 )
 
 var docCmd = &cobra.Command{
-	Use:   "doc [type]",
+	Use:   "doc",
 	Short: "Generate documentation",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
@@ -32,26 +32,26 @@ var docCmd = &cobra.Command{
 var docSubCmdMan = &cobra.Command{
 	Use:   "man",
 	Short: "Generate man page documentation",
-	Run:   func(_ *cobra.Command, _ []string) { df.Man() },
+	Run:   df.Run,
 }
 
 var docSubCmdMarkdown = &cobra.Command{
 	Use:     "markdown",
-	Aliases: []string{"md"},
+	Aliases: []string{FileTypeMarkdown},
 	Short:   "Generate markdown documentation",
-	Run:     func(_ *cobra.Command, _ []string) { df.Markdown() },
+	Run:     df.Run,
 }
 
 var docSubCmdRest = &cobra.Command{
 	Use:   "rest",
 	Short: "Generate rest documentation",
-	Run:   func(_ *cobra.Command, _ []string) { df.Rest() },
+	Run:   df.Run,
 }
 
 var docSubCmdYaml = &cobra.Command{
 	Use:   "yaml",
 	Short: "Generate yaml documentation",
-	Run:   func(_ *cobra.Command, _ []string) { df.Yaml() },
+	Run:   df.Run,
 }
 
 var df docFlag
@@ -70,49 +70,41 @@ type docFlag struct {
 	dir string
 }
 
-func (d docFlag) createDir() {
-	_, err := os.Stat(df.dir)
+func (d *docFlag) createDir() error {
+	_, err := os.Stat(d.dir)
 	if err != nil {
 		/* Create directory if not exist. */
-		mkErr := os.Mkdir(df.dir, 0755)
+		mkErr := os.Mkdir(d.dir, os.ModePerm)
 		if mkErr != nil {
-			log.Println(mkErr)
-			return
+			return mkErr
 		}
 	}
+	return nil
 }
 
-func (d docFlag) Man() {
-	d.createDir()
-	header := &doc.GenManHeader{
-		Title:   "MINE",
-		Section: "3",
-	}
-	err := doc.GenManTree(rootCmd, header, d.dir)
-	if err != nil {
+func (d *docFlag) Run(cmd *cobra.Command, _ []string) {
+	var err error
+	if err = d.createDir(); err != nil {
 		log.Println(err)
+		return
 	}
-}
-
-func (d docFlag) Markdown() {
-	d.createDir()
-	err := doc.GenMarkdownTree(rootCmd, d.dir)
-	if err != nil {
-		log.Println(err)
+	switch cmd.Name() {
+	case DocTypeMan:
+		header := &doc.GenManHeader{
+			Title:   "MINE",
+			Section: "3",
+		}
+		err = doc.GenManTree(rootCmd, header, d.dir)
+	case DocTypeMarkdown:
+		err = doc.GenMarkdownTree(rootCmd, d.dir)
+	case DocTypeReST:
+		err = doc.GenReSTTree(rootCmd, d.dir)
+	case DocTypeYaml:
+		err = doc.GenYamlTree(rootCmd, d.dir)
+	default:
+		_ = cmd.Help()
+		return
 	}
-}
-
-func (d docFlag) Rest() {
-	d.createDir()
-	err := doc.GenReSTTree(rootCmd, d.dir)
-	if err != nil {
-		log.Println(err)
-	}
-}
-
-func (d docFlag) Yaml() {
-	d.createDir()
-	err := doc.GenYamlTree(rootCmd, d.dir)
 	if err != nil {
 		log.Println(err)
 	}
