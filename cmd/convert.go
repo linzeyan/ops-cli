@@ -29,24 +29,45 @@ import (
 var convertCmd = &cobra.Command{
 	Use:   "convert",
 	Short: "Convert data format",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			_ = cmd.Help()
-			return
-		}
-		if args[0] == "" {
-			_ = cmd.Help()
-			return
-		}
-		slice := strings.Split(strings.ToLower(args[0]), "2")
-		if len(slice) != 2 {
-			_ = cmd.Help()
-			return
-		}
-		cf.Select(slice)
-	},
+	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+}
+
+var convertSubCmdJSON2TOML = &cobra.Command{
+	Use:   "json2toml",
+	Short: "Convert json to toml format",
+	Run:   cf.Run,
+}
+
+var convertSubCmdJSON2YAML = &cobra.Command{
+	Use:   "json2yaml",
+	Short: "Convert json to yaml format",
+	Run:   cf.Run,
+}
+
+var convertSubCmdTOML2JSON = &cobra.Command{
+	Use:   "toml2json",
+	Short: "Convert toml to json format",
+	Run:   cf.Run,
+}
+
+var convertSubCmdTOML2YAML = &cobra.Command{
+	Use:   "toml2yaml",
+	Short: "Convert toml to yaml format",
+	Run:   cf.Run,
+}
+
+var convertSubCmdYAML2JSON = &cobra.Command{
+	Use:   "yaml2json",
+	Short: "Convert yaml to json format",
+	Run:   cf.Run,
 	Example: Examples(`# Convert yaml to json
 ops-cli convert yaml2json -i input.yaml -o output.json`),
+}
+
+var convertSubCmdYAML2TOML = &cobra.Command{
+	Use:   "yaml2toml",
+	Short: "Convert yaml to toml format",
+	Run:   cf.Run,
 }
 
 var cf convertFlag
@@ -54,8 +75,15 @@ var cf convertFlag
 func init() {
 	rootCmd.AddCommand(convertCmd)
 
-	convertCmd.Flags().StringVarP(&cf.inFile, "in", "i", "", "Input file")
-	convertCmd.Flags().StringVarP(&cf.outFile, "out", "o", "", "Output file")
+	convertCmd.PersistentFlags().StringVarP(&cf.inFile, "in", "i", "", "Input file")
+	convertCmd.PersistentFlags().StringVarP(&cf.outFile, "out", "o", "", "Output file")
+
+	convertCmd.AddCommand(convertSubCmdJSON2TOML)
+	convertCmd.AddCommand(convertSubCmdJSON2YAML)
+	convertCmd.AddCommand(convertSubCmdTOML2JSON)
+	convertCmd.AddCommand(convertSubCmdTOML2YAML)
+	convertCmd.AddCommand(convertSubCmdYAML2JSON)
+	convertCmd.AddCommand(convertSubCmdYAML2TOML)
 }
 
 type convertFlag struct {
@@ -146,7 +174,16 @@ func (c convertFlag) Convert(i interface{}) interface{} {
 	return i
 }
 
-func (c convertFlag) Select(slice []string) {
+func (c convertFlag) Run(cmd *cobra.Command, _ []string) {
+	if !ValidFile(cf.inFile) || cf.outFile == "" {
+		_ = cmd.Help()
+		return
+	}
+	slice := strings.Split(cmd.Name(), "2")
+	if len(slice) != 2 {
+		_ = cmd.Help()
+		return
+	}
 	cf.inType = fileSelector(slice[0])
 	cf.outType = fileSelector(slice[1])
 
