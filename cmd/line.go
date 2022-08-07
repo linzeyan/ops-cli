@@ -30,19 +30,12 @@ var lineCmd = &cobra.Command{
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
-var lineSubCmdMsg = &cobra.Command{
-	Use:     "msg",
-	Aliases: []string{imTypeMessage},
-	Short:   "Send message to LINE",
-	Example: Examples(`# Send message to LINE chat
-ops-cli line msg -s secret -t token --id GroupID -a 'Hello LINE'`),
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := line.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		line.Msg()
-	},
+var lineSubCmdText = &cobra.Command{
+	Use:   "text",
+	Short: "Send message to LINE",
+	Example: Examples(`# Send text to LINE chat
+ops-cli line text -s secret -t token --id GroupID -a 'Hello LINE'`),
+	Run: line.Run,
 }
 
 var lineSubCmdPhoto = &cobra.Command{
@@ -50,13 +43,7 @@ var lineSubCmdPhoto = &cobra.Command{
 	Short: "Send photo to LINE",
 	Example: Examples(`# Send photo to LINE chat
 ops-cli line photo -s secret -t token --id GroupID -a https://img.url`),
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := line.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		line.Photo()
-	},
+	Run: line.Run,
 }
 
 var lineSubCmdVideo = &cobra.Command{
@@ -64,13 +51,7 @@ var lineSubCmdVideo = &cobra.Command{
 	Short: "Send video to LINE",
 	Example: Examples(`# Send video to LINE chat
 ops-cli line video -s secret -t token --id GroupID -a https://video.url`),
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := line.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		line.Video()
-	},
+	Run: line.Run,
 }
 
 var line lineFlag
@@ -83,7 +64,7 @@ func init() {
 	lineCmd.PersistentFlags().StringVarP(&line.arg, "arg", "a", "", "Function Argument")
 	lineCmd.PersistentFlags().StringVar(&line.id, "id", "", "UserID/GroupID/RoomID")
 
-	lineCmd.AddCommand(lineSubCmdMsg)
+	lineCmd.AddCommand(lineSubCmdText)
 	lineCmd.AddCommand(lineSubCmdPhoto)
 	lineCmd.AddCommand(lineSubCmdVideo)
 }
@@ -108,28 +89,23 @@ func (l *lineFlag) Init() error {
 	return nil
 }
 
-func (l *lineFlag) Msg() {
-	input := linebot.NewTextMessage(l.arg)
-	var err error
-	l.resp, err = l.api.PushMessage(l.id, input).Do()
-	if err != nil {
+func (l *lineFlag) Run(cmd *cobra.Command, _ []string) {
+	if err := l.Init(); err != nil {
 		log.Println(err)
+		return
 	}
-}
-
-func (l *lineFlag) Photo() {
-	input := linebot.NewImageMessage(l.arg, l.arg)
 	var err error
-	l.resp, err = l.api.PushMessage(l.id, input).Do()
-	if err != nil {
-		log.Println(err)
+	switch cmd.Name() {
+	case ImTypeText:
+		input := linebot.NewTextMessage(l.arg)
+		l.resp, err = l.api.PushMessage(l.id, input).Do()
+	case ImTypePhoto:
+		input := linebot.NewImageMessage(l.arg, l.arg)
+		l.resp, err = l.api.PushMessage(l.id, input).Do()
+	case ImTypeVideo:
+		input := linebot.NewVideoMessage(l.arg, l.arg)
+		l.resp, err = l.api.PushMessage(l.id, input).Do()
 	}
-}
-
-func (l *lineFlag) Video() {
-	input := linebot.NewVideoMessage(l.arg, l.arg)
-	var err error
-	l.resp, err = l.api.PushMessage(l.id, input).Do()
 	if err != nil {
 		log.Println(err)
 	}

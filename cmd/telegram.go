@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 
 	tgBot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/spf13/cobra"
@@ -35,26 +36,13 @@ var telegramCmd = &cobra.Command{
 var telegramSubCmdAudio = &cobra.Command{
 	Use:   "audio",
 	Short: "Send audio file to telegram",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := tg.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		tg.Audio()
-	},
+	Run:   tg.Run,
 }
 
 var telegramSubCmdFile = &cobra.Command{
-	Use:     "file",
-	Aliases: []string{imTypeDoc, imTypeDocument},
-	Short:   "Send file to telegram",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := tg.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		tg.File()
-	},
+	Use:   "file",
+	Short: "Send file to telegram",
+	Run:   tg.Run,
 	Example: Examples(`# Send file
 ops-cli telegram file -t bot_token -c chat_id -a '~/readme.md'`),
 }
@@ -62,42 +50,23 @@ ops-cli telegram file -t bot_token -c chat_id -a '~/readme.md'`),
 var telegramSubCmdID = &cobra.Command{
 	Use:   "id",
 	Short: "Get chat ID",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := tg.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		tg.GetUpdate()
-	},
+	Run:   tg.Run,
 	Example: Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
 ops-cli telegram id --config ~/.config.toml`),
 }
 
-var telegramSubCmdMsg = &cobra.Command{
-	Use:     "msg",
-	Aliases: []string{imTypeMessage},
-	Short:   "Send message to telegram",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := tg.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		tg.Msg()
-	},
+var telegramSubCmdText = &cobra.Command{
+	Use:   "text",
+	Short: "Send text to telegram",
+	Run:   tg.Run,
 	Example: Examples(`# Send message
-ops-cli telegram msg -t bot_token -c chat_id -a 'Hello word'`),
+ops-cli telegram text -t bot_token -c chat_id -a 'Hello word'`),
 }
 
 var telegramSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
 	Short: "Send photo to telegram",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := tg.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		tg.Photo()
-	},
+	Run:   tg.Run,
 	Example: Examples(`# Send photo
 ops-cli telegram photo -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
 ops-cli telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'`),
@@ -106,25 +75,13 @@ ops-cli telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'`),
 var telegramSubCmdVideo = &cobra.Command{
 	Use:   "video",
 	Short: "Send video file to telegram",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := tg.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		tg.Video()
-	},
+	Run:   tg.Run,
 }
 
 var telegramSubCmdVoice = &cobra.Command{
 	Use:   "voice",
 	Short: "Send voice file to telegram",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := tg.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		tg.Voice()
-	},
+	Run:   tg.Run,
 }
 
 var tg telegramFlag
@@ -140,7 +97,7 @@ func init() {
 	telegramCmd.AddCommand(telegramSubCmdAudio)
 	telegramCmd.AddCommand(telegramSubCmdFile)
 	telegramCmd.AddCommand(telegramSubCmdID)
-	telegramCmd.AddCommand(telegramSubCmdMsg)
+	telegramCmd.AddCommand(telegramSubCmdText)
 	telegramCmd.AddCommand(telegramSubCmdPhoto)
 	telegramCmd.AddCommand(telegramSubCmdVideo)
 	telegramCmd.AddCommand(telegramSubCmdVoice)
@@ -176,7 +133,7 @@ func (t telegramFlag) Animation() {
 	t.send(input)
 }
 
-func (t telegramFlag) Audio() {
+func (t *telegramFlag) Audio() {
 	input := tgBot.NewAudio(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	t.send(input)
@@ -202,45 +159,45 @@ func (t telegramFlag) Dice() {
 	t.send(input)
 }
 
-func (t telegramFlag) File() {
+func (t *telegramFlag) File() {
 	input := tgBot.NewDocument(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	t.send(input)
 }
 
-func (t telegramFlag) Msg() {
+func (t *telegramFlag) Text() {
 	input := tgBot.NewMessage(t.chat, t.arg)
 	input.ParseMode = tgBot.ModeMarkdownV2
 	input.DisableWebPagePreview = true
 	t.send(input)
 }
 
-func (t telegramFlag) Photo() {
+func (t *telegramFlag) Photo() {
 	input := tgBot.NewPhoto(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	t.send(input)
 }
 
-func (t telegramFlag) Video() {
+func (t *telegramFlag) Video() {
 	input := tgBot.NewVideo(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	t.send(input)
 }
 
-func (t telegramFlag) Voice() {
+func (t *telegramFlag) Voice() {
 	input := tgBot.NewVoice(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	t.send(input)
 }
 
-func (t telegramFlag) GetUpdate() {
+func (t *telegramFlag) GetUpdate() {
 	u := tgBot.NewUpdate(0)
 	u.Timeout = 60
 	updates := t.api.GetUpdatesChan(u)
 
 	for update := range updates {
 		if update.Message != nil { // If we got a message
-			if update.Message.Text == imTypeID {
+			if update.Message.Text == ImTypeID {
 				fmt.Println(update.Message.Chat.ID)
 				break
 			}
@@ -248,7 +205,30 @@ func (t telegramFlag) GetUpdate() {
 	}
 }
 
-func (t telegramFlag) parseFile(s string) tgBot.RequestFileData {
+func (t *telegramFlag) Run(cmd *cobra.Command, _ []string) {
+	if err := t.Init(); err != nil {
+		log.Println(err)
+		return
+	}
+	switch cmd.Name() {
+	case ImTypeAudio:
+		t.Audio()
+	case ImTypeFile:
+		t.File()
+	case ImTypeID:
+		t.GetUpdate()
+	case ImTypePhoto:
+		t.Photo()
+	case ImTypeText:
+		t.Text()
+	case ImTypeVideo:
+		t.Video()
+	case ImTypeVoice:
+		t.Voice()
+	}
+}
+
+func (t *telegramFlag) parseFile(s string) tgBot.RequestFileData {
 	switch {
 	case ValidFile(s):
 		return tgBot.FilePath(s)
@@ -263,7 +243,7 @@ func (t *telegramFlag) send(c tgBot.Chattable) {
 	t.resp, err = t.api.Send(c)
 	if err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	if rootOutputJSON {
 		t.JSON()

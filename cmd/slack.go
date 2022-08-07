@@ -39,44 +39,26 @@ var slackCmd = &cobra.Command{
 }
 
 var slackSubCmdFile = &cobra.Command{
-	Use:     "file",
-	Aliases: []string{imTypeDoc, imTypeDocument},
-	Short:   "Send file to slack",
-	Run: func(cmd *cobra.Command, _ []string) {
-		if err := sf.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		sf.fileName = cmd.Name()
-		sf.Photo()
-	}, Example: Examples(`# Send message
+	Use:   "file",
+	Short: "Send file to slack",
+	Run:   sf.Run,
+	Example: Examples(`# Send message
 ops-cli slack file -a "Hello World!"`),
 }
 
-var slackSubCmdMsg = &cobra.Command{
-	Use:     "msg",
-	Aliases: []string{imTypeMessage},
-	Short:   "Send message to slack",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := sf.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		sf.Msg()
-	}, Example: Examples(`# Send message
-ops-cli slack msg -a "Hello World!"`),
+var slackSubCmdText = &cobra.Command{
+	Use:   "text",
+	Short: "Send text to slack",
+	Run:   sf.Run,
+	Example: Examples(`# Send message
+ops-cli slack text -a "Hello World!"`),
 }
 
 var slackSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
 	Short: "Send photo to slack",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := sf.Init(); err != nil {
-			log.Println(err)
-			return
-		}
-		sf.Photo()
-	}, Example: Examples(`# Send message
+	Run:   sf.Run,
+	Example: Examples(`# Send message
 ops-cli slack photo -a "Hello World!"`),
 }
 
@@ -90,7 +72,7 @@ func init() {
 	slackCmd.PersistentFlags().StringVarP(&sf.arg, "arg", "a", "", "Input argument")
 
 	slackCmd.AddCommand(slackSubCmdFile)
-	slackCmd.AddCommand(slackSubCmdMsg)
+	slackCmd.AddCommand(slackSubCmdText)
 	slackCmd.AddCommand(slackSubCmdPhoto)
 }
 
@@ -115,15 +97,16 @@ func (s *slackFlag) Init() error {
 	return nil
 }
 
-func (s slackFlag) Msg() {
+func (s *slackFlag) Text() {
 	input := slack.MsgOptionText(s.arg, false)
 	_, _, _, err := s.api.SendMessageContext(rootContext, s.channel, input)
 	if err != nil {
 		log.Println(err)
+		os.Exit(1)
 	}
 }
 
-func (s slackFlag) Photo() {
+func (s *slackFlag) Photo() {
 	var base64Image string
 	switch {
 	case ValidFile(s.arg):
@@ -147,9 +130,11 @@ func (s slackFlag) Photo() {
 	defer f.Close()
 	if _, err := f.Write(decode); err != nil {
 		log.Println(err)
+		return
 	}
 	if err := f.Sync(); err != nil {
 		log.Println(err)
+		return
 	}
 	if s.fileName == "" {
 		s.fileName = "upload.png"
@@ -171,7 +156,23 @@ func (s slackFlag) Photo() {
 	}
 }
 
-func (s slackFlag) localFile() string {
+func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
+	if err := s.Init(); err != nil {
+		log.Println(err)
+		return
+	}
+	switch cmd.Name() {
+	case ImTypeFile:
+		s.fileName = cmd.Name()
+		s.Photo()
+	case ImTypePhoto:
+		s.Photo()
+	case ImTypeText:
+		s.Text()
+	}
+}
+
+func (s *slackFlag) localFile() string {
 	content, err := os.ReadFile(s.arg)
 	if err != nil {
 		log.Println(err)
@@ -194,7 +195,7 @@ func (s slackFlag) localFile() string {
 	return base64Image
 }
 
-func (s slackFlag) remoteFile() string {
+func (s *slackFlag) remoteFile() string {
 	var client = &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true,

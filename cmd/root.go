@@ -61,10 +61,13 @@ const (
 )
 
 const (
-	imTypeDoc      = "doc"
-	imTypeDocument = "document"
-	imTypeID       = "id"
-	imTypeMessage  = "message"
+	ImTypeAudio = "audio"
+	ImTypeFile  = "file"
+	ImTypeID    = "id"
+	ImTypePhoto = "photo"
+	ImTypeText  = "text"
+	ImTypeVideo = "video"
+	ImTypeVoice = "voice"
 )
 
 var rootCmd = &cobra.Command{
