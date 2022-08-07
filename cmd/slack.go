@@ -33,33 +33,33 @@ import (
 )
 
 var slackCmd = &cobra.Command{
-	Use:   "slack",
-	Short: "Send message to slack",
+	Use:   "Slack",
+	Short: "Send message to Slack",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
 var slackSubCmdFile = &cobra.Command{
 	Use:   "file",
-	Short: "Send file to slack",
+	Short: "Send file to Slack",
 	Run:   sf.Run,
-	Example: Examples(`# Send message
-ops-cli slack file -a "Hello World!"`),
+	Example: Examples(`# Send file
+ops-cli Slack file -a "Hello World!"`),
 }
 
 var slackSubCmdText = &cobra.Command{
 	Use:   "text",
-	Short: "Send text to slack",
+	Short: "Send text to Slack",
 	Run:   sf.Run,
-	Example: Examples(`# Send message
-ops-cli slack text -a "Hello World!"`),
+	Example: Examples(`# Send text
+ops-cli Slack text -a "Hello World!"`),
 }
 
 var slackSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
-	Short: "Send photo to slack",
+	Short: "Send photo to Slack",
 	Run:   sf.Run,
-	Example: Examples(`# Send message
-ops-cli slack photo -a "Hello World!"`),
+	Example: Examples(`# Send photo
+ops-cli Slack photo -a "Hello World!"`),
 }
 
 var sf slackFlag

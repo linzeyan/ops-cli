@@ -27,24 +27,24 @@ import (
 )
 
 var telegramCmd = &cobra.Command{
-	Use:     "telegram",
+	Use:     "Telegram",
 	Aliases: []string{"tg"},
-	Short:   "Send message to telegram",
+	Short:   "Send message to Telegram",
 	Run:     func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
 var telegramSubCmdAudio = &cobra.Command{
 	Use:   "audio",
-	Short: "Send audio file to telegram",
+	Short: "Send audio file to Telegram",
 	Run:   tg.Run,
 }
 
 var telegramSubCmdFile = &cobra.Command{
 	Use:   "file",
-	Short: "Send file to telegram",
+	Short: "Send file to Telegram",
 	Run:   tg.Run,
 	Example: Examples(`# Send file
-ops-cli telegram file -t bot_token -c chat_id -a '~/readme.md'`),
+ops-cli Telegram file -t bot_token -c chat_id -a '~/readme.md'`),
 }
 
 var telegramSubCmdID = &cobra.Command{
@@ -52,35 +52,35 @@ var telegramSubCmdID = &cobra.Command{
 	Short: "Get chat ID",
 	Run:   tg.Run,
 	Example: Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
-ops-cli telegram id --config ~/.config.toml`),
+ops-cli Telegram id --config ~/.config.toml`),
 }
 
 var telegramSubCmdText = &cobra.Command{
 	Use:   "text",
-	Short: "Send text to telegram",
+	Short: "Send text to Telegram",
 	Run:   tg.Run,
 	Example: Examples(`# Send message
-ops-cli telegram text -t bot_token -c chat_id -a 'Hello word'`),
+ops-cli Telegram text -t bot_token -c chat_id -a 'Hello word'`),
 }
 
 var telegramSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
-	Short: "Send photo to telegram",
+	Short: "Send photo to Telegram",
 	Run:   tg.Run,
 	Example: Examples(`# Send photo
-ops-cli telegram photo -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
-ops-cli telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'`),
+ops-cli Telegram photo -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
+ops-cli Telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'`),
 }
 
 var telegramSubCmdVideo = &cobra.Command{
 	Use:   "video",
-	Short: "Send video file to telegram",
+	Short: "Send video file to Telegram",
 	Run:   tg.Run,
 }
 
 var telegramSubCmdVoice = &cobra.Command{
 	Use:   "voice",
-	Short: "Send voice file to telegram",
+	Short: "Send voice file to Telegram",
 	Run:   tg.Run,
 }
 

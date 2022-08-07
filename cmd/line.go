@@ -25,7 +25,7 @@ import (
 )
 
 var lineCmd = &cobra.Command{
-	Use:   "line",
+	Use:   "LINE",
 	Short: "Send message to LINE",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
@@ -34,7 +34,7 @@ var lineSubCmdText = &cobra.Command{
 	Use:   "text",
 	Short: "Send message to LINE",
 	Example: Examples(`# Send text to LINE chat
-ops-cli line text -s secret -t token --id GroupID -a 'Hello LINE'`),
+ops-cli LINE text -s secret -t token --id GroupID -a 'Hello LINE'`),
 	Run: line.Run,
 }
 
@@ -42,7 +42,7 @@ var lineSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
 	Short: "Send photo to LINE",
 	Example: Examples(`# Send photo to LINE chat
-ops-cli line photo -s secret -t token --id GroupID -a https://img.url`),
+ops-cli LINE photo -s secret -t token --id GroupID -a https://img.url`),
 	Run: line.Run,
 }
 
@@ -50,7 +50,7 @@ var lineSubCmdVideo = &cobra.Command{
 	Use:   "video",
 	Short: "Send video to LINE",
 	Example: Examples(`# Send video to LINE chat
-ops-cli line video -s secret -t token --id GroupID -a https://video.url`),
+ops-cli LINE video -s secret -t token --id GroupID -a https://video.url`),
 	Run: line.Run,
 }
 
