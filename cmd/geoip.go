@@ -32,15 +32,16 @@ import (
 
 var geoipCmd = &cobra.Command{
 	Use:   "geoip",
+	Args:  cobra.MinimumNArgs(1),
 	Short: "Print IP geographic information",
 	Run: func(_ *cobra.Command, args []string) {
 		var out rootOutput
 		var err error
-		switch l := len(args); {
-		case l == 1:
+		switch len(args) {
+		case 1:
 			var r GeoIPSingle
 			out, err = r.Request(args[0])
-		case l > 1:
+		default:
 			var r GeoIPBatch
 			out, err = r.Request(args)
 		}
@@ -55,6 +56,7 @@ ops-cli geoip 1.1.1.1
 
 # Print multiple IP geographic information
 ops-cli geoip 1.1.1.1 8.8.8.8`),
+	DisableFlagsInUseLine: true,
 }
 
 func init() {

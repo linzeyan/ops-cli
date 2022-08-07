@@ -25,21 +25,18 @@ import (
 
 var icpCmd = &cobra.Command{
 	Use:   "icp",
+	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			icp.Domain = args[0]
-			Config(configICP)
-			if i.account == "" && i.key == "" {
-				_ = cmd.Help()
-				return
-			}
-			icp.WestAccount = i.account
-			icp.WestApiKey = i.key
-			fmt.Println(icp.Domain, icp.Check())
+		Config(configICP)
+		if i.account == "" && i.key == "" {
+			_ = cmd.Help()
 			return
 		}
-		_ = cmd.Help()
+		icp.Domain = args[0]
+		icp.WestAccount = i.account
+		icp.WestApiKey = i.key
+		fmt.Println(icp.Domain, icp.Check())
 	},
 	Example: Examples(`# Print the ICP status
 ops-cli icp -a account -k api_key google.com`),

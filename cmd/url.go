@@ -26,18 +26,15 @@ import (
 
 var urlCmd = &cobra.Command{
 	Use:   "url",
+	Args:  cobra.ExactArgs(1),
 	Short: "Expand shorten url",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			result, err := expandUrl.Expand(args[0])
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			fmt.Println(result)
+	Run: func(_ *cobra.Command, args []string) {
+		result, err := expandUrl.Expand(args[0])
+		if err != nil {
+			log.Println(err)
 			return
 		}
-		_ = cmd.Help()
+		fmt.Println(result)
 	},
 	Example: Examples(`# Get the real URL from the shortened URL
 ops-cli url https://goo.gl/maps/b37Aq3Anc7taXQDd9`),

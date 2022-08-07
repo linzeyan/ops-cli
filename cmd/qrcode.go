@@ -34,18 +34,15 @@ var qrcodeCmd = &cobra.Command{
 
 var qrcodeSubCmdRead = &cobra.Command{
 	Use:   "read",
+	Args:  cobra.ExactArgs(1),
 	Short: "Read QR code and print message",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			_ = cmd.Help()
-			return
-		}
-		input := args[0]
-		if !ValidFile(input) {
+	Run: func(_ *cobra.Command, args []string) {
+		qr.text = args[0]
+		if !ValidFile(qr.text) {
 			log.Println("file not found")
 			return
 		}
-		result, err := qrcode.ReadQRCode(input)
+		result, err := qrcode.ReadQRCode(qr.text)
 		if err != nil {
 			log.Println(err)
 			return
@@ -54,17 +51,17 @@ var qrcodeSubCmdRead = &cobra.Command{
 	},
 	Example: Examples(`# Read QR code and print message
 ops-cli qrcode qrcode.png`),
+	DisableFlagsInUseLine: true,
 }
 
 var qrcodeSubCmdText = &cobra.Command{
 	Use:   "text",
+	Args:  cobra.MinimumNArgs(1),
 	Short: "Generate QR code with text",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) != 1 {
-			_ = cmd.Help()
-			return
+	Run: func(_ *cobra.Command, args []string) {
+		for i := range args {
+			qr.text += args[i]
 		}
-		qr.text = args[0]
 		err := qr.Generate()
 		if err != nil {
 			log.Println(err)

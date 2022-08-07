@@ -36,14 +36,11 @@ import (
 
 var certCmd = &cobra.Command{
 	Use:   "cert",
+	Args:  cobra.ExactArgs(1),
 	Short: "Check tls cert expiry time",
 	Run: func(cmd *cobra.Command, args []string) {
 		var out *certResponse
 		var err error
-		if len(args) == 0 {
-			_ = cmd.Help()
-			return
-		}
 		input := args[0]
 		switch {
 		case ValidFile(input):

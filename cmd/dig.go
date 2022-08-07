@@ -28,14 +28,12 @@ import (
 
 var digCmd = &cobra.Command{
 	Use:   "dig [host] [@server] [type]",
+	Args:  cobra.MinimumNArgs(1),
 	Short: "Resolve domain name",
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 		var argsWithoutDomain []string
 		var argsType []string
 		switch lens := len(args); {
-		case lens == 0:
-			_ = cmd.Help()
-			return
 		case lens == 1:
 			digDomain = args[0]
 			digOutput.Request(dns.TypeA)
