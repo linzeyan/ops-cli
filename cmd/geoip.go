@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -121,7 +121,7 @@ func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 		return nil, err
 	}
 	if resp.StatusCode == http.StatusOK {
-		content, err := ioutil.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
@@ -191,7 +191,7 @@ func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
 		return nil, err
 	}
 	if resp.StatusCode == http.StatusOK {
-		content, err := ioutil.ReadAll(resp.Body)
+		content, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}

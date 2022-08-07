@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net"
 	"reflect"
@@ -117,7 +117,7 @@ func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	result, err := ioutil.ReadAll(conn)
+	result, err := io.ReadAll(conn)
 	if err != nil {
 		return nil, err
 	}

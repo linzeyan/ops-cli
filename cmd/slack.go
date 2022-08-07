@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"image/jpeg"
 	"image/png"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -214,7 +214,7 @@ func (s slackFlag) remoteFile() string {
 	}
 	var content []byte
 	if resp.StatusCode == http.StatusOK {
-		content, err = ioutil.ReadAll(resp.Body)
+		content, err = io.ReadAll(resp.Body)
 		if err != nil {
 			return ""
 		}
