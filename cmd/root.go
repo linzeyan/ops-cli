@@ -203,7 +203,11 @@ func PrintYAML(i interface{}) {
 
 /* If i is a domain return true. */
 func ValidDomain(i interface{}) bool {
+	const elements = "~!@#$%^&*()_+`={}|[]\\:\"<>?,/"
 	if val, ok := i.(string); ok {
+		if strings.ContainsAny(val, elements) {
+			return false
+		}
 		slice := strings.Split(val, ".")
 		l := len(slice)
 		if l > 1 {
