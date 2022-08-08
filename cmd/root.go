@@ -33,17 +33,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type configSelector string
+type ConfigBlock string
 
-func (c configSelector) String() string {
+func (c ConfigBlock) String() string {
 	return string(c)
 }
 
 const (
-	configICP      configSelector = "icp"
-	configLINE     configSelector = "line"
-	configSlack    configSelector = "slack"
-	configTelegram configSelector = "telegram"
+	ConfigBlockICP      ConfigBlock = "icp"
+	ConfigBlockLINE     ConfigBlock = "line"
+	ConfigBlockSlack    ConfigBlock = "slack"
+	ConfigBlockTelegram ConfigBlock = "telegram"
 )
 
 const (
@@ -99,7 +99,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", "Specify config path (toml)")
 }
 
-func Config(subFn configSelector) {
+func Config(subFn ConfigBlock) {
 	if rootConfig == "" {
 		return
 	}
@@ -114,26 +114,26 @@ func Config(subFn configSelector) {
 		return
 	}
 	switch subFn {
-	case configICP:
+	case ConfigBlockICP:
 		if i.account == "" && i.key == "" {
 			i.account = viper.GetString("west.account")
 			i.key = viper.GetString("west.api_key")
 		}
-	case configTelegram:
+	case ConfigBlockTelegram:
 		if tg.token == "" {
 			tg.token = viper.GetString("telegram.token")
 		}
 		if tg.chat == 0 {
 			tg.chat = viper.GetInt64("telegram.chat_id")
 		}
-	case configSlack:
+	case ConfigBlockSlack:
 		if sf.token == "" {
 			sf.token = viper.GetString("slack.token")
 		}
 		if sf.channel == "" {
 			sf.channel = viper.GetString("slack.channel_id")
 		}
-	case configLINE:
+	case ConfigBlockLINE:
 		if line.secret == "" && line.token == "" {
 			line.secret = viper.GetString("line.secret")
 			line.token = viper.GetString("line.access_token")

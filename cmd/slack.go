@@ -86,7 +86,7 @@ type slackFlag struct {
 }
 
 func (s *slackFlag) Init() error {
-	Config(configSlack)
+	Config(ConfigBlockSlack)
 	if s.token == "" {
 		return errors.New("token is empty")
 	}

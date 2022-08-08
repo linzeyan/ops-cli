@@ -115,7 +115,7 @@ type telegramFlag struct {
 }
 
 func (t *telegramFlag) Init() error {
-	Config(configTelegram)
+	Config(ConfigBlockTelegram)
 	if tg.token == "" {
 		return errors.New("token is empty")
 	}

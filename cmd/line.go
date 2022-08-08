@@ -108,7 +108,7 @@ type lineFlag struct {
 }
 
 func (l *lineFlag) Init() error {
-	Config(configLINE)
+	Config(ConfigBlockLINE)
 	var err error
 	l.api, err = linebot.New(l.secret, l.token)
 	if err != nil {

@@ -28,7 +28,7 @@ var icpCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	Run: func(cmd *cobra.Command, args []string) {
-		Config(configICP)
+		Config(ConfigBlockICP)
 		if i.account == "" && i.key == "" {
 			_ = cmd.Help()
 			return
