@@ -18,6 +18,7 @@ require (
 	github.com/slack-go/slack v0.11.2
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.8.1
+	github.com/stephenafamo/goldmark-pdf v0.0.0-20210426082656-1b7b737070eb
 	github.com/yuin/goldmark v1.4.5
 	github.com/yuin/goldmark-emoji v1.0.1
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
@@ -25,11 +26,13 @@ require (
 )
 
 require (
+	github.com/ReneKroon/ttlcache/v2 v2.4.0 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/forPelevin/gomoji v1.1.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/go-swiss/fonts v0.0.0-20210417170609-5d357d615b8f // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -39,6 +42,7 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
+	github.com/phpdave11/gofpdf v1.4.2 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect

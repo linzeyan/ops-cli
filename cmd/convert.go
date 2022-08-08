@@ -28,6 +28,7 @@ import (
 	toc "github.com/abhinav/goldmark-toc"
 	"github.com/pelletier/go-toml"
 	"github.com/spf13/cobra"
+	pdf "github.com/stephenafamo/goldmark-pdf"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
 	highlighting "github.com/yuin/goldmark-highlighting"
@@ -52,6 +53,12 @@ var convertSubCmdJSON2TOML = &cobra.Command{
 var convertSubCmdMarkdown2HTML = &cobra.Command{
 	Use:   "markdown2html",
 	Short: "Convert markdown to html format",
+	Run:   cf.Run,
+}
+
+var convertSubCmdMarkdown2PDF = &cobra.Command{
+	Use:   "markdown2pdf",
+	Short: "Convert markdown to pdf format",
 	Run:   cf.Run,
 }
 
@@ -96,7 +103,7 @@ func init() {
 	convertCmd.PersistentFlags().StringVarP(&cf.outFile, "out", "o", "", "Output file")
 
 	convertCmd.AddCommand(convertSubCmdJSON2TOML, convertSubCmdJSON2YAML)
-	convertCmd.AddCommand(convertSubCmdMarkdown2HTML)
+	convertCmd.AddCommand(convertSubCmdMarkdown2HTML, convertSubCmdMarkdown2PDF)
 	convertCmd.AddCommand(convertSubCmdTOML2JSON, convertSubCmdTOML2YAML)
 	convertCmd.AddCommand(convertSubCmdYAML2JSON, convertSubCmdYAML2TOML)
 }
@@ -225,6 +232,41 @@ func (c *convertFlag) ConvertMarkdown2HTML() {
 }
 
 func (c *convertFlag) ConvertMarkdown2PDF() {
+	c.Load()
+	md := goldmark.New(
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.Linkify,
+			extension.Strikethrough,
+			extension.Table,
+			extension.TaskList,
+			extension.Typographer,
+			emoji.Emoji,
+			&hashtag.Extender{},
+			highlighting.Highlighting,
+			&mermaid.Extender{},
+		),
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+			parser.WithBlockParsers(),
+			parser.WithInlineParsers(),
+			parser.WithParagraphTransformers(),
+		),
+		goldmark.WithRenderer(
+			pdf.New(
+				pdf.WithContext(rootContext),
+				pdf.WithHeadingFont(pdf.GetTextFont("IBM Plex Serif", pdf.FontLora)),
+				pdf.WithBodyFont(pdf.GetTextFont("Open Sans", pdf.FontRoboto)),
+				pdf.WithCodeFont(pdf.GetCodeFont("Inconsolata", pdf.FontRobotoMono)),
+			),
+		),
+	)
+	var buf bytes.Buffer
+	if err := md.Convert(c.readFile, &buf); err != nil {
+		log.Println(err)
+		os.Exit(0)
+	}
+	c.WriteFile(buf.Bytes())
 }
 
 func (c *convertFlag) WriteFile(content []byte) {
@@ -244,6 +286,7 @@ func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
 		return
 	case FileTypeMarkdown + "2" + FileTypePDF:
 		c.ConvertMarkdown2PDF()
+		return
 	}
 	slice := strings.Split(cmd.Name(), "2")
 	if len(slice) != 2 {
