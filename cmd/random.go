@@ -25,24 +25,9 @@ import (
 
 var randomCmd = &cobra.Command{
 	Use:   "random",
+	Args:  cobra.NoArgs,
 	Short: "Generate random string",
-	Run: func(_ *cobra.Command, _ []string) {
-		switch r.mode {
-		case "all":
-			r.result = password.GenAll(r.length)
-		case "num", "number":
-			r.result = password.GenNumber(r.length)
-		case "sym", "symbol":
-			r.result = password.GenSymbol(r.length)
-		case "upper", "uppercase":
-			r.result = password.GenUpper(r.length)
-		case "lower", "lowercase":
-			r.result = password.GenLower(r.length)
-		default:
-			r.result = password.GeneratePassword(r.length, r.lower, r.upper, r.symbol, r.number)
-		}
-		fmt.Println(r.result)
-	},
+	Run:   r.Run,
 	Example: Examples(`# Generate a random string
 ops-cli random
 
@@ -50,22 +35,39 @@ ops-cli random
 ops-cli random -l 32
 
 # Generate a random string of length 32 consisting of 10 symbols, 10 lowercase letters, 10 uppercase letters, 2 numbers
-ops-cli random -l 32 -s 10 -o 10 -u 10 -n 2
+ops-cli random -l 32 -s 10 -o 10 -u 10 -n 2`),
+}
 
-# Generate a random string of numbers of length 100
-ops-cli random -t number -l 100
+var randomSubCmdLower = &cobra.Command{
+	Use:   "lowercase",
+	Short: "Generate a string consisting of lowercase letters",
+	Run:   r.Run,
+	Example: Examples(` Generate a random string of lowercase letters
+ops-cli random lowercase`),
+}
 
-# Generate a random string of symbols
-ops-cli random -t symbol
+var randomSubCmdNumber = &cobra.Command{
+	Use:   "number",
+	Short: "Generate a string consisting of numbers",
+	Run:   r.Run,
+	Example: Examples(`Generate a random string of numbers of length 100
+ops-cli random number -l 100`),
+}
 
-# Generate a random string of uppercase letters
-ops-cli random -t upper
+var randomSubCmdSymbol = &cobra.Command{
+	Use:   "symbol",
+	Short: "Generate a string consisting of symbols",
+	Run:   r.Run,
+	Example: Examples(`# Generate a random string of symbols
+ops-cli random symbol`),
+}
 
-# Generate a random string of lowercase letters
-ops-cli random -t lower
-
-# Generate a random string
-ops-cli random -t all`),
+var randomSubCmdUpper = &cobra.Command{
+	Use:   "uppercase",
+	Short: "Generate a string consisting of uppercase letters",
+	Run:   r.Run,
+	Example: Examples(`# Generate a random string of uppercase letters
+ops-cli random uppercase`),
 }
 
 var r ran
@@ -73,18 +75,38 @@ var r ran
 func init() {
 	rootCmd.AddCommand(randomCmd)
 
-	randomCmd.Flags().UintVarP(&r.length, "length", "l", 24, "Specify the string length")
+	randomCmd.PersistentFlags().UintVarP(&r.length, "length", "l", 24, "Specify the string length")
 	randomCmd.Flags().UintVarP(&r.lower, "lower", "o", 4, "Number of lowercase letters to include in the string")
 	randomCmd.Flags().UintVarP(&r.upper, "upper", "u", 4, "Number of uppercase letters to include in the string")
 	randomCmd.Flags().UintVarP(&r.symbol, "symbol", "s", 4, "Number of symbols to include in the string")
 	randomCmd.Flags().UintVarP(&r.number, "number", "n", 4, "Number of digits to include in the string")
-	randomCmd.Flags().StringVarP(&r.mode, "type", "t", "default", "Specifies the string type, which can be number, symbol, upper(case), lower(case), or all but unspecified number of characters")
+
+	randomCmd.AddCommand(randomSubCmdLower)
+	randomCmd.AddCommand(randomSubCmdNumber)
+	randomCmd.AddCommand(randomSubCmdSymbol)
+	randomCmd.AddCommand(randomSubCmdUpper)
 }
 
 type ran struct {
 	/* Bind flags */
 	length, lower, upper, symbol, number uint
-	mode                                 string
+
 	/* Output string */
 	result string
+}
+
+func (r *ran) Run(cmd *cobra.Command, _ []string) {
+	switch cmd.Name() {
+	case "number":
+		r.result = password.GenNumber(r.length)
+	case "symbol":
+		r.result = password.GenSymbol(r.length)
+	case "uppercase":
+		r.result = password.GenUpper(r.length)
+	case "lowercase":
+		r.result = password.GenLower(r.length)
+	case "random":
+		r.result = password.GeneratePassword(r.length, r.lower, r.upper, r.symbol, r.number)
+	}
+	fmt.Println(r.result)
 }
