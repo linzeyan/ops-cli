@@ -206,6 +206,10 @@ func (t *telegramFlag) GetUpdate() {
 }
 
 func (t *telegramFlag) Run(cmd *cobra.Command, _ []string) {
+	if t.arg == "" {
+		_ = cmd.Help()
+		return
+	}
 	if err := t.Init(); err != nil {
 		log.Println(err)
 		return

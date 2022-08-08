@@ -157,6 +157,10 @@ func (s *slackFlag) Photo() {
 }
 
 func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
+	if s.arg == "" {
+		_ = cmd.Help()
+		return
+	}
 	if err := s.Init(); err != nil {
 		log.Println(err)
 		return
