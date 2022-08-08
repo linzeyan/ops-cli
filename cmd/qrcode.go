@@ -50,7 +50,7 @@ var qrcodeSubCmdRead = &cobra.Command{
 		fmt.Println(result)
 	},
 	Example: Examples(`# Read QR code and print message
-ops-cli qrcode qrcode.png`),
+ops-cli qrcode read qrcode.png`),
 	DisableFlagsInUseLine: true,
 }
 

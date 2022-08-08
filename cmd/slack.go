@@ -43,7 +43,7 @@ var slackSubCmdFile = &cobra.Command{
 	Short: "Send file to Slack",
 	Run:   sf.Run,
 	Example: Examples(`# Send file
-ops-cli Slack file -a "Hello World!"`),
+ops-cli Slack file -a "/tmp/a.txt" --config ~/.config.toml`),
 }
 
 var slackSubCmdText = &cobra.Command{
@@ -59,7 +59,7 @@ var slackSubCmdPhoto = &cobra.Command{
 	Short: "Send photo to Slack",
 	Run:   sf.Run,
 	Example: Examples(`# Send photo
-ops-cli Slack photo -a "Hello World!"`),
+ops-cli Slack photo -a "~/robot.png"`),
 }
 
 var sf slackFlag
