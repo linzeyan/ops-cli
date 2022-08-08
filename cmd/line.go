@@ -17,8 +17,11 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"github.com/spf13/cobra"
@@ -36,6 +39,30 @@ var lineSubCmdText = &cobra.Command{
 	Example: Examples(`# Send text to LINE chat
 ops-cli LINE text -s secret -t token --id GroupID -a 'Hello LINE'`),
 	Run: line.Run,
+}
+
+var lineSubCmdID = &cobra.Command{
+	Use:   "id",
+	Args:  cobra.ExactArgs(1),
+	Short: "Get chat ID from LINE",
+	Example: Examples(`# Get chat ID from LINE,
+# execute this command will listen on 80 port,
+# and type any text message in the chat,
+# then console will print ID.
+ops-cli LINE id https://callback_url`),
+	Run: func(_ *cobra.Command, args []string) {
+		var err error
+		if err = line.Init(); err != nil {
+			log.Println(err)
+			return
+		}
+		line.resp, err = line.api.SetWebhookEndpointURL(args[0]).Do()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		line.GetID()
+	},
 }
 
 var lineSubCmdPhoto = &cobra.Command{
@@ -64,8 +91,9 @@ func init() {
 	lineCmd.PersistentFlags().StringVarP(&line.arg, "arg", "a", "", "Function Argument")
 	lineCmd.PersistentFlags().StringVar(&line.id, "id", "", "UserID/GroupID/RoomID")
 
-	lineCmd.AddCommand(lineSubCmdText)
+	lineCmd.AddCommand(lineSubCmdID)
 	lineCmd.AddCommand(lineSubCmdPhoto)
+	lineCmd.AddCommand(lineSubCmdText)
 	lineCmd.AddCommand(lineSubCmdVideo)
 }
 
@@ -89,12 +117,41 @@ func (l *lineFlag) Init() error {
 	return nil
 }
 
+func (l *lineFlag) GetID() {
+	http.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
+		events, err := l.api.ParseRequest(r)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		for i := range events {
+			if events[i].Type == linebot.EventTypeMessage {
+				s := events[i].Source
+				fmt.Printf("%#v", s)
+				os.Exit(0)
+			}
+		}
+	})
+
+	err := http.ListenAndServe(":80", nil)
+	if errors.Is(err, http.ErrServerClosed) {
+		log.Println("server closed")
+	} else if err != nil {
+		log.Printf("error starting server: %s\n", err)
+		os.Exit(1)
+	}
+}
+
 func (l *lineFlag) Run(cmd *cobra.Command, _ []string) {
-	if err := l.Init(); err != nil {
-		log.Println(err)
+	if l.arg == "" {
+		_ = cmd.Help()
 		return
 	}
 	var err error
+	if err = l.Init(); err != nil {
+		log.Println(err)
+		return
+	}
 	switch cmd.Name() {
 	case ImTypeText:
 		input := linebot.NewTextMessage(l.arg)
