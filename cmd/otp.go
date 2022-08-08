@@ -71,9 +71,9 @@ var of otpFlag
 func init() {
 	rootCmd.AddCommand(otpCmd)
 
-	otpCmd.Flags().StringVarP(&of.alg, "algorithm", "a", "SHA1", "The hash algorithm used by the credential(SHA1/SHA256/SHA512)")
-	otpCmd.Flags().Int8VarP(&of.period, "period", "p", 30, "The period parameter defines a validity period in seconds for the TOTP code(15/30/60)")
-	otpCmd.Flags().Int8VarP(&of.digit, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
+	otpCmd.PersistentFlags().StringVarP(&of.alg, "algorithm", "a", "SHA1", "The hash algorithm used by the credential(SHA1/SHA256/SHA512)")
+	otpCmd.PersistentFlags().Int8VarP(&of.period, "period", "p", 30, "The period parameter defines a validity period in seconds for the TOTP code(15/30/60)")
+	otpCmd.PersistentFlags().Int8VarP(&of.digit, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
 
 	otpCmd.AddCommand(otpSubCmdCalculate, otpSubCmdGenerate)
 }
