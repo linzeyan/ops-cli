@@ -35,57 +35,35 @@ import (
 
 var otpCmd = &cobra.Command{
 	Use:   "otp",
+	Short: "Calculate passcode or generate secret",
+	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+}
+
+var otpSubCmdCalculate = &cobra.Command{
+	Use:   "calculate",
+	Args:  cobra.MinimumNArgs(1),
 	Short: "Calculate passcode",
-	Run: func(cmd *cobra.Command, args []string) {
-		/* Read secret if not generate. */
-		if !of.secret {
-			var secret string
-			switch l := len(args); {
-			case l == 1:
-				secret = args[0]
-			/* Merge all strings. */
-			case l > 1:
-				for i := range args {
-					secret += args[i]
-				}
-			default:
-				_ = cmd.Help()
-				return
-			}
-			var result, err = of.TOTP(secret)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			fmt.Println(result)
-			return
-		}
-		if of.secret {
-			var secret, err = of.GenSecret()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			fmt.Println(secret)
-			return
-		}
-		_ = cmd.Help()
-	},
+	Run:   of.Run,
 	Example: Examples(`# Calculate the passcode for the specified secret
-ops-cli otp 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
-ops-cli otp 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
+ops-cli otp calculate 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
+ops-cli otp calculate 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
 
 # Calculate the passcode of the specified secret, the period is 15 seconds, and the number of digits is 7
-ops-cli otp T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7
+ops-cli otp calculate T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`),
+}
 
-# Generate OTP and specify a period of 15 seconds
-ops-cli otp -g -p 15
+var otpSubCmdGenerate = &cobra.Command{
+	Use:   "generate",
+	Short: "Generate otp secret",
+	Run:   of.Run,
+	Example: Examples(`# Generate OTP and specify a period of 15 seconds
+ops-cli otp generate -p 15
 
 # Generate OTP and specify SHA256 algorithm
-ops-cli otp -g -a sha256
+ops-cli otp generate -a sha256
 
 # Generate OTP and specify SHA512 algorithm, the period is 15 seconds
-ops-cli otp -g -a sha512 -p 15`),
+ops-cli otp generate -a sha512 -p 15`),
 }
 
 var of otpFlag
@@ -93,10 +71,11 @@ var of otpFlag
 func init() {
 	rootCmd.AddCommand(otpCmd)
 
-	otpCmd.Flags().BoolVarP(&of.secret, "generate", "g", false, "Generate secret key")
 	otpCmd.Flags().StringVarP(&of.alg, "algorithm", "a", "SHA1", "The hash algorithm used by the credential(SHA1/SHA256/SHA512)")
 	otpCmd.Flags().Int8VarP(&of.period, "period", "p", 30, "The period parameter defines a validity period in seconds for the TOTP code(15/30/60)")
 	otpCmd.Flags().Int8VarP(&of.digit, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
+
+	otpCmd.AddCommand(otpSubCmdCalculate, otpSubCmdGenerate)
 }
 
 type otpFlag struct {
@@ -107,11 +86,9 @@ type otpFlag struct {
 	digit int8
 	/* The algorithm of OTP */
 	alg string
-	/* Generate secret key or not */
-	secret bool
 }
 
-func (o otpFlag) SetTimeInterval() int64 {
+func (o *otpFlag) SetTimeInterval() int64 {
 	var timeInterval int64
 	switch o.period {
 	case 15:
@@ -124,7 +101,7 @@ func (o otpFlag) SetTimeInterval() int64 {
 	return timeInterval
 }
 
-func (o otpFlag) SetDigits() [2]int {
+func (o *otpFlag) SetDigits() [2]int {
 	var digits [2]int
 	switch o.digit {
 	case 7:
@@ -137,7 +114,7 @@ func (o otpFlag) SetDigits() [2]int {
 	return digits
 }
 
-func (o otpFlag) SetAlgorithm() func() hash.Hash {
+func (o *otpFlag) SetAlgorithm() func() hash.Hash {
 	var algorithm func() hash.Hash
 	switch strings.ToLower(o.alg) {
 	case "sha256":
@@ -150,7 +127,7 @@ func (o otpFlag) SetAlgorithm() func() hash.Hash {
 	return algorithm
 }
 
-func (o otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
+func (o *otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
 	key, err := base32.StdEncoding.DecodeString(strings.ToUpper(secret))
 	if err != nil {
 		return "", err
@@ -182,11 +159,11 @@ func (o otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
 	return passcode, nil
 }
 
-func (o otpFlag) TOTP(secret string) (string, error) {
+func (o *otpFlag) TOTP(secret string) (string, error) {
 	return o.HOTP(secret, o.SetTimeInterval())
 }
 
-func (o otpFlag) GenSecret() (string, error) {
+func (o *otpFlag) GenSecret() (string, error) {
 	buf := bytes.Buffer{}
 	err := binary.Write(&buf, binary.BigEndian, o.SetTimeInterval())
 	if err != nil {
@@ -197,10 +174,39 @@ func (o otpFlag) GenSecret() (string, error) {
 	return secret, nil
 }
 
-func (o otpFlag) Verify(secret string, input string) (bool, error) {
+func (o *otpFlag) Verify(secret string, input string) (bool, error) {
 	passcode, err := o.TOTP(secret)
 	if err != nil {
 		return passcode == input, err
 	}
 	return passcode == input, nil
+}
+
+func (o *otpFlag) Run(cmd *cobra.Command, args []string) {
+	switch cmd.Name() {
+	case "calculate":
+		var secret string
+		switch l := len(args); {
+		case l == 1:
+			secret = args[0]
+		/* Merge all strings. */
+		case l > 1:
+			for i := range args {
+				secret += args[i]
+			}
+		}
+		var result, err = o.TOTP(secret)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fmt.Println(result)
+	case "generate":
+		var secret, err = o.GenSecret()
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		fmt.Println(secret)
+	}
 }
