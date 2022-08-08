@@ -17,26 +17,30 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"strings"
 
+	hashtag "github.com/abhinav/goldmark-hashtag"
+	mermaid "github.com/abhinav/goldmark-mermaid"
+	toc "github.com/abhinav/goldmark-toc"
 	"github.com/pelletier/go-toml"
-	"github.com/russross/blackfriday/v2"
 	"github.com/spf13/cobra"
+	"github.com/yuin/goldmark"
+	emoji "github.com/yuin/goldmark-emoji"
+	highlighting "github.com/yuin/goldmark-highlighting"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 	"gopkg.in/yaml.v3"
 )
 
 var convertCmd = &cobra.Command{
 	Use:   "convert",
 	Short: "Convert data format",
-	Run: func(cmd *cobra.Command, _ []string) {
-		output := blackfriday.Run([]byte(`# 123`))
-		fmt.Println(string(output))
-		_ = cmd.Help()
-	},
+	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
 
 var convertSubCmdJSON2TOML = &cobra.Command{
@@ -142,12 +146,6 @@ func (c *convertFlag) ParseYAML() {
 	c.unmarshalData = c.Convert(c.unmarshalData)
 }
 
-func (c convertFlag) ToHTML() {
-	c.Load()
-	out := blackfriday.Run(c.readFile)
-	c.WriteFile(out)
-}
-
 func (c convertFlag) ToJSON() {
 	out, err := json.MarshalIndent(c.unmarshalData, "", "  ")
 	if err != nil {
@@ -191,6 +189,44 @@ func (c convertFlag) Convert(i interface{}) interface{} {
 	return i
 }
 
+func (c *convertFlag) ConvertMarkdown2HTML() {
+	c.Load()
+	md := goldmark.New(
+		goldmark.WithExtensions(
+			extension.GFM,
+			extension.Linkify,
+			extension.Strikethrough,
+			extension.Table,
+			extension.TaskList,
+			extension.Typographer,
+			emoji.Emoji,
+			&hashtag.Extender{},
+			highlighting.Highlighting,
+			&mermaid.Extender{},
+			&toc.Extender{},
+		),
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+			parser.WithBlockParsers(),
+			parser.WithInlineParsers(),
+			parser.WithParagraphTransformers(),
+		),
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
+			html.WithXHTML(),
+		),
+	)
+	var buf bytes.Buffer
+	if err := md.Convert(c.readFile, &buf); err != nil {
+		log.Println(err)
+		os.Exit(0)
+	}
+	c.WriteFile(buf.Bytes())
+}
+
+func (c *convertFlag) ConvertMarkdown2PDF() {
+}
+
 func (c *convertFlag) WriteFile(content []byte) {
 	if err := os.WriteFile(c.outFile, content, os.ModePerm); err != nil {
 		log.Println(err)
@@ -201,6 +237,13 @@ func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
 	if !ValidFile(c.inFile) || c.outFile == "" {
 		_ = cmd.Help()
 		return
+	}
+	switch cmd.Name() {
+	case FileTypeMarkdown + "2" + FileTypeHTML:
+		c.ConvertMarkdown2HTML()
+		return
+	case FileTypeMarkdown + "2" + FileTypePDF:
+		c.ConvertMarkdown2PDF()
 	}
 	slice := strings.Split(cmd.Name(), "2")
 	if len(slice) != 2 {
@@ -213,7 +256,6 @@ func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
 	switch c.inType {
 	case FileTypeJSON:
 		c.ParseJSON()
-	case FileTypeMarkdown:
 	case FileTypeTOML:
 		c.ParseTOML()
 	case FileTypeYAML:
@@ -221,8 +263,6 @@ func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
 	}
 
 	switch c.outType {
-	case FileTypeHTML:
-		c.ToHTML()
 	case FileTypeJSON:
 		c.ToJSON()
 	case FileTypeTOML:
