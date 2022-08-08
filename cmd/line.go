@@ -47,7 +47,7 @@ var lineSubCmdID = &cobra.Command{
 	Short: "Get chat ID from LINE",
 	Example: Examples(`# Get chat ID from LINE,
 # execute this command will listen on 80 port,
-# and type any text message in the chat,
+# type and sent 'id' in the chat,
 # then console will print ID.
 ops-cli LINE id https://callback_url`),
 	Run: func(_ *cobra.Command, args []string) {
@@ -125,10 +125,18 @@ func (l *lineFlag) GetID() {
 			return
 		}
 		for i := range events {
-			if events[i].Type == linebot.EventTypeMessage {
-				s := events[i].Source
-				fmt.Printf("%#v", s)
-				os.Exit(0)
+			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == ImTypeID {
+				switch s := events[i].Source; s.Type {
+				case linebot.EventSourceTypeGroup:
+					fmt.Println(s.GroupID)
+					os.Exit(0)
+				case linebot.EventSourceTypeRoom:
+					fmt.Println(s.RoomID)
+					os.Exit(0)
+				case linebot.EventSourceTypeUser:
+					fmt.Println(s.UserID)
+					os.Exit(0)
+				}
 			}
 		}
 	})
