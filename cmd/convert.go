@@ -18,11 +18,13 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/pelletier/go-toml"
+	"github.com/russross/blackfriday/v2"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -30,12 +32,22 @@ import (
 var convertCmd = &cobra.Command{
 	Use:   "convert",
 	Short: "Convert data format",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+	Run: func(cmd *cobra.Command, _ []string) {
+		output := blackfriday.Run([]byte(`# 123`))
+		fmt.Println(string(output))
+		_ = cmd.Help()
+	},
 }
 
 var convertSubCmdJSON2TOML = &cobra.Command{
 	Use:   "json2toml",
 	Short: "Convert json to toml format",
+	Run:   cf.Run,
+}
+
+var convertSubCmdMarkdown2HTML = &cobra.Command{
+	Use:   "markdown2html",
+	Short: "Convert markdown to html format",
 	Run:   cf.Run,
 }
 
@@ -79,12 +91,10 @@ func init() {
 	convertCmd.PersistentFlags().StringVarP(&cf.inFile, "in", "i", "", "Input file")
 	convertCmd.PersistentFlags().StringVarP(&cf.outFile, "out", "o", "", "Output file")
 
-	convertCmd.AddCommand(convertSubCmdJSON2TOML)
-	convertCmd.AddCommand(convertSubCmdJSON2YAML)
-	convertCmd.AddCommand(convertSubCmdTOML2JSON)
-	convertCmd.AddCommand(convertSubCmdTOML2YAML)
-	convertCmd.AddCommand(convertSubCmdYAML2JSON)
-	convertCmd.AddCommand(convertSubCmdYAML2TOML)
+	convertCmd.AddCommand(convertSubCmdJSON2TOML, convertSubCmdJSON2YAML)
+	convertCmd.AddCommand(convertSubCmdMarkdown2HTML)
+	convertCmd.AddCommand(convertSubCmdTOML2JSON, convertSubCmdTOML2YAML)
+	convertCmd.AddCommand(convertSubCmdYAML2JSON, convertSubCmdYAML2TOML)
 }
 
 type convertFlag struct {
@@ -130,6 +140,12 @@ func (c *convertFlag) ParseYAML() {
 		os.Exit(0)
 	}
 	c.unmarshalData = c.Convert(c.unmarshalData)
+}
+
+func (c convertFlag) ToHTML() {
+	c.Load()
+	out := blackfriday.Run(c.readFile)
+	c.WriteFile(out)
 }
 
 func (c convertFlag) ToJSON() {
@@ -197,6 +213,7 @@ func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
 	switch c.inType {
 	case FileTypeJSON:
 		c.ParseJSON()
+	case FileTypeMarkdown:
 	case FileTypeTOML:
 		c.ParseTOML()
 	case FileTypeYAML:
@@ -204,6 +221,8 @@ func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
 	}
 
 	switch c.outType {
+	case FileTypeHTML:
+		c.ToHTML()
 	case FileTypeJSON:
 		c.ToJSON()
 	case FileTypeTOML:

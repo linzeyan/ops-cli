@@ -54,8 +54,9 @@ const (
 )
 
 const (
+	FileTypeHTML     = "html"
 	FileTypeJSON     = "json"
-	FileTypeMarkdown = "md"
+	FileTypeMarkdown = "markdown"
 	FileTypeTOML     = "toml"
 	FileTypeYAML     = "yaml"
 )
