@@ -37,10 +37,9 @@ var docSubCmdMan = &cobra.Command{
 }
 
 var docSubCmdMarkdown = &cobra.Command{
-	Use:     "markdown",
-	Aliases: []string{FileTypeMarkdown},
-	Short:   "Generate markdown documentation",
-	Run:     df.Run,
+	Use:   "markdown",
+	Short: "Generate markdown documentation",
+	Run:   df.Run,
 }
 
 var docSubCmdRest = &cobra.Command{
