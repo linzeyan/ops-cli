@@ -93,16 +93,31 @@ func (s *systemFlag) CPUTimes() error {
 		return err
 	}
 	s.cpuTimeResp = systemCPUTimesResponse{
-		User:      (time.Second * time.Duration(info[0].User)).String(),
-		System:    (time.Second * time.Duration(info[0].System)).String(),
-		Idle:      (time.Second * time.Duration(info[0].Idle)).String(),
-		Nice:      (time.Second * time.Duration(info[0].Nice)).String(),
-		Iowait:    (time.Second * time.Duration(info[0].Iowait)).String(),
-		Irq:       (time.Second * time.Duration(info[0].Irq)).String(),
-		Softirq:   (time.Second * time.Duration(info[0].Softirq)).String(),
-		Steal:     (time.Second * time.Duration(info[0].Steal)).String(),
-		Guest:     (time.Second * time.Duration(info[0].Guest)).String(),
-		GuestNice: (time.Second * time.Duration(info[0].GuestNice)).String(),
+		User:   (time.Second * time.Duration(info[0].User)).String(),
+		System: (time.Second * time.Duration(info[0].System)).String(),
+		Idle:   (time.Second * time.Duration(info[0].Idle)).String(),
+	}
+	switch {
+	case info[0].Nice != 0:
+		s.cpuTimeResp.Nice = (time.Second * time.Duration(info[0].Nice)).String()
+		fallthrough
+	case info[0].Iowait != 0:
+		s.cpuTimeResp.Iowait = (time.Second * time.Duration(info[0].Iowait)).String()
+		fallthrough
+	case info[0].Irq != 0:
+		s.cpuTimeResp.Irq = (time.Second * time.Duration(info[0].Irq)).String()
+		fallthrough
+	case info[0].Softirq != 0:
+		s.cpuTimeResp.Softirq = (time.Second * time.Duration(info[0].Softirq)).String()
+		fallthrough
+	case info[0].Steal != 0:
+		s.cpuTimeResp.Steal = (time.Second * time.Duration(info[0].Steal)).String()
+		fallthrough
+	case info[0].Guest != 0:
+		s.cpuTimeResp.Guest = (time.Second * time.Duration(info[0].Guest)).String()
+		fallthrough
+	case info[0].GuestNice != 0:
+		s.cpuTimeResp.GuestNice = (time.Second * time.Duration(info[0].GuestNice)).String()
 	}
 	return nil
 }
