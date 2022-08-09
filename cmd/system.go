@@ -25,7 +25,9 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/shirou/gopsutil/v3/net"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +48,9 @@ type systemFlag struct {
 	cpuTimeResp systemCPUTimesResponse
 	diskResp    systemDiskUsageResponse
 	hostResp    systemHostInfoResponse
+	loadResp    systemLoadAvgResponse
 	memResp     systemMemInfoResponse
+	netResp     systemNetIOResponse
 }
 
 type systemCPUInfoResponse struct {
@@ -210,6 +214,27 @@ func (s *systemFlag) HostInfo() error {
 	return nil
 }
 
+type systemLoadAvgResponse struct {
+	Load1  float64 `json:"load1,omitempty" yaml:"load1,omitempty"`
+	Load5  float64 `json:"load5,omitempty" yaml:"load5,omitempty"`
+	Load15 float64 `json:"load15,omitempty" yaml:"load15,omitempty"`
+}
+
+func (s *systemFlag) LoadAvg() error {
+	info, err := load.Avg()
+	if err != nil {
+		return err
+	}
+	data, err := json.Marshal(info)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(data, &s.loadResp); err != nil {
+		return err
+	}
+	return nil
+}
+
 type systemMemInfoResponse struct {
 	/* mem.VirtualMemory() */
 	Total       string `json:"total,omitempty" yaml:"total,omitempty"`
@@ -230,6 +255,62 @@ func (s *systemFlag) MemUsage() error {
 		Free:        ByteSize(info.Free).String(),
 		Used:        ByteSize(info.Used).String(),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
+	}
+	return nil
+}
+
+type systemNetIOResponse struct {
+	BytesSent   uint64 `json:"bytesSent,omitempty" yaml:"bytesSent,omitempty"`
+	BytesRecv   uint64 `json:"bytesRecv,omitempty" yaml:"bytesRecv,omitempty"`
+	PacketsSent uint64 `json:"packetsSent,omitempty" yaml:"packetsSent,omitempty"`
+	PacketsRecv uint64 `json:"packetsRecv,omitempty" yaml:"packetsRecv,omitempty"`
+	Errin       uint64 `json:"errin,omitempty" yaml:"errin,omitempty"`
+	Errout      uint64 `json:"errout,omitempty" yaml:"errout,omitempty"`
+	Dropin      uint64 `json:"dropin,omitempty" yaml:"dropin,omitempty"`
+	Dropout     uint64 `json:"dropout,omitempty" yaml:"dropout,omitempty"`
+	Fifoin      uint64 `json:"fifoin,omitempty" yaml:"fifoin,omitempty"`
+	Fifoout     uint64 `json:"fifoout,omitempty" yaml:"fifoout,omitempty"`
+
+	Interfaces []systemNetInterfaceResponse `json:"interface,omitempty" yaml:"interface,omitempty"`
+}
+
+type systemNetInterfaceResponse struct {
+	Index        int      `json:"index"`
+	MTU          int      `json:"mtu"`
+	Name         string   `json:"name"`
+	HardwareAddr string   `json:"hardwareAddr"`
+	Flags        []string `json:"flags"`
+
+	Addrs net.InterfaceAddrList `json:"addrs"`
+}
+
+func (s *systemFlag) NetInfo() error {
+	info, err := net.IOCounters(false)
+	if err != nil {
+		return err
+	}
+	data, err := json.Marshal(info[0])
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(data, &s.netResp); err != nil {
+		return err
+	}
+	inet, err := net.Interfaces()
+	if err != nil {
+		return err
+	}
+	for i := range inet {
+		if len(inet[i].Addrs) != 0 && inet[i].HardwareAddr != "" {
+			s.netResp.Interfaces = append(s.netResp.Interfaces, systemNetInterfaceResponse{
+				Index:        inet[i].Index,
+				MTU:          inet[i].MTU,
+				Name:         inet[i].Name,
+				HardwareAddr: inet[i].HardwareAddr,
+				Flags:        inet[i].Flags,
+				Addrs:        inet[i].Addrs,
+			})
+		}
 	}
 	return nil
 }
