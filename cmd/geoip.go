@@ -84,7 +84,7 @@ type GeoIPSingle struct {
 
 func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 	/* Valid IP */
-	if net.ParseIP(geoipInput) == nil {
+	if !ValidIP(geoipInput) {
 		return nil, errors.New("not a valid IP")
 	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
@@ -145,7 +145,7 @@ func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
 	/* Valid IP and combine args */
 	for i := range geoipBatch {
 		switch {
-		case net.ParseIP(geoipBatch[i]) != nil:
+		case ValidIP(geoipBatch[i]):
 			ips += fmt.Sprintf(`"%s", `, geoipBatch[i])
 		default:
 			ip, err := net.LookupIP(geoipBatch[i])

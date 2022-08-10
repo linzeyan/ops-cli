@@ -19,7 +19,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"net"
 	"strings"
 
 	"github.com/miekg/dns"
@@ -46,7 +45,7 @@ var digCmd = &cobra.Command{
 		case lens > 1:
 			/* Find which arg is domain. */
 			for i := range args {
-				if ValidDomain(args[i]) || net.ParseIP(args[i]) != nil {
+				if ValidDomain(args[i]) || ValidIP(args[i]) {
 					digDomain = args[i]
 					argsWithoutDomain = append(args[:i], args[i+1:]...)
 					break

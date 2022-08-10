@@ -24,7 +24,6 @@ import (
 	"errors"
 	"io"
 	"log"
-	"net"
 	"os"
 	"time"
 
@@ -76,7 +75,7 @@ func (cf *certFlag) Run(cmd *cobra.Command, args []string) {
 	switch {
 	case ValidFile(input):
 		cf.resp, err = cf.resp.CheckFile(input)
-	case ValidDomain(input) || net.ParseIP(input).To4() != nil:
+	case ValidDomain(input) || ValidIPv4(input):
 		cf.resp, err = cf.resp.CheckHost(input + ":" + cf.port)
 	default:
 		_ = cmd.Help()

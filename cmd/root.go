@@ -17,10 +17,12 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/url"
 	"os"
 	"strconv"
@@ -230,21 +232,25 @@ func OutputDefaultYAML(i interface{}) {
 }
 
 func PrintJSON(i interface{}) {
-	out, err := json.MarshalIndent(i, "", "  ")
-	if err != nil {
+	var buf bytes.Buffer
+	encoder := json.NewEncoder(&buf)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(i); err != nil {
 		log.Println(err)
 		return
 	}
-	fmt.Println(string(out))
+	PrintString(buf.String())
 }
 
 func PrintYAML(i interface{}) {
-	out, err := yaml.Marshal(i)
-	if err != nil {
+	var buf bytes.Buffer
+	encoder := yaml.NewEncoder(&buf)
+	encoder.SetIndent(2)
+	if err := encoder.Encode(i); err != nil {
 		log.Println(err)
 		return
 	}
-	fmt.Println(string(out))
+	PrintString(buf.String())
 }
 
 func PrintString(i interface{}) {
@@ -276,6 +282,21 @@ func ValidDomain(i interface{}) bool {
 func ValidFile(f string) bool {
 	_, err := os.Stat(f)
 	return err == nil
+}
+
+/* If i is a ipv address return true. */
+func ValidIP(i string) bool {
+	return net.ParseIP(i) != nil
+}
+
+/* If i is a ipv4 address return true. */
+func ValidIPv4(i string) bool {
+	return net.ParseIP(i).To4() != nil
+}
+
+/* If i is a ipv6 address return true. */
+func ValidIPv6(i string) bool {
+	return net.ParseIP(i).To4() == nil && net.ParseIP(i).To16() != nil
 }
 
 /* If u is a valid url return true. */
