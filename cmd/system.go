@@ -19,7 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
+	"log"
 	"time"
 
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -34,23 +34,111 @@ import (
 var systemCmd = &cobra.Command{
 	Use:   "system",
 	Short: "Display system informations",
-	Run:   sysf.Run,
+	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+}
+
+var systemSubCmdCPU = &cobra.Command{
+	Use:   "cpu",
+	Short: "Display cpu informations",
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := sysf.CPUInfo(); err != nil {
+			log.Println(err)
+			return
+		}
+		OutputDefaultJSON(sysf.cpuResp)
+	},
+}
+
+var systemSubCmdDisk = &cobra.Command{
+	Use:   "disk",
+	Short: "Display disk informations",
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := sysf.DiskUsage(); err != nil {
+			log.Println(err)
+			return
+		}
+		OutputDefaultJSON(sysf.diskResp)
+	},
+}
+
+var systemSubCmdHost = &cobra.Command{
+	Use:   "host",
+	Short: "Display host informations",
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := sysf.HostInfo(); err != nil {
+			log.Println(err)
+			return
+		}
+		OutputDefaultJSON(sysf.hostResp)
+	},
+}
+
+var systemSubCmdLoad = &cobra.Command{
+	Use:   "load",
+	Short: "Display load informations",
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := sysf.LoadAvg(); err != nil {
+			log.Println(err)
+			return
+		}
+		OutputDefaultJSON(sysf.loadResp)
+	},
+}
+
+var systemSubCmdMemory = &cobra.Command{
+	Use:   "memory",
+	Short: "Display memory informations",
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := sysf.MemUsage(); err != nil {
+			log.Println(err)
+			return
+		}
+		OutputDefaultJSON(sysf.memResp)
+	},
+}
+
+var systemSubCmdNetwork = &cobra.Command{
+	Use:   "network",
+	Short: "Display network informations",
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := sysf.NetInfo(); err != nil {
+			log.Println(err)
+			return
+		}
+		OutputDefaultJSON(sysf.netResp)
+	},
 }
 
 var sysf systemFlag
 
 func init() {
 	rootCmd.AddCommand(systemCmd)
+
+	systemCmd.AddCommand(systemSubCmdCPU)
+	systemCmd.AddCommand(systemSubCmdDisk)
+	systemCmd.AddCommand(systemSubCmdHost)
+	systemCmd.AddCommand(systemSubCmdLoad)
+	systemCmd.AddCommand(systemSubCmdMemory)
+	systemCmd.AddCommand(systemSubCmdNetwork)
+
+	systemSubCmdCPU.Flags().BoolVarP(&sysf.cpu, "cpu-times", "t", false, "Display CPU Times")
+	systemSubCmdHost.Flags().BoolVarP(&sysf.temperature, "temperature", "t", false, "Display sensors temperature")
+	systemSubCmdNetwork.Flags().BoolVarP(&sysf.aiface, "all-interfaces", "a", false, "Display all interfaces")
+	systemSubCmdNetwork.Flags().BoolVarP(&sysf.iface, "interface", "i", false, "Display interfaces")
 }
 
 type systemFlag struct {
-	cpuResp     systemCPUInfoResponse
-	cpuTimeResp systemCPUTimesResponse
-	diskResp    systemDiskUsageResponse
-	hostResp    systemHostInfoResponse
-	loadResp    systemLoadAvgResponse
-	memResp     systemMemInfoResponse
-	netResp     systemNetIOResponse
+	cpu         bool
+	temperature bool
+	aiface      bool
+	iface       bool
+
+	cpuResp  systemCPUInfoResponse
+	diskResp systemDiskUsageResponse
+	hostResp systemHostInfoResponse
+	loadResp systemLoadAvgResponse
+	memResp  systemMemInfoResponse
+	netResp  systemNetIOResponse
 }
 
 type systemCPUInfoResponse struct {
@@ -60,21 +148,8 @@ type systemCPUInfoResponse struct {
 	ModelName string `json:"modelName,omitempty" yaml:"modelName,omitempty"`
 	Mhz       int    `json:"mhz,omitempty" yaml:"mhz,omitempty"`
 	CacheSize int    `json:"cacheSize,omitempty" yaml:"cacheSize,omitempty"`
-}
 
-func (s *systemFlag) CPUInfo() error {
-	info, err := cpu.Info()
-	if err != nil {
-		return err
-	}
-	data, err := json.Marshal(info[0])
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(data, &s.cpuResp); err != nil {
-		return err
-	}
-	return nil
+	CPUTimes systemCPUTimesResponse `json:"cpuTimes,omitempty" yaml:"cpuTimes,omitempty"`
 }
 
 type systemCPUTimesResponse struct {
@@ -91,37 +166,52 @@ type systemCPUTimesResponse struct {
 	GuestNice string `json:"guestNice,omitempty" yaml:"guestNice,omitempty"`
 }
 
-func (s *systemFlag) CPUTimes() error {
-	info, err := cpu.Times(false)
+func (s *systemFlag) CPUInfo() error {
+	info, err := cpu.Info()
 	if err != nil {
 		return err
 	}
-	s.cpuTimeResp = systemCPUTimesResponse{
-		User:   (time.Second * time.Duration(info[0].User)).String(),
-		System: (time.Second * time.Duration(info[0].System)).String(),
-		Idle:   (time.Second * time.Duration(info[0].Idle)).String(),
+	data, err := json.Marshal(info[0])
+	if err != nil {
+		return err
 	}
-	switch {
-	case info[0].Nice != 0:
-		s.cpuTimeResp.Nice = (time.Second * time.Duration(info[0].Nice)).String()
-		fallthrough
-	case info[0].Iowait != 0:
-		s.cpuTimeResp.Iowait = (time.Second * time.Duration(info[0].Iowait)).String()
-		fallthrough
-	case info[0].Irq != 0:
-		s.cpuTimeResp.Irq = (time.Second * time.Duration(info[0].Irq)).String()
-		fallthrough
-	case info[0].Softirq != 0:
-		s.cpuTimeResp.Softirq = (time.Second * time.Duration(info[0].Softirq)).String()
-		fallthrough
-	case info[0].Steal != 0:
-		s.cpuTimeResp.Steal = (time.Second * time.Duration(info[0].Steal)).String()
-		fallthrough
-	case info[0].Guest != 0:
-		s.cpuTimeResp.Guest = (time.Second * time.Duration(info[0].Guest)).String()
-		fallthrough
-	case info[0].GuestNice != 0:
-		s.cpuTimeResp.GuestNice = (time.Second * time.Duration(info[0].GuestNice)).String()
+	if err := json.Unmarshal(data, &s.cpuResp); err != nil {
+		return err
+	}
+	if !s.cpu {
+		return nil
+	}
+
+	times, err := cpu.Times(false)
+	if err != nil {
+		return err
+	}
+	s.cpuResp.CPUTimes = systemCPUTimesResponse{
+		User:   (time.Second * time.Duration(times[0].User)).String(),
+		System: (time.Second * time.Duration(times[0].System)).String(),
+		Idle:   (time.Second * time.Duration(times[0].Idle)).String(),
+	}
+
+	if times[0].Nice != 0 {
+		s.cpuResp.CPUTimes.Nice = (time.Second * time.Duration(times[0].Nice)).String()
+	}
+	if times[0].Iowait != 0 {
+		s.cpuResp.CPUTimes.Iowait = (time.Second * time.Duration(times[0].Iowait)).String()
+	}
+	if times[0].Irq != 0 {
+		s.cpuResp.CPUTimes.Irq = (time.Second * time.Duration(times[0].Irq)).String()
+	}
+	if times[0].Softirq != 0 {
+		s.cpuResp.CPUTimes.Softirq = (time.Second * time.Duration(times[0].Softirq)).String()
+	}
+	if times[0].Steal != 0 {
+		s.cpuResp.CPUTimes.Steal = (time.Second * time.Duration(times[0].Steal)).String()
+	}
+	if times[0].Guest != 0 {
+		s.cpuResp.CPUTimes.Guest = (time.Second * time.Duration(times[0].Guest)).String()
+	}
+	if times[0].GuestNice != 0 {
+		s.cpuResp.CPUTimes.GuestNice = (time.Second * time.Duration(times[0].GuestNice)).String()
 	}
 	return nil
 }
@@ -196,7 +286,9 @@ func (s *systemFlag) HostInfo() error {
 		VirtualizationRole:   info.VirtualizationRole,
 		HostID:               info.HostID,
 	}
-
+	if !s.temperature {
+		return nil
+	}
 	temp, err := host.SensorsTemperatures()
 	if err != nil {
 		return err
@@ -296,12 +388,25 @@ func (s *systemFlag) NetInfo() error {
 	if err := json.Unmarshal(data, &s.netResp); err != nil {
 		return err
 	}
+	if !s.iface && !s.aiface {
+		return nil
+	}
 	inet, err := net.Interfaces()
 	if err != nil {
 		return err
 	}
+
 	for i := range inet {
-		if len(inet[i].Addrs) != 0 && inet[i].HardwareAddr != "" {
+		if s.aiface {
+			s.netResp.Interfaces = append(s.netResp.Interfaces, systemNetInterfaceResponse{
+				Index:        inet[i].Index,
+				MTU:          inet[i].MTU,
+				Name:         inet[i].Name,
+				HardwareAddr: inet[i].HardwareAddr,
+				Flags:        inet[i].Flags,
+				Addrs:        inet[i].Addrs,
+			})
+		} else if len(inet[i].Addrs) != 0 && inet[i].HardwareAddr != "" {
 			s.netResp.Interfaces = append(s.netResp.Interfaces, systemNetInterfaceResponse{
 				Index:        inet[i].Index,
 				MTU:          inet[i].MTU,
@@ -313,20 +418,4 @@ func (s *systemFlag) NetInfo() error {
 		}
 	}
 	return nil
-}
-
-func (s systemFlag) Run(cmd *cobra.Command, args []string) {
-
-}
-
-func (s systemFlag) JSON() { PrintJSON(s) }
-
-func (s systemFlag) YAML() { PrintYAML(s) }
-
-func (s systemFlag) String() {
-	f := reflect.ValueOf(&s).Elem()
-	t := f.Type()
-	for i := 0; i < f.NumField(); i++ {
-		fmt.Printf("%s\t%v\n", t.Field(i).Name, f.Field(i).Interface())
-	}
 }
