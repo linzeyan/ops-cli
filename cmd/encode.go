@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/base32"
 	"encoding/base64"
+	"encoding/hex"
 	"log"
 
 	"github.com/spf13/cobra"
@@ -42,12 +43,12 @@ func (e *encodeFlag) Run(cmd *cobra.Command, args []string) {
 
 }
 
-func (e *encodeFlag) Base32StdEncode(s string) string {
-	return base32.StdEncoding.EncodeToString([]byte(s))
+func (e *encodeFlag) Base32HexEncode(s string) string {
+	return base32.HexEncoding.EncodeToString([]byte(s))
 }
 
-func (e *encodeFlag) Base32StdDecode(s string) string {
-	out, err := base32.StdEncoding.DecodeString(s)
+func (e *encodeFlag) Base32HexDecode(s string) string {
+	out, err := base32.HexEncoding.DecodeString(s)
 	if err != nil {
 		log.Println(err)
 		return ""
@@ -55,12 +56,12 @@ func (e *encodeFlag) Base32StdDecode(s string) string {
 	return string(out)
 }
 
-func (e *encodeFlag) Base32HexEncode(s string) string {
-	return base32.HexEncoding.EncodeToString([]byte(s))
+func (e *encodeFlag) Base32StdEncode(s string) string {
+	return base32.StdEncoding.EncodeToString([]byte(s))
 }
 
-func (e *encodeFlag) Base32HexDecode(s string) string {
-	out, err := base32.HexEncoding.DecodeString(s)
+func (e *encodeFlag) Base32StdDecode(s string) string {
+	out, err := base32.StdEncoding.DecodeString(s)
 	if err != nil {
 		log.Println(err)
 		return ""
@@ -87,6 +88,19 @@ func (e *encodeFlag) Base64URLEncode(s string) string {
 
 func (e *encodeFlag) Base64URLDecode(s string) string {
 	out, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+	return string(out)
+}
+
+func (e *encodeFlag) HexEncode(s string) string {
+	return hex.EncodeToString([]byte(s))
+}
+
+func (e *encodeFlag) HexDecode(s string) string {
+	out, err := hex.DecodeString(s)
 	if err != nil {
 		log.Println(err)
 		return ""
