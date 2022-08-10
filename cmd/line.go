@@ -173,13 +173,7 @@ func (l *lineFlag) Run(cmd *cobra.Command, _ []string) {
 	}
 	if err != nil {
 		log.Println(err)
+		return
 	}
-}
-
-func (l lineFlag) JSON() { PrintJSON(l.resp) }
-
-func (l lineFlag) YAML() { PrintYAML(l.resp) }
-
-func (l lineFlag) String() {
-	fmt.Printf(`%v`, l.resp)
+	OutputDefaultNone(l.resp)
 }

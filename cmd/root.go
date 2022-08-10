@@ -205,19 +205,27 @@ func OutputDefaultString(r rootOutput) {
 	}
 }
 
-func OutputDefaultJSON(r rootOutput) {
-	if rootOutputYAML {
-		r.YAML()
-	} else {
-		r.JSON()
+func OutputDefaultNone(i interface{}) {
+	if rootOutputJSON {
+		PrintJSON(i)
+	} else if rootOutputYAML {
+		PrintYAML(i)
 	}
 }
 
-func OutputDefaultYAML(r rootOutput) {
-	if rootOutputJSON {
-		r.JSON()
+func OutputDefaultJSON(i interface{}) {
+	if rootOutputYAML {
+		PrintYAML(i)
 	} else {
-		r.YAML()
+		PrintJSON(i)
+	}
+}
+
+func OutputDefaultYAML(i interface{}) {
+	if rootOutputJSON {
+		PrintJSON(i)
+	} else {
+		PrintYAML(i)
 	}
 }
 
@@ -237,6 +245,10 @@ func PrintYAML(i interface{}) {
 		return
 	}
 	fmt.Println(string(out))
+}
+
+func PrintString(i interface{}) {
+	fmt.Printf("%+v\n", i)
 }
 
 /* If i is a domain return true. */

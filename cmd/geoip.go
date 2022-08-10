@@ -35,7 +35,7 @@ var geoipCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Print IP geographic information",
 	Run: func(_ *cobra.Command, args []string) {
-		var out rootOutput
+		var out interface{}
 		var err error
 		switch len(args) {
 		case 1:
@@ -80,24 +80,6 @@ type GeoIPSingle struct {
 	Proxy       bool   `json:"proxy"`
 	Hosting     bool   `json:"hosting"`
 	Query       string `json:"query"`
-}
-
-func (g GeoIPSingle) JSON() { PrintJSON(g) }
-
-func (g GeoIPSingle) YAML() { PrintYAML(g) }
-
-func (g GeoIPSingle) String() {
-	var s strings.Builder
-	f := reflect.ValueOf(&g).Elem()
-	t := f.Type()
-	for i := 0; i < f.NumField(); i++ {
-		_, err := s.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
-		if err != nil {
-			log.Println(err)
-			return
-		}
-	}
-	fmt.Println(s.String())
 }
 
 func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {

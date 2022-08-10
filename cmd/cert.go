@@ -22,13 +22,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net"
 	"os"
-	"reflect"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -38,29 +35,7 @@ var certCmd = &cobra.Command{
 	Use:   "cert",
 	Args:  cobra.ExactArgs(1),
 	Short: "Check tls cert expiry time",
-	Run: func(cmd *cobra.Command, args []string) {
-		var out *certResponse
-		var err error
-		input := args[0]
-		switch {
-		case ValidFile(input):
-			out, err = out.CheckFile(input)
-		case ValidDomain(input) || net.ParseIP(input).To4() != nil:
-			out, err = out.CheckHost(input + ":" + certPort)
-		default:
-			_ = cmd.Help()
-			return
-		}
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		if out == nil {
-			log.Println("response is empty")
-			return
-		}
-		OutputDefaultString(out)
-	},
+	Run:   crtf.Run,
 	Example: Examples(`# Print certificate expiration time, DNS, IP and issuer
 ops-cli cert www.google.com
 
@@ -74,18 +49,61 @@ ops-cli cert www.google.com --dns
 ops-cli cert example.com.crt`),
 }
 
-var certPort string
-var certIP, certExpiry, certRemainDays, certDNS, certIssuer bool
+var crtf certFlag
 
 func init() {
 	rootCmd.AddCommand(certCmd)
 
-	certCmd.Flags().StringVarP(&certPort, "port", "p", "443", "Specify host port")
-	certCmd.Flags().BoolVar(&certIP, "ip", false, "Only print IP")
-	certCmd.Flags().BoolVar(&certExpiry, "expiry", false, "Only print expiry time")
-	certCmd.Flags().BoolVar(&certDNS, "dns", false, "Only print DNS names")
-	certCmd.Flags().BoolVar(&certIssuer, "issuer", false, "Only print issuer")
-	certCmd.Flags().BoolVar(&certRemainDays, "days", false, "Only print the remaining days")
+	certCmd.Flags().StringVarP(&crtf.port, "port", "p", "443", "Specify host port")
+	certCmd.Flags().BoolVar(&crtf.ip, "ip", false, "Only print IP")
+	certCmd.Flags().BoolVar(&crtf.expiry, "expiry", false, "Only print expiry time")
+	certCmd.Flags().BoolVar(&crtf.dns, "dns", false, "Only print DNS names")
+	certCmd.Flags().BoolVar(&crtf.issuer, "issuer", false, "Only print issuer")
+	certCmd.Flags().BoolVar(&crtf.days, "days", false, "Only print the remaining days")
+}
+
+type certFlag struct {
+	ip, expiry, days, dns, issuer bool
+
+	port string
+
+	resp *certResponse
+}
+
+func (cf *certFlag) Run(cmd *cobra.Command, args []string) {
+	var err error
+	input := args[0]
+	switch {
+	case ValidFile(input):
+		cf.resp, err = cf.resp.CheckFile(input)
+	case ValidDomain(input) || net.ParseIP(input).To4() != nil:
+		cf.resp, err = cf.resp.CheckHost(input + ":" + cf.port)
+	default:
+		_ = cmd.Help()
+		return
+	}
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	if cf.resp == nil {
+		log.Println("response is empty")
+		return
+	}
+	switch {
+	default:
+		OutputDefaultJSON(cf.resp)
+	case cf.ip:
+		PrintString(cf.resp.ServerIP)
+	case cf.dns:
+		PrintString(cf.resp.DNS)
+	case cf.expiry:
+		PrintString(cf.resp.ExpiryTime)
+	case cf.issuer:
+		PrintString(cf.resp.Issuer)
+	case cf.days:
+		PrintString(cf.resp.Days)
+	}
 }
 
 type certResponse struct {
@@ -94,46 +112,6 @@ type certResponse struct {
 	Issuer     string   `json:"issuer,omitempty" yaml:"issuer,omitempty"`
 	ServerIP   string   `json:"serverIp,omitempty" yaml:"serverIp,omitempty"`
 	DNS        []string `json:"dns,omitempty" yaml:"dns,omitempty"`
-}
-
-func (c certResponse) JSON() { PrintJSON(c) }
-
-func (c certResponse) YAML() { PrintYAML(c) }
-
-func (c certResponse) String() {
-	if certIP {
-		fmt.Println(c.ServerIP)
-		return
-	}
-	if certDNS {
-		fmt.Println(c.DNS)
-		return
-	}
-	if certExpiry {
-		fmt.Println(c.ExpiryTime)
-		return
-	}
-	if certIssuer {
-		fmt.Println(c.Issuer)
-		return
-	}
-	if certRemainDays {
-		fmt.Println(c.Days)
-		return
-	}
-
-	var s strings.Builder
-	f := reflect.ValueOf(&c).Elem()
-	t := f.Type()
-	for i := 0; i < f.NumField(); i++ {
-		_, err := s.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
-		// f.Field(i).Type()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-	}
-	fmt.Println(s.String())
 }
 
 func (c *certResponse) CheckHost(host string) (*certResponse, error) {

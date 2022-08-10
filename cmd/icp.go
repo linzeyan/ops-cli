@@ -17,8 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/linzeyan/icp"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +34,7 @@ var icpCmd = &cobra.Command{
 		icp.Domain = args[0]
 		icp.WestAccount = i.account
 		icp.WestApiKey = i.key
-		fmt.Println(icp.Domain, icp.Check())
+		OutputDefaultJSON(map[string]string{icp.Domain: icp.Check()})
 	},
 	Example: Examples(`# Print the ICP status
 ops-cli icp -a account -k api_key google.com`),

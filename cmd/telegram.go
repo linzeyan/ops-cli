@@ -248,17 +248,5 @@ func (t *telegramFlag) send(c tgBot.Chattable) {
 		log.Println(err)
 		os.Exit(1)
 	}
-	if rootOutputJSON {
-		t.JSON()
-	} else if rootOutputYAML {
-		t.YAML()
-	}
-}
-
-func (t telegramFlag) JSON() { PrintJSON(t.resp) }
-
-func (t telegramFlag) YAML() { PrintYAML(t.resp) }
-
-func (t telegramFlag) String() {
-	fmt.Printf(`%v`, t.resp)
+	OutputDefaultNone(t.resp)
 }
