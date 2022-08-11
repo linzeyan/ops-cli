@@ -20,6 +20,11 @@ linters-settings:
   lll:
     line-length: 200
 
+  testpackage:
+    allow-packages:
+      - cmd
+      - main
+
 linters:
   disable-all: true
   enable:

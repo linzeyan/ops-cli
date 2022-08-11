@@ -151,7 +151,7 @@ type systemCPUInfoResponse struct {
 	Mhz       int    `json:"mhz,omitempty" yaml:"mhz,omitempty"`
 	CacheSize int    `json:"cacheSize,omitempty" yaml:"cacheSize,omitempty"`
 
-	CPUTimes systemCPUTimesResponse `json:"cpuTimes,omitempty" yaml:"cpuTimes,omitempty"`
+	CPUTimes []systemCPUTimesResponse `json:"cpuTimes,omitempty" yaml:"cpuTimes,omitempty"`
 }
 
 type systemCPUTimesResponse struct {
@@ -188,32 +188,32 @@ func (s *systemFlag) CPUInfo() error {
 	if err != nil {
 		return err
 	}
-	s.cpuResp.CPUTimes = systemCPUTimesResponse{
+	s.cpuResp.CPUTimes = append(s.cpuResp.CPUTimes, systemCPUTimesResponse{
 		User:   (time.Second * time.Duration(times[0].User)).String(),
 		System: (time.Second * time.Duration(times[0].System)).String(),
 		Idle:   (time.Second * time.Duration(times[0].Idle)).String(),
-	}
+	})
 
 	if times[0].Nice != 0 {
-		s.cpuResp.CPUTimes.Nice = (time.Second * time.Duration(times[0].Nice)).String()
+		s.cpuResp.CPUTimes[0].Nice = (time.Second * time.Duration(times[0].Nice)).String()
 	}
 	if times[0].Iowait != 0 {
-		s.cpuResp.CPUTimes.Iowait = (time.Second * time.Duration(times[0].Iowait)).String()
+		s.cpuResp.CPUTimes[0].Iowait = (time.Second * time.Duration(times[0].Iowait)).String()
 	}
 	if times[0].Irq != 0 {
-		s.cpuResp.CPUTimes.Irq = (time.Second * time.Duration(times[0].Irq)).String()
+		s.cpuResp.CPUTimes[0].Irq = (time.Second * time.Duration(times[0].Irq)).String()
 	}
 	if times[0].Softirq != 0 {
-		s.cpuResp.CPUTimes.Softirq = (time.Second * time.Duration(times[0].Softirq)).String()
+		s.cpuResp.CPUTimes[0].Softirq = (time.Second * time.Duration(times[0].Softirq)).String()
 	}
 	if times[0].Steal != 0 {
-		s.cpuResp.CPUTimes.Steal = (time.Second * time.Duration(times[0].Steal)).String()
+		s.cpuResp.CPUTimes[0].Steal = (time.Second * time.Duration(times[0].Steal)).String()
 	}
 	if times[0].Guest != 0 {
-		s.cpuResp.CPUTimes.Guest = (time.Second * time.Duration(times[0].Guest)).String()
+		s.cpuResp.CPUTimes[0].Guest = (time.Second * time.Duration(times[0].Guest)).String()
 	}
 	if times[0].GuestNice != 0 {
-		s.cpuResp.CPUTimes.GuestNice = (time.Second * time.Duration(times[0].GuestNice)).String()
+		s.cpuResp.CPUTimes[0].GuestNice = (time.Second * time.Duration(times[0].GuestNice)).String()
 	}
 	return nil
 }
