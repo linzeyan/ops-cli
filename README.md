@@ -1,7 +1,7 @@
 # ops-cli
 
-[![https://github.com/linzeyan/ops-cli/actions?query=workflow:golangci-lint](https://github.com/linzeyan/ops-cli/workflows/golangci-lint/badge.svg?branch=main)](https://github.com/linzeyan/ops-cli/actions?query=workflow:golangci-lint)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/linzeyan/ops-cli/goreleaser?style=flat-square)](https://github.com/linzeyan/ops-cli/actions?query=workflow%3Agoreleaser)
+[![https://github.com/linzeyan/ops-cli/actions?query=workflow:test](https://github.com/linzeyan/ops-cli/workflows/test/badge.svg?branch=main)](https://github.com/linzeyan/ops-cli/actions?query=workflow:test)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/linzeyan/ops-cli/release?style=flat-square)](https://github.com/linzeyan/ops-cli/actions?query=workflow:release)
 [![Release](https://img.shields.io/github/release/linzeyan/ops-cli.svg?style=flat-square)](https://github.com/linzeyan/ops-cli/releases/latest)
 [![Software License](https://img.shields.io/github/license/linzeyan/ops-cli?style=flat-square)](./LICENSE)
 
