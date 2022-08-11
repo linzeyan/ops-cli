@@ -1,4 +1,4 @@
-name: golangci-lint
+name: test
 
 on: [push]
 
@@ -6,7 +6,7 @@ permissions:
   contents: read
 
 jobs:
-  golangci:
+  golangci-lint:
     permissions:
       contents: read # for actions/checkout to fetch code
       pull-requests: read # for golangci/golangci-lint-action to fetch pull requests
@@ -22,3 +22,14 @@ jobs:
         with:
           skip-go-installation: true
           args: --timeout=5m
+
+  test:
+    name: "test"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+
+      - uses: actions/checkout@v2
+      - run: go test test/*
