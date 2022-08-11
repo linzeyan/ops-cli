@@ -36,6 +36,8 @@ var slackCmd = &cobra.Command{
 	Use:   "Slack",
 	Short: "Send message to Slack",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+	DisableFlagsInUseLine: true,
 }
 
 var slackSubCmdFile = &cobra.Command{

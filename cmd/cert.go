@@ -31,7 +31,7 @@ import (
 )
 
 var certCmd = &cobra.Command{
-	Use:   "cert",
+	Use:   "cert [host|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Check tls cert expiry time",
 	Run:   crtf.Run,

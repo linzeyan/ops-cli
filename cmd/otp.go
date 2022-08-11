@@ -37,6 +37,8 @@ var otpCmd = &cobra.Command{
 	Use:   "otp",
 	Short: "Calculate passcode or generate secret",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+	DisableFlagsInUseLine: true,
 }
 
 var otpSubCmdCalculate = &cobra.Command{

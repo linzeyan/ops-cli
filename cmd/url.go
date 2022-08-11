@@ -25,7 +25,7 @@ import (
 )
 
 var urlCmd = &cobra.Command{
-	Use:   "url",
+	Use:   "url [shorten url]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Expand shorten url",
 	Run: func(_ *cobra.Command, args []string) {
@@ -38,6 +38,7 @@ var urlCmd = &cobra.Command{
 	},
 	Example: Examples(`# Get the real URL from the shortened URL
 ops-cli url https://goo.gl/maps/b37Aq3Anc7taXQDd9`),
+	DisableFlagsInUseLine: true,
 }
 
 func init() {

@@ -35,6 +35,8 @@ var systemCmd = &cobra.Command{
 	Use:   "system",
 	Short: "Display system informations",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+	DisableFlagsInUseLine: true,
 }
 
 var systemSubCmdCPU = &cobra.Command{

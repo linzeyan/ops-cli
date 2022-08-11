@@ -29,7 +29,7 @@ import (
 )
 
 var whoisCmd = &cobra.Command{
-	Use:   "whois",
+	Use:   "whois [domain]",
 	Args:  cobra.ExactArgs(1),
 	Short: "List domain name information",
 	Run: func(_ *cobra.Command, args []string) {

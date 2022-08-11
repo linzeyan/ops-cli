@@ -31,6 +31,8 @@ var lineCmd = &cobra.Command{
 	Use:   "LINE",
 	Short: "Send message to LINE",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+	DisableFlagsInUseLine: true,
 }
 
 var lineSubCmdText = &cobra.Command{

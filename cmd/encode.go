@@ -29,6 +29,8 @@ var encodeCmd = &cobra.Command{
 	Use:   "encode",
 	Short: "encode and decode string",
 	Run:   enc.Run,
+
+	DisableFlagsInUseLine: true,
 }
 
 var enc encodeFlag

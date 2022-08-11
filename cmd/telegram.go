@@ -30,6 +30,8 @@ var telegramCmd = &cobra.Command{
 	Use:   "Telegram",
 	Short: "Send message to Telegram",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+	DisableFlagsInUseLine: true,
 }
 
 var telegramSubCmdAudio = &cobra.Command{

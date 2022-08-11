@@ -41,6 +41,8 @@ var convertCmd = &cobra.Command{
 	Use:   "convert",
 	Short: "Convert data format",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+	DisableFlagsInUseLine: true,
 }
 
 /* CSV. */

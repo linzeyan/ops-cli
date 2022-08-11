@@ -22,7 +22,7 @@ import (
 )
 
 var icpCmd = &cobra.Command{
-	Use:   "icp",
+	Use:   "icp [domain]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	Run: func(cmd *cobra.Command, args []string) {
