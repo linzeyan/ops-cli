@@ -1,10 +1,10 @@
-package test_test
+package cmd
 
 import (
 	"testing"
-
-	"github.com/linzeyan/ops-cli/cmd"
 )
+
+const mainGo = "../main.go"
 
 func TestDomain(t *testing.T) {
 	testCases := []struct {
@@ -19,8 +19,8 @@ func TestDomain(t *testing.T) {
 		{"dns-admin.google.com.", true},
 	}
 	for i := range testCases {
-		if got := cmd.ValidDomain(testCases[i].input); got != testCases[i].expected {
-			t.Errorf("Expected %#v is %t, got %t", testCases[i].input, testCases[i].expected, got)
+		if got := ValidDomain(testCases[i].input); got != testCases[i].expected {
+			t.Errorf("%#v expected is %t, got %t", testCases[i].input, testCases[i].expected, got)
 		}
 	}
 }
@@ -37,8 +37,8 @@ func TestFile(t *testing.T) {
 		{"/dev/null", true},
 	}
 	for i := range testCases {
-		if got := cmd.ValidFile(testCases[i].input); got != testCases[i].expected {
-			t.Errorf("Expected %s is %t, got %t", testCases[i].input, testCases[i].expected, got)
+		if got := ValidFile(testCases[i].input); got != testCases[i].expected {
+			t.Errorf("%#v expected is %t, got %t", testCases[i].input, testCases[i].expected, got)
 		}
 	}
 }
@@ -55,8 +55,8 @@ func TestIP(t *testing.T) {
 		{"2404:6800:4008:c01::65", true},
 	}
 	for i := range testCases {
-		if got := cmd.ValidIP(testCases[i].input); got != testCases[i].expected {
-			t.Errorf("Expected %s is %t, got %t", testCases[i].input, testCases[i].expected, got)
+		if got := ValidIP(testCases[i].input); got != testCases[i].expected {
+			t.Errorf("%#v expected is %t, got %t", testCases[i].input, testCases[i].expected, got)
 		}
 	}
 }
@@ -73,8 +73,8 @@ func TestIPv4(t *testing.T) {
 		{"2404:6800:4008:c01::65", false},
 	}
 	for i := range testCases {
-		if got := cmd.ValidIPv4(testCases[i].input); got != testCases[i].expected {
-			t.Errorf("Expected %s is %t, got %t", testCases[i].input, testCases[i].expected, got)
+		if got := ValidIPv4(testCases[i].input); got != testCases[i].expected {
+			t.Errorf("%#v expected is %t, got %t", testCases[i].input, testCases[i].expected, got)
 		}
 	}
 }
@@ -91,8 +91,8 @@ func TestIPv6(t *testing.T) {
 		{"2404:6800:4008:c01::65", true},
 	}
 	for i := range testCases {
-		if got := cmd.ValidIPv6(testCases[i].input); got != testCases[i].expected {
-			t.Errorf("Expected %s is %t, got %t", testCases[i].input, testCases[i].expected, got)
+		if got := ValidIPv6(testCases[i].input); got != testCases[i].expected {
+			t.Errorf("%#v expected is %t, got %t", testCases[i].input, testCases[i].expected, got)
 		}
 	}
 }
@@ -112,8 +112,8 @@ func TestUrl(t *testing.T) {
 		{"https://example.com/api/v1/add?user=1", true},
 	}
 	for i := range testCases {
-		if got := cmd.ValidURL(testCases[i].input); got != testCases[i].expected {
-			t.Errorf("Expected %s is %t, got %t", testCases[i].input, testCases[i].expected, got)
+		if got := ValidURL(testCases[i].input); got != testCases[i].expected {
+			t.Errorf("%#v expected is %t, got %t", testCases[i].input, testCases[i].expected, got)
 		}
 	}
 }

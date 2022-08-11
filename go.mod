@@ -19,6 +19,7 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/spf13/viper v1.8.1
 	github.com/stephenafamo/goldmark-pdf v0.0.0-20210426082656-1b7b737070eb
+	github.com/stretchr/testify v1.8.0
 	github.com/tomwright/dasel v1.26.0
 	github.com/yuin/goldmark v1.4.5
 	github.com/yuin/goldmark-emoji v1.0.1
@@ -34,6 +35,7 @@ require (
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/clbanning/mxj/v2 v2.3.3-0.20201214204241-e937bdee5a3e // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.4.0 // indirect
 	github.com/forPelevin/gomoji v1.1.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
@@ -56,6 +58,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/pelletier/go-toml v1.9.5-0.20220105141732-fed146406641 // indirect
 	github.com/phpdave11/gofpdf v1.4.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.0 // indirect
