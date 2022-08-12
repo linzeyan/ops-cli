@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -168,7 +167,7 @@ func (d digResponse) Request(digType uint16) error {
 		return err
 	}
 	if len(resp.Answer) == 0 {
-		return errors.New("answer is empty")
+		os.Exit(0)
 	}
 
 	for i := range resp.Answer {
