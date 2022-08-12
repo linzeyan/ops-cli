@@ -1,0 +1,34 @@
+apiVersion = "apps/v1"
+kind = "Deployment"
+
+[metadata]
+  name = "proxy"
+  namespace = "proxy"
+
+[spec]
+  progressDeadlineSeconds = 60
+  replicas = 3
+  revisionHistoryLimit = 10
+
+  [spec.selector]
+
+    [spec.selector.matchLabels]
+      "kubernetes.io/os" = "linux"
+
+  [spec.strategy]
+    type = "RollingUpdate"
+
+    [spec.strategy.rollingUpdate]
+      maxSurge = "25%"
+      maxUnavailable = "25%"
+
+  [spec.template]
+
+    [spec.template.metadata]
+
+      [spec.template.metadata.labels]
+        "kubernetes.io/os" = "linux"
+
+    [spec.template.spec]
+      containers = [{ image = "registry.example.com/it/docker/proxy:8be0f511", imagePullPolicy = "IfNotPresent", name = "proxy", livenessProbe = { httpGet = { path = "/", port = 80, scheme = "HTTP" } }, readinessProbe = { httpGet = { path = "/", port = 80, scheme = "HTTP" } }, resources = { limits = { cpu = "500m", memory = "512Mi" }, requests = { cpu = "250m", memory = "256Mi" } } }]
+      imagePullSecrets = [{ name = "gitlab" }]

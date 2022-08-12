@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy
+  namespace: proxy
+spec:
+  progressDeadlineSeconds: 60
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      kubernetes.io/os: linux
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        kubernetes.io/os: linux
+    spec:
+      imagePullSecrets:
+        - name: gitlab
+      containers:
+        - name: proxy
+          image: registry.example.com/it/docker/proxy:8be0f511
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+              scheme: "HTTP"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+              scheme: "HTTP"
