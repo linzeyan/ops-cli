@@ -92,6 +92,12 @@ const (
 )
 
 const (
+	ErrArgNotFound   = "argument not found"
+	ErrFileNotFound  = "file not found"
+	ErrTokenNotFound = "token not found"
+)
+
+const (
 	FileTypeHTML     = "html"
 	FileTypeJSON     = "json"
 	FileTypeMarkdown = "markdown"

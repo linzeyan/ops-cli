@@ -118,77 +118,74 @@ type telegramFlag struct {
 func (t *telegramFlag) Init() error {
 	Config(ConfigBlockTelegram)
 	if tg.token == "" {
-		return errors.New("token is empty")
+		return errors.New(ErrTokenNotFound)
 	}
 	var err error
 	t.api, err = tgBot.NewBotAPI(t.token)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
-func (t telegramFlag) Animation() {
+func (t telegramFlag) Animation() error {
 	input := tgBot.NewAnimation(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
-	t.send(input)
+	return t.send(input)
 }
 
-func (t *telegramFlag) Audio() {
+func (t *telegramFlag) Audio() error {
 	input := tgBot.NewAudio(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
-	t.send(input)
+	return t.send(input)
 }
 
-func (t telegramFlag) ChatDescription() {
+func (t telegramFlag) ChatDescription() error {
 	input := tgBot.NewChatDescription(t.chat, t.arg)
-	t.send(input)
+	return t.send(input)
 }
 
-func (t telegramFlag) ChatPhoto() {
+func (t telegramFlag) ChatPhoto() error {
 	input := tgBot.NewChatPhoto(t.chat, t.parseFile(t.arg))
-	t.send(input)
+	return t.send(input)
 }
 
-func (t telegramFlag) ChatTitle() {
+func (t telegramFlag) ChatTitle() error {
 	input := tgBot.NewChatTitle(t.chat, t.arg)
-	t.send(input)
+	return t.send(input)
 }
 
-func (t telegramFlag) Dice() {
+func (t telegramFlag) Dice() error {
 	input := tgBot.NewDice(t.chat)
-	t.send(input)
+	return t.send(input)
 }
 
-func (t *telegramFlag) File() {
+func (t *telegramFlag) File() error {
 	input := tgBot.NewDocument(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
-	t.send(input)
+	return t.send(input)
 }
 
-func (t *telegramFlag) Text() {
+func (t *telegramFlag) Text() error {
 	input := tgBot.NewMessage(t.chat, t.arg)
 	input.ParseMode = tgBot.ModeMarkdownV2
 	input.DisableWebPagePreview = true
-	t.send(input)
+	return t.send(input)
 }
 
-func (t *telegramFlag) Photo() {
+func (t *telegramFlag) Photo() error {
 	input := tgBot.NewPhoto(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
-	t.send(input)
+	return t.send(input)
 }
 
-func (t *telegramFlag) Video() {
+func (t *telegramFlag) Video() error {
 	input := tgBot.NewVideo(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
-	t.send(input)
+	return t.send(input)
 }
 
-func (t *telegramFlag) Voice() {
+func (t *telegramFlag) Voice() error {
 	input := tgBot.NewVoice(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
-	t.send(input)
+	return t.send(input)
 }
 
 func (t *telegramFlag) GetUpdate() {
@@ -208,28 +205,33 @@ func (t *telegramFlag) GetUpdate() {
 
 func (t *telegramFlag) Run(cmd *cobra.Command, _ []string) {
 	if t.arg == "" {
-		_ = cmd.Help()
-		return
+		log.Println(ErrArgNotFound)
+		os.Exit(1)
 	}
-	if err := t.Init(); err != nil {
+	var err error
+	if err = t.Init(); err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	switch cmd.Name() {
 	case ImTypeAudio:
-		t.Audio()
+		err = t.Audio()
 	case ImTypeFile:
-		t.File()
+		err = t.File()
 	case ImTypeID:
 		t.GetUpdate()
 	case ImTypePhoto:
-		t.Photo()
+		err = t.Photo()
 	case ImTypeText:
-		t.Text()
+		err = t.Text()
 	case ImTypeVideo:
-		t.Video()
+		err = t.Video()
 	case ImTypeVoice:
-		t.Voice()
+		err = t.Voice()
+	}
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
 }
 
@@ -243,12 +245,9 @@ func (t *telegramFlag) parseFile(s string) tgBot.RequestFileData {
 	return nil
 }
 
-func (t *telegramFlag) send(c tgBot.Chattable) {
+func (t *telegramFlag) send(c tgBot.Chattable) error {
 	var err error
 	t.resp, err = t.api.Send(c)
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
 	OutputDefaultNone(t.resp)
+	return err
 }

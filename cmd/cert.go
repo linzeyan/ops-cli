@@ -78,16 +78,15 @@ func (cf *certFlag) Run(cmd *cobra.Command, args []string) {
 	case ValidDomain(input) || ValidIPv4(input):
 		cf.resp, err = cf.resp.CheckHost(input + ":" + cf.port)
 	default:
-		_ = cmd.Help()
-		return
+		os.Exit(1)
 	}
 	if err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	if cf.resp == nil {
 		log.Println("response is empty")
-		return
+		os.Exit(1)
 	}
 	switch {
 	default:
@@ -129,7 +128,7 @@ func (c *certResponse) CheckHost(host string) (*certResponse, error) {
 		ServerIP:   conn.RemoteAddr().String(),
 		Days:       int(dayRemain.Hours() / 24),
 	}
-	return &out, nil
+	return &out, err
 }
 
 func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
@@ -174,5 +173,5 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 		Issuer:     cert[0].Issuer.String(),
 		Days:       int(dayRemain.Hours() / 24),
 	}
-	return &out, nil
+	return &out, err
 }

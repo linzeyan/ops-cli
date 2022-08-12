@@ -87,6 +87,31 @@ type slackFlag struct {
 	api      *slack.Client
 }
 
+func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
+	if s.arg == "" {
+		log.Println(ErrArgNotFound)
+		os.Exit(1)
+	}
+	var err error
+	if err = s.Init(); err != nil {
+		log.Println(err)
+		return
+	}
+	switch cmd.Name() {
+	case ImTypeFile:
+		s.fileName = cmd.Name()
+		err = s.Photo()
+	case ImTypePhoto:
+		err = s.Photo()
+	case ImTypeText:
+		err = s.Text()
+	}
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+}
+
 func (s *slackFlag) Init() error {
 	Config(ConfigBlockSlack)
 	if s.token == "" {
@@ -99,44 +124,41 @@ func (s *slackFlag) Init() error {
 	return nil
 }
 
-func (s *slackFlag) Text() {
+func (s *slackFlag) Text() error {
 	input := slack.MsgOptionText(s.arg, false)
 	_, _, _, err := s.api.SendMessageContext(rootContext, s.channel, input)
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	return err
 }
 
-func (s *slackFlag) Photo() {
+func (s *slackFlag) Photo() error {
 	var base64Image string
+	var err error
 	switch {
 	case ValidFile(s.arg):
-		base64Image = s.localFile()
+		base64Image, err = s.localFile()
 	case ValidURL(s.arg):
-		base64Image = s.remoteFile()
+		base64Image, err = s.remoteFile()
+	}
+	if err != nil {
+		return err
 	}
 
 	uploadFileKey := fmt.Sprintf("upload-f-to-slack-%d", rootNow.UnixNano())
 	decode, err := base64.StdEncoding.DecodeString(base64Image)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 
 	f, err := os.Create(uploadFileKey)
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 	defer f.Close()
 	if _, err := f.Write(decode); err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 	if err := f.Sync(); err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 	if s.fileName == "" {
 		s.fileName = "upload.png"
@@ -148,60 +170,38 @@ func (s *slackFlag) Photo() {
 		File:     uploadFileKey,
 	})
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 	if uploadFileKey != "" {
 		if err := os.Remove(uploadFileKey); err != nil {
-			log.Println(err)
+			return err
 		}
 	}
+	return err
 }
 
-func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
-	if s.arg == "" {
-		_ = cmd.Help()
-		return
-	}
-	if err := s.Init(); err != nil {
-		log.Println(err)
-		return
-	}
-	switch cmd.Name() {
-	case ImTypeFile:
-		s.fileName = cmd.Name()
-		s.Photo()
-	case ImTypePhoto:
-		s.Photo()
-	case ImTypeText:
-		s.Text()
-	}
-}
-
-func (s *slackFlag) localFile() string {
+func (s *slackFlag) localFile() (string, error) {
 	content, err := os.ReadFile(s.arg)
 	if err != nil {
-		log.Println(err)
-		return ""
+		return "", err
 	}
 	contentType := http.DetectContentType(content)
 	if contentType == "image/jpeg" {
 		img, err := jpeg.Decode(bytes.NewReader(content))
 		if err != nil {
-			log.Println(err)
-			return ""
+			return "", err
 		}
 		var buf bytes.Buffer
 		if err := png.Encode(&buf, img); err != nil {
-			return ""
+			return "", err
 		}
 		content = buf.Bytes()
 	}
 	base64Image := base64.StdEncoding.EncodeToString(content)
-	return base64Image
+	return base64Image, err
 }
 
-func (s *slackFlag) remoteFile() string {
+func (s *slackFlag) remoteFile() (string, error) {
 	var client = &http.Client{
 		Transport: &http.Transport{
 			DisableKeepAlives: true,
@@ -209,36 +209,33 @@ func (s *slackFlag) remoteFile() string {
 	}
 	req, err := http.NewRequestWithContext(rootContext, http.MethodGet, s.arg, nil)
 	if err != nil {
-		log.Println(err)
-		return ""
+		return "", err
 	}
 	resp, err := client.Do(req)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		log.Println(err)
-		return ""
+		return "", err
 	}
 	var content []byte
 	if resp.StatusCode == http.StatusOK {
 		content, err = io.ReadAll(resp.Body)
 		if err != nil {
-			return ""
+			return "", err
 		}
 	}
 	if http.DetectContentType(content) == "image/jpeg" {
 		img, err := jpeg.Decode(bytes.NewReader(content))
 		if err != nil {
-			log.Println(err)
-			return ""
+			return "", err
 		}
 		var buf bytes.Buffer
 		if err := png.Encode(&buf, img); err != nil {
-			return ""
+			return "", err
 		}
 		content = buf.Bytes()
 	}
 	base64Image := base64.StdEncoding.EncodeToString(content)
-	return base64Image
+	return base64Image, err
 }

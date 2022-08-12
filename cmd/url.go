@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"log"
+	"os"
 
 	"github.com/linzeyan/expandUrl"
 	"github.com/spf13/cobra"
@@ -31,7 +32,7 @@ var urlCmd = &cobra.Command{
 		result, err := expandUrl.Expand(args[0])
 		if err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		PrintString(result)
 	},

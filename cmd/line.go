@@ -56,12 +56,12 @@ ops-cli LINE id https://callback_url`),
 		var err error
 		if err = line.Init(); err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		line.resp, err = line.api.SetWebhookEndpointURL(args[0]).Do()
 		if err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		line.GetID()
 	},
@@ -113,18 +113,16 @@ func (l *lineFlag) Init() error {
 	Config(ConfigBlockLINE)
 	var err error
 	l.api, err = linebot.New(l.secret, l.token)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (l *lineFlag) GetID() {
+	var err error
 	http.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
 		events, err := l.api.ParseRequest(r)
 		if err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		for i := range events {
 			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == ImTypeID {
@@ -143,7 +141,7 @@ func (l *lineFlag) GetID() {
 		}
 	})
 
-	err := http.ListenAndServe(":80", nil)
+	err = http.ListenAndServe(":80", nil)
 	if errors.Is(err, http.ErrServerClosed) {
 		log.Println("server closed")
 	} else if err != nil {
@@ -154,13 +152,13 @@ func (l *lineFlag) GetID() {
 
 func (l *lineFlag) Run(cmd *cobra.Command, _ []string) {
 	if l.arg == "" {
-		_ = cmd.Help()
-		return
+		log.Println(ErrArgNotFound)
+		os.Exit(1)
 	}
 	var err error
 	if err = l.Init(); err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	switch cmd.Name() {
 	case ImTypeText:
@@ -175,7 +173,7 @@ func (l *lineFlag) Run(cmd *cobra.Command, _ []string) {
 	}
 	if err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	OutputDefaultNone(l.resp)
 }

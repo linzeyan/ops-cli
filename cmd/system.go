@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -45,7 +46,7 @@ var systemSubCmdCPU = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := sysf.CPUInfo(); err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		OutputDefaultJSON(sysf.cpuResp)
 	},
@@ -57,7 +58,7 @@ var systemSubCmdDisk = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := sysf.DiskUsage(); err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		OutputDefaultJSON(sysf.diskResp)
 	},
@@ -69,7 +70,7 @@ var systemSubCmdHost = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := sysf.HostInfo(); err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		OutputDefaultJSON(sysf.hostResp)
 	},
@@ -81,7 +82,7 @@ var systemSubCmdLoad = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := sysf.LoadAvg(); err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		OutputDefaultJSON(sysf.loadResp)
 	},
@@ -93,7 +94,7 @@ var systemSubCmdMemory = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := sysf.MemUsage(); err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		OutputDefaultJSON(sysf.memResp)
 	},
@@ -105,7 +106,7 @@ var systemSubCmdNetwork = &cobra.Command{
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := sysf.NetInfo(); err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		OutputDefaultJSON(sysf.netResp)
 	},
@@ -160,7 +161,7 @@ func (s *systemFlag) CPUInfo() error {
 		Mhz:       fmt.Sprintf("%d", int(info[0].Mhz)),
 		CacheSize: fmt.Sprintf("%d", info[0].CacheSize),
 	}
-	return nil
+	return err
 }
 
 type systemDiskUsageResponse struct {
@@ -185,7 +186,7 @@ func (s *systemFlag) DiskUsage() error {
 		Used:        ByteSize(info.Used).String(),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
-	return nil
+	return err
 }
 
 type systemHostInfoResponse struct {
@@ -224,7 +225,7 @@ func (s *systemFlag) HostInfo() error {
 		VirtualizationRole:   info.VirtualizationRole,
 		HostID:               info.HostID,
 	}
-	return nil
+	return err
 }
 
 type systemLoadAvgResponse struct {
@@ -243,7 +244,7 @@ func (s *systemFlag) LoadAvg() error {
 		Load5:  fmt.Sprintf("%0.2f", info.Load5),
 		Load15: fmt.Sprintf("%0.2f", info.Load15),
 	}
-	return nil
+	return err
 }
 
 type systemMemInfoResponse struct {
@@ -267,7 +268,7 @@ func (s *systemFlag) MemUsage() error {
 		Used:        ByteSize(info.Used).String(),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
-	return nil
+	return err
 }
 
 type systemNetIOResponse struct {
@@ -308,7 +309,7 @@ func (s *systemFlag) NetInfo() error {
 		return err
 	}
 	if !s.iface && !s.aiface {
-		return nil
+		return err
 	}
 	inet, err := net.Interfaces()
 	if err != nil {
@@ -336,5 +337,5 @@ func (s *systemFlag) NetInfo() error {
 			})
 		}
 	}
-	return nil
+	return err
 }

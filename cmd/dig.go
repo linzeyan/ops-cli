@@ -17,8 +17,10 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/miekg/dns"
@@ -30,14 +32,17 @@ var digCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Resolve domain name",
 	Run: func(_ *cobra.Command, args []string) {
+		var err error
 		var argsWithoutDomain []string
 		var argsType []string
 		switch lens := len(args); {
 		case lens == 1:
 			digDomain = args[0]
-			digOutput.Request(dns.TypeA)
+			if err = digOutput.Request(dns.TypeA); err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
 			if digOutput == nil {
-				log.Println("response is empty")
 				return
 			}
 			OutputDefaultString(&digOutput)
@@ -73,27 +78,31 @@ var digCmd = &cobra.Command{
 		}
 		switch strings.ToLower(argsType[0]) {
 		case "a":
-			digOutput.Request(dns.TypeA)
+			err = digOutput.Request(dns.TypeA)
 		case "aaaa":
-			digOutput.Request(dns.TypeAAAA)
+			err = digOutput.Request(dns.TypeAAAA)
 		case "caa":
-			digOutput.Request(dns.TypeCAA)
+			err = digOutput.Request(dns.TypeCAA)
 		case "cname":
-			digOutput.Request(dns.TypeCNAME)
+			err = digOutput.Request(dns.TypeCNAME)
 		case "mx":
-			digOutput.Request(dns.TypeMX)
+			err = digOutput.Request(dns.TypeMX)
 		case "ns":
-			digOutput.Request(dns.TypeNS)
+			err = digOutput.Request(dns.TypeNS)
 		case "ptr":
-			digOutput.Request(dns.TypePTR)
+			err = digOutput.Request(dns.TypePTR)
 		case "soa":
-			digOutput.Request(dns.TypeSOA)
+			err = digOutput.Request(dns.TypeSOA)
 		case "srv":
-			digOutput.Request(dns.TypeSRV)
+			err = digOutput.Request(dns.TypeSRV)
 		case "txt":
-			digOutput.Request(dns.TypeTXT)
+			err = digOutput.Request(dns.TypeTXT)
 		case "any":
-			digOutput.Request(dns.TypeANY)
+			err = digOutput.Request(dns.TypeANY)
+		}
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
 		}
 		if digOutput == nil {
 			return
@@ -134,14 +143,13 @@ type digResponseFormat struct {
 
 type digResponse []digResponseFormat
 
-func (d digResponse) Request(digType uint16) {
+func (d digResponse) Request(digType uint16) error {
+	var err error
 	/* If Query type is PTR, need to do reverse. */
 	if dns.TypeToString[digType] == "PTR" {
-		var err error
 		digDomain, err = dns.ReverseAddr(digDomain)
 		if err != nil {
-			log.Println(err)
-			return
+			return err
 		}
 		digDomain = strings.TrimRight(digDomain, ".")
 	}
@@ -150,15 +158,17 @@ func (d digResponse) Request(digType uint16) {
 	message.SetQuestion(digDomain+".", digType)
 	var client = &dns.Client{Net: digNetwork}
 	if digServer == "" {
-		digServer = d.GetLocalServer()
+		digServer, err = d.GetLocalServer()
+		if err != nil {
+			return err
+		}
 	}
 	resp, _, err := client.Exchange(&message, digServer+":53")
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 	if len(resp.Answer) == 0 {
-		return
+		return errors.New("answer is empty")
 	}
 
 	for i := range resp.Answer {
@@ -189,16 +199,18 @@ func (d digResponse) Request(digType uint16) {
 		}
 		digOutput = append(digOutput, d)
 	}
+	return err
 }
 
-func (d digResponse) GetLocalServer() string {
+func (d digResponse) GetLocalServer() (string, error) {
 	const resolvConfig = "/etc/resolv.conf"
+	var err error
 	s, err := dns.ClientConfigFromFile(resolvConfig)
 	if err != nil {
 		log.Println(err)
-		return ""
+		return "", err
 	}
-	return s.Servers[0]
+	return s.Servers[0], err
 }
 
 func (d digResponse) String() {

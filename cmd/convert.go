@@ -201,26 +201,28 @@ type convertFlag struct {
 
 func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
 	if !ValidFile(c.inFile) || c.outFile == "" {
-		_ = cmd.Help()
-		return
+		os.Exit(1)
 	}
 	switch cmd.Name() {
 	case FileTypeMarkdown + "2" + FileTypeHTML:
-		c.ConvertMarkdown2HTML()
+		if err := c.ConvertMarkdown2HTML(); err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
 		return
 	case FileTypeMarkdown + "2" + FileTypePDF:
-		c.ConvertMarkdown2PDF()
+		if err := c.ConvertMarkdown2PDF(); err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
 		return
 	}
 	slice := strings.Split(cmd.Name(), "2")
-	if len(slice) != 2 {
-		_ = cmd.Help()
-		return
-	}
 	c.inType = slice[0]
 	c.outType = slice[1]
 	if err := c.Convert(); err != nil {
 		log.Println(err)
+		os.Exit(1)
 	}
 }
 
@@ -229,24 +231,23 @@ func (c *convertFlag) Convert() error {
 	if err != nil {
 		return err
 	}
-	if err := node.WriteToFile(c.outFile, c.outType, []storage.ReadWriteOption{
+	return node.WriteToFile(c.outFile, c.outType, []storage.ReadWriteOption{
 		{Key: storage.OptionIndent},
-	}); err != nil {
-		return err
-	}
-	return nil
+	})
 }
 
-func (c *convertFlag) Load() {
+func (c *convertFlag) Load() error {
 	var err error
 	if c.readFile, err = os.ReadFile(c.inFile); err != nil {
-		log.Println(err)
-		os.Exit(0)
+		return err
 	}
+	return err
 }
 
-func (c *convertFlag) ConvertMarkdown2HTML() {
-	c.Load()
+func (c *convertFlag) ConvertMarkdown2HTML() error {
+	if err := c.Load(); err != nil {
+		return err
+	}
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
@@ -274,14 +275,15 @@ func (c *convertFlag) ConvertMarkdown2HTML() {
 	)
 	var buf bytes.Buffer
 	if err := md.Convert(c.readFile, &buf); err != nil {
-		log.Println(err)
-		os.Exit(0)
+		return err
 	}
-	c.WriteFile(buf.Bytes())
+	return c.WriteFile(buf.Bytes())
 }
 
-func (c *convertFlag) ConvertMarkdown2PDF() {
-	c.Load()
+func (c *convertFlag) ConvertMarkdown2PDF() error {
+	if err := c.Load(); err != nil {
+		return err
+	}
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
@@ -312,14 +314,15 @@ func (c *convertFlag) ConvertMarkdown2PDF() {
 	)
 	var buf bytes.Buffer
 	if err := md.Convert(c.readFile, &buf); err != nil {
-		log.Println(err)
-		os.Exit(0)
+		return err
 	}
-	c.WriteFile(buf.Bytes())
+	return c.WriteFile(buf.Bytes())
 }
 
-func (c *convertFlag) WriteFile(content []byte) {
-	if err := os.WriteFile(c.outFile, content, os.ModePerm); err != nil {
-		log.Println(err)
+func (c *convertFlag) WriteFile(content []byte) error {
+	var err error
+	if err = os.WriteFile(c.outFile, content, os.ModePerm); err != nil {
+		return err
 	}
+	return err
 }

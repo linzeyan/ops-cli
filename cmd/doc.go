@@ -71,22 +71,22 @@ type docFlag struct {
 }
 
 func (d *docFlag) createDir() error {
-	_, err := os.Stat(d.dir)
+	var err error
+	_, err = os.Stat(d.dir)
 	if err != nil {
 		/* Create directory if not exist. */
-		mkErr := os.Mkdir(d.dir, os.ModePerm)
-		if mkErr != nil {
-			return mkErr
+		if err = os.Mkdir(d.dir, os.ModePerm); err != nil {
+			return err
 		}
 	}
-	return nil
+	return err
 }
 
 func (d *docFlag) Run(cmd *cobra.Command, _ []string) {
 	var err error
 	if err = d.createDir(); err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	switch cmd.Name() {
 	case DocTypeMan:
@@ -101,11 +101,9 @@ func (d *docFlag) Run(cmd *cobra.Command, _ []string) {
 		err = doc.GenReSTTree(rootCmd, d.dir)
 	case DocTypeYaml:
 		err = doc.GenYamlTree(rootCmd, d.dir)
-	default:
-		_ = cmd.Help()
-		return
 	}
 	if err != nil {
 		log.Println(err)
+		os.Exit(1)
 	}
 }

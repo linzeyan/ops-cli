@@ -21,6 +21,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 	"reflect"
 	"strings"
 	"time"
@@ -38,10 +39,9 @@ var whoisCmd = &cobra.Command{
 		resp, err = wf.Request(args[0])
 		if err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		if resp == nil {
-			log.Println("response is empty")
 			return
 		}
 		OutputDefaultString(resp)
@@ -119,59 +119,60 @@ func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	replace := strings.ReplaceAll(string(result), ": ", ";")
 	replace1 := strings.ReplaceAll(replace, "\r\n", ",")
 	split := strings.Split(replace1, ",")
 	var ns []string
 	var r whoisResponse
+	var calErr error
 	/* Filter field. */
 	for i := range split {
+		v := strings.Split(split[i], ";")
 		if strings.Contains(split[i], "Updated Date") {
-			v := strings.Split(split[i], ";")
-			r.UpdatedDate = w.ParseTime(v[1])
+			r.UpdatedDate, err = w.ParseTime(v[1])
 		}
 		if strings.Contains(split[i], "Creation Date") {
-			v := strings.Split(split[i], ";")
-			r.CreatedDate = w.ParseTime(v[1])
+			r.CreatedDate, err = w.ParseTime(v[1])
 		}
 		if strings.Contains(split[i], "Registry Expiry Date") {
-			v := strings.Split(split[i], ";")
-			r.ExpiresDate = w.ParseTime(v[1])
-			r.RemainDays = w.CalculateDays(v[1])
+			r.ExpiresDate, err = w.ParseTime(v[1])
+			r.RemainDays, calErr = w.CalculateDays(v[1])
 		}
 		if strings.Contains(split[i], "Registrar") {
-			v := strings.Split(split[i], ";")
 			if strings.TrimSpace(v[0]) == "Registrar" {
 				r.Registrar = v[1]
 			}
 		}
 		if strings.Contains(split[i], "Name Server") {
-			v := strings.Split(split[i], ";")
 			ns = append(ns, v[1])
+		}
+		if err != nil {
+			log.Println(err)
+		}
+		if calErr != nil {
+			log.Println(calErr)
+			err = calErr
 		}
 	}
 	r.NameServers = ns
-	return &r, nil
+	return &r, err
 }
 
 /* Convert time to RFC3339 format. */
-func (w whoisFlag) ParseTime(t string) string {
+func (w whoisFlag) ParseTime(t string) (string, error) {
 	/* 1997-09-15T04:00:00Z */
 	s, err := time.Parse("2006-01-02T03:04:05Z", t)
 	if err != nil {
-		log.Println(err)
-		return ""
+		return "", err
 	}
-	return s.Local().Format(time.RFC3339)
+	return s.Local().Format(time.RFC3339), err
 }
 
 /* Convert time to days. */
-func (w whoisFlag) CalculateDays(t string) int {
+func (w whoisFlag) CalculateDays(t string) (int, error) {
 	s, err := time.Parse("2006-01-02T03:04:05Z", t)
 	if err != nil {
-		log.Println(err)
-		return 0
+		return 0, err
 	}
-	return int(s.Local().Sub(rootNow.Local()).Hours() / 24)
+	return int(s.Local().Sub(rootNow.Local()).Hours() / 24), err
 }

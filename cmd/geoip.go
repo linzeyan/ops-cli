@@ -24,6 +24,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -46,7 +47,7 @@ var geoipCmd = &cobra.Command{
 		}
 		if err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
 		OutputDefaultJSON(out)
 	},
@@ -114,7 +115,7 @@ func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &data, nil
+		return &data, err
 	}
 	return nil, err
 }
@@ -166,7 +167,7 @@ func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &data, nil
+		return &data, err
 	}
 	return nil, err
 }

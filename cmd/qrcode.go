@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/linzeyan/qrcode"
 	"github.com/spf13/cobra"
@@ -40,15 +41,15 @@ var qrcodeSubCmdRead = &cobra.Command{
 	Run: func(_ *cobra.Command, args []string) {
 		qr.text = args[0]
 		if !ValidFile(qr.text) {
-			log.Println("file not found")
-			return
+			log.Println(ErrFileNotFound)
+			os.Exit(1)
 		}
 		result, err := qrcode.ReadQRCode(qr.text)
 		if err != nil {
 			log.Println(err)
-			return
+			os.Exit(1)
 		}
-		fmt.Println(result)
+		PrintString(result)
 	},
 	Example: Examples(`# Read QR code and print message
 ops-cli qrcode read qrcode.png`),
@@ -63,9 +64,9 @@ var qrcodeSubCmdText = &cobra.Command{
 		for i := range args {
 			qr.text += args[i]
 		}
-		err := qr.Generate()
-		if err != nil {
+		if err := qr.Generate(); err != nil {
 			log.Println(err)
+			os.Exit(1)
 		}
 	},
 	Example: Examples(`# Generate QR code with text
@@ -76,15 +77,15 @@ ops-cli qrcode text https://www.google.com -o out.png -s 500`),
 var qrcodeSubCmdOtp = &cobra.Command{
 	Use:   "otp",
 	Short: "Generate OTP QR code",
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		if qr.otpSecret == "" {
-			_ = cmd.Help()
-			return
+			log.Println(ErrArgNotFound)
+			os.Exit(1)
 		}
 		qr.text = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`, qr.otpIssuer, qr.otpAccount, qr.otpSecret, qr.otpIssuer)
-		err := qr.Generate()
-		if err != nil {
+		if err := qr.Generate(); err != nil {
 			log.Println(err)
+			os.Exit(1)
 		}
 	},
 	Example: Examples(`# Generate OTP QR code
@@ -94,15 +95,15 @@ ops-cli qrcode otp --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --ot
 var qrcodeSubCmdWifi = &cobra.Command{
 	Use:   "wifi",
 	Short: "Generate WiFi QR code",
-	Run: func(cmd *cobra.Command, _ []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		if qr.wifiSsid == "" {
-			_ = cmd.Help()
-			return
+			log.Println(ErrArgNotFound)
+			os.Exit(1)
 		}
 		qr.text = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`, qr.wifiSsid, qr.wifiType, qr.wifiPass)
-		err := qr.Generate()
-		if err != nil {
+		if err := qr.Generate(); err != nil {
 			log.Println(err)
+			os.Exit(1)
 		}
 	},
 	Example: Examples(`# Generate WiFi QR code
@@ -152,9 +153,5 @@ func (q qrcodeFlag) Generate() error {
 	if qr.text == "" {
 		return errors.New("text is empty")
 	}
-	err := qrcode.GenerateQRCode(qr.text, qr.size, qr.output)
-	if err != nil {
-		return err
-	}
-	return nil
+	return qrcode.GenerateQRCode(qr.text, qr.size, qr.output)
 }

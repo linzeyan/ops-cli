@@ -24,9 +24,9 @@ import (
 	"crypto/sha512"
 	"encoding/base32"
 	"encoding/binary"
-	"fmt"
 	"hash"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -91,42 +91,36 @@ type otpFlag struct {
 }
 
 func (o *otpFlag) SetTimeInterval() int64 {
-	var timeInterval int64
 	switch o.period {
 	case 15:
-		timeInterval = rootNow.Unix() / 15
+		return rootNow.Unix() / 15
 	case 60:
-		timeInterval = rootNow.Unix() / 60
+		return rootNow.Unix() / 60
 	default:
-		timeInterval = rootNow.Unix() / 30
+		return rootNow.Unix() / 30
 	}
-	return timeInterval
 }
 
 func (o *otpFlag) SetDigits() [2]int {
-	var digits [2]int
 	switch o.digit {
 	case 7:
-		digits = [2]int{7, 10000000}
+		return [2]int{7, 10000000}
 	case 8:
-		digits = [2]int{8, 100000000}
+		return [2]int{8, 100000000}
 	default:
-		digits = [2]int{6, 1000000}
+		return [2]int{6, 1000000}
 	}
-	return digits
 }
 
 func (o *otpFlag) SetAlgorithm() func() hash.Hash {
-	var algorithm func() hash.Hash
 	switch strings.ToLower(o.alg) {
 	case "sha256":
-		algorithm = sha256.New
+		return sha256.New
 	case "sha512":
-		algorithm = sha512.New
+		return sha512.New
 	default:
-		algorithm = sha1.New
+		return sha1.New
 	}
-	return algorithm
 }
 
 func (o *otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
@@ -153,12 +147,12 @@ func (o *otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
 
 	length := len(passcode)
 	if length == digits[0] {
-		return passcode, nil
+		return passcode, err
 	}
 	for i := (digits[0] - length); i > 0; i-- {
 		passcode = "0" + passcode
 	}
-	return passcode, nil
+	return passcode, err
 }
 
 func (o *otpFlag) TOTP(secret string) (string, error) {
@@ -173,18 +167,17 @@ func (o *otpFlag) GenSecret() (string, error) {
 	}
 	hasher := hmac.New(o.SetAlgorithm(), buf.Bytes())
 	secret := base32.StdEncoding.EncodeToString(hasher.Sum(nil))
-	return secret, nil
+	return secret, err
 }
 
 func (o *otpFlag) Verify(secret string, input string) (bool, error) {
 	passcode, err := o.TOTP(secret)
-	if err != nil {
-		return passcode == input, err
-	}
-	return passcode == input, nil
+	return passcode == input, err
 }
 
 func (o *otpFlag) Run(cmd *cobra.Command, args []string) {
+	var result string
+	var err error
 	switch cmd.Name() {
 	case "calculate":
 		var secret string
@@ -197,18 +190,13 @@ func (o *otpFlag) Run(cmd *cobra.Command, args []string) {
 				secret += args[i]
 			}
 		}
-		var result, err = o.TOTP(secret)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		fmt.Println(result)
+		result, err = o.TOTP(secret)
 	case "generate":
-		var secret, err = o.GenSecret()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		fmt.Println(secret)
+		result, err = o.GenSecret()
 	}
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	PrintString(result)
 }
