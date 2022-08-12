@@ -24,7 +24,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -121,24 +120,6 @@ func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 }
 
 type GeoIPBatch []GeoIPSingle
-
-func (g GeoIPBatch) JSON() { PrintJSON(g) }
-
-func (g GeoIPBatch) YAML() { PrintYAML(g) }
-
-func (g GeoIPBatch) String() {
-	var s strings.Builder
-	f := reflect.ValueOf(&g).Elem()
-	t := f.Type()
-	for i := 0; i < f.NumField(); i++ {
-		_, err := s.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
-		if err != nil {
-			log.Println(err)
-			return
-		}
-	}
-	fmt.Println(s.String())
-}
 
 func (GeoIPBatch) Request(geoipBatch []string) (*GeoIPBatch, error) {
 	var ips = `[`

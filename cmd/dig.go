@@ -96,7 +96,6 @@ var digCmd = &cobra.Command{
 			digOutput.Request(dns.TypeANY)
 		}
 		if digOutput == nil {
-			log.Println("response is empty")
 			return
 		}
 		OutputDefaultString(&digOutput)
