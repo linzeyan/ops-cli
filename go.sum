@@ -244,8 +244,6 @@ github.com/linzeyan/expandUrl v0.2.0 h1:PA8FMEjPxew2urYV1mREIRlaXrC15xA4lF0RbNwT
 github.com/linzeyan/expandUrl v0.2.0/go.mod h1:kFfj1cLkAEcIEmAcYmCquaQZfH6v/X8AiH4XD1Rc8o0=
 github.com/linzeyan/icp v0.3.1 h1:NDEKZgbgdZCU5Mee1Ydheyz1p4Wr+nr3dnAQyCmasGk=
 github.com/linzeyan/icp v0.3.1/go.mod h1:sDQ0YJqFc3QSU1z7LSHnfQFkhO0zXPjQUTfibU24Zc8=
-github.com/linzeyan/password v0.3.4 h1:MsgPHrrzBhLVI8g+aSyU07Xx8RC3bamGWdW49kO02fE=
-github.com/linzeyan/password v0.3.4/go.mod h1:AzgHaCEjUVGdil4l8ReolCwumaOllFPmn9rdCMH8zPk=
 github.com/linzeyan/qrcode v0.0.3 h1:C32owFqLrQq51QJHQhIzVCbN7qXk+c/qxKZKjTbO/c8=
 github.com/linzeyan/qrcode v0.0.3/go.mod h1:gIH7z2lJ3HaTPXzbXU4sljuD4WtW1o6Dxu5rrBR+M24=
 github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 h1:6E+4a0GO5zZEnZ81pIr0yLvtUWk2if982qA3F3QD6H4=

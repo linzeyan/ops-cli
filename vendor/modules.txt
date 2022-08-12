@@ -126,9 +126,6 @@ github.com/linzeyan/expandUrl
 # github.com/linzeyan/icp v0.3.1
 ## explicit; go 1.17
 github.com/linzeyan/icp
-# github.com/linzeyan/password v0.3.4
-## explicit; go 1.17
-github.com/linzeyan/password
 # github.com/linzeyan/qrcode v0.0.3
 ## explicit; go 1.18
 github.com/linzeyan/qrcode

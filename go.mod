@@ -11,7 +11,6 @@ require (
 	github.com/line/line-bot-sdk-go/v7 v7.16.0
 	github.com/linzeyan/expandUrl v0.2.0
 	github.com/linzeyan/icp v0.3.1
-	github.com/linzeyan/password v0.3.4
 	github.com/linzeyan/qrcode v0.0.3
 	github.com/miekg/dns v1.1.47
 	github.com/shirou/gopsutil/v3 v3.22.7

@@ -17,7 +17,14 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/linzeyan/password"
+	"crypto/rand"
+	"errors"
+	"log"
+	"math/big"
+	mathRand "math/rand"
+	"os"
+	"strings"
+
 	"github.com/spf13/cobra"
 )
 
@@ -73,11 +80,11 @@ var r ran
 func init() {
 	rootCmd.AddCommand(randomCmd)
 
-	randomCmd.PersistentFlags().UintVarP(&r.length, "length", "l", 24, "Specify the string length")
-	randomCmd.Flags().UintVarP(&r.lower, "lower", "o", 4, "Number of lowercase letters to include in the string")
-	randomCmd.Flags().UintVarP(&r.upper, "upper", "u", 4, "Number of uppercase letters to include in the string")
-	randomCmd.Flags().UintVarP(&r.symbol, "symbol", "s", 4, "Number of symbols to include in the string")
-	randomCmd.Flags().UintVarP(&r.number, "number", "n", 4, "Number of digits to include in the string")
+	randomCmd.PersistentFlags().IntVarP(&r.length, "length", "l", 24, "Specify the string length")
+	randomCmd.Flags().IntVarP(&r.lower, "lower", "o", 4, "Number of lowercase letters to include in the string")
+	randomCmd.Flags().IntVarP(&r.upper, "upper", "u", 4, "Number of uppercase letters to include in the string")
+	randomCmd.Flags().IntVarP(&r.symbol, "symbol", "s", 4, "Number of symbols to include in the string")
+	randomCmd.Flags().IntVarP(&r.number, "number", "n", 4, "Number of digits to include in the string")
 
 	randomCmd.AddCommand(randomSubCmdLower)
 	randomCmd.AddCommand(randomSubCmdNumber)
@@ -87,24 +94,92 @@ func init() {
 
 type ran struct {
 	/* Bind flags */
-	length, lower, upper, symbol, number uint
+	length, lower, upper, symbol, number int
 
 	/* Output string */
 	result string
 }
 
 func (r *ran) Run(cmd *cobra.Command, _ []string) {
+	var err error
+	var p randomString
 	switch cmd.Name() {
 	case "number":
-		r.result = password.GenNumber(r.length)
+		r.result, err = p.genString(r.length, number)
 	case "symbol":
-		r.result = password.GenSymbol(r.length)
+		r.result, err = p.genString(r.length, symbol)
 	case "uppercase":
-		r.result = password.GenUpper(r.length)
+		r.result, err = p.genString(r.length, uppercase)
 	case "lowercase":
-		r.result = password.GenLower(r.length)
+		r.result, err = p.genString(r.length, lowercase)
 	case "random":
-		r.result = password.GeneratePassword(r.length, r.lower, r.upper, r.symbol, r.number)
+		r.result, err = p.GenerateAll(r.length, r.lower, r.upper, r.symbol, r.number)
+	}
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
 	PrintString(r.result)
+}
+
+const (
+	lowercase = "abcdefghijklmnopqrstuvwxyz"
+	uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	symbol    = "~!@#$%^&*()_+`-={}|[]\\:\"<>?,./"
+	number    = "0123456789"
+	allSet    = lowercase + uppercase + symbol + number
+)
+
+type randomString struct{}
+
+func (randomString) genString(length int, charSet string) (string, error) {
+	var s strings.Builder
+	var err error
+	for i := int(0); i < length; i++ {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))
+		if err != nil {
+			return "", err
+		}
+		err = s.WriteByte(charSet[n.Int64()])
+		if err != nil {
+			return "", err
+		}
+	}
+	return s.String(), err
+}
+
+func (r randomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) (string, error) {
+	var err error
+	var remain string
+	leave := length - minLower - minUpper - minSymbol - minNumber
+	if leave < 0 {
+		return "", errors.New("invalid length")
+	}
+	lower, err := r.genString(minLower, lowercase)
+	if err != nil {
+		return lower, err
+	}
+	upper, err := r.genString(minUpper, uppercase)
+	if err != nil {
+		return upper, err
+	}
+	symbol, err := r.genString(minSymbol, symbol)
+	if err != nil {
+		return symbol, err
+	}
+	num, err := r.genString(minNumber, number)
+	if err != nil {
+		return num, err
+	}
+	if leave != 0 {
+		remain, err = r.genString(leave, allSet)
+		if err != nil {
+			return remain, err
+		}
+	}
+	result := []byte(lower + upper + symbol + num + remain)
+	mathRand.Shuffle(len(result), func(i, j int) {
+		result[i], result[j] = result[j], result[i]
+	})
+	return string(result), err
 }
