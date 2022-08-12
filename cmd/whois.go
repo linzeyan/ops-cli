@@ -161,7 +161,7 @@ func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
 /* Convert time to RFC3339 format. */
 func (w whoisFlag) ParseTime(t string) (string, error) {
 	/* 1997-09-15T04:00:00Z */
-	s, err := time.Parse("2006-01-02T03:04:05Z", t)
+	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
 		return "", err
 	}
@@ -170,7 +170,7 @@ func (w whoisFlag) ParseTime(t string) (string, error) {
 
 /* Convert time to days. */
 func (w whoisFlag) CalculateDays(t string) (int, error) {
-	s, err := time.Parse("2006-01-02T03:04:05Z", t)
+	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
 		return 0, err
 	}
