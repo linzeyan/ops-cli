@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -e -o pipefail
 
 runCommand="./ops-cli"
 assests="test/assets/"

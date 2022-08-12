@@ -36,7 +36,7 @@ brew install ops-cli
 OPS useful tools
 
 Usage:
-  ops-cli [flags]
+  ops-cli
   ops-cli [command]
 
 Available Commands:
@@ -48,12 +48,14 @@ Available Commands:
   convert     Convert data format
   dig         Resolve domain name
   doc         Generate documentation
+  encode      encode and decode string
   geoip       Print IP geographic information
   help        Help about any command
   icp         Check ICP status
   otp         Calculate passcode or generate secret
   qrcode      Read or generate QR Code
   random      Generate random string
+  system      Display system informations
   url         Expand shorten url
   version     Print version information
   whois       List domain name information
