@@ -7,7 +7,11 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-const mainGo = "../main.go"
+const (
+	mainCommand = "go"
+	mainGo      = "../main.go"
+	runCommand  = "run"
+)
 
 func TestDomain(t *testing.T) {
 	testCases := []struct {
