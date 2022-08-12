@@ -1,8 +1,10 @@
-package cmd
+package test_test
 
 import (
 	"fmt"
 	"testing"
+
+	"github.com/linzeyan/ops-cli/cmd"
 )
 
 const mainGo = "../main.go"
@@ -21,7 +23,7 @@ func TestDomain(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(fmt.Sprintf("%s", testCases[i].input), func(t *testing.T) {
-			if got := ValidDomain(testCases[i].input); got != testCases[i].expected {
+			if got := cmd.ValidDomain(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -41,7 +43,7 @@ func TestFile(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := ValidFile(testCases[i].input); got != testCases[i].expected {
+			if got := cmd.ValidFile(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -61,7 +63,7 @@ func TestIP(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := ValidIP(testCases[i].input); got != testCases[i].expected {
+			if got := cmd.ValidIP(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -81,7 +83,7 @@ func TestIPv4(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := ValidIPv4(testCases[i].input); got != testCases[i].expected {
+			if got := cmd.ValidIPv4(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -101,7 +103,7 @@ func TestIPv6(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := ValidIPv6(testCases[i].input); got != testCases[i].expected {
+			if got := cmd.ValidIPv6(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -124,7 +126,7 @@ func TestUrl(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := ValidURL(testCases[i].input); got != testCases[i].expected {
+			if got := cmd.ValidURL(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})

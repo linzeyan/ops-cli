@@ -1,4 +1,4 @@
-package cmd
+package test_test
 
 import (
 	"os/exec"
