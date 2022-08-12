@@ -121,6 +121,12 @@ var (
 	ErrArgNotFound   = errors.New("argument not found")
 	ErrConfNotFound  = errors.New("config not found")
 	ErrFileNotFound  = errors.New("file not found")
+	ErrFileType      = errors.New("file type not correct")
+	ErrInitialFailed = errors.New("initial failed")
+	ErrInvalidIP     = errors.New("invalid IP")
+	ErrInvalidLength = errors.New("invalid length")
+	ErrParseCert     = errors.New("can not correctly parse certificate")
+	ErrEmptyResponse = errors.New("response is empty")
 	ErrTokenNotFound = errors.New("token not found")
 )
 
@@ -143,8 +149,7 @@ var rootNow = time.Now().Local()
 var rootContext = context.Background()
 
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
@@ -253,7 +258,7 @@ func PrintJSON(i interface{}) {
 	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(i); err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	PrintString(buf.String())
 }
@@ -264,7 +269,7 @@ func PrintYAML(i interface{}) {
 	encoder.SetIndent(2)
 	if err := encoder.Encode(i); err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	PrintString(buf.String())
 }

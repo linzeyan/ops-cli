@@ -147,9 +147,7 @@ func (l *lineFlag) GetID() {
 	})
 
 	err = http.ListenAndServe(":80", nil)
-	if errors.Is(err, http.ErrServerClosed) {
-		log.Println("server closed")
-	} else if err != nil {
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Printf("error starting server: %s\n", err)
 		os.Exit(1)
 	}

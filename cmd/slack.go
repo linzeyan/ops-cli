@@ -19,7 +19,6 @@ package cmd
 import (
 	"bytes"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"image/jpeg"
 	"image/png"
@@ -122,7 +121,7 @@ func (s *slackFlag) Init() error {
 	}
 	s.api = slack.New(s.token)
 	if s.api == nil {
-		return errors.New("api init failed")
+		return ErrInitialFailed
 	}
 	return err
 }

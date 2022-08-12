@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -85,7 +84,7 @@ type GeoIPSingle struct {
 func (GeoIPSingle) Request(geoipInput string) (*GeoIPSingle, error) {
 	/* Valid IP */
 	if !ValidIP(geoipInput) {
-		return nil, errors.New("not a valid IP")
+		return nil, ErrInvalidIP
 	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 

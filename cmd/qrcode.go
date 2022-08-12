@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -151,7 +150,7 @@ type qrcodeFlag struct {
 
 func (q qrcodeFlag) Generate() error {
 	if qr.text == "" {
-		return errors.New("text is empty")
+		return ErrEmptyResponse
 	}
 	return qrcode.GenerateQRCode(qr.text, qr.size, qr.output)
 }

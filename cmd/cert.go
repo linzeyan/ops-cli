@@ -21,7 +21,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"errors"
 	"io"
 	"log"
 	"os"
@@ -85,7 +84,7 @@ func (cf *certFlag) Run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	if cf.resp == nil {
-		log.Println("response is empty")
+		log.Println(ErrEmptyResponse)
 		os.Exit(1)
 	}
 	switch {
@@ -156,14 +155,14 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 	buf = buf[0:t]
 	crtPem, _ := pem.Decode(buf)
 	if crtPem == nil {
-		return nil, errors.New("file type not correct")
+		return nil, ErrFileType
 	}
 	cert, err := x509.ParseCertificates(crtPem.Bytes)
 	if err != nil {
 		return nil, err
 	}
 	if cert == nil {
-		return nil, errors.New("can not correctly parse")
+		return nil, ErrParseCert
 	}
 
 	dayRemain := cert[0].NotAfter.Local().Sub(rootNow)

@@ -33,7 +33,8 @@ var icpCmd = &cobra.Command{
 			log.Println(err)
 			os.Exit(1)
 		}
-		if i.account == "" && i.key == "" {
+		if i.account == "" || i.key == "" {
+			log.Println(ErrTokenNotFound)
 			os.Exit(1)
 		}
 		icp.Domain = args[0]

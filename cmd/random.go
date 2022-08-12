@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"crypto/rand"
-	"errors"
 	"log"
 	"math/big"
 	mathRand "math/rand"
@@ -145,7 +144,7 @@ func (r randomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumb
 	var remain string
 	leave := length - minLower - minUpper - minSymbol - minNumber
 	if leave < 0 {
-		return "", errors.New("invalid length")
+		return "", ErrInvalidLength
 	}
 	lower, err := r.genString(minLower, LowercaseLetters)
 	if err != nil {
