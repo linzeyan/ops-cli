@@ -34,7 +34,7 @@ var icpCmd = &cobra.Command{
 		icp.Domain = args[0]
 		icp.WestAccount = i.account
 		icp.WestApiKey = i.key
-		OutputDefaultJSON(map[string]string{icp.Domain: icp.Check()})
+		OutputDefaultYAML(map[string]string{icp.Domain: icp.Check()})
 	},
 	Example: Examples(`# Print the ICP status
 ops-cli icp -a account -k api_key google.com`),

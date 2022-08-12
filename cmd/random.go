@@ -17,8 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/linzeyan/password"
 	"github.com/spf13/cobra"
 )
@@ -108,5 +106,5 @@ func (r *ran) Run(cmd *cobra.Command, _ []string) {
 	case "random":
 		r.result = password.GeneratePassword(r.length, r.lower, r.upper, r.symbol, r.number)
 	}
-	fmt.Println(r.result)
+	PrintString(r.result)
 }

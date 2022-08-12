@@ -83,5 +83,5 @@ func (r version) String() {
 	}
 	ver.WriteString("Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>\n")
 	ver.WriteString("Source available at https://github.com/linzeyan/ops-cli")
-	fmt.Println(ver.String())
+	PrintString(ver.String())
 }

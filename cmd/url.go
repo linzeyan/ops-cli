@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/linzeyan/expandUrl"
@@ -34,7 +33,7 @@ var urlCmd = &cobra.Command{
 			log.Println(err)
 			return
 		}
-		fmt.Println(result)
+		PrintString(result)
 	},
 	Example: Examples(`# Get the real URL from the shortened URL
 ops-cli url https://goo.gl/maps/b37Aq3Anc7taXQDd9`),
