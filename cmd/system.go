@@ -123,17 +123,13 @@ func init() {
 	systemCmd.AddCommand(systemSubCmdMemory)
 	systemCmd.AddCommand(systemSubCmdNetwork)
 
-	systemSubCmdCPU.Flags().BoolVarP(&sysf.cpu, "cpu-times", "t", false, "Display CPU Times")
-	systemSubCmdHost.Flags().BoolVarP(&sysf.temperature, "temperature", "t", false, "Display sensors temperature")
 	systemSubCmdNetwork.Flags().BoolVarP(&sysf.aiface, "all-interfaces", "a", false, "Display all interfaces")
 	systemSubCmdNetwork.Flags().BoolVarP(&sysf.iface, "interface", "i", false, "Display interfaces")
 }
 
 type systemFlag struct {
-	cpu         bool
-	temperature bool
-	aiface      bool
-	iface       bool
+	aiface bool
+	iface  bool
 
 	cpuResp  systemCPUInfoResponse
 	diskResp systemDiskUsageResponse
@@ -146,26 +142,10 @@ type systemFlag struct {
 type systemCPUInfoResponse struct {
 	/* cpu.Info() */
 	VendorID  string `json:"vendorId,omitempty" yaml:"vendorId,omitempty"`
-	Cores     int    `json:"cores,omitempty" yaml:"cores,omitempty"`
+	Cores     string `json:"cores,omitempty" yaml:"cores,omitempty"`
 	ModelName string `json:"modelName,omitempty" yaml:"modelName,omitempty"`
-	Mhz       int    `json:"mhz,omitempty" yaml:"mhz,omitempty"`
-	CacheSize int    `json:"cacheSize,omitempty" yaml:"cacheSize,omitempty"`
-
-	CPUTimes []systemCPUTimesResponse `json:"cpuTimes,omitempty" yaml:"cpuTimes,omitempty"`
-}
-
-type systemCPUTimesResponse struct {
-	/* cpu.Times(false) */
-	User      string `json:"user,omitempty" yaml:"user,omitempty"`
-	System    string `json:"system,omitempty" yaml:"system,omitempty"`
-	Idle      string `json:"idle,omitempty" yaml:"idle,omitempty"`
-	Nice      string `json:"nice,omitempty" yaml:"nice,omitempty"`
-	Iowait    string `json:"iowait,omitempty" yaml:"iowait,omitempty"`
-	Irq       string `json:"irq,omitempty" yaml:"irq,omitempty"`
-	Softirq   string `json:"softirq,omitempty" yaml:"softirq,omitempty"`
-	Steal     string `json:"steal,omitempty" yaml:"steal,omitempty"`
-	Guest     string `json:"guest,omitempty" yaml:"guest,omitempty"`
-	GuestNice string `json:"guestNice,omitempty" yaml:"guestNice,omitempty"`
+	Mhz       string `json:"mhz,omitempty" yaml:"mhz,omitempty"`
+	CacheSize string `json:"cacheSize,omitempty" yaml:"cacheSize,omitempty"`
 }
 
 func (s *systemFlag) CPUInfo() error {
@@ -173,47 +153,12 @@ func (s *systemFlag) CPUInfo() error {
 	if err != nil {
 		return err
 	}
-	data, err := json.Marshal(info[0])
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(data, &s.cpuResp); err != nil {
-		return err
-	}
-	if !s.cpu {
-		return nil
-	}
-
-	times, err := cpu.Times(false)
-	if err != nil {
-		return err
-	}
-	s.cpuResp.CPUTimes = append(s.cpuResp.CPUTimes, systemCPUTimesResponse{
-		User:   (time.Second * time.Duration(times[0].User)).String(),
-		System: (time.Second * time.Duration(times[0].System)).String(),
-		Idle:   (time.Second * time.Duration(times[0].Idle)).String(),
-	})
-
-	if times[0].Nice != 0 {
-		s.cpuResp.CPUTimes[0].Nice = (time.Second * time.Duration(times[0].Nice)).String()
-	}
-	if times[0].Iowait != 0 {
-		s.cpuResp.CPUTimes[0].Iowait = (time.Second * time.Duration(times[0].Iowait)).String()
-	}
-	if times[0].Irq != 0 {
-		s.cpuResp.CPUTimes[0].Irq = (time.Second * time.Duration(times[0].Irq)).String()
-	}
-	if times[0].Softirq != 0 {
-		s.cpuResp.CPUTimes[0].Softirq = (time.Second * time.Duration(times[0].Softirq)).String()
-	}
-	if times[0].Steal != 0 {
-		s.cpuResp.CPUTimes[0].Steal = (time.Second * time.Duration(times[0].Steal)).String()
-	}
-	if times[0].Guest != 0 {
-		s.cpuResp.CPUTimes[0].Guest = (time.Second * time.Duration(times[0].Guest)).String()
-	}
-	if times[0].GuestNice != 0 {
-		s.cpuResp.CPUTimes[0].GuestNice = (time.Second * time.Duration(times[0].GuestNice)).String()
+	s.cpuResp = systemCPUInfoResponse{
+		VendorID:  info[0].VendorID,
+		Cores:     fmt.Sprintf("%d", info[0].Cores),
+		ModelName: info[0].ModelName,
+		Mhz:       fmt.Sprintf("%d", int(info[0].Mhz)),
+		CacheSize: fmt.Sprintf("%d", info[0].CacheSize),
 	}
 	return nil
 }
@@ -257,15 +202,6 @@ type systemHostInfoResponse struct {
 	VirtualizationSystem string `json:"virtualizationSystem,omitempty" yaml:"virtualizationSystem,omitempty"`
 	VirtualizationRole   string `json:"virtualizationRole,omitempty" yaml:"virtualizationRole,omitempty"`
 	HostID               string `json:"hostId,omitempty" yaml:"hostId,omitempty"`
-
-	Temperature []systemHostTemperatureResponse `json:"temperature,omitempty" yaml:"temperature,omitempty"`
-}
-
-type systemHostTemperatureResponse struct {
-	SensorKey   string  `json:"sensorKey,omitempty" yaml:"sensorKey,omitempty"`
-	Temperature float64 `json:"temperature,omitempty" yaml:"temperature,omitempty"`
-	High        float64 `json:"sensorHigh,omitempty" yaml:"sensorHigh,omitempty"`
-	Critical    float64 `json:"sensorCritical,omitempty" yaml:"sensorCritical,omitempty"`
 }
 
 func (s *systemFlag) HostInfo() error {
@@ -288,30 +224,13 @@ func (s *systemFlag) HostInfo() error {
 		VirtualizationRole:   info.VirtualizationRole,
 		HostID:               info.HostID,
 	}
-	if !s.temperature {
-		return nil
-	}
-	temp, err := host.SensorsTemperatures()
-	if err != nil {
-		return err
-	}
-	for i := range temp {
-		if temp[i].Temperature != 0 {
-			s.hostResp.Temperature = append(s.hostResp.Temperature, systemHostTemperatureResponse{
-				SensorKey:   temp[i].SensorKey,
-				Temperature: temp[i].Temperature,
-				High:        temp[i].High,
-				Critical:    temp[i].Critical,
-			})
-		}
-	}
 	return nil
 }
 
 type systemLoadAvgResponse struct {
-	Load1  float64 `json:"load1,omitempty" yaml:"load1,omitempty"`
-	Load5  float64 `json:"load5,omitempty" yaml:"load5,omitempty"`
-	Load15 float64 `json:"load15,omitempty" yaml:"load15,omitempty"`
+	Load1  string `json:"load1,omitempty" yaml:"load1,omitempty"`
+	Load5  string `json:"load5,omitempty" yaml:"load5,omitempty"`
+	Load15 string `json:"load15,omitempty" yaml:"load15,omitempty"`
 }
 
 func (s *systemFlag) LoadAvg() error {
@@ -319,12 +238,10 @@ func (s *systemFlag) LoadAvg() error {
 	if err != nil {
 		return err
 	}
-	data, err := json.Marshal(info)
-	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(data, &s.loadResp); err != nil {
-		return err
+	s.loadResp = systemLoadAvgResponse{
+		Load1:  fmt.Sprintf("%0.2f", info.Load1),
+		Load5:  fmt.Sprintf("%0.2f", info.Load5),
+		Load15: fmt.Sprintf("%0.2f", info.Load15),
 	}
 	return nil
 }
