@@ -232,7 +232,7 @@ func (c *convertFlag) Convert() error {
 		return err
 	}
 	return node.WriteToFile(c.outFile, c.outType, []storage.ReadWriteOption{
-		{Key: storage.OptionIndent},
+		storage.PrettyPrintOption(true),
 	})
 }
 
