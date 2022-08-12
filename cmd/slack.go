@@ -95,7 +95,7 @@ func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
 	var err error
 	if err = s.Init(); err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 	switch cmd.Name() {
 	case ImTypeFile:
@@ -113,15 +113,18 @@ func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
 }
 
 func (s *slackFlag) Init() error {
-	Config(ConfigBlockSlack)
+	var err error
+	if err = Config(ConfigBlockSlack); err != nil {
+		return err
+	}
 	if s.token == "" {
-		return errors.New("token is empty")
+		return ErrTokenNotFound
 	}
 	s.api = slack.New(s.token)
 	if s.api == nil {
 		return errors.New("api init failed")
 	}
-	return nil
+	return err
 }
 
 func (s *slackFlag) Text() error {

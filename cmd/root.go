@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -73,10 +74,6 @@ func (b ByteSize) String() string {
 
 type ConfigBlock string
 
-func (c ConfigBlock) String() string {
-	return string(c)
-}
-
 const (
 	ConfigBlockICP      ConfigBlock = "icp"
 	ConfigBlockLINE     ConfigBlock = "line"
@@ -89,12 +86,6 @@ const (
 	DocTypeMarkdown = "markdown"
 	DocTypeReST     = "rest"
 	DocTypeYaml     = "yaml"
-)
-
-const (
-	ErrArgNotFound   = "argument not found"
-	ErrFileNotFound  = "file not found"
-	ErrTokenNotFound = "token not found"
 )
 
 const (
@@ -124,6 +115,13 @@ const (
 	Symbols          RandomCharacter = "~!@#$%^&*()_+`-={}|[]\\:\"<>?,./"
 	Numbers          RandomCharacter = "0123456789"
 	AllSet           RandomCharacter = LowercaseLetters + UppercaseLetters + Symbols + Numbers
+)
+
+var (
+	ErrArgNotFound   = errors.New("argument not found")
+	ErrConfNotFound  = errors.New("config not found")
+	ErrFileNotFound  = errors.New("file not found")
+	ErrTokenNotFound = errors.New("token not found")
 )
 
 var rootCmd = &cobra.Command{
@@ -157,19 +155,16 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", "Specify config path (toml)")
 }
 
-func Config(subFn ConfigBlock) {
+/* Get secret token from config. */
+func Config(subFn ConfigBlock) error {
+	var err error
 	if rootConfig == "" {
-		return
-	}
-	if subFn == "" {
-		return
+		return ErrConfNotFound
 	}
 	viper.SetConfigFile(rootConfig)
 	viper.SetConfigType(FileTypeTOML)
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Println(err)
-		return
+	if err = viper.ReadInConfig(); err != nil {
+		return err
 	}
 	switch subFn {
 	case ConfigBlockICP:
@@ -199,7 +194,10 @@ func Config(subFn ConfigBlock) {
 		if line.id == "" {
 			line.id = viper.GetString("line.id")
 		}
+	default:
+		return ErrConfNotFound
 	}
+	return err
 }
 
 /* Print examples with color. */

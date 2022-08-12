@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/linzeyan/icp"
@@ -28,7 +29,10 @@ var icpCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	Run: func(_ *cobra.Command, args []string) {
-		Config(ConfigBlockICP)
+		if err := Config(ConfigBlockICP); err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
 		if i.account == "" && i.key == "" {
 			os.Exit(1)
 		}
