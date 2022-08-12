@@ -75,7 +75,7 @@ var randomSubCmdUpper = &cobra.Command{
 ops-cli random uppercase`),
 }
 
-var r ran
+var r randomFlag
 
 func init() {
 	rootCmd.AddCommand(randomCmd)
@@ -92,7 +92,7 @@ func init() {
 	randomCmd.AddCommand(randomSubCmdUpper)
 }
 
-type ran struct {
+type randomFlag struct {
 	/* Bind flags */
 	length, lower, upper, symbol, number int
 
@@ -100,18 +100,18 @@ type ran struct {
 	result string
 }
 
-func (r *ran) Run(cmd *cobra.Command, _ []string) {
+func (r *randomFlag) Run(cmd *cobra.Command, _ []string) {
 	var err error
 	var p randomString
 	switch cmd.Name() {
 	case "number":
-		r.result, err = p.genString(r.length, number)
+		r.result, err = p.genString(r.length, Numbers)
 	case "symbol":
-		r.result, err = p.genString(r.length, symbol)
+		r.result, err = p.genString(r.length, Symbols)
 	case "uppercase":
-		r.result, err = p.genString(r.length, uppercase)
+		r.result, err = p.genString(r.length, UppercaseLetters)
 	case "lowercase":
-		r.result, err = p.genString(r.length, lowercase)
+		r.result, err = p.genString(r.length, LowercaseLetters)
 	case "random":
 		r.result, err = p.GenerateAll(r.length, r.lower, r.upper, r.symbol, r.number)
 	}
@@ -122,17 +122,9 @@ func (r *ran) Run(cmd *cobra.Command, _ []string) {
 	PrintString(r.result)
 }
 
-const (
-	lowercase = "abcdefghijklmnopqrstuvwxyz"
-	uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	symbol    = "~!@#$%^&*()_+`-={}|[]\\:\"<>?,./"
-	number    = "0123456789"
-	allSet    = lowercase + uppercase + symbol + number
-)
-
 type randomString struct{}
 
-func (randomString) genString(length int, charSet string) (string, error) {
+func (randomString) genString(length int, charSet RandomCharacter) (string, error) {
 	var s strings.Builder
 	var err error
 	for i := int(0); i < length; i++ {
@@ -155,24 +147,24 @@ func (r randomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumb
 	if leave < 0 {
 		return "", errors.New("invalid length")
 	}
-	lower, err := r.genString(minLower, lowercase)
+	lower, err := r.genString(minLower, LowercaseLetters)
 	if err != nil {
 		return lower, err
 	}
-	upper, err := r.genString(minUpper, uppercase)
+	upper, err := r.genString(minUpper, UppercaseLetters)
 	if err != nil {
 		return upper, err
 	}
-	symbol, err := r.genString(minSymbol, symbol)
+	symbol, err := r.genString(minSymbol, Symbols)
 	if err != nil {
 		return symbol, err
 	}
-	num, err := r.genString(minNumber, number)
+	num, err := r.genString(minNumber, Numbers)
 	if err != nil {
 		return num, err
 	}
 	if leave != 0 {
-		remain, err = r.genString(leave, allSet)
+		remain, err = r.genString(leave, AllSet)
 		if err != nil {
 			return remain, err
 		}

@@ -116,6 +116,16 @@ const (
 	ImTypeVoice = "voice"
 )
 
+type RandomCharacter string
+
+const (
+	LowercaseLetters RandomCharacter = "abcdefghijklmnopqrstuvwxyz"
+	UppercaseLetters RandomCharacter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	Symbols          RandomCharacter = "~!@#$%^&*()_+`-={}|[]\\:\"<>?,./"
+	Numbers          RandomCharacter = "0123456789"
+	AllSet           RandomCharacter = LowercaseLetters + UppercaseLetters + Symbols + Numbers
+)
+
 var rootCmd = &cobra.Command{
 	Use:   "ops-cli",
 	Short: "OPS useful tools",
