@@ -20,10 +20,12 @@ func TestCert(t *testing.T) {
 	}
 
 	for i := range testCases {
-		got, err := exec.Command("go", testCases[i].input...).Output()
-		if err != nil {
-			t.Errorf("%s exec error:%s", testCases[i].input[3], err)
-		}
-		assert.Equal(t, testCases[i].expected, string(got))
+		t.Run(testCases[i].input[3], func(t *testing.T) {
+			got, err := exec.Command("go", testCases[i].input...).Output()
+			if err != nil {
+				t.Errorf("%s exec error:%s", testCases[i].input[3], err)
+			}
+			assert.Equal(t, testCases[i].expected, string(got))
+		})
 	}
 }
