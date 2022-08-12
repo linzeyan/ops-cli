@@ -238,9 +238,7 @@ func (c *convertFlag) Convert() error {
 
 func (c *convertFlag) Load() error {
 	var err error
-	if c.readFile, err = os.ReadFile(c.inFile); err != nil {
-		return err
-	}
+	c.readFile, err = os.ReadFile(c.inFile)
 	return err
 }
 
@@ -320,9 +318,5 @@ func (c *convertFlag) ConvertMarkdown2PDF() error {
 }
 
 func (c *convertFlag) WriteFile(content []byte) error {
-	var err error
-	if err = os.WriteFile(c.outFile, content, os.ModePerm); err != nil {
-		return err
-	}
-	return err
+	return os.WriteFile(c.outFile, content, os.ModePerm)
 }

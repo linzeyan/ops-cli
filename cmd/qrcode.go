@@ -150,7 +150,7 @@ type qrcodeFlag struct {
 
 func (q qrcodeFlag) Generate() error {
 	if qr.text == "" {
-		return ErrEmptyResponse
+		return ErrArgNotFound
 	}
 	return qrcode.GenerateQRCode(qr.text, qr.size, qr.output)
 }

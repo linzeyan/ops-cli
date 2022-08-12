@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -133,13 +132,13 @@ func (l *lineFlag) GetID() {
 			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == ImTypeID {
 				switch s := events[i].Source; s.Type {
 				case linebot.EventSourceTypeGroup:
-					fmt.Println(s.GroupID)
+					PrintString(s.GroupID)
 					os.Exit(0)
 				case linebot.EventSourceTypeRoom:
-					fmt.Println(s.RoomID)
+					PrintString(s.RoomID)
 					os.Exit(0)
 				case linebot.EventSourceTypeUser:
-					fmt.Println(s.UserID)
+					PrintString(s.UserID)
 					os.Exit(0)
 				}
 			}

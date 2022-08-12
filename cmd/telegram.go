@@ -234,6 +234,7 @@ func (t *telegramFlag) Run(cmd *cobra.Command, _ []string) {
 		log.Println(err)
 		os.Exit(1)
 	}
+	OutputDefaultNone(t.resp)
 }
 
 func (t *telegramFlag) parseFile(s string) tgBot.RequestFileData {
@@ -249,6 +250,5 @@ func (t *telegramFlag) parseFile(s string) tgBot.RequestFileData {
 func (t *telegramFlag) send(c tgBot.Chattable) error {
 	var err error
 	t.resp, err = t.api.Send(c)
-	OutputDefaultNone(t.resp)
 	return err
 }

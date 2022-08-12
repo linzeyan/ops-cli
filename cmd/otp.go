@@ -131,14 +131,16 @@ func (o *otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(timeInterval))
 	hasher := hmac.New(o.SetAlgorithm(), key)
-	hasher.Write(buf)
+	_, err = hasher.Write(buf)
+	if err != nil {
+		return "", err
+	}
 	h := hasher.Sum(nil)
 	offset := h[len(h)-1] & 0xf
 	r := bytes.NewReader(h[offset : offset+4])
 
 	var data uint32
-	err = binary.Read(r, binary.BigEndian, &data)
-	if err != nil {
+	if err = binary.Read(r, binary.BigEndian, &data); err != nil {
 		return "", err
 	}
 	var digits = o.SetDigits()

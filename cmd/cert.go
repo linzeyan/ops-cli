@@ -146,8 +146,7 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 				if err == io.EOF {
 					break
 				}
-				log.Println(err)
-				break
+				return nil, err
 			}
 		}
 		t = n

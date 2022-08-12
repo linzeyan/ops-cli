@@ -131,8 +131,7 @@ func (randomString) genString(length int, charSet RandomCharacter) (string, erro
 		if err != nil {
 			return "", err
 		}
-		err = s.WriteByte(charSet[n.Int64()])
-		if err != nil {
+		if err = s.WriteByte(charSet[n.Int64()]); err != nil {
 			return "", err
 		}
 	}

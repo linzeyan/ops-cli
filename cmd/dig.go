@@ -203,10 +203,8 @@ func (d digResponse) Request(digType uint16) error {
 
 func (d digResponse) GetLocalServer() (string, error) {
 	const resolvConfig = "/etc/resolv.conf"
-	var err error
 	s, err := dns.ClientConfigFromFile(resolvConfig)
 	if err != nil {
-		log.Println(err)
 		return "", err
 	}
 	return s.Servers[0], err
