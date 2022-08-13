@@ -76,7 +76,7 @@ func (r whoisResponse) String() {
 		return
 	}
 	if wf.ns {
-		PrintString(r.NameServers)
+		PrintJSON(r.NameServers)
 		return
 	}
 	if wf.registrar {

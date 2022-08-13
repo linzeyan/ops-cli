@@ -92,7 +92,7 @@ func (cf *certFlag) Run(cmd *cobra.Command, args []string) {
 	case cf.ip:
 		PrintString(cf.resp.ServerIP)
 	case cf.dns:
-		PrintString(cf.resp.DNS)
+		PrintJSON(cf.resp.DNS)
 	case cf.expiry:
 		PrintString(cf.resp.ExpiryTime)
 	case cf.issuer:
