@@ -17,9 +17,7 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -33,7 +31,6 @@ import (
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
 )
 
 type ByteSize float64
@@ -253,25 +250,21 @@ func OutputDefaultYAML(i interface{}) {
 }
 
 func PrintJSON(i interface{}) {
-	var buf bytes.Buffer
-	encoder := json.NewEncoder(&buf)
-	encoder.SetIndent("", "  ")
-	if err := encoder.Encode(i); err != nil {
+	out, err := Encoder.JSONEncode(i)
+	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	PrintString(buf.String())
+	PrintString(out)
 }
 
 func PrintYAML(i interface{}) {
-	var buf bytes.Buffer
-	encoder := yaml.NewEncoder(&buf)
-	encoder.SetIndent(2)
-	if err := encoder.Encode(i); err != nil {
+	out, err := Encoder.YamlEncode(i)
+	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	PrintString(buf.String())
+	PrintString(out)
 }
 
 func PrintString(i interface{}) {

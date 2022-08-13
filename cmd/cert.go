@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/pem"
 	"io"
 	"log"
 	"os"
@@ -152,9 +151,9 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 		t = n
 	}
 	buf = buf[0:t]
-	crtPem, _ := pem.Decode(buf)
-	if crtPem == nil {
-		return nil, ErrFileType
+	crtPem, err := Encoder.PemDecode(buf)
+	if err != nil {
+		return nil, err
 	}
 	cert, err := x509.ParseCertificates(crtPem.Bytes)
 	if err != nil {
