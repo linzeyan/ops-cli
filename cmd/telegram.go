@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -202,7 +201,7 @@ func (t *telegramFlag) GetUpdate() {
 	for update := range updates {
 		if update.Message != nil { // If we got a message
 			if update.Message.Text == ImTypeID {
-				fmt.Println(update.Message.Chat.ID)
+				PrintString(update.Message.Chat.ID)
 				break
 			}
 		}

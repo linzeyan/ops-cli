@@ -216,17 +216,15 @@ func Examples(s string) string {
 }
 
 type rootOutput interface {
-	JSON()
-	YAML()
 	String()
 }
 
 func OutputDefaultString(r rootOutput) {
 	switch {
 	case rootOutputJSON:
-		r.JSON()
+		PrintJSON(r)
 	case rootOutputYAML:
-		r.YAML()
+		PrintYAML(r)
 	default:
 		r.String()
 	}

@@ -72,19 +72,19 @@ type whoisResponse struct {
 
 func (r whoisResponse) String() {
 	if wf.expiry {
-		fmt.Println(r.ExpiresDate)
+		PrintString(r.ExpiresDate)
 		return
 	}
 	if wf.ns {
-		fmt.Println(r.NameServers)
+		PrintString(r.NameServers)
 		return
 	}
 	if wf.registrar {
-		fmt.Println(r.Registrar)
+		PrintString(r.Registrar)
 		return
 	}
 	if wf.days {
-		fmt.Println(r.RemainDays)
+		PrintString(r.RemainDays)
 		return
 	}
 	f := reflect.ValueOf(&r).Elem()
@@ -93,10 +93,6 @@ func (r whoisResponse) String() {
 		fmt.Printf("%s\t%v\n", t.Field(i).Name, f.Field(i).Interface())
 	}
 }
-
-func (r whoisResponse) JSON() { PrintJSON(r) }
-
-func (r whoisResponse) YAML() { PrintYAML(r) }
 
 type whoisFlag struct {
 	/* Bind flags */

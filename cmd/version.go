@@ -64,10 +64,6 @@ type version struct {
 	Runtime string `json:"runtime,omitempty" yaml:"runtime,omitempty"`
 }
 
-func (r version) JSON() { PrintJSON(r) }
-
-func (r version) YAML() { PrintYAML(r) }
-
 func (r version) String() {
 	var ver strings.Builder
 	f := reflect.ValueOf(&r).Elem()

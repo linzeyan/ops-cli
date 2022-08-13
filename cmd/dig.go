@@ -215,7 +215,3 @@ func (d digResponse) String() {
 		fmt.Printf("%-20s\t%s\t%s\t%s\t%s\n", d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD)
 	}
 }
-
-func (d *digResponse) JSON() { PrintJSON(d) }
-
-func (d *digResponse) YAML() { PrintYAML(d) }
