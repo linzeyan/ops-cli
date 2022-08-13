@@ -16,8 +16,9 @@ func TestConvert(t *testing.T) {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, "yaml2json", "-i", "assets/proxy.yaml", "-o", "/tmp/test.json"}, "assets/proxy.json"},
-		{[]string{runCommand, mainGo, subCommand, "yaml2toml", "-i", "assets/proxy.yaml", "-o", "/tmp/test.toml"}, "assets/proxy.toml"},
+		{[]string{runCommand, mainGo, subCommand, "yaml2json", "-i", "assets/proxy.yaml", "-o", "/tmp/testy.json"}, "assets/proxy.json"},
+		{[]string{runCommand, mainGo, subCommand, "yaml2toml", "-i", "assets/proxy.yaml", "-o", "/tmp/testy.toml"}, "assets/proxy.toml"},
+		{[]string{runCommand, mainGo, subCommand, "toml2json", "-i", "assets/proxy.toml", "-o", "/tmp/testt.json"}, "assets/proxy.json"},
 	}
 
 	for i := range testCases {
