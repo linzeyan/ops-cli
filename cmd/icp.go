@@ -29,9 +29,11 @@ var icpCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	Run: func(_ *cobra.Command, args []string) {
-		if err := Config(ConfigBlockICP); err != nil {
-			log.Println(err)
-			os.Exit(1)
+		if (i.account == "" || i.key == "") && rootConfig != "" {
+			if err := Config(ConfigBlockICP); err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
 		}
 		if i.account == "" || i.key == "" {
 			log.Println(ErrTokenNotFound)

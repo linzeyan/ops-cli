@@ -112,8 +112,10 @@ func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
 
 func (s *slackFlag) Init() error {
 	var err error
-	if err = Config(ConfigBlockSlack); err != nil {
-		return err
+	if s.token == "" && rootConfig != "" {
+		if err = Config(ConfigBlockSlack); err != nil {
+			return err
+		}
 	}
 	if s.token == "" {
 		return ErrTokenNotFound

@@ -116,13 +116,18 @@ type telegramFlag struct {
 
 func (t *telegramFlag) Init() error {
 	var err error
-	if err = Config(ConfigBlockTelegram); err != nil {
-		return err
+	if tg.token == "" && rootConfig != "" {
+		if err = Config(ConfigBlockTelegram); err != nil {
+			return err
+		}
 	}
 	if tg.token == "" {
 		return ErrTokenNotFound
 	}
 	t.api, err = tgBot.NewBotAPI(t.token)
+	if t.api == nil {
+		return ErrInitialFailed
+	}
 	return err
 }
 

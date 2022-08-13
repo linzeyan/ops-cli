@@ -173,8 +173,10 @@ func Config(subFn ConfigBlock) error {
 	}
 	switch subFn {
 	case ConfigBlockICP:
-		if i.account == "" && i.key == "" {
+		if i.account == "" {
 			i.account = viper.GetString("west.account")
+		}
+		if i.key == "" {
 			i.key = viper.GetString("west.api_key")
 		}
 	case ConfigBlockTelegram:
@@ -192,8 +194,10 @@ func Config(subFn ConfigBlock) error {
 			sf.channel = viper.GetString("slack.channel_id")
 		}
 	case ConfigBlockLINE:
-		if line.secret == "" && line.token == "" {
+		if line.secret == "" {
 			line.secret = viper.GetString("line.secret")
+		}
+		if line.token == "" {
 			line.token = viper.GetString("line.access_token")
 		}
 		if line.id == "" {
