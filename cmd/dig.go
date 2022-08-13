@@ -44,7 +44,7 @@ var digCmd = &cobra.Command{
 			if digOutput == nil {
 				return
 			}
-			OutputDefaultString(&digOutput)
+			OutputInterfaceString(&digOutput)
 			return
 		case lens > 1:
 			/* Find which arg is domain. */
@@ -106,7 +106,7 @@ var digCmd = &cobra.Command{
 		if digOutput == nil {
 			return
 		}
-		OutputDefaultString(&digOutput)
+		OutputInterfaceString(&digOutput)
 	},
 	Example: Examples(`# Query A record
 ops-cli dig google.com

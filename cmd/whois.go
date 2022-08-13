@@ -44,7 +44,7 @@ var whoisCmd = &cobra.Command{
 		if resp == nil {
 			return
 		}
-		OutputDefaultString(resp)
+		OutputInterfaceString(resp)
 	},
 	Example: Examples(`# Search domain
 ops-cli whois apple.com`),

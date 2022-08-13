@@ -219,7 +219,7 @@ type rootOutput interface {
 	String()
 }
 
-func OutputDefaultString(r rootOutput) {
+func OutputInterfaceString(r rootOutput) {
 	switch {
 	case rootOutputJSON:
 		PrintJSON(r)
@@ -227,6 +227,14 @@ func OutputDefaultString(r rootOutput) {
 		PrintYAML(r)
 	default:
 		r.String()
+	}
+}
+
+func OutputDefaultJSON(i interface{}) {
+	if rootOutputYAML {
+		PrintYAML(i)
+	} else {
+		PrintJSON(i)
 	}
 }
 
@@ -238,11 +246,14 @@ func OutputDefaultNone(i interface{}) {
 	}
 }
 
-func OutputDefaultJSON(i interface{}) {
-	if rootOutputYAML {
-		PrintYAML(i)
-	} else {
+func OutputDefaultString(i interface{}) {
+	switch {
+	case rootOutputJSON:
 		PrintJSON(i)
+	case rootOutputYAML:
+		PrintYAML(i)
+	default:
+		PrintString(i)
 	}
 }
 
