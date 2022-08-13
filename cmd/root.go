@@ -20,8 +20,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"strconv"
@@ -115,16 +117,17 @@ const (
 )
 
 var (
-	ErrArgNotFound   = errors.New("argument not found")
-	ErrConfNotFound  = errors.New("config not found")
-	ErrFileNotFound  = errors.New("file not found")
-	ErrFileType      = errors.New("file type not correct")
-	ErrInitialFailed = errors.New("initial failed")
-	ErrInvalidIP     = errors.New("invalid IP")
-	ErrInvalidLength = errors.New("invalid length")
-	ErrParseCert     = errors.New("can not correctly parse certificate")
-	ErrEmptyResponse = errors.New("response is empty")
-	ErrTokenNotFound = errors.New("token not found")
+	ErrArgNotFound    = errors.New("argument not found")
+	ErrConfNotFound   = errors.New("config not found")
+	ErrEmptyResponse  = errors.New("response is empty")
+	ErrFileNotFound   = errors.New("file not found")
+	ErrFileType       = errors.New("file type not correct")
+	ErrInitialFailed  = errors.New("initial failed")
+	ErrInvalidIP      = errors.New("invalid IP")
+	ErrInvalidLength  = errors.New("invalid length")
+	ErrParseCert      = errors.New("can not correctly parse certificate")
+	ErrResponseStatus = errors.New("response status code is not 200")
+	ErrTokenNotFound  = errors.New("token not found")
 )
 
 var rootCmd = &cobra.Command{
@@ -269,6 +272,40 @@ func PrintYAML(i interface{}) {
 
 func PrintString(i interface{}) {
 	fmt.Printf("%+v\n", i)
+}
+
+/* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
+func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, error) {
+	var method string
+	if len(methods) == 0 {
+		method = http.MethodGet
+	} else {
+		method = methods[0]
+	}
+	var client = &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
+	}
+	req, err := http.NewRequestWithContext(rootContext, method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == http.StatusOK {
+		content, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+		return content, err
+	}
+	return nil, ErrResponseStatus
 }
 
 /* If i is a domain return true. */

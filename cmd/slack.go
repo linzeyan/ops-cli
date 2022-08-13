@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"image/jpeg"
 	"image/png"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -204,28 +203,9 @@ func (s *slackFlag) localFile() (string, error) {
 }
 
 func (s *slackFlag) remoteFile() (string, error) {
-	var client = &http.Client{
-		Transport: &http.Transport{
-			DisableKeepAlives: true,
-		},
-	}
-	req, err := http.NewRequestWithContext(rootContext, http.MethodGet, s.arg, nil)
+	content, err := HTTPRequestContent(s.arg, nil)
 	if err != nil {
 		return "", err
-	}
-	resp, err := client.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	}
-	if err != nil {
-		return "", err
-	}
-	var content []byte
-	if resp.StatusCode == http.StatusOK {
-		content, err = io.ReadAll(resp.Body)
-		if err != nil {
-			return "", err
-		}
 	}
 	if http.DetectContentType(content) == "image/jpeg" {
 		img, err := jpeg.Decode(bytes.NewReader(content))
