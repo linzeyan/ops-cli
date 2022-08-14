@@ -46,8 +46,8 @@ func TestQrcodeRead(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
+			assert.FileExists(t, testCases[i].input[4])
 			assert.Equal(t, testCases[i].expected, string(got))
-			// assert.FileExists(t, testCases[i].expected)
 		})
 	}
 }

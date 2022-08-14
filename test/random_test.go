@@ -1,0 +1,61 @@
+package test_test
+
+import (
+	"os/exec"
+	"strings"
+	"testing"
+
+	"github.com/linzeyan/ops-cli/cmd"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestRandom(t *testing.T) {
+	const subCommand = "random"
+	testCases := []struct {
+		input          []string
+		unexpectedText []cmd.RandomCharacter
+		expectedLength int
+	}{
+		{
+			[]string{runCommand, mainGo, subCommand, "number"},
+			[]cmd.RandomCharacter{cmd.LowercaseLetters, cmd.UppercaseLetters, cmd.Symbols},
+			24,
+		},
+		{
+			[]string{runCommand, mainGo, subCommand, "number", "-l", "64"},
+			[]cmd.RandomCharacter{cmd.LowercaseLetters, cmd.UppercaseLetters, cmd.Symbols},
+			64,
+		},
+		{
+			[]string{runCommand, mainGo, subCommand, "symbol"},
+			[]cmd.RandomCharacter{cmd.LowercaseLetters, cmd.UppercaseLetters, cmd.Numbers},
+			24,
+		},
+		{
+			[]string{runCommand, mainGo, subCommand, "lowercase"},
+			[]cmd.RandomCharacter{cmd.Numbers, cmd.UppercaseLetters, cmd.Symbols},
+			24,
+		},
+		{
+			[]string{runCommand, mainGo, subCommand, "uppercase", "-l", "200"},
+			[]cmd.RandomCharacter{cmd.Numbers, cmd.LowercaseLetters, cmd.Symbols},
+			200,
+		},
+	}
+
+	for i := range testCases {
+		t.Run(testCases[i].input[3], func(t *testing.T) {
+			out, err := exec.Command(mainCommand, testCases[i].input...).Output()
+			if err != nil {
+				t.Error(err)
+			}
+			got := string(out)
+			assert.Len(t, strings.TrimRight(got, "\n"), testCases[i].expectedLength)
+			for _, textType := range testCases[i].unexpectedText {
+				if strings.ContainsAny(got, string(textType)) {
+					t.Errorf("Expect %s, got %v", testCases[i].input[3], textType)
+				}
+			}
+		})
+	}
+}
