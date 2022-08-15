@@ -29,7 +29,7 @@ func TestConvert(t *testing.T) {
 				t.Error(err)
 			}
 			assert.FileExists(t, testCases[i].input[7])
-			if isWindows() {
+			if !isWindows() {
 				fileExpected, err := os.ReadFile(testCases[i].expected)
 				if err != nil {
 					t.Error(err)
