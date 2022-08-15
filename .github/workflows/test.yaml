@@ -20,6 +20,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@b0e28b5ac45a892f91e7d036f8200cf5ed489415 # v3
+        with:
+          fetch-depth: 0
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@537aa1903e5d359d0b27dbc19ddd22c5087f3fbc # v3
@@ -30,22 +32,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - ubuntu
-          - macOS
-        go:
+        goVersion:
           - 17
           - 18
-    name: "${{ matrix.platform }} | 1.${{ matrix.go }}.x"
-    runs-on: ${{ matrix.platform }}-latest
+          - 19
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+    name: "${{ matrix.os }} | 1.${{ matrix.goVersion }}.x"
+    runs-on: ${{ matrix.os }}-latest
     steps:
-      - name: "Install go1.${{ matrix.go }}.x"
+      - name: "Install go1.${{ matrix.goVersion }}.x"
         uses: actions/setup-go@v2
         with:
-          go-version: 1.${{ matrix.go }}.x
+          go-version: 1.${{ matrix.goVersion }}.x
 
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Run go test
         run: go test test/*.go
@@ -72,6 +78,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Run go test
         run: go test test/*.go

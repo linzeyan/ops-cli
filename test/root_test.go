@@ -19,7 +19,9 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	err := exec.Command(mainCommand, "build", "-ldflags", "-s -w", "-o", binaryCommand, mainGo).Run()
+	cmd := exec.Command(mainCommand, "build", "-ldflags", "-s -w", "-o", binaryCommand, mainGo)
+	cmd.Env = append(cmd.Env, []string{"CGO_ENABLED=0"}...)
+	err := cmd.Run()
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
