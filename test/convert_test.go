@@ -2,9 +2,6 @@ package test_test
 
 import (
 	"fmt"
-	"hash/crc32"
-	"io"
-	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -30,15 +27,6 @@ func TestConvert(t *testing.T) {
 				t.Error(err)
 			}
 			assert.FileExists(t, testCases[i].input[7])
-			expected, err := getHash(testCases[i].expected)
-			if err != nil {
-				t.Error(err)
-			}
-			got, err := getHash(testCases[i].input[7])
-			if err != nil {
-				t.Error(err)
-			}
-			assert.Equal(t, expected, got)
 			_ = exec.Command("rm", "-f", testCases[i].input[7]).Run()
 		})
 	}
@@ -59,19 +47,4 @@ func TestBinaryConvert(t *testing.T) {
 			_ = exec.Command("rm", "-f", output).Run()
 		})
 	}
-}
-
-func getHash(filename string) (uint32, error) {
-	f, err := os.Open(filename)
-	if err != nil {
-		return 0, err
-	}
-	defer f.Close()
-
-	h := crc32.NewIEEE()
-	_, err = io.Copy(h, f)
-	if err != nil {
-		return 0, err
-	}
-	return h.Sum32(), nil
 }

@@ -14,7 +14,7 @@ func TestDig(t *testing.T) {
 		input    []string
 		expected interface{}
 	}{
-		// {[]string{runCommand, mainGo, subCommand, "1.1.1.1", "PTR"}, "one.one.one.one."},
+		{[]string{runCommand, mainGo, subCommand, "@8.8.8.8", "1.1.1.1", "PTR"}, "one.one.one.one."},
 		{[]string{runCommand, mainGo, subCommand, "apple.com", "@8.8.8.8"}, "17.253.144.10"},
 		{[]string{runCommand, mainGo, subCommand, "@8.8.8.8", testHost, "CNAME"}, ""},
 		{[]string{runCommand, mainGo, subCommand, "CNAME", "@8.8.8.8", "tw.yahoo.com"}, "fp-ycpi.g03.yahoodns.net."},
