@@ -5,20 +5,25 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
 const (
-	binaryCommand = "../ops-cli"
-	mainCommand   = "go"
-	mainGo        = "../main.go"
-	runCommand    = "run"
-	testHost      = "google.com"
+	mainCommand = "go"
+	mainGo      = "../main.go"
+	runCommand  = "run"
+	testHost    = "google.com"
 )
 
+var binaryCommand = "../ops-cli"
+
 func TestMain(m *testing.M) {
+	if runtime.GOOS == "windows" {
+		binaryCommand = "../ops-cli.exe"
+	}
 	if err := exec.Command(mainCommand, "build", "-trimpath", "-ldflags", "-s -w", "-o", binaryCommand, mainGo).Run(); err != nil {
 		log.Println(err)
 		os.Exit(1)
