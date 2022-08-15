@@ -1,10 +1,12 @@
 package test_test
 
 import (
+	"fmt"
 	"hash/crc32"
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -23,7 +25,7 @@ func TestConvert(t *testing.T) {
 
 	for i := range testCases {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
-			_, err := exec.Command(mainCommand, testCases[i].input...).Output()
+			err := exec.Command(mainCommand, testCases[i].input...).Run()
 			if err != nil {
 				t.Error(err)
 			}
@@ -37,6 +39,24 @@ func TestConvert(t *testing.T) {
 				t.Error(err)
 			}
 			assert.Equal(t, expected, got)
+			_ = exec.Command("rm", "-f", testCases[i].input[7]).Run()
+		})
+	}
+}
+
+func TestBinaryConvert(t *testing.T) {
+	const subCommand = "convert"
+	testCommand := []string{"json2csv", "json2toml", "json2yaml", "yaml2json", "yaml2toml", "yaml2csv"}
+
+	for _, cmd := range testCommand {
+		slice := strings.Split(cmd, "2")
+		input := fmt.Sprintf("assets/proxy.%s", slice[0])
+		output := fmt.Sprintf("/tmp/out.%s", slice[1])
+		t.Run(cmd, func(t *testing.T) {
+			if err := exec.Command(binaryCommand, subCommand, cmd, "-i", input, "-o", output).Run(); err != nil {
+				t.Error(err)
+			}
+			_ = exec.Command("rm", "-f", output).Run()
 		})
 	}
 }

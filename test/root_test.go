@@ -2,16 +2,29 @@ package test_test
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"os/exec"
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
 const (
-	mainCommand = "go"
-	mainGo      = "../main.go"
-	runCommand  = "run"
+	binaryCommand = "../ops-cli"
+	mainCommand   = "go"
+	mainGo        = "../main.go"
+	runCommand    = "run"
 )
+
+func TestMain(m *testing.M) {
+	_, err := exec.Command(mainCommand, "build", "-ldflags", "-s -w", "-o", binaryCommand, mainGo).Output()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	os.Exit(m.Run())
+}
 
 func TestDomain(t *testing.T) {
 	testCases := []struct {
