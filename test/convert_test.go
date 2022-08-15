@@ -18,9 +18,9 @@ func TestConvert(t *testing.T) {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, "yaml2json", "-i", "assets/proxy.yaml", "-o", "/tmp/testy.json"}, "assets/proxy.json"},
-		{[]string{runCommand, mainGo, subCommand, "yaml2toml", "-i", "assets/proxy.yaml", "-o", "/tmp/testy.toml"}, "assets/proxy.toml"},
-		{[]string{runCommand, mainGo, subCommand, "toml2json", "-i", "assets/proxy.toml", "-o", "/tmp/testt.json"}, "assets/proxy.json"},
+		{[]string{runCommand, mainGo, subCommand, "yaml2json", "-i", "assets/proxy.yaml", "-o", "testy.json"}, "assets/proxy.json"},
+		{[]string{runCommand, mainGo, subCommand, "yaml2toml", "-i", "assets/proxy.yaml", "-o", "testy.toml"}, "assets/proxy.toml"},
+		{[]string{runCommand, mainGo, subCommand, "toml2json", "-i", "assets/proxy.toml", "-o", "testt.json"}, "assets/proxy.json"},
 	}
 
 	for i := range testCases {
@@ -51,7 +51,7 @@ func TestBinaryConvert(t *testing.T) {
 	for _, cmd := range testCommand {
 		slice := strings.Split(cmd, "2")
 		input := fmt.Sprintf("assets/proxy.%s", slice[0])
-		output := fmt.Sprintf("/tmp/out.%s", slice[1])
+		output := fmt.Sprintf("out.%s", slice[1])
 		t.Run(cmd, func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, cmd, "-i", input, "-o", output).Run(); err != nil {
 				t.Error(err)
