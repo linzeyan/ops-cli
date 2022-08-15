@@ -69,4 +69,4 @@ jobs:
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: Run go test
-        run: go test test/*.go
+        run: go test ./test/.
