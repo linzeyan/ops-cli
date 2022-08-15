@@ -5,6 +5,9 @@ on: [push]
 permissions:
   contents: read
 
+env:
+  CGO_ENABLED: 0
+
 jobs:
   golangci-lint:
     permissions:
@@ -28,7 +31,7 @@ jobs:
         with:
           args: --timeout=5m
 
-  test-unix:
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -37,49 +40,33 @@ jobs:
           - 18
           - 19
         os:
-          - ubuntu-latest
-          - macos-latest
+          - macos
+          - ubuntu
+          - windows
 
     name: "${{ matrix.os }} | 1.${{ matrix.goVersion }}.x"
     runs-on: ${{ matrix.os }}-latest
     steps:
       - name: "Install go1.${{ matrix.goVersion }}.x"
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: 1.${{ matrix.goVersion }}.x
 
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Run go test
-        run: go test test/*.go
-
-  test-win:
-    name: MINGW64
-    defaults:
-      run:
-        shell: msys2 {0}
-    runs-on: windows-latest
-    steps:
-      - name: Set line break types
-        shell: bash
-        run: git config --global core.autocrlf input
-
-      - name: Install dependencies
-        uses: msys2/setup-msys2@v2
+      - uses: actions/cache@v3
         with:
-          msystem: MINGW64
-          update: true
-          install: >
-            git
-            mingw-w64-x86_64-go
-
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/Library/Caches/go-build
+            ~\AppData\Local\go-build
+          key: ${{ runner.os }}-go-${{ matrix.goVersion }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: Run go test
         run: go test test/*.go
