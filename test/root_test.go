@@ -15,6 +15,7 @@ const (
 	mainCommand   = "go"
 	mainGo        = "../main.go"
 	runCommand    = "run"
+	testHost      = "google.com"
 )
 
 func TestMain(m *testing.M) {

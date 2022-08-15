@@ -57,3 +57,19 @@ func TestURL(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryURL(t *testing.T) {
+	const subCommand = "url"
+	args := [][]string{
+		{subCommand, "https://goo.gl/maps/b37Aq3Anc7taXQDd9"},
+		{subCommand, "https://reurl.cc/7peeZl"},
+		{subCommand, "https://bit.ly/3gk7w5x"},
+	}
+	for i := range args {
+		t.Run(args[i][1], func(t *testing.T) {
+			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}

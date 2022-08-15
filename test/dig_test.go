@@ -16,7 +16,7 @@ func TestDig(t *testing.T) {
 	}{
 		{[]string{runCommand, mainGo, subCommand, "1.1.1.1", "PTR"}, "one.one.one.one."},
 		{[]string{runCommand, mainGo, subCommand, "apple.com", "@8.8.8.8"}, "17.253.144.10"},
-		{[]string{runCommand, mainGo, subCommand, "@8.8.8.8", "google.com", "CNAME"}, ""},
+		{[]string{runCommand, mainGo, subCommand, "@8.8.8.8", testHost, "CNAME"}, ""},
 		{[]string{runCommand, mainGo, subCommand, "CNAME", "@8.8.8.8", "tw.yahoo.com"}, "fp-ycpi.g03.yahoodns.net."},
 	}
 
@@ -41,13 +41,12 @@ func TestDig(t *testing.T) {
 
 func TestBinaryDig(t *testing.T) {
 	const subCommand = "dig"
-	host := "google.com"
 	servers := []string{"@1.1.1.1", "@8.8.8.8"}
 	args := []string{"A", "AAAA", "CNAME", "NS", "ANY", "-j", "-y"}
 
 	for _, server := range servers {
 		t.Run(server, func(t *testing.T) {
-			if err := exec.Command(binaryCommand, subCommand, host, server).Run(); err != nil {
+			if err := exec.Command(binaryCommand, subCommand, testHost, server).Run(); err != nil {
 				t.Error(err)
 			}
 		})
@@ -55,7 +54,7 @@ func TestBinaryDig(t *testing.T) {
 
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
-			if err := exec.Command(binaryCommand, subCommand, host, "@8.8.8.8", args[i]).Run(); err != nil {
+			if err := exec.Command(binaryCommand, subCommand, testHost, "@8.8.8.8", args[i]).Run(); err != nil {
 				t.Error(err)
 			}
 		})

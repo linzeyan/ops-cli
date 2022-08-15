@@ -3,6 +3,7 @@ package test_test
 import (
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -14,7 +15,7 @@ func TestWhois(t *testing.T) {
 		expected string
 	}{
 		{
-			[]string{runCommand, mainGo, subCommand, "google.com", "--ns"},
+			[]string{runCommand, mainGo, subCommand, testHost, "--ns"},
 			`[
 	"NS1.GOOGLE.COM",
 	"NS2.GOOGLE.COM",
@@ -68,5 +69,19 @@ func TestWhoisRegistrar(t *testing.T) {
 			}
 			assert.Equal(t, testCases[i].expected, string(got))
 		})
+	}
+}
+
+func TestBinaryWhois(t *testing.T) {
+	const subCommand = "whois"
+	args := []string{"-d", "-e", "-n", "-r", "-j", "-y"}
+
+	for i := range args {
+		t.Run(args[i], func(t *testing.T) {
+			if err := exec.Command(binaryCommand, subCommand, testHost, args[i]).Run(); err != nil {
+				t.Error(err)
+			}
+		})
+		time.Sleep(time.Second * 2)
 	}
 }

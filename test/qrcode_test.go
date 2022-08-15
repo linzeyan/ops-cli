@@ -20,7 +20,7 @@ func TestQrcode(t *testing.T) {
 
 	for i := range testCases {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
-			_, err := exec.Command(mainCommand, testCases[i].input...).Output()
+			err := exec.Command(mainCommand, testCases[i].input...).Run()
 			if err != nil {
 				t.Error(err)
 			}
@@ -50,4 +50,26 @@ func TestQrcodeRead(t *testing.T) {
 			assert.Equal(t, testCases[i].expected, string(got))
 		})
 	}
+}
+
+func TestBinaryQrcode(t *testing.T) {
+	const subCommand = "qrcode"
+	args := [][]string{
+		{subCommand, "otp", "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", "/tmp/otp.png"},
+		{subCommand, "wifi", "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", "/tmp/wifi.png", "-s", "500"},
+		{subCommand, "text", "https://www.google.com", "-o", "/tmp/text.png"},
+	}
+	t.Run("read", func(t *testing.T) {
+		if err := exec.Command(binaryCommand, []string{subCommand, "read", "assets/example.png"}...).Run(); err != nil {
+			t.Error(err)
+		}
+	})
+	for i := range args {
+		t.Run(args[i][1], func(t *testing.T) {
+			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	_ = exec.Command("rm", "-f", "/tmp/text.png", "/tmp/wifi.png", "/tmp/otp.png").Run()
 }

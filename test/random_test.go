@@ -59,3 +59,30 @@ func TestRandom(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryRandom(t *testing.T) {
+	const subCommand = "random"
+	args := [][]string{
+		{subCommand, "lowercase", "-l", "30"},
+		{subCommand, "uppercase", "-l", "40"},
+		{subCommand, "number", "-l", "50"},
+		{subCommand, "symbol", "-l", "60"},
+		{subCommand, "-l", "70"},
+		{subCommand, "-s", "10"},
+		{subCommand, "-o", "10", "-s", "10", "-l", "32"},
+		{subCommand, "-u", "10", "-s", "10", "-o", "10", "-l", "64"},
+		{subCommand, "-n", "15", "-s", "10", "-o", "10", "-l", "64", "-u", "10"},
+	}
+	t.Run(subCommand, func(t *testing.T) {
+		if err := exec.Command(binaryCommand).Run(); err != nil {
+			t.Error(err)
+		}
+	})
+	for i := range args {
+		t.Run(args[i][1], func(t *testing.T) {
+			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
