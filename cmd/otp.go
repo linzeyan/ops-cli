@@ -177,6 +177,13 @@ func (o *otpFlag) Verify(secret string, input string) (bool, error) {
 	return passcode == input, err
 }
 
+func (o otpFlag) RemoveSpaces(s string) string {
+	if strings.Contains(s, " ") {
+		return strings.ReplaceAll(s, " ", "")
+	}
+	return s
+}
+
 func (o *otpFlag) Run(cmd *cobra.Command, args []string) {
 	var result string
 	var err error
@@ -185,11 +192,11 @@ func (o *otpFlag) Run(cmd *cobra.Command, args []string) {
 		var secret string
 		switch l := len(args); {
 		case l == 1:
-			secret = args[0]
+			secret = o.RemoveSpaces(args[0])
 		/* Merge all strings. */
 		case l > 1:
 			for i := range args {
-				secret += args[i]
+				secret += o.RemoveSpaces(args[i])
 			}
 		}
 		result, err = o.TOTP(secret)
