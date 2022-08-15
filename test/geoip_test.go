@@ -90,3 +90,22 @@ func TestGeoip(t *testing.T) {
 		})
 	}
 }
+
+func TestBinaryGeoip(t *testing.T) {
+	const subCommand = "geoip"
+	host := "8.8.8.8"
+	args := []string{"-j", "-y"}
+
+	for i := range args {
+		t.Run(args[i], func(t *testing.T) {
+			if err := exec.Command(binaryCommand, subCommand, host, args[i]).Run(); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	t.Run("batch", func(t *testing.T) {
+		if err := exec.Command(binaryCommand, subCommand, "1.2.3.4", "1.1.1.1", "8.8.4.4").Run(); err != nil {
+			t.Error(err)
+		}
+	})
+}

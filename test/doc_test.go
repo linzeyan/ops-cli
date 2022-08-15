@@ -21,11 +21,27 @@ func TestDoc(t *testing.T) {
 
 	for i := range testCases {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
-			_, err := exec.Command(mainCommand, testCases[i].input...).Output()
+			err := exec.Command(mainCommand, testCases[i].input...).Run()
 			if err != nil {
 				t.Error(err)
 			}
 			assert.FileExists(t, testCases[i].expected)
 		})
 	}
+	_ = exec.Command("rm", "rf", "/tmp/doc").Run()
+}
+
+func TestBinaryDoc(t *testing.T) {
+	const subCommand = "doc"
+	dir := "/tmp/doc"
+	args := []string{"man", "markdown", "rest", "yaml"}
+
+	for i := range args {
+		t.Run(args[i], func(t *testing.T) {
+			if err := exec.Command(binaryCommand, subCommand, args[i], "-d", dir).Run(); err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	_ = exec.Command("rm", "-rf", dir).Run()
 }

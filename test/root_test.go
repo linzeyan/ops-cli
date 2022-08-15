@@ -18,12 +18,14 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	_, err := exec.Command(mainCommand, "build", "-ldflags", "-s -w", "-o", binaryCommand, mainGo).Output()
+	err := exec.Command(mainCommand, "build", "-ldflags", "-s -w", "-o", binaryCommand, mainGo).Run()
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	os.Exit(m.Run())
+	exitCode := m.Run()
+	_ = exec.Command("rm", "-f", binaryCommand).Run()
+	os.Exit(exitCode)
 }
 
 func TestDomain(t *testing.T) {
