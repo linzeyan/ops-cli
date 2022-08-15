@@ -20,9 +20,13 @@ const (
 
 var binaryCommand = "../ops-cli"
 
+func isWindows() bool {
+	return runtime.GOOS == "windows"
+}
+
 func TestMain(m *testing.M) {
-	if runtime.GOOS == "windows" {
-		binaryCommand = "../ops-cli.exe"
+	if isWindows() {
+		binaryCommand += ".exe"
 	}
 	if err := exec.Command(mainCommand, "build", "-trimpath", "-ldflags", "-s -w", "-o", binaryCommand, mainGo).Run(); err != nil {
 		log.Println(err)
@@ -63,7 +67,7 @@ func TestFile(t *testing.T) {
 		{"../vendor", true},
 		{"command.json", false},
 		{"root_test.go", true},
-		{"/dev/null", runtime.GOOS != "windows"},
+		{"/dev/null", !isWindows()},
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
