@@ -26,21 +26,6 @@ jobs:
         with:
           args: --timeout=5m
 
-  test-go:
-    name: "test-go"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.18
-
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Run go test
-        run: go test test/*.go
-
   test-unix:
     strategy:
       fail-fast: false
@@ -62,8 +47,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Run test script
-        run: ./scripts/test.bash all
+      - name: Run go test
+        run: go test test/*.go
 
   test-win:
     name: MINGW64
@@ -88,5 +73,5 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Run test script
-        run: ./scripts/test.bash all
+      - name: Run go test
+        run: go test test/*.go
