@@ -2,10 +2,12 @@ package test_test
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,6 +29,18 @@ func TestConvert(t *testing.T) {
 				t.Error(err)
 			}
 			assert.FileExists(t, testCases[i].input[7])
+			fileExpected, err := os.ReadFile(testCases[i].expected)
+			if err != nil {
+				t.Error(err)
+			}
+			expected := cmd.Encoder.Base64StdEncode(string(fileExpected))
+			fileGot, err := os.ReadFile(testCases[i].input[7])
+			if err != nil {
+				t.Error(err)
+			}
+			got := cmd.Encoder.Base64StdEncode(string(fileGot))
+
+			assert.Equal(t, expected, got)
 			_ = exec.Command("rm", "-f", testCases[i].input[7]).Run()
 		})
 	}

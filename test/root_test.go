@@ -63,7 +63,7 @@ func TestFile(t *testing.T) {
 		{"../vendor", true},
 		{"command.json", false},
 		{"root_test.go", true},
-		{"/dev/null", true},
+		{"/dev/null", runtime.GOOS != "windows"},
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
