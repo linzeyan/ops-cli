@@ -147,7 +147,7 @@ func (s *slackFlag) Photo() error {
 	}
 
 	uploadFileKey := fmt.Sprintf("upload-f-to-slack-%d", rootNow.UnixNano())
-	decode, err := base64.StdEncoding.DecodeString(base64Image)
+	decode, err := Encoder.Base64StdDecode(base64Image)
 	if err != nil {
 		return err
 	}
@@ -200,8 +200,7 @@ func (s *slackFlag) localFile() (string, error) {
 		}
 		content = buf.Bytes()
 	}
-	base64Image := base64.StdEncoding.EncodeToString(content)
-	return base64Image, err
+	return Encoder.Base64StdEncode(content)
 }
 
 func (s *slackFlag) remoteFile() (string, error) {

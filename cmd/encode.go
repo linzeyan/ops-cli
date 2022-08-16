@@ -60,9 +60,8 @@ func (e *EncodeFlag) Base32HexEncode(i interface{}) (string, error) {
 	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) Base32HexDecode(s string) (string, error) {
-	out, err := base32.HexEncoding.DecodeString(s)
-	return string(out), err
+func (e *EncodeFlag) Base32HexDecode(s string) ([]byte, error) {
+	return base32.HexEncoding.DecodeString(s)
 }
 
 func (e *EncodeFlag) Base32StdEncode(i interface{}) (string, error) {
@@ -75,9 +74,8 @@ func (e *EncodeFlag) Base32StdEncode(i interface{}) (string, error) {
 	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) Base32StdDecode(s string) (string, error) {
-	out, err := base32.StdEncoding.DecodeString(s)
-	return string(out), err
+func (e *EncodeFlag) Base32StdDecode(s string) ([]byte, error) {
+	return base32.StdEncoding.DecodeString(s)
 }
 
 func (e *EncodeFlag) Base64StdEncode(i interface{}) (string, error) {
@@ -90,9 +88,8 @@ func (e *EncodeFlag) Base64StdEncode(i interface{}) (string, error) {
 	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) Base64StdDecode(s string) (string, error) {
-	out, err := base64.StdEncoding.DecodeString(s)
-	return string(out), err
+func (e *EncodeFlag) Base64StdDecode(s string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(s)
 }
 
 func (e *EncodeFlag) Base64URLEncode(i interface{}) (string, error) {
@@ -105,9 +102,8 @@ func (e *EncodeFlag) Base64URLEncode(i interface{}) (string, error) {
 	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) Base64URLDecode(s string) (string, error) {
-	out, err := base64.URLEncoding.DecodeString(s)
-	return string(out), err
+func (e *EncodeFlag) Base64URLDecode(s string) ([]byte, error) {
+	return base64.URLEncoding.DecodeString(s)
 }
 
 func (e *EncodeFlag) HexEncode(i interface{}) (string, error) {
@@ -120,9 +116,8 @@ func (e *EncodeFlag) HexEncode(i interface{}) (string, error) {
 	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) HexDecode(s string) (string, error) {
-	out, err := hex.DecodeString(s)
-	return string(out), err
+func (e *EncodeFlag) HexDecode(s string) ([]byte, error) {
+	return hex.DecodeString(s)
 }
 
 func (e *EncodeFlag) JSONEncode(i interface{}) (string, error) {

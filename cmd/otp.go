@@ -22,7 +22,6 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
-	"encoding/base32"
 	"encoding/binary"
 	"hash"
 	"log"
@@ -124,7 +123,7 @@ func (o *otpFlag) SetAlgorithm() func() hash.Hash {
 }
 
 func (o *otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
-	key, err := base32.StdEncoding.DecodeString(strings.ToUpper(secret))
+	key, err := Encoder.Base32StdDecode(strings.ToUpper(secret))
 	if err != nil {
 		return "", err
 	}
@@ -168,8 +167,7 @@ func (o *otpFlag) GenSecret() (string, error) {
 		return "", err
 	}
 	hasher := hmac.New(o.SetAlgorithm(), buf.Bytes())
-	secret := base32.StdEncoding.EncodeToString(hasher.Sum(nil))
-	return secret, err
+	return Encoder.Base32StdEncode(hasher.Sum(nil))
 }
 
 func (o *otpFlag) Verify(secret string, input string) (bool, error) {
