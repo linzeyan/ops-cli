@@ -7,6 +7,49 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestHashFile(t *testing.T) {
+	testCases := struct {
+		input    string
+		expected map[string]string
+	}{
+		mainGo,
+		map[string]string{
+			"md5":    "1b48671ec88f2b498820450f802097a6",
+			"sha1":   "b2828f7ce1eb4872e5543617f9bf2b7ef28e7c61",
+			"sha256": "74d680e9a561929551611bcecf9fc1704c75a8491e9aec00065adbfaefa36905",
+			"sha512": "9aa41fc10c66de39e30dcf7e35be7c15878322df8e318922dc8623f140464c51b964953d950d8dc1ef4b0d4b614f01c065ef50d0c0e686cdd21ff4580fec3ce7",
+		},
+	}
+	t.Run("md5", func(t *testing.T) {
+		got, err := cmd.Hasher.Md5Hash(testCases.input)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Equal(t, testCases.expected["md5"], got)
+	})
+	t.Run("sha1", func(t *testing.T) {
+		got, err := cmd.Hasher.Sha1Hash(testCases.input)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Equal(t, testCases.expected["sha1"], got)
+	})
+	t.Run("sha256", func(t *testing.T) {
+		got, err := cmd.Hasher.Sha256Hash(testCases.input)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Equal(t, testCases.expected["sha256"], got)
+	})
+	t.Run("sha512", func(t *testing.T) {
+		got, err := cmd.Hasher.Sha512Hash(testCases.input)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Equal(t, testCases.expected["sha512"], got)
+	})
+}
+
 func TestMd5(t *testing.T) {
 	testCases := []struct {
 		input, expected string
@@ -35,7 +78,7 @@ func TestSha1(t *testing.T) {
 		{"https://github.com", "84b7e44aa54d002eac8d00f5bfa9cc93410f2a48"},
 	}
 	for _, testCase := range testCases {
-		t.Run("md5", func(t *testing.T) {
+		t.Run("sha1", func(t *testing.T) {
 			got, err := cmd.Hasher.Sha1Hash(testCase.input)
 			if err != nil {
 				t.Error(err)
@@ -54,7 +97,7 @@ func TestSha256(t *testing.T) {
 		{"https://github.com", "996e1f714b08e971ec79e3bea686287e66441f043177999a13dbc546d8fe402a"},
 	}
 	for _, testCase := range testCases {
-		t.Run("md5", func(t *testing.T) {
+		t.Run("sha256", func(t *testing.T) {
 			got, err := cmd.Hasher.Sha256Hash(testCase.input)
 			if err != nil {
 				t.Error(err)
@@ -82,7 +125,7 @@ func TestSha512(t *testing.T) {
 		},
 	}
 	for _, testCase := range testCases {
-		t.Run("md5", func(t *testing.T) {
+		t.Run("sha512", func(t *testing.T) {
 			got, err := cmd.Hasher.Sha512Hash(testCase.input)
 			if err != nil {
 				t.Error(err)

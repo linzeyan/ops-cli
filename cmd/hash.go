@@ -22,6 +22,8 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"hash"
+	"io"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -46,34 +48,50 @@ func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
 
 func (h *HashFlag) Md5Hash(i any) (string, error) {
 	hasher := md5.New()
-	return h.Write(hasher, i)
+	return h.WriteString(hasher, i)
 }
 
 func (h *HashFlag) Sha1Hash(i any) (string, error) {
 	hasher := sha1.New()
-	return h.Write(hasher, i)
+	return h.WriteString(hasher, i)
 }
 
 func (h *HashFlag) Sha256Hash(i any) (string, error) {
 	hasher := sha256.New()
-	return h.Write(hasher, i)
+	return h.WriteString(hasher, i)
 }
 
 func (h *HashFlag) Sha512Hash(i any) (string, error) {
 	hasher := sha512.New()
-	return h.Write(hasher, i)
+	return h.WriteString(hasher, i)
 }
 
-func (h *HashFlag) Write(hasher hash.Hash, i any) (string, error) {
+func (h *HashFlag) WriteString(hasher hash.Hash, i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
+		if ValidFile(data) {
+			return h.WriteFile(hasher, data)
+		}
 		_, err = hasher.Write([]byte(data))
 	case []byte:
 		_, err = hasher.Write(data)
 	default:
 		return "", ErrInvalidVar
 	}
+	if err != nil {
+		return "", err
+	}
+	return Encoder.HexEncode(hasher.Sum(nil))
+}
+
+func (h *HashFlag) WriteFile(hasher hash.Hash, filename string) (string, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	_, err = io.Copy(hasher, f)
 	if err != nil {
 		return "", err
 	}
