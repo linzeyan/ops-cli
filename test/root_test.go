@@ -32,7 +32,7 @@ func dos2unix(filename string) error {
 		return err
 	}
 	eol := regexp.MustCompile(`\r\n`)
-	f = eol.ReplaceAllLiteral(f, []byte(`\n`))
+	f = eol.ReplaceAllLiteral(f, []byte{'\n'})
 	return os.WriteFile(filename, f, os.ModePerm)
 }
 
