@@ -29,25 +29,31 @@ func TestConvert(t *testing.T) {
 				t.Error(err)
 			}
 			assert.FileExists(t, testCases[i].input[7])
-			if !isWindows() {
-				fileExpected, err := os.ReadFile(testCases[i].expected)
-				if err != nil {
+			if isWindows() {
+				if err := dos2unix(testCases[i].expected); err != nil {
 					t.Error(err)
 				}
-				expected, err := cmd.Encoder.Base64StdEncode(fileExpected)
-				if err != nil {
+				if err := dos2unix(testCases[i].input[7]); err != nil {
 					t.Error(err)
 				}
-				fileGot, err := os.ReadFile(testCases[i].input[7])
-				if err != nil {
-					t.Error(err)
-				}
-				got, err := cmd.Encoder.Base64StdEncode(fileGot)
-				if err != nil {
-					t.Error(err)
-				}
-				assert.Equal(t, expected, got)
 			}
+			fileExpected, err := os.ReadFile(testCases[i].expected)
+			if err != nil {
+				t.Error(err)
+			}
+			expected, err := cmd.Encoder.Base64StdEncode(fileExpected)
+			if err != nil {
+				t.Error(err)
+			}
+			fileGot, err := os.ReadFile(testCases[i].input[7])
+			if err != nil {
+				t.Error(err)
+			}
+			got, err := cmd.Encoder.Base64StdEncode(fileGot)
+			if err != nil {
+				t.Error(err)
+			}
+			assert.Equal(t, expected, got)
 			_ = exec.Command("rm", "-f", testCases[i].input[7]).Run()
 		})
 	}

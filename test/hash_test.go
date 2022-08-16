@@ -9,7 +9,9 @@ import (
 
 func TestHashFile(t *testing.T) {
 	if isWindows() {
-		return
+		if err := dos2unix(mainGo); err != nil {
+			t.Error(err)
+		}
 	}
 	testCases := struct {
 		input    string

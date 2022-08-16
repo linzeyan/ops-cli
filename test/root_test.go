@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"testing"
 
@@ -22,6 +23,16 @@ var binaryCommand = "../ops-cli"
 
 func isWindows() bool {
 	return runtime.GOOS == "windows"
+}
+
+func dos2unix(filename string) error {
+	f, err := os.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	eol := regexp.MustCompile(`\r\n`)
+	f = eol.ReplaceAllLiteral(f, []byte(`\n`))
+	return os.WriteFile(filename, f, os.ModePerm)
 }
 
 func TestMain(m *testing.M) {
