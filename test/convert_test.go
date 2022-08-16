@@ -21,6 +21,14 @@ func TestConvert(t *testing.T) {
 		{[]string{runCommand, mainGo, subCommand, "yaml2toml", "-i", "assets/proxy.yaml", "-o", "testy.toml"}, "assets/proxy.toml"},
 		{[]string{runCommand, mainGo, subCommand, "toml2json", "-i", "assets/proxy.toml", "-o", "testt.json"}, "assets/proxy.json"},
 	}
+	if isWindows() {
+		if err := dos2unix("assets/proxy.json"); err != nil {
+			t.Error(err)
+		}
+		if err := dos2unix("assets/proxy.toml"); err != nil {
+			t.Error(err)
+		}
+	}
 
 	for i := range testCases {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
@@ -29,25 +37,25 @@ func TestConvert(t *testing.T) {
 				t.Error(err)
 			}
 			assert.FileExists(t, testCases[i].input[7])
-			if !isWindows() {
-				fileExpected, err := os.ReadFile(testCases[i].expected)
-				if err != nil {
-					t.Error(err)
-				}
-				expected, err := cmd.Encoder.Base64StdEncode(fileExpected)
-				if err != nil {
-					t.Error(err)
-				}
-				fileGot, err := os.ReadFile(testCases[i].input[7])
-				if err != nil {
-					t.Error(err)
-				}
-				got, err := cmd.Encoder.Base64StdEncode(fileGot)
-				if err != nil {
-					t.Error(err)
-				}
-				assert.Equal(t, expected, got)
+
+			fileExpected, err := os.ReadFile(testCases[i].expected)
+			if err != nil {
+				t.Error(err)
 			}
+			expected, err := cmd.Encoder.Base64StdEncode(fileExpected)
+			if err != nil {
+				t.Error(err)
+			}
+			fileGot, err := os.ReadFile(testCases[i].input[7])
+			if err != nil {
+				t.Error(err)
+			}
+			got, err := cmd.Encoder.Base64StdEncode(fileGot)
+			if err != nil {
+				t.Error(err)
+			}
+			assert.Equal(t, expected, got)
+
 			_ = exec.Command("rm", "-f", testCases[i].input[7]).Run()
 		})
 	}
