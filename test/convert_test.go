@@ -34,12 +34,18 @@ func TestConvert(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
-				expected := cmd.Encoder.Base64StdEncode(string(fileExpected))
+				expected, err := cmd.Encoder.Base64StdEncode(fileExpected)
+				if err != nil {
+					t.Error(err)
+				}
 				fileGot, err := os.ReadFile(testCases[i].input[7])
 				if err != nil {
 					t.Error(err)
 				}
-				got := cmd.Encoder.Base64StdEncode(string(fileGot))
+				got, err := cmd.Encoder.Base64StdEncode(fileGot)
+				if err != nil {
+					t.Error(err)
+				}
 				assert.Equal(t, expected, got)
 			}
 			_ = exec.Command("rm", "-f", testCases[i].input[7]).Run()

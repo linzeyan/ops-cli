@@ -125,6 +125,7 @@ var (
 	ErrInitialFailed  = errors.New("initial failed")
 	ErrInvalidIP      = errors.New("invalid IP")
 	ErrInvalidLength  = errors.New("invalid length")
+	ErrInvalidVar     = errors.New("invalid variable")
 	ErrParseCert      = errors.New("can not correctly parse certificate")
 	ErrResponseStatus = errors.New("response status code is not 200")
 	ErrTokenNotFound  = errors.New("token not found")

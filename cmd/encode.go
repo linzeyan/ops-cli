@@ -25,7 +25,6 @@ import (
 	"encoding/pem"
 	"encoding/xml"
 	"io"
-	"log"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -51,69 +50,79 @@ func (e *EncodeFlag) Run(cmd *cobra.Command, args []string) {
 
 }
 
-func (e *EncodeFlag) Base32HexEncode(s string) string {
-	return base32.HexEncoding.EncodeToString([]byte(s))
+func (e *EncodeFlag) Base32HexEncode(i interface{}) (string, error) {
+	var err error
+	if t, ok := i.(string); ok {
+		return base32.HexEncoding.EncodeToString([]byte(t)), err
+	} else if t, ok := i.([]byte); ok {
+		return base32.HexEncoding.EncodeToString(t), err
+	}
+	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) Base32HexDecode(s string) string {
+func (e *EncodeFlag) Base32HexDecode(s string) (string, error) {
 	out, err := base32.HexEncoding.DecodeString(s)
-	if err != nil {
-		log.Println(err)
-		return ""
+	return string(out), err
+}
+
+func (e *EncodeFlag) Base32StdEncode(i interface{}) (string, error) {
+	var err error
+	if t, ok := i.(string); ok {
+		return base32.StdEncoding.EncodeToString([]byte(t)), err
+	} else if t, ok := i.([]byte); ok {
+		return base32.StdEncoding.EncodeToString(t), err
 	}
-	return string(out)
+	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) Base32StdEncode(s string) string {
-	return base32.StdEncoding.EncodeToString([]byte(s))
-}
-
-func (e *EncodeFlag) Base32StdDecode(s string) string {
+func (e *EncodeFlag) Base32StdDecode(s string) (string, error) {
 	out, err := base32.StdEncoding.DecodeString(s)
-	if err != nil {
-		log.Println(err)
-		return ""
+	return string(out), err
+}
+
+func (e *EncodeFlag) Base64StdEncode(i interface{}) (string, error) {
+	var err error
+	if t, ok := i.(string); ok {
+		return base64.StdEncoding.EncodeToString([]byte(t)), err
+	} else if t, ok := i.([]byte); ok {
+		return base64.StdEncoding.EncodeToString(t), err
 	}
-	return string(out)
+	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) Base64StdEncode(s string) string {
-	return base64.StdEncoding.EncodeToString([]byte(s))
-}
-
-func (e *EncodeFlag) Base64StdDecode(s string) string {
+func (e *EncodeFlag) Base64StdDecode(s string) (string, error) {
 	out, err := base64.StdEncoding.DecodeString(s)
-	if err != nil {
-		log.Println(err)
-		return ""
+	return string(out), err
+}
+
+func (e *EncodeFlag) Base64URLEncode(i interface{}) (string, error) {
+	var err error
+	if t, ok := i.(string); ok {
+		return base64.URLEncoding.EncodeToString([]byte(t)), err
+	} else if t, ok := i.([]byte); ok {
+		return base64.URLEncoding.EncodeToString(t), err
 	}
-	return string(out)
+	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) Base64URLEncode(s string) string {
-	return base64.StdEncoding.EncodeToString([]byte(s))
+func (e *EncodeFlag) Base64URLDecode(s string) (string, error) {
+	out, err := base64.URLEncoding.DecodeString(s)
+	return string(out), err
 }
 
-func (e *EncodeFlag) Base64URLDecode(s string) string {
-	out, err := base64.StdEncoding.DecodeString(s)
-	if err != nil {
-		log.Println(err)
-		return ""
+func (e *EncodeFlag) HexEncode(i interface{}) (string, error) {
+	var err error
+	if t, ok := i.(string); ok {
+		return hex.EncodeToString([]byte(t)), err
+	} else if t, ok := i.([]byte); ok {
+		return hex.EncodeToString(t), err
 	}
-	return string(out)
+	return "", ErrInvalidVar
 }
 
-func (e *EncodeFlag) HexEncode(s string) string {
-	return hex.EncodeToString([]byte(s))
-}
-
-func (e *EncodeFlag) HexDecode(s string) string {
+func (e *EncodeFlag) HexDecode(s string) (string, error) {
 	out, err := hex.DecodeString(s)
-	if err != nil {
-		log.Println(err)
-		return ""
-	}
-	return string(out)
+	return string(out), err
 }
 
 func (e *EncodeFlag) JSONEncode(i interface{}) (string, error) {
