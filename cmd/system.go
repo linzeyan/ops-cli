@@ -44,11 +44,11 @@ var systemSubCmdCPU = &cobra.Command{
 	Use:   "cpu",
 	Short: "Display cpu informations",
 	Run: func(_ *cobra.Command, _ []string) {
-		if err := sysf.CPUInfo(); err != nil {
+		if err := systemCmdGlobalVar.CPUInfo(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
-		OutputDefaultJSON(sysf.cpuResp)
+		OutputDefaultJSON(systemCmdGlobalVar.cpuResp)
 	},
 }
 
@@ -56,11 +56,11 @@ var systemSubCmdDisk = &cobra.Command{
 	Use:   "disk",
 	Short: "Display disk informations",
 	Run: func(_ *cobra.Command, _ []string) {
-		if err := sysf.DiskUsage(); err != nil {
+		if err := systemCmdGlobalVar.DiskUsage(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
-		OutputDefaultJSON(sysf.diskResp)
+		OutputDefaultJSON(systemCmdGlobalVar.diskResp)
 	},
 }
 
@@ -68,11 +68,11 @@ var systemSubCmdHost = &cobra.Command{
 	Use:   "host",
 	Short: "Display host informations",
 	Run: func(_ *cobra.Command, _ []string) {
-		if err := sysf.HostInfo(); err != nil {
+		if err := systemCmdGlobalVar.HostInfo(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
-		OutputDefaultJSON(sysf.hostResp)
+		OutputDefaultJSON(systemCmdGlobalVar.hostResp)
 	},
 }
 
@@ -80,11 +80,11 @@ var systemSubCmdLoad = &cobra.Command{
 	Use:   "load",
 	Short: "Display load informations",
 	Run: func(_ *cobra.Command, _ []string) {
-		if err := sysf.LoadAvg(); err != nil {
+		if err := systemCmdGlobalVar.LoadAvg(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
-		OutputDefaultJSON(sysf.loadResp)
+		OutputDefaultJSON(systemCmdGlobalVar.loadResp)
 	},
 }
 
@@ -92,11 +92,11 @@ var systemSubCmdMemory = &cobra.Command{
 	Use:   "memory",
 	Short: "Display memory informations",
 	Run: func(_ *cobra.Command, _ []string) {
-		if err := sysf.MemUsage(); err != nil {
+		if err := systemCmdGlobalVar.MemUsage(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
-		OutputDefaultJSON(sysf.memResp)
+		OutputDefaultJSON(systemCmdGlobalVar.memResp)
 	},
 }
 
@@ -104,15 +104,15 @@ var systemSubCmdNetwork = &cobra.Command{
 	Use:   "network",
 	Short: "Display network informations",
 	Run: func(_ *cobra.Command, _ []string) {
-		if err := sysf.NetInfo(); err != nil {
+		if err := systemCmdGlobalVar.NetInfo(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
-		OutputDefaultJSON(sysf.netResp)
+		OutputDefaultJSON(systemCmdGlobalVar.netResp)
 	},
 }
 
-var sysf systemFlag
+var systemCmdGlobalVar SystemFlag
 
 func init() {
 	rootCmd.AddCommand(systemCmd)
@@ -124,11 +124,11 @@ func init() {
 	systemCmd.AddCommand(systemSubCmdMemory)
 	systemCmd.AddCommand(systemSubCmdNetwork)
 
-	systemSubCmdNetwork.Flags().BoolVarP(&sysf.aiface, "all-interfaces", "a", false, "Display all interfaces")
-	systemSubCmdNetwork.Flags().BoolVarP(&sysf.iface, "interface", "i", false, "Display interfaces")
+	systemSubCmdNetwork.Flags().BoolVarP(&systemCmdGlobalVar.aiface, "all-interfaces", "a", false, "Display all interfaces")
+	systemSubCmdNetwork.Flags().BoolVarP(&systemCmdGlobalVar.iface, "interface", "i", false, "Display interfaces")
 }
 
-type systemFlag struct {
+type SystemFlag struct {
 	aiface bool
 	iface  bool
 
@@ -149,7 +149,7 @@ type systemCPUInfoResponse struct {
 	CacheSize string `json:"cacheSize,omitempty" yaml:"cacheSize,omitempty"`
 }
 
-func (s *systemFlag) CPUInfo() error {
+func (s *SystemFlag) CPUInfo() error {
 	info, err := cpu.Info()
 	if err != nil {
 		return err
@@ -173,7 +173,7 @@ type systemDiskUsageResponse struct {
 	UsedPercent string `json:"usedPercent,omitempty" yaml:"usedPercent,omitempty"`
 }
 
-func (s *systemFlag) DiskUsage() error {
+func (s *SystemFlag) DiskUsage() error {
 	info, err := disk.Usage("/")
 	if err != nil {
 		return err
@@ -205,7 +205,7 @@ type systemHostInfoResponse struct {
 	HostID               string `json:"hostId,omitempty" yaml:"hostId,omitempty"`
 }
 
-func (s *systemFlag) HostInfo() error {
+func (s *SystemFlag) HostInfo() error {
 	info, err := host.Info()
 	if err != nil {
 		return err
@@ -234,7 +234,7 @@ type systemLoadAvgResponse struct {
 	Load15 string `json:"load15,omitempty" yaml:"load15,omitempty"`
 }
 
-func (s *systemFlag) LoadAvg() error {
+func (s *SystemFlag) LoadAvg() error {
 	info, err := load.Avg()
 	if err != nil {
 		return err
@@ -256,7 +256,7 @@ type systemMemInfoResponse struct {
 	UsedPercent string `json:"usedPercent,omitempty" yaml:"usedPercent,omitempty"`
 }
 
-func (s *systemFlag) MemUsage() error {
+func (s *SystemFlag) MemUsage() error {
 	info, err := mem.VirtualMemory()
 	if err != nil {
 		return err
@@ -296,7 +296,7 @@ type systemNetInterfaceResponse struct {
 	Addrs net.InterfaceAddrList `json:"addrs"`
 }
 
-func (s *systemFlag) NetInfo() error {
+func (s *SystemFlag) NetInfo() error {
 	info, err := net.IOCounters(false)
 	if err != nil {
 		return err

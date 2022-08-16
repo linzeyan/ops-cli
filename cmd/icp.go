@@ -29,35 +29,35 @@ var icpCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	Run: func(_ *cobra.Command, args []string) {
-		if (i.account == "" || i.key == "") && rootConfig != "" {
+		if (icpCmdGlobalVar.account == "" || icpCmdGlobalVar.key == "") && rootConfig != "" {
 			if err := Config(ConfigBlockICP); err != nil {
 				log.Println(err)
 				os.Exit(1)
 			}
 		}
-		if i.account == "" || i.key == "" {
+		if icpCmdGlobalVar.account == "" || icpCmdGlobalVar.key == "" {
 			log.Println(ErrTokenNotFound)
 			os.Exit(1)
 		}
 		icp.Domain = args[0]
-		icp.WestAccount = i.account
-		icp.WestApiKey = i.key
+		icp.WestAccount = icpCmdGlobalVar.account
+		icp.WestApiKey = icpCmdGlobalVar.key
 		OutputDefaultYAML(map[string]string{icp.Domain: icp.Check()})
 	},
 	Example: Examples(`# Print the ICP status
 ops-cli icp -a account -k api_key google.com`),
 }
 
-var i icpFlags
+var icpCmdGlobalVar IcpFlags
 
 func init() {
 	rootCmd.AddCommand(icpCmd)
 
-	icpCmd.Flags().StringVarP(&i.account, "account", "a", "", "Enter the WEST account")
-	icpCmd.Flags().StringVarP(&i.key, "key", "k", "", "Enter the WEST api key")
+	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.account, "account", "a", "", "Enter the WEST account")
+	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.key, "key", "k", "", "Enter the WEST api key")
 	icpCmd.MarkFlagsRequiredTogether("account", "key")
 }
 
-type icpFlags struct {
+type IcpFlags struct {
 	account, key string
 }

@@ -31,7 +31,7 @@ var randomCmd = &cobra.Command{
 	Use:   "random",
 	Args:  cobra.NoArgs,
 	Short: "Generate random string",
-	Run:   r.Run,
+	Run:   randomCmdGlobalVar.Run,
 	Example: Examples(`# Generate a random string
 ops-cli random
 
@@ -45,7 +45,7 @@ ops-cli random -l 32 -s 10 -o 10 -u 10 -n 2`),
 var randomSubCmdLower = &cobra.Command{
 	Use:   "lowercase",
 	Short: "Generate a string consisting of lowercase letters",
-	Run:   r.Run,
+	Run:   randomCmdGlobalVar.Run,
 	Example: Examples(` Generate a random string of lowercase letters
 ops-cli random lowercase`),
 }
@@ -53,7 +53,7 @@ ops-cli random lowercase`),
 var randomSubCmdNumber = &cobra.Command{
 	Use:   "number",
 	Short: "Generate a string consisting of numbers",
-	Run:   r.Run,
+	Run:   randomCmdGlobalVar.Run,
 	Example: Examples(`Generate a random string of numbers of length 100
 ops-cli random number -l 100`),
 }
@@ -61,7 +61,7 @@ ops-cli random number -l 100`),
 var randomSubCmdSymbol = &cobra.Command{
 	Use:   "symbol",
 	Short: "Generate a string consisting of symbols",
-	Run:   r.Run,
+	Run:   randomCmdGlobalVar.Run,
 	Example: Examples(`# Generate a random string of symbols
 ops-cli random symbol`),
 }
@@ -69,21 +69,21 @@ ops-cli random symbol`),
 var randomSubCmdUpper = &cobra.Command{
 	Use:   "uppercase",
 	Short: "Generate a string consisting of uppercase letters",
-	Run:   r.Run,
+	Run:   randomCmdGlobalVar.Run,
 	Example: Examples(`# Generate a random string of uppercase letters
 ops-cli random uppercase`),
 }
 
-var r randomFlag
+var randomCmdGlobalVar RandomFlag
 
 func init() {
 	rootCmd.AddCommand(randomCmd)
 
-	randomCmd.PersistentFlags().IntVarP(&r.length, "length", "l", 24, "Specify the string length")
-	randomCmd.Flags().IntVarP(&r.lower, "lower", "o", 4, "Number of lowercase letters to include in the string")
-	randomCmd.Flags().IntVarP(&r.upper, "upper", "u", 4, "Number of uppercase letters to include in the string")
-	randomCmd.Flags().IntVarP(&r.symbol, "symbol", "s", 4, "Number of symbols to include in the string")
-	randomCmd.Flags().IntVarP(&r.number, "number", "n", 4, "Number of digits to include in the string")
+	randomCmd.PersistentFlags().IntVarP(&randomCmdGlobalVar.length, "length", "l", 24, "Specify the string length")
+	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.lower, "lower", "o", 4, "Number of lowercase letters to include in the string")
+	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.upper, "upper", "u", 4, "Number of uppercase letters to include in the string")
+	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.symbol, "symbol", "s", 4, "Number of symbols to include in the string")
+	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.number, "number", "n", 4, "Number of digits to include in the string")
 
 	randomCmd.AddCommand(randomSubCmdLower)
 	randomCmd.AddCommand(randomSubCmdNumber)
@@ -91,7 +91,7 @@ func init() {
 	randomCmd.AddCommand(randomSubCmdUpper)
 }
 
-type randomFlag struct {
+type RandomFlag struct {
 	/* Bind flags */
 	length, lower, upper, symbol, number int
 
@@ -99,31 +99,31 @@ type randomFlag struct {
 	result string
 }
 
-func (r *randomFlag) Run(cmd *cobra.Command, _ []string) {
+func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 	var err error
-	var p randomString
+	var p RandomString
 	switch cmd.Name() {
 	case "number":
-		r.result, err = p.genString(r.length, Numbers)
+		randomCmdGlobalVar.result, err = p.genString(randomCmdGlobalVar.length, Numbers)
 	case "symbol":
-		r.result, err = p.genString(r.length, Symbols)
+		randomCmdGlobalVar.result, err = p.genString(randomCmdGlobalVar.length, Symbols)
 	case "uppercase":
-		r.result, err = p.genString(r.length, UppercaseLetters)
+		randomCmdGlobalVar.result, err = p.genString(randomCmdGlobalVar.length, UppercaseLetters)
 	case "lowercase":
-		r.result, err = p.genString(r.length, LowercaseLetters)
+		randomCmdGlobalVar.result, err = p.genString(randomCmdGlobalVar.length, LowercaseLetters)
 	case "random":
-		r.result, err = p.GenerateAll(r.length, r.lower, r.upper, r.symbol, r.number)
+		randomCmdGlobalVar.result, err = p.GenerateAll(randomCmdGlobalVar.length, randomCmdGlobalVar.lower, randomCmdGlobalVar.upper, randomCmdGlobalVar.symbol, randomCmdGlobalVar.number)
 	}
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	PrintString(r.result)
+	PrintString(randomCmdGlobalVar.result)
 }
 
-type randomString struct{}
+type RandomString struct{}
 
-func (randomString) genString(length int, charSet RandomCharacter) (string, error) {
+func (RandomString) genString(length int, charSet RandomCharacter) (string, error) {
 	var s strings.Builder
 	var err error
 	for i := int(0); i < length; i++ {
@@ -138,7 +138,7 @@ func (randomString) genString(length int, charSet RandomCharacter) (string, erro
 	return s.String(), err
 }
 
-func (r randomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) (string, error) {
+func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) (string, error) {
 	var err error
 	var remain string
 	leave := length - minLower - minUpper - minSymbol - minNumber

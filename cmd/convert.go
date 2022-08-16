@@ -49,133 +49,133 @@ var convertCmd = &cobra.Command{
 var convertSubCmdCSV2JSON = &cobra.Command{
 	Use:   "csv2json",
 	Short: "Convert csv to json format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdCSV2TOML = &cobra.Command{
 	Use:   "csv2toml",
 	Short: "Convert csv to toml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdCSV2XML = &cobra.Command{
 	Use:   "csv2xml",
 	Short: "Convert csv to xml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdCSV2YAML = &cobra.Command{
 	Use:   "csv2yaml",
 	Short: "Convert csv to yaml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 
 /* JSON. */
 var convertSubCmdJSON2CSV = &cobra.Command{
 	Use:   "json2csv",
 	Short: "Convert json to csv format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdJSON2TOML = &cobra.Command{
 	Use:   "json2toml",
 	Short: "Convert json to toml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdJSON2XML = &cobra.Command{
 	Use:   "json2xml",
 	Short: "Convert json to xml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdJSON2YAML = &cobra.Command{
 	Use:   "json2yaml",
 	Short: "Convert json to yaml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 
 /* Markdown. */
 var convertSubCmdMarkdown2HTML = &cobra.Command{
 	Use:   "markdown2html",
 	Short: "Convert markdown to html format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdMarkdown2PDF = &cobra.Command{
 	Use:   "markdown2pdf",
 	Short: "Convert markdown to pdf format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 
 /* TOML. */
 var convertSubCmdTOML2CSV = &cobra.Command{
 	Use:   "toml2csv",
 	Short: "Convert toml to csv format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdTOML2JSON = &cobra.Command{
 	Use:   "toml2json",
 	Short: "Convert toml to json format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdTOML2XML = &cobra.Command{
 	Use:   "toml2xml",
 	Short: "Convert toml to xml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdTOML2YAML = &cobra.Command{
 	Use:   "toml2yaml",
 	Short: "Convert toml to yaml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 
 /* XML. */
 var convertSubCmdXML2CSV = &cobra.Command{
 	Use:   "xml2csv",
 	Short: "Convert xml to csv format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdXML2JSON = &cobra.Command{
 	Use:   "xml2json",
 	Short: "Convert xml to json format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdXML2TOML = &cobra.Command{
 	Use:   "xml2toml",
 	Short: "Convert xml to toml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdXML2YAML = &cobra.Command{
 	Use:   "xml2yaml",
 	Short: "Convert xml to yaml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 
 /* YAML. */
 var convertSubCmdYAML2CSV = &cobra.Command{
 	Use:   "yaml2csv",
 	Short: "Convert yaml to csv format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdYAML2JSON = &cobra.Command{
 	Use:   "yaml2json",
 	Short: "Convert yaml to json format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 	Example: Examples(`# Convert yaml to json
 ops-cli convert yaml2json -i input.yaml -o output.json`),
 }
 var convertSubCmdYAML2TOML = &cobra.Command{
 	Use:   "yaml2toml",
 	Short: "Convert yaml to toml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 var convertSubCmdYAML2XML = &cobra.Command{
 	Use:   "yaml2xml",
 	Short: "Convert yaml to xml format",
-	Run:   cf.Run,
+	Run:   convertCmdGlobalVar.Run,
 }
 
-var cf convertFlag
+var convertCmdGlobalVar ConvertFlag
 
 func init() {
 	rootCmd.AddCommand(convertCmd)
 
-	convertCmd.PersistentFlags().StringVarP(&cf.inFile, "in", "i", "", "Input file")
-	convertCmd.PersistentFlags().StringVarP(&cf.outFile, "out", "o", "", "Output file")
+	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.inFile, "in", "i", "", "Input file")
+	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.outFile, "out", "o", "", "Output file")
 	/* Markdown */
 	convertCmd.AddCommand(convertSubCmdMarkdown2HTML, convertSubCmdMarkdown2PDF)
 	/* CSV */
@@ -190,7 +190,7 @@ func init() {
 	convertCmd.AddCommand(convertSubCmdYAML2CSV, convertSubCmdYAML2JSON, convertSubCmdYAML2TOML, convertSubCmdYAML2XML)
 }
 
-type convertFlag struct {
+type ConvertFlag struct {
 	inFile  string
 	inType  string
 	outFile string
@@ -199,7 +199,7 @@ type convertFlag struct {
 	readFile []byte
 }
 
-func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
+func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
 	if !ValidFile(c.inFile) || c.outFile == "" {
 		os.Exit(1)
 	}
@@ -226,7 +226,7 @@ func (c *convertFlag) Run(cmd *cobra.Command, _ []string) {
 	}
 }
 
-func (c *convertFlag) Convert() error {
+func (c *ConvertFlag) Convert() error {
 	node, err := dasel.NewFromFile(c.inFile, c.inType)
 	if err != nil {
 		return err
@@ -236,13 +236,13 @@ func (c *convertFlag) Convert() error {
 	})
 }
 
-func (c *convertFlag) Load() error {
+func (c *ConvertFlag) Load() error {
 	var err error
 	c.readFile, err = os.ReadFile(c.inFile)
 	return err
 }
 
-func (c *convertFlag) ConvertMarkdown2HTML() error {
+func (c *ConvertFlag) ConvertMarkdown2HTML() error {
 	if err := c.Load(); err != nil {
 		return err
 	}
@@ -278,7 +278,7 @@ func (c *convertFlag) ConvertMarkdown2HTML() error {
 	return c.WriteFile(buf.Bytes())
 }
 
-func (c *convertFlag) ConvertMarkdown2PDF() error {
+func (c *ConvertFlag) ConvertMarkdown2PDF() error {
 	if err := c.Load(); err != nil {
 		return err
 	}
@@ -317,6 +317,6 @@ func (c *convertFlag) ConvertMarkdown2PDF() error {
 	return c.WriteFile(buf.Bytes())
 }
 
-func (c *convertFlag) WriteFile(content []byte) error {
+func (c *ConvertFlag) WriteFile(content []byte) error {
 	return os.WriteFile(c.outFile, content, os.ModePerm)
 }

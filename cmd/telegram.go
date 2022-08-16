@@ -35,13 +35,13 @@ var telegramCmd = &cobra.Command{
 var telegramSubCmdAudio = &cobra.Command{
 	Use:   "audio",
 	Short: "Send audio file to Telegram",
-	Run:   tg.Run,
+	Run:   telegramCmdGlobalVar.Run,
 }
 
 var telegramSubCmdFile = &cobra.Command{
 	Use:   "file",
 	Short: "Send file to Telegram",
-	Run:   tg.Run,
+	Run:   telegramCmdGlobalVar.Run,
 	Example: Examples(`# Send file
 ops-cli Telegram file -t bot_token -c chat_id -a '~/readme.md'`),
 }
@@ -49,7 +49,7 @@ ops-cli Telegram file -t bot_token -c chat_id -a '~/readme.md'`),
 var telegramSubCmdID = &cobra.Command{
 	Use:   "id",
 	Short: "Get chat ID",
-	Run:   tg.Run,
+	Run:   telegramCmdGlobalVar.Run,
 	Example: Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
 ops-cli Telegram id --config ~/.config.toml`),
 }
@@ -57,7 +57,7 @@ ops-cli Telegram id --config ~/.config.toml`),
 var telegramSubCmdText = &cobra.Command{
 	Use:   "text",
 	Short: "Send text to Telegram",
-	Run:   tg.Run,
+	Run:   telegramCmdGlobalVar.Run,
 	Example: Examples(`# Send message
 ops-cli Telegram text -t bot_token -c chat_id -a 'Hello word'`),
 }
@@ -65,7 +65,7 @@ ops-cli Telegram text -t bot_token -c chat_id -a 'Hello word'`),
 var telegramSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
 	Short: "Send photo to Telegram",
-	Run:   tg.Run,
+	Run:   telegramCmdGlobalVar.Run,
 	Example: Examples(`# Send photo
 ops-cli Telegram photo -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
 ops-cli Telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'`),
@@ -74,24 +74,24 @@ ops-cli Telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'`),
 var telegramSubCmdVideo = &cobra.Command{
 	Use:   "video",
 	Short: "Send video file to Telegram",
-	Run:   tg.Run,
+	Run:   telegramCmdGlobalVar.Run,
 }
 
 var telegramSubCmdVoice = &cobra.Command{
 	Use:   "voice",
 	Short: "Send voice file to Telegram",
-	Run:   tg.Run,
+	Run:   telegramCmdGlobalVar.Run,
 }
 
-var tg telegramFlag
+var telegramCmdGlobalVar TelegramFlag
 
 func init() {
 	rootCmd.AddCommand(telegramCmd)
 
-	telegramCmd.PersistentFlags().StringVarP(&tg.token, "token", "t", "", "Bot token (required)")
-	telegramCmd.PersistentFlags().Int64VarP(&tg.chat, "chat-id", "c", 0, "Chat ID")
-	telegramCmd.PersistentFlags().StringVarP(&tg.arg, "arg", "a", "", "Input argument")
-	telegramCmd.PersistentFlags().StringVarP(&tg.caption, "caption", "", "", "Add caption for file")
+	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.token, "token", "t", "", "Bot token (required)")
+	telegramCmd.PersistentFlags().Int64VarP(&telegramCmdGlobalVar.chat, "chat-id", "c", 0, "Chat ID")
+	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.arg, "arg", "a", "", "Input argument")
+	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.caption, "caption", "", "", "Add caption for file")
 
 	telegramCmd.AddCommand(telegramSubCmdAudio)
 	telegramCmd.AddCommand(telegramSubCmdFile)
@@ -102,7 +102,7 @@ func init() {
 	telegramCmd.AddCommand(telegramSubCmdVoice)
 }
 
-type telegramFlag struct {
+type TelegramFlag struct {
 	/* Bind flags */
 	token   string
 	chat    int64
@@ -113,14 +113,14 @@ type telegramFlag struct {
 	resp tgBot.Message
 }
 
-func (t *telegramFlag) Init() error {
+func (t *TelegramFlag) Init() error {
 	var err error
-	if tg.token == "" && rootConfig != "" {
+	if t.token == "" && rootConfig != "" {
 		if err = Config(ConfigBlockTelegram); err != nil {
 			return err
 		}
 	}
-	if tg.token == "" {
+	if t.token == "" {
 		return ErrTokenNotFound
 	}
 	t.api, err = tgBot.NewBotAPI(t.token)
@@ -130,70 +130,70 @@ func (t *telegramFlag) Init() error {
 	return err
 }
 
-func (t telegramFlag) Animation() error {
+func (t TelegramFlag) Animation() error {
 	input := tgBot.NewAnimation(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
-func (t *telegramFlag) Audio() error {
+func (t *TelegramFlag) Audio() error {
 	input := tgBot.NewAudio(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
-func (t telegramFlag) ChatDescription() error {
+func (t TelegramFlag) ChatDescription() error {
 	input := tgBot.NewChatDescription(t.chat, t.arg)
 	return t.send(input)
 }
 
-func (t telegramFlag) ChatPhoto() error {
+func (t TelegramFlag) ChatPhoto() error {
 	input := tgBot.NewChatPhoto(t.chat, t.parseFile(t.arg))
 	return t.send(input)
 }
 
-func (t telegramFlag) ChatTitle() error {
+func (t TelegramFlag) ChatTitle() error {
 	input := tgBot.NewChatTitle(t.chat, t.arg)
 	return t.send(input)
 }
 
-func (t telegramFlag) Dice() error {
+func (t TelegramFlag) Dice() error {
 	input := tgBot.NewDice(t.chat)
 	return t.send(input)
 }
 
-func (t *telegramFlag) File() error {
+func (t *TelegramFlag) File() error {
 	input := tgBot.NewDocument(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
-func (t *telegramFlag) Text() error {
+func (t *TelegramFlag) Text() error {
 	input := tgBot.NewMessage(t.chat, t.arg)
 	input.ParseMode = tgBot.ModeMarkdownV2
 	input.DisableWebPagePreview = true
 	return t.send(input)
 }
 
-func (t *telegramFlag) Photo() error {
+func (t *TelegramFlag) Photo() error {
 	input := tgBot.NewPhoto(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
-func (t *telegramFlag) Video() error {
+func (t *TelegramFlag) Video() error {
 	input := tgBot.NewVideo(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
-func (t *telegramFlag) Voice() error {
+func (t *TelegramFlag) Voice() error {
 	input := tgBot.NewVoice(t.chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
-func (t *telegramFlag) GetUpdate() {
+func (t *TelegramFlag) GetUpdate() {
 	u := tgBot.NewUpdate(0)
 	u.Timeout = 60
 	updates := t.api.GetUpdatesChan(u)
@@ -208,7 +208,7 @@ func (t *telegramFlag) GetUpdate() {
 	}
 }
 
-func (t *telegramFlag) Run(cmd *cobra.Command, _ []string) {
+func (t *TelegramFlag) Run(cmd *cobra.Command, _ []string) {
 	if t.arg == "" {
 		log.Println(ErrArgNotFound)
 		os.Exit(1)
@@ -241,7 +241,7 @@ func (t *telegramFlag) Run(cmd *cobra.Command, _ []string) {
 	OutputDefaultNone(t.resp)
 }
 
-func (t *telegramFlag) parseFile(s string) tgBot.RequestFileData {
+func (t *TelegramFlag) parseFile(s string) tgBot.RequestFileData {
 	switch {
 	case ValidFile(s):
 		return tgBot.FilePath(s)
@@ -251,7 +251,7 @@ func (t *telegramFlag) parseFile(s string) tgBot.RequestFileData {
 	return nil
 }
 
-func (t *telegramFlag) send(c tgBot.Chattable) error {
+func (t *TelegramFlag) send(c tgBot.Chattable) error {
 	var err error
 	t.resp, err = t.api.Send(c)
 	return err

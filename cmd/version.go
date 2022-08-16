@@ -30,13 +30,13 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version information",
 	Run: func(_ *cobra.Command, _ []string) {
-		var v = version{
+		var v = VersionOutput{
 			Version: appVersion,
 			Commit:  appCommit,
 			Date:    appBuildTime,
 			Runtime: fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
 		}
-		if versionComplete {
+		if versionFull {
 			v.String()
 			return
 		}
@@ -49,22 +49,22 @@ var (
 	appBuildTime = "unknown"
 	appCommit    = "unknown"
 )
-var versionComplete bool
+var versionFull bool
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
 
-	versionCmd.Flags().BoolVarP(&versionComplete, "complete", "c", false, "Print version information completely")
+	versionCmd.Flags().BoolVarP(&versionFull, "complete", "c", false, "Print version information completely")
 }
 
-type version struct {
+type VersionOutput struct {
 	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 	Commit  string `json:"commit,omitempty" yaml:"commit,omitempty"`
 	Date    string `json:"date,omitempty" yaml:"date,omitempty"`
 	Runtime string `json:"runtime,omitempty" yaml:"runtime,omitempty"`
 }
 
-func (r version) String() {
+func (r VersionOutput) String() {
 	var ver strings.Builder
 	f := reflect.ValueOf(&r).Elem()
 	t := f.Type()

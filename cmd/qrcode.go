@@ -38,12 +38,12 @@ var qrcodeSubCmdRead = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Read QR code and print message",
 	Run: func(_ *cobra.Command, args []string) {
-		qr.text = args[0]
-		if !ValidFile(qr.text) {
+		qrcodeCmdGlobalVar.text = args[0]
+		if !ValidFile(qrcodeCmdGlobalVar.text) {
 			log.Println(ErrFileNotFound)
 			os.Exit(1)
 		}
-		result, err := qrcode.ReadQRCode(qr.text)
+		result, err := qrcode.ReadQRCode(qrcodeCmdGlobalVar.text)
 		if err != nil {
 			log.Println(err)
 			os.Exit(1)
@@ -61,9 +61,9 @@ var qrcodeSubCmdText = &cobra.Command{
 	Short: "Generate QR code with text",
 	Run: func(_ *cobra.Command, args []string) {
 		for i := range args {
-			qr.text += args[i]
+			qrcodeCmdGlobalVar.text += args[i]
 		}
-		if err := qr.Generate(); err != nil {
+		if err := qrcodeCmdGlobalVar.Generate(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
@@ -77,12 +77,18 @@ var qrcodeSubCmdOtp = &cobra.Command{
 	Use:   "otp",
 	Short: "Generate OTP QR code",
 	Run: func(_ *cobra.Command, _ []string) {
-		if qr.otpSecret == "" {
+		if qrcodeCmdGlobalVar.otpSecret == "" {
 			log.Println(ErrArgNotFound)
 			os.Exit(1)
 		}
-		qr.text = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`, qr.otpIssuer, qr.otpAccount, qr.otpSecret, qr.otpIssuer)
-		if err := qr.Generate(); err != nil {
+		qrcodeCmdGlobalVar.text = fmt.Sprintf(
+			`otpauth://totp/%s:%s?secret=%s&issuer=%s`,
+			qrcodeCmdGlobalVar.otpIssuer,
+			qrcodeCmdGlobalVar.otpAccount,
+			qrcodeCmdGlobalVar.otpSecret,
+			qrcodeCmdGlobalVar.otpIssuer,
+		)
+		if err := qrcodeCmdGlobalVar.Generate(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
@@ -95,12 +101,12 @@ var qrcodeSubCmdWifi = &cobra.Command{
 	Use:   "wifi",
 	Short: "Generate WiFi QR code",
 	Run: func(_ *cobra.Command, _ []string) {
-		if qr.wifiSsid == "" {
+		if qrcodeCmdGlobalVar.wifiSsid == "" {
 			log.Println(ErrArgNotFound)
 			os.Exit(1)
 		}
-		qr.text = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`, qr.wifiSsid, qr.wifiType, qr.wifiPass)
-		if err := qr.Generate(); err != nil {
+		qrcodeCmdGlobalVar.text = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`, qrcodeCmdGlobalVar.wifiSsid, qrcodeCmdGlobalVar.wifiType, qrcodeCmdGlobalVar.wifiPass)
+		if err := qrcodeCmdGlobalVar.Generate(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
@@ -109,32 +115,32 @@ var qrcodeSubCmdWifi = &cobra.Command{
 ops-cli qrcode wifi --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid -o wifi.png`),
 }
 
-var qr qrcodeFlag
+var qrcodeCmdGlobalVar QrcodeFlag
 
 func init() {
 	rootCmd.AddCommand(qrcodeCmd)
 
 	/* output arguments */
-	qrcodeCmd.PersistentFlags().StringVarP(&qr.output, "output", "o", "./qrcode.png", "Output QRCode file path")
-	qrcodeCmd.PersistentFlags().IntVarP(&qr.size, "size", "s", 600, "Specify QRCode generate size")
+	qrcodeCmd.PersistentFlags().StringVarP(&qrcodeCmdGlobalVar.output, "output", "o", "./qrcode.png", "Output QRCode file path")
+	qrcodeCmd.PersistentFlags().IntVarP(&qrcodeCmdGlobalVar.size, "size", "s", 600, "Specify QRCode generate size")
 	qrcodeCmd.AddCommand(qrcodeSubCmdRead)
 	qrcodeCmd.AddCommand(qrcodeSubCmdText)
 	qrcodeCmd.AddCommand(qrcodeSubCmdOtp)
 	qrcodeCmd.AddCommand(qrcodeSubCmdWifi)
 
 	/* Type: wifi */
-	qrcodeSubCmdWifi.Flags().StringVarP(&qr.wifiPass, "wifi-pass", "", "", "Specify password")
-	qrcodeSubCmdWifi.Flags().StringVarP(&qr.wifiSsid, "wifi-ssid", "", "", "Specify SSID")
-	qrcodeSubCmdWifi.Flags().StringVarP(&qr.wifiType, "wifi-type", "", "WPA", "WPA/WEP/nopass")
+	qrcodeSubCmdWifi.Flags().StringVarP(&qrcodeCmdGlobalVar.wifiPass, "wifi-pass", "", "", "Specify password")
+	qrcodeSubCmdWifi.Flags().StringVarP(&qrcodeCmdGlobalVar.wifiSsid, "wifi-ssid", "", "", "Specify SSID")
+	qrcodeSubCmdWifi.Flags().StringVarP(&qrcodeCmdGlobalVar.wifiType, "wifi-type", "", "WPA", "WPA/WEP/nopass")
 	qrcodeSubCmdWifi.MarkFlagsRequiredTogether("wifi-pass", "wifi-ssid")
 	/* Type: otp */
-	qrcodeSubCmdOtp.Flags().StringVarP(&qr.otpAccount, "otp-account", "", "", "Specify account")
-	qrcodeSubCmdOtp.Flags().StringVarP(&qr.otpIssuer, "otp-issuer", "", "", "Specify issuer")
-	qrcodeSubCmdOtp.Flags().StringVarP(&qr.otpSecret, "otp-secret", "", "", "Specify secret")
+	qrcodeSubCmdOtp.Flags().StringVarP(&qrcodeCmdGlobalVar.otpAccount, "otp-account", "", "", "Specify account")
+	qrcodeSubCmdOtp.Flags().StringVarP(&qrcodeCmdGlobalVar.otpIssuer, "otp-issuer", "", "", "Specify issuer")
+	qrcodeSubCmdOtp.Flags().StringVarP(&qrcodeCmdGlobalVar.otpSecret, "otp-secret", "", "", "Specify secret")
 	qrcodeSubCmdOtp.MarkFlagsRequiredTogether("otp-account", "otp-issuer", "otp-secret")
 }
 
-type qrcodeFlag struct {
+type QrcodeFlag struct {
 	/* Bind flags */
 	/* QR Code generate file path */
 	output string
@@ -148,9 +154,9 @@ type qrcodeFlag struct {
 	otpAccount, otpSecret, otpIssuer string
 }
 
-func (q qrcodeFlag) Generate() error {
-	if qr.text == "" {
+func (q *QrcodeFlag) Generate() error {
+	if q.text == "" {
 		return ErrArgNotFound
 	}
-	return qrcode.GenerateQRCode(qr.text, qr.size, qr.output)
+	return qrcode.GenerateQRCode(q.text, q.size, q.output)
 }

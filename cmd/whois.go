@@ -34,9 +34,9 @@ var whoisCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "List domain name information",
 	Run: func(_ *cobra.Command, args []string) {
-		var resp *whoisResponse
+		var resp *WhoisResponse
 		var err error
-		resp, err = wf.Request(args[0])
+		resp, err = whoisCmdGlobalVar.Request(args[0])
 		if err != nil {
 			log.Println(err)
 			os.Exit(1)
@@ -50,18 +50,18 @@ var whoisCmd = &cobra.Command{
 ops-cli whois apple.com`),
 }
 
-var wf whoisFlag
+var whoisCmdGlobalVar WhoisFlag
 
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
-	whoisCmd.Flags().BoolVarP(&wf.ns, "ns", "n", false, "Only print Name Servers")
-	whoisCmd.Flags().BoolVarP(&wf.expiry, "expiry", "e", false, "Only print expiry time")
-	whoisCmd.Flags().BoolVarP(&wf.registrar, "registrar", "r", false, "Only print Registrar")
-	whoisCmd.Flags().BoolVarP(&wf.days, "days", "d", false, "Only print the remaining days")
+	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.ns, "ns", "n", false, "Only print Name Servers")
+	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.expiry, "expiry", "e", false, "Only print expiry time")
+	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.registrar, "registrar", "r", false, "Only print Registrar")
+	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.days, "days", "d", false, "Only print the remaining days")
 }
 
-type whoisResponse struct {
+type WhoisResponse struct {
 	Registrar   string   `json:"registrar" yaml:"registrar"`
 	CreatedDate string   `json:"createdDate" yaml:"createdDate"`
 	ExpiresDate string   `json:"expiresDate" yaml:"expiresDate"`
@@ -70,20 +70,20 @@ type whoisResponse struct {
 	NameServers []string `json:"nameServers" yaml:"nameServers"`
 }
 
-func (r whoisResponse) String() {
-	if wf.expiry {
+func (r WhoisResponse) String() {
+	if whoisCmdGlobalVar.expiry {
 		PrintString(r.ExpiresDate)
 		return
 	}
-	if wf.ns {
+	if whoisCmdGlobalVar.ns {
 		PrintJSON(r.NameServers)
 		return
 	}
-	if wf.registrar {
+	if whoisCmdGlobalVar.registrar {
 		PrintString(r.Registrar)
 		return
 	}
-	if wf.days {
+	if whoisCmdGlobalVar.days {
 		PrintString(r.RemainDays)
 		return
 	}
@@ -94,12 +94,12 @@ func (r whoisResponse) String() {
 	}
 }
 
-type whoisFlag struct {
+type WhoisFlag struct {
 	/* Bind flags */
 	ns, expiry, registrar, days bool
 }
 
-func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
+func (w WhoisFlag) Request(domain string) (*WhoisResponse, error) {
 	conn, err := net.Dial("tcp", "whois.verisign-grs.com:43")
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
 	replace1 := strings.ReplaceAll(replace, "\r\n", ",")
 	split := strings.Split(replace1, ",")
 	var ns []string
-	var r whoisResponse
+	var r WhoisResponse
 	var calErr error
 	/* Filter field. */
 	for i := range split {
@@ -155,7 +155,7 @@ func (w whoisFlag) Request(domain string) (*whoisResponse, error) {
 }
 
 /* Convert time to RFC3339 format. */
-func (w whoisFlag) ParseTime(t string) (string, error) {
+func (w WhoisFlag) ParseTime(t string) (string, error) {
 	/* 1997-09-15T04:00:00Z */
 	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
@@ -165,7 +165,7 @@ func (w whoisFlag) ParseTime(t string) (string, error) {
 }
 
 /* Convert time to days. */
-func (w whoisFlag) CalculateDays(t string) (int, error) {
+func (w WhoisFlag) CalculateDays(t string) (int, error) {
 	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
 		return 0, err

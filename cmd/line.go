@@ -39,7 +39,7 @@ var lineSubCmdText = &cobra.Command{
 	Short: "Send message to LINE",
 	Example: Examples(`# Send text to LINE chat
 ops-cli LINE text -s secret -t token --id GroupID -a 'Hello LINE'`),
-	Run: line.Run,
+	Run: lineCmdGlobalVar.Run,
 }
 
 var lineSubCmdID = &cobra.Command{
@@ -53,16 +53,16 @@ var lineSubCmdID = &cobra.Command{
 ops-cli LINE id https://callback_url`),
 	Run: func(_ *cobra.Command, args []string) {
 		var err error
-		if err = line.Init(); err != nil {
+		if err = lineCmdGlobalVar.Init(); err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
-		line.resp, err = line.api.SetWebhookEndpointURL(args[0]).Do()
+		lineCmdGlobalVar.resp, err = lineCmdGlobalVar.api.SetWebhookEndpointURL(args[0]).Do()
 		if err != nil {
 			log.Println(err)
 			os.Exit(1)
 		}
-		line.GetID()
+		lineCmdGlobalVar.GetID()
 	},
 }
 
@@ -71,7 +71,7 @@ var lineSubCmdPhoto = &cobra.Command{
 	Short: "Send photo to LINE",
 	Example: Examples(`# Send photo to LINE chat
 ops-cli LINE photo -s secret -t token --id GroupID -a https://img.url`),
-	Run: line.Run,
+	Run: lineCmdGlobalVar.Run,
 }
 
 var lineSubCmdVideo = &cobra.Command{
@@ -79,18 +79,18 @@ var lineSubCmdVideo = &cobra.Command{
 	Short: "Send video to LINE",
 	Example: Examples(`# Send video to LINE chat
 ops-cli LINE video -s secret -t token --id GroupID -a https://video.url`),
-	Run: line.Run,
+	Run: lineCmdGlobalVar.Run,
 }
 
-var line lineFlag
+var lineCmdGlobalVar LineFlag
 
 func init() {
 	rootCmd.AddCommand(lineCmd)
 
-	lineCmd.PersistentFlags().StringVarP(&line.secret, "secret", "s", "", "Channel Secret")
-	lineCmd.PersistentFlags().StringVarP(&line.token, "token", "t", "", "Channel Access Token")
-	lineCmd.PersistentFlags().StringVarP(&line.arg, "arg", "a", "", "Function Argument")
-	lineCmd.PersistentFlags().StringVar(&line.id, "id", "", "UserID/GroupID/RoomID")
+	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.secret, "secret", "s", "", "Channel Secret")
+	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.token, "token", "t", "", "Channel Access Token")
+	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.arg, "arg", "a", "", "Function Argument")
+	lineCmd.PersistentFlags().StringVar(&lineCmdGlobalVar.id, "id", "", "UserID/GroupID/RoomID")
 
 	lineCmd.AddCommand(lineSubCmdID)
 	lineCmd.AddCommand(lineSubCmdPhoto)
@@ -98,7 +98,7 @@ func init() {
 	lineCmd.AddCommand(lineSubCmdVideo)
 }
 
-type lineFlag struct {
+type LineFlag struct {
 	secret string
 	token  string
 	id     string
@@ -108,7 +108,7 @@ type lineFlag struct {
 	resp *linebot.BasicResponse
 }
 
-func (l *lineFlag) Init() error {
+func (l *LineFlag) Init() error {
 	var err error
 	if (l.secret == "" || l.token == "") && rootConfig != "" {
 		if err = Config(ConfigBlockLINE); err != nil {
@@ -125,7 +125,7 @@ func (l *lineFlag) Init() error {
 	return err
 }
 
-func (l *lineFlag) GetID() {
+func (l *LineFlag) GetID() {
 	var err error
 	http.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
 		events, err := l.api.ParseRequest(r)
@@ -157,7 +157,7 @@ func (l *lineFlag) GetID() {
 	}
 }
 
-func (l *lineFlag) Run(cmd *cobra.Command, _ []string) {
+func (l *LineFlag) Run(cmd *cobra.Command, _ []string) {
 	if l.arg == "" {
 		log.Println(ErrArgNotFound)
 		os.Exit(1)

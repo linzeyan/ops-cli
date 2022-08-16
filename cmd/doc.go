@@ -33,44 +33,44 @@ var docCmd = &cobra.Command{
 var docSubCmdMan = &cobra.Command{
 	Use:   "man",
 	Short: "Generate man page documentation",
-	Run:   df.Run,
+	Run:   docCmdGlobalVar.Run,
 }
 
 var docSubCmdMarkdown = &cobra.Command{
 	Use:   "markdown",
 	Short: "Generate markdown documentation",
-	Run:   df.Run,
+	Run:   docCmdGlobalVar.Run,
 }
 
 var docSubCmdRest = &cobra.Command{
 	Use:   "rest",
 	Short: "Generate rest documentation",
-	Run:   df.Run,
+	Run:   docCmdGlobalVar.Run,
 }
 
 var docSubCmdYaml = &cobra.Command{
 	Use:   "yaml",
 	Short: "Generate yaml documentation",
-	Run:   df.Run,
+	Run:   docCmdGlobalVar.Run,
 }
 
-var df docFlag
+var docCmdGlobalVar DocFlag
 
 func init() {
 	rootCmd.AddCommand(docCmd)
 
-	docCmd.PersistentFlags().StringVarP(&df.dir, "dir", "d", "doc", "Specify the path to generate documentation")
+	docCmd.PersistentFlags().StringVarP(&docCmdGlobalVar.dir, "dir", "d", "doc", "Specify the path to generate documentation")
 	docCmd.AddCommand(docSubCmdMan)
 	docCmd.AddCommand(docSubCmdMarkdown)
 	docCmd.AddCommand(docSubCmdRest)
 	docCmd.AddCommand(docSubCmdYaml)
 }
 
-type docFlag struct {
+type DocFlag struct {
 	dir string
 }
 
-func (d *docFlag) createDir() error {
+func (d *DocFlag) createDir() error {
 	var err error
 	_, err = os.Stat(d.dir)
 	if err != nil {
@@ -82,7 +82,7 @@ func (d *docFlag) createDir() error {
 	return err
 }
 
-func (d *docFlag) Run(cmd *cobra.Command, _ []string) {
+func (d *DocFlag) Run(cmd *cobra.Command, _ []string) {
 	var err error
 	if err = d.createDir(); err != nil {
 		log.Println(err)

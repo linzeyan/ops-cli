@@ -44,7 +44,7 @@ var otpSubCmdCalculate = &cobra.Command{
 	Use:   "calculate",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Calculate passcode",
-	Run:   of.Run,
+	Run:   otpCmdGlobalVar.Run,
 	Example: Examples(`# Calculate the passcode for the specified secret
 ops-cli otp calculate 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
 ops-cli otp calculate 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
@@ -56,7 +56,7 @@ ops-cli otp calculate T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`),
 var otpSubCmdGenerate = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate otp secret",
-	Run:   of.Run,
+	Run:   otpCmdGlobalVar.Run,
 	Example: Examples(`# Generate OTP and specify a period of 15 seconds
 ops-cli otp generate -p 15
 
@@ -67,19 +67,19 @@ ops-cli otp generate -a sha256
 ops-cli otp generate -a sha512 -p 15`),
 }
 
-var of otpFlag
+var otpCmdGlobalVar OtpFlag
 
 func init() {
 	rootCmd.AddCommand(otpCmd)
 
-	otpCmd.PersistentFlags().StringVarP(&of.alg, "algorithm", "a", "SHA1", "The hash algorithm used by the credential(SHA1/SHA256/SHA512)")
-	otpCmd.PersistentFlags().Int8VarP(&of.period, "period", "p", 30, "The period parameter defines a validity period in seconds for the TOTP code(15/30/60)")
-	otpCmd.PersistentFlags().Int8VarP(&of.digit, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
+	otpCmd.PersistentFlags().StringVarP(&otpCmdGlobalVar.alg, "algorithm", "a", "SHA1", "The hash algorithm used by the credential(SHA1/SHA256/SHA512)")
+	otpCmd.PersistentFlags().Int8VarP(&otpCmdGlobalVar.period, "period", "p", 30, "The period parameter defines a validity period in seconds for the TOTP code(15/30/60)")
+	otpCmd.PersistentFlags().Int8VarP(&otpCmdGlobalVar.digit, "digits", "d", 6, "The number of digits in a one-time password(6/7/8)")
 
 	otpCmd.AddCommand(otpSubCmdCalculate, otpSubCmdGenerate)
 }
 
-type otpFlag struct {
+type OtpFlag struct {
 	/* Bind flags */
 	/* The period parameter defines a validity period in seconds */
 	period int8
@@ -89,7 +89,7 @@ type otpFlag struct {
 	alg string
 }
 
-func (o *otpFlag) SetTimeInterval() int64 {
+func (o *OtpFlag) SetTimeInterval() int64 {
 	switch o.period {
 	case 15:
 		return rootNow.Unix() / 15
@@ -100,7 +100,7 @@ func (o *otpFlag) SetTimeInterval() int64 {
 	}
 }
 
-func (o *otpFlag) SetDigits() [2]int {
+func (o *OtpFlag) SetDigits() [2]int {
 	switch o.digit {
 	case 7:
 		return [2]int{7, 10000000}
@@ -111,7 +111,7 @@ func (o *otpFlag) SetDigits() [2]int {
 	}
 }
 
-func (o *otpFlag) SetAlgorithm() func() hash.Hash {
+func (o *OtpFlag) SetAlgorithm() func() hash.Hash {
 	switch strings.ToLower(o.alg) {
 	case "sha256":
 		return sha256.New
@@ -122,7 +122,7 @@ func (o *otpFlag) SetAlgorithm() func() hash.Hash {
 	}
 }
 
-func (o *otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
+func (o *OtpFlag) HOTP(secret string, timeInterval int64) (string, error) {
 	key, err := Encoder.Base32StdDecode(strings.ToUpper(secret))
 	if err != nil {
 		return "", err
@@ -156,11 +156,11 @@ func (o *otpFlag) HOTP(secret string, timeInterval int64) (string, error) {
 	return passcode, err
 }
 
-func (o *otpFlag) TOTP(secret string) (string, error) {
+func (o *OtpFlag) TOTP(secret string) (string, error) {
 	return o.HOTP(secret, o.SetTimeInterval())
 }
 
-func (o *otpFlag) GenSecret() (string, error) {
+func (o *OtpFlag) GenSecret() (string, error) {
 	buf := bytes.Buffer{}
 	err := binary.Write(&buf, binary.BigEndian, o.SetTimeInterval())
 	if err != nil {
@@ -170,19 +170,19 @@ func (o *otpFlag) GenSecret() (string, error) {
 	return Encoder.Base32StdEncode(hasher.Sum(nil))
 }
 
-func (o *otpFlag) Verify(secret string, input string) (bool, error) {
+func (o *OtpFlag) Verify(secret string, input string) (bool, error) {
 	passcode, err := o.TOTP(secret)
 	return passcode == input, err
 }
 
-func (o otpFlag) RemoveSpaces(s string) string {
+func (o OtpFlag) RemoveSpaces(s string) string {
 	if strings.Contains(s, " ") {
 		return strings.ReplaceAll(s, " ", "")
 	}
 	return s
 }
 
-func (o *otpFlag) Run(cmd *cobra.Command, args []string) {
+func (o *OtpFlag) Run(cmd *cobra.Command, args []string) {
 	var result string
 	var err error
 	switch cmd.Name() {

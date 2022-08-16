@@ -41,7 +41,7 @@ var slackCmd = &cobra.Command{
 var slackSubCmdFile = &cobra.Command{
 	Use:   "file",
 	Short: "Send file to Slack",
-	Run:   sf.Run,
+	Run:   slackCmdGlobalVar.Run,
 	Example: Examples(`# Send file
 ops-cli Slack file -a "/tmp/a.txt" --config ~/.config.toml`),
 }
@@ -49,7 +49,7 @@ ops-cli Slack file -a "/tmp/a.txt" --config ~/.config.toml`),
 var slackSubCmdText = &cobra.Command{
 	Use:   "text",
 	Short: "Send text to Slack",
-	Run:   sf.Run,
+	Run:   slackCmdGlobalVar.Run,
 	Example: Examples(`# Send text
 ops-cli Slack text -a "Hello World!"`),
 }
@@ -57,26 +57,26 @@ ops-cli Slack text -a "Hello World!"`),
 var slackSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
 	Short: "Send photo to Slack",
-	Run:   sf.Run,
+	Run:   slackCmdGlobalVar.Run,
 	Example: Examples(`# Send photo
 ops-cli Slack photo -a "~/robot.png"`),
 }
 
-var sf slackFlag
+var slackCmdGlobalVar SlackFlag
 
 func init() {
 	rootCmd.AddCommand(slackCmd)
 
-	slackCmd.PersistentFlags().StringVarP(&sf.token, "token", "t", "", "Bot token (required)")
-	slackCmd.PersistentFlags().StringVarP(&sf.channel, "channel", "c", "", "Channel ID")
-	slackCmd.PersistentFlags().StringVarP(&sf.arg, "arg", "a", "", "Input argument")
+	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.token, "token", "t", "", "Bot token (required)")
+	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.channel, "channel", "c", "", "Channel ID")
+	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.arg, "arg", "a", "", "Input argument")
 
 	slackCmd.AddCommand(slackSubCmdFile)
 	slackCmd.AddCommand(slackSubCmdText)
 	slackCmd.AddCommand(slackSubCmdPhoto)
 }
 
-type slackFlag struct {
+type SlackFlag struct {
 	token   string
 	channel string
 	arg     string
@@ -85,7 +85,7 @@ type slackFlag struct {
 	api      *slack.Client
 }
 
-func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
+func (s *SlackFlag) Run(cmd *cobra.Command, _ []string) {
 	if s.arg == "" {
 		log.Println(ErrArgNotFound)
 		os.Exit(1)
@@ -110,7 +110,7 @@ func (s *slackFlag) Run(cmd *cobra.Command, _ []string) {
 	}
 }
 
-func (s *slackFlag) Init() error {
+func (s *SlackFlag) Init() error {
 	var err error
 	if s.token == "" && rootConfig != "" {
 		if err = Config(ConfigBlockSlack); err != nil {
@@ -127,13 +127,13 @@ func (s *slackFlag) Init() error {
 	return err
 }
 
-func (s *slackFlag) Text() error {
+func (s *SlackFlag) Text() error {
 	input := slack.MsgOptionText(s.arg, false)
 	_, _, _, err := s.api.SendMessageContext(rootContext, s.channel, input)
 	return err
 }
 
-func (s *slackFlag) Photo() error {
+func (s *SlackFlag) Photo() error {
 	var base64Image string
 	var err error
 	switch {
@@ -183,7 +183,7 @@ func (s *slackFlag) Photo() error {
 	return err
 }
 
-func (s *slackFlag) localFile() (string, error) {
+func (s *SlackFlag) localFile() (string, error) {
 	content, err := os.ReadFile(s.arg)
 	if err != nil {
 		return "", err
@@ -203,7 +203,7 @@ func (s *slackFlag) localFile() (string, error) {
 	return Encoder.Base64StdEncode(content)
 }
 
-func (s *slackFlag) remoteFile() (string, error) {
+func (s *SlackFlag) remoteFile() (string, error) {
 	content, err := HTTPRequestContent(s.arg, nil)
 	if err != nil {
 		return "", err
