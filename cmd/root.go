@@ -285,7 +285,7 @@ func PrintYAML(i any) {
 }
 
 func PrintString(i any) {
-	fmt.Printf("%+v\n", i)
+	fmt.Printf("%s\n", i)
 }
 
 /* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
