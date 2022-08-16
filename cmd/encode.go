@@ -52,12 +52,14 @@ func (e *EncodeFlag) Run(cmd *cobra.Command, args []string) {
 
 func (e *EncodeFlag) Base32HexEncode(i interface{}) (string, error) {
 	var err error
-	if t, ok := i.(string); ok {
-		return base32.HexEncoding.EncodeToString([]byte(t)), err
-	} else if t, ok := i.([]byte); ok {
-		return base32.HexEncoding.EncodeToString(t), err
+	switch data := i.(type) {
+	case string:
+		return base32.HexEncoding.EncodeToString([]byte(data)), err
+	case []byte:
+		return base32.HexEncoding.EncodeToString(data), err
+	default:
+		return "", ErrInvalidVar
 	}
-	return "", ErrInvalidVar
 }
 
 func (e *EncodeFlag) Base32HexDecode(s string) ([]byte, error) {
@@ -66,12 +68,14 @@ func (e *EncodeFlag) Base32HexDecode(s string) ([]byte, error) {
 
 func (e *EncodeFlag) Base32StdEncode(i interface{}) (string, error) {
 	var err error
-	if t, ok := i.(string); ok {
-		return base32.StdEncoding.EncodeToString([]byte(t)), err
-	} else if t, ok := i.([]byte); ok {
-		return base32.StdEncoding.EncodeToString(t), err
+	switch data := i.(type) {
+	case string:
+		return base32.StdEncoding.EncodeToString([]byte(data)), err
+	case []byte:
+		return base32.StdEncoding.EncodeToString(data), err
+	default:
+		return "", ErrInvalidVar
 	}
-	return "", ErrInvalidVar
 }
 
 func (e *EncodeFlag) Base32StdDecode(s string) ([]byte, error) {
@@ -80,12 +84,14 @@ func (e *EncodeFlag) Base32StdDecode(s string) ([]byte, error) {
 
 func (e *EncodeFlag) Base64StdEncode(i interface{}) (string, error) {
 	var err error
-	if t, ok := i.(string); ok {
-		return base64.StdEncoding.EncodeToString([]byte(t)), err
-	} else if t, ok := i.([]byte); ok {
-		return base64.StdEncoding.EncodeToString(t), err
+	switch data := i.(type) {
+	case string:
+		return base64.StdEncoding.EncodeToString([]byte(data)), err
+	case []byte:
+		return base64.StdEncoding.EncodeToString(data), err
+	default:
+		return "", ErrInvalidVar
 	}
-	return "", ErrInvalidVar
 }
 
 func (e *EncodeFlag) Base64StdDecode(s string) ([]byte, error) {
@@ -94,12 +100,14 @@ func (e *EncodeFlag) Base64StdDecode(s string) ([]byte, error) {
 
 func (e *EncodeFlag) Base64URLEncode(i interface{}) (string, error) {
 	var err error
-	if t, ok := i.(string); ok {
-		return base64.URLEncoding.EncodeToString([]byte(t)), err
-	} else if t, ok := i.([]byte); ok {
-		return base64.URLEncoding.EncodeToString(t), err
+	switch data := i.(type) {
+	case string:
+		return base64.URLEncoding.EncodeToString([]byte(data)), err
+	case []byte:
+		return base64.URLEncoding.EncodeToString(data), err
+	default:
+		return "", ErrInvalidVar
 	}
-	return "", ErrInvalidVar
 }
 
 func (e *EncodeFlag) Base64URLDecode(s string) ([]byte, error) {
@@ -108,12 +116,14 @@ func (e *EncodeFlag) Base64URLDecode(s string) ([]byte, error) {
 
 func (e *EncodeFlag) HexEncode(i interface{}) (string, error) {
 	var err error
-	if t, ok := i.(string); ok {
-		return hex.EncodeToString([]byte(t)), err
-	} else if t, ok := i.([]byte); ok {
-		return hex.EncodeToString(t), err
+	switch data := i.(type) {
+	case string:
+		return hex.EncodeToString([]byte(data)), err
+	case []byte:
+		return hex.EncodeToString(data), err
+	default:
+		return "", ErrInvalidVar
 	}
-	return "", ErrInvalidVar
 }
 
 func (e *EncodeFlag) HexDecode(s string) ([]byte, error) {
