@@ -33,7 +33,7 @@ var geoipCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Print IP geographic information",
 	Run: func(_ *cobra.Command, args []string) {
-		var out interface{}
+		var out any
 		var err error
 		switch len(args) {
 		case 1:

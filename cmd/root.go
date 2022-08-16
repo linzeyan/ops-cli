@@ -231,7 +231,7 @@ func OutputInterfaceString(r rootOutput) {
 	}
 }
 
-func OutputDefaultJSON(i interface{}) {
+func OutputDefaultJSON(i any) {
 	if rootOutputYAML {
 		PrintYAML(i)
 	} else {
@@ -239,7 +239,7 @@ func OutputDefaultJSON(i interface{}) {
 	}
 }
 
-func OutputDefaultNone(i interface{}) {
+func OutputDefaultNone(i any) {
 	if rootOutputJSON {
 		PrintJSON(i)
 	} else if rootOutputYAML {
@@ -247,7 +247,7 @@ func OutputDefaultNone(i interface{}) {
 	}
 }
 
-func OutputDefaultString(i interface{}) {
+func OutputDefaultString(i any) {
 	switch {
 	case rootOutputJSON:
 		PrintJSON(i)
@@ -258,7 +258,7 @@ func OutputDefaultString(i interface{}) {
 	}
 }
 
-func OutputDefaultYAML(i interface{}) {
+func OutputDefaultYAML(i any) {
 	if rootOutputJSON {
 		PrintJSON(i)
 	} else {
@@ -266,7 +266,7 @@ func OutputDefaultYAML(i interface{}) {
 	}
 }
 
-func PrintJSON(i interface{}) {
+func PrintJSON(i any) {
 	out, err := Encoder.JSONEncode(i)
 	if err != nil {
 		log.Println(err)
@@ -275,7 +275,7 @@ func PrintJSON(i interface{}) {
 	PrintString(out)
 }
 
-func PrintYAML(i interface{}) {
+func PrintYAML(i any) {
 	out, err := Encoder.YamlEncode(i)
 	if err != nil {
 		log.Println(err)
@@ -284,7 +284,7 @@ func PrintYAML(i interface{}) {
 	PrintString(out)
 }
 
-func PrintString(i interface{}) {
+func PrintString(i any) {
 	fmt.Printf("%+v\n", i)
 }
 
@@ -323,7 +323,7 @@ func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, 
 }
 
 /* If i is a domain return true. */
-func ValidDomain(i interface{}) bool {
+func ValidDomain(i any) bool {
 	const elements = "~!@#$%^&*()_+`={}|[]\\:\"<>?,/"
 	if val, ok := i.(string); ok {
 		if strings.ContainsAny(val, elements) {

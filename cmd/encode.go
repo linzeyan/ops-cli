@@ -50,7 +50,7 @@ func (e *EncodeFlag) Run(cmd *cobra.Command, args []string) {
 
 }
 
-func (e *EncodeFlag) Base32HexEncode(i interface{}) (string, error) {
+func (e *EncodeFlag) Base32HexEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -66,7 +66,7 @@ func (e *EncodeFlag) Base32HexDecode(s string) ([]byte, error) {
 	return base32.HexEncoding.DecodeString(s)
 }
 
-func (e *EncodeFlag) Base32StdEncode(i interface{}) (string, error) {
+func (e *EncodeFlag) Base32StdEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -82,7 +82,7 @@ func (e *EncodeFlag) Base32StdDecode(s string) ([]byte, error) {
 	return base32.StdEncoding.DecodeString(s)
 }
 
-func (e *EncodeFlag) Base64StdEncode(i interface{}) (string, error) {
+func (e *EncodeFlag) Base64StdEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -98,7 +98,7 @@ func (e *EncodeFlag) Base64StdDecode(s string) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(s)
 }
 
-func (e *EncodeFlag) Base64URLEncode(i interface{}) (string, error) {
+func (e *EncodeFlag) Base64URLEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -114,7 +114,7 @@ func (e *EncodeFlag) Base64URLDecode(s string) ([]byte, error) {
 	return base64.URLEncoding.DecodeString(s)
 }
 
-func (e *EncodeFlag) HexEncode(i interface{}) (string, error) {
+func (e *EncodeFlag) HexEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -130,7 +130,7 @@ func (e *EncodeFlag) HexDecode(s string) ([]byte, error) {
 	return hex.DecodeString(s)
 }
 
-func (e *EncodeFlag) JSONEncode(i interface{}) (string, error) {
+func (e *EncodeFlag) JSONEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := json.NewEncoder(&buf)
 	encoder.SetIndent("", "  ")
@@ -138,7 +138,7 @@ func (e *EncodeFlag) JSONEncode(i interface{}) (string, error) {
 	return buf.String(), err
 }
 
-func (e *EncodeFlag) JSONDecode(r io.Reader, i interface{}) (interface{}, error) {
+func (e *EncodeFlag) JSONDecode(r io.Reader, i any) (any, error) {
 	decoder := json.NewDecoder(r)
 	err := decoder.Decode(i)
 	return i, err
@@ -158,20 +158,20 @@ func (e *EncodeFlag) PemDecode(b []byte) (*pem.Block, error) {
 	return p, nil
 }
 
-func (e *EncodeFlag) XMLEncode(i interface{}) (string, error) {
+func (e *EncodeFlag) XMLEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := xml.NewEncoder(&buf)
 	err := encoder.Encode(i)
 	return buf.String(), err
 }
 
-func (e *EncodeFlag) XMLDecode(r io.Reader, i interface{}) (interface{}, error) {
+func (e *EncodeFlag) XMLDecode(r io.Reader, i any) (any, error) {
 	decoder := xml.NewDecoder(r)
 	err := decoder.Decode(i)
 	return i, err
 }
 
-func (e *EncodeFlag) YamlEncode(i interface{}) (string, error) {
+func (e *EncodeFlag) YamlEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := yaml.NewEncoder(&buf)
 	encoder.SetIndent(2)
@@ -179,7 +179,7 @@ func (e *EncodeFlag) YamlEncode(i interface{}) (string, error) {
 	return buf.String(), err
 }
 
-func (e *EncodeFlag) YamlDecode(r io.Reader, i interface{}) (interface{}, error) {
+func (e *EncodeFlag) YamlDecode(r io.Reader, i any) (any, error) {
 	decoder := yaml.NewDecoder(r)
 	err := decoder.Decode(i)
 	return i, err

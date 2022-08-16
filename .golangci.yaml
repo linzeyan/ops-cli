@@ -16,6 +16,8 @@ linters-settings:
   gosec:
     excludes:
       - G204 # Subprocess launched with a potential tainted input or cmd arguments # Use os/exec
+      - G401 # Use of weak cryptographic primitive # md5, sha1
+      - G501 # Blocklisted import crypto/md5: weak cryptographic primitive
       - G505 # Import blocklist: crypto/sha1
 
   lll:
