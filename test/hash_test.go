@@ -8,6 +8,9 @@ import (
 )
 
 func TestHashFile(t *testing.T) {
+	if isWindows() {
+		return
+	}
 	testCases := struct {
 		input    string
 		expected map[string]string
