@@ -9,7 +9,7 @@ import (
 
 func TestHashFile(t *testing.T) {
 	if isWindows() {
-		if err := dos2unix(mainGo); err != nil {
+		if err := dos2unix(license); err != nil {
 			t.Error(err)
 		}
 	}
@@ -17,12 +17,12 @@ func TestHashFile(t *testing.T) {
 		input    string
 		expected map[string]string
 	}{
-		mainGo,
+		license,
 		map[string]string{
-			"md5":    "1b48671ec88f2b498820450f802097a6",
-			"sha1":   "b2828f7ce1eb4872e5543617f9bf2b7ef28e7c61",
-			"sha256": "74d680e9a561929551611bcecf9fc1704c75a8491e9aec00065adbfaefa36905",
-			"sha512": "9aa41fc10c66de39e30dcf7e35be7c15878322df8e318922dc8623f140464c51b964953d950d8dc1ef4b0d4b614f01c065ef50d0c0e686cdd21ff4580fec3ce7",
+			"md5":    "3b83ef96387f14655fc854ddc3c6bd57",
+			"sha1":   "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
+			"sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+			"sha512": "98f6b79b778f7b0a15415bd750c3a8a097d650511cb4ec8115188e115c47053fe700f578895c097051c9bc3dfb6197c2b13a15de203273e1a3218884f86e90e8",
 		},
 	}
 	t.Run("md5", func(t *testing.T) {
