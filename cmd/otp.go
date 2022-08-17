@@ -113,9 +113,9 @@ func (o *OtpFlag) SetDigits() [2]int {
 
 func (o *OtpFlag) SetAlgorithm() func() hash.Hash {
 	switch strings.ToLower(o.alg) {
-	case "sha256":
+	case HashSha256:
 		return sha256.New
-	case "sha512":
+	case HashSha512:
 		return sha512.New
 	default:
 		return sha1.New

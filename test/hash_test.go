@@ -19,39 +19,39 @@ func TestHashFile(t *testing.T) {
 	}{
 		license,
 		map[string]string{
-			"md5":    "3b83ef96387f14655fc854ddc3c6bd57",
-			"sha1":   "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
-			"sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-			"sha512": "98f6b79b778f7b0a15415bd750c3a8a097d650511cb4ec8115188e115c47053fe700f578895c097051c9bc3dfb6197c2b13a15de203273e1a3218884f86e90e8",
+			cmd.HashMd5:    "3b83ef96387f14655fc854ddc3c6bd57",
+			cmd.HashSha1:   "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
+			cmd.HashSha256: "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+			cmd.HashSha512: "98f6b79b778f7b0a15415bd750c3a8a097d650511cb4ec8115188e115c47053fe700f578895c097051c9bc3dfb6197c2b13a15de203273e1a3218884f86e90e8",
 		},
 	}
-	t.Run("md5", func(t *testing.T) {
-		got, err := cmd.Hasher.Md5Hash(testCases.input)
+	t.Run(cmd.HashMd5, func(t *testing.T) {
+		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashMd5], testCases.input)
 		if err != nil {
 			t.Error(err)
 		}
-		assert.Equal(t, testCases.expected["md5"], got)
+		assert.Equal(t, testCases.expected[cmd.HashMd5], got)
 	})
-	t.Run("sha1", func(t *testing.T) {
-		got, err := cmd.Hasher.Sha1Hash(testCases.input)
+	t.Run(cmd.HashSha1, func(t *testing.T) {
+		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha1], testCases.input)
 		if err != nil {
 			t.Error(err)
 		}
-		assert.Equal(t, testCases.expected["sha1"], got)
+		assert.Equal(t, testCases.expected[cmd.HashSha1], got)
 	})
-	t.Run("sha256", func(t *testing.T) {
-		got, err := cmd.Hasher.Sha256Hash(testCases.input)
+	t.Run(cmd.HashSha256, func(t *testing.T) {
+		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha256], testCases.input)
 		if err != nil {
 			t.Error(err)
 		}
-		assert.Equal(t, testCases.expected["sha256"], got)
+		assert.Equal(t, testCases.expected[cmd.HashSha256], got)
 	})
-	t.Run("sha512", func(t *testing.T) {
-		got, err := cmd.Hasher.Sha512Hash(testCases.input)
+	t.Run(cmd.HashSha512, func(t *testing.T) {
+		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha512], testCases.input)
 		if err != nil {
 			t.Error(err)
 		}
-		assert.Equal(t, testCases.expected["sha512"], got)
+		assert.Equal(t, testCases.expected[cmd.HashSha512], got)
 	})
 }
 
@@ -64,8 +64,8 @@ func TestMd5(t *testing.T) {
 		{"https://github.com", "3097fca9b1ec8942c4305e550ef1b50a"},
 	}
 	for _, testCase := range testCases {
-		t.Run("md5", func(t *testing.T) {
-			got, err := cmd.Hasher.Md5Hash(testCase.input)
+		t.Run(cmd.HashMd5, func(t *testing.T) {
+			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashMd5], testCase.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -83,8 +83,8 @@ func TestSha1(t *testing.T) {
 		{"https://github.com", "84b7e44aa54d002eac8d00f5bfa9cc93410f2a48"},
 	}
 	for _, testCase := range testCases {
-		t.Run("sha1", func(t *testing.T) {
-			got, err := cmd.Hasher.Sha1Hash(testCase.input)
+		t.Run(cmd.HashSha1, func(t *testing.T) {
+			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha1], testCase.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -102,8 +102,8 @@ func TestSha256(t *testing.T) {
 		{"https://github.com", "996e1f714b08e971ec79e3bea686287e66441f043177999a13dbc546d8fe402a"},
 	}
 	for _, testCase := range testCases {
-		t.Run("sha256", func(t *testing.T) {
-			got, err := cmd.Hasher.Sha256Hash(testCase.input)
+		t.Run(cmd.HashSha256, func(t *testing.T) {
+			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha256], testCase.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -130,8 +130,8 @@ func TestSha512(t *testing.T) {
 		},
 	}
 	for _, testCase := range testCases {
-		t.Run("sha512", func(t *testing.T) {
-			got, err := cmd.Hasher.Sha512Hash(testCase.input)
+		t.Run(cmd.HashSha512, func(t *testing.T) {
+			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha512], testCase.input)
 			if err != nil {
 				t.Error(err)
 			}

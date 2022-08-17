@@ -17,14 +17,12 @@ limitations under the License.
 package cmd
 
 import (
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
+	"bufio"
 	"hash"
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -70,24 +68,33 @@ var Hasher HashFlag
 func init() {
 	rootCmd.AddCommand(hashCmd)
 
+	hashCmd.PersistentFlags().BoolVarP(&Hasher.check, "check", "c", false, "Read SHA sums from the file and check them")
 	hashCmd.AddCommand(hashSubCmdMd5, hashSubCmdSha1, hashSubCmdSha256, hashSubCmdSha512)
 }
 
-type HashFlag struct{}
+type HashFlag struct {
+	check bool
+}
 
 func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
+	var hasher hash.Hash
 	var out string
 	var err error
 	switch cmd.Name() {
-	case "md5":
-		out, err = h.Md5Hash(args[0])
-	case "sha1":
-		out, err = h.Sha1Hash(args[0])
-	case "sha256":
-		out, err = h.Sha256Hash(args[0])
-	case "sha512":
-		out, err = h.Sha512Hash(args[0])
+	case HashMd5:
+		hasher = HashAlgorithm[HashMd5]
+	case HashSha1:
+		hasher = HashAlgorithm[HashSha1]
+	case HashSha256:
+		hasher = HashAlgorithm[HashSha256]
+	case HashSha512:
+		hasher = HashAlgorithm[HashSha512]
 	}
+	if h.check {
+		h.CheckFile(hasher, args[0])
+		return
+	}
+	out, err = h.Hash(hasher, args[0])
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
@@ -95,27 +102,7 @@ func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
 	PrintString(out)
 }
 
-func (h *HashFlag) Md5Hash(i any) (string, error) {
-	hasher := md5.New()
-	return h.WriteString(hasher, i)
-}
-
-func (h *HashFlag) Sha1Hash(i any) (string, error) {
-	hasher := sha1.New()
-	return h.WriteString(hasher, i)
-}
-
-func (h *HashFlag) Sha256Hash(i any) (string, error) {
-	hasher := sha256.New()
-	return h.WriteString(hasher, i)
-}
-
-func (h *HashFlag) Sha512Hash(i any) (string, error) {
-	hasher := sha512.New()
-	return h.WriteString(hasher, i)
-}
-
-func (h *HashFlag) WriteString(hasher hash.Hash, i any) (string, error) {
+func (h *HashFlag) Hash(hasher hash.Hash, i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -145,4 +132,27 @@ func (h *HashFlag) WriteFile(hasher hash.Hash, filename string) (string, error) 
 		return "", err
 	}
 	return Encoder.HexEncode(hasher.Sum(nil))
+}
+
+func (h *HashFlag) CheckFile(hasher hash.Hash, filename string) {
+	var err error
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	defer f.Close()
+	reader := bufio.NewScanner(f)
+	for reader.Scan() {
+		slice := strings.Fields(reader.Text())
+		got, err := h.WriteFile(hasher, slice[1])
+		if err != nil {
+			PrintString(err)
+			continue
+		}
+		if got == slice[0] {
+			PrintString(slice[1] + ": OK")
+		}
+		hasher.Reset()
+	}
 }
