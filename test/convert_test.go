@@ -22,10 +22,10 @@ func TestConvert(t *testing.T) {
 		{[]string{runCommand, mainGo, subCommand, "toml2json", "-i", "assets/proxy.toml", "-o", "testt.json"}, "assets/proxy.json"},
 	}
 	if isWindows() {
-		if err := dos2unix("assets/proxy.json"); err != nil {
+		if err := cmd.Dos2Unix("assets/proxy.json"); err != nil {
 			t.Error(err)
 		}
-		if err := dos2unix("assets/proxy.toml"); err != nil {
+		if err := cmd.Dos2Unix("assets/proxy.toml"); err != nil {
 			t.Error(err)
 		}
 	}

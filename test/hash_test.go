@@ -9,7 +9,7 @@ import (
 
 func TestHashFile(t *testing.T) {
 	if isWindows() {
-		if err := dos2unix(license); err != nil {
+		if err := cmd.Dos2Unix(license); err != nil {
 			t.Error(err)
 		}
 	}
