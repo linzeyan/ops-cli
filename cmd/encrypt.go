@@ -181,6 +181,9 @@ func (e *EncrytpFlag) AesDecrypt() error {
 	if err != nil {
 		return err
 	}
+	if e.outFile == "" {
+		e.outFile = e.inFile + ".raw"
+	}
 	out, err := os.OpenFile(e.outFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return err
