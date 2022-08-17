@@ -6,6 +6,9 @@ on:
       - "*"
 
 jobs:
+  test:
+    uses: ./.github/workflows/test.yaml
+
   goreleaser:
     runs-on: ubuntu-latest
     steps:
