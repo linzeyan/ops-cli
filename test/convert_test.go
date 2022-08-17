@@ -55,8 +55,7 @@ func TestConvert(t *testing.T) {
 				t.Error(err)
 			}
 			assert.Equal(t, expected, got)
-
-			_ = exec.Command("rm", "-f", testCases[i].input[7]).Run()
+			_ = os.Remove(testCases[i].input[7])
 		})
 	}
 }
@@ -73,7 +72,7 @@ func TestBinaryConvert(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, cmd, "-i", input, "-o", output).Run(); err != nil {
 				t.Error(err)
 			}
-			_ = exec.Command("rm", "-f", output).Run()
+			_ = os.Remove(output)
 		})
 	}
 }

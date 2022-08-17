@@ -34,7 +34,7 @@ func TestMain(m *testing.M) {
 		os.Exit(1)
 	}
 	exitCode := m.Run()
-	_ = exec.Command("rm", "-f", binaryCommand).Run()
+	_ = os.Remove(binaryCommand)
 	os.Exit(exitCode)
 }
 

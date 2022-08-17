@@ -1,6 +1,7 @@
 package test_test
 
 import (
+	"os"
 	"os/exec"
 	"testing"
 
@@ -28,7 +29,7 @@ func TestDoc(t *testing.T) {
 			assert.FileExists(t, testCases[i].expected)
 		})
 	}
-	_ = exec.Command("rm", "rf", "doc").Run()
+	_ = os.RemoveAll("doc")
 }
 
 func TestBinaryDoc(t *testing.T) {
@@ -42,5 +43,5 @@ func TestBinaryDoc(t *testing.T) {
 			}
 		})
 	}
-	_ = exec.Command("rm", "-rf", "doc").Run()
+	_ = os.RemoveAll("doc")
 }

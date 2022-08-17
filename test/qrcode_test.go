@@ -1,6 +1,7 @@
 package test_test
 
 import (
+	"os"
 	"os/exec"
 	"testing"
 
@@ -71,5 +72,7 @@ func TestBinaryQrcode(t *testing.T) {
 			}
 		})
 	}
-	_ = exec.Command("rm", "-f", "text.png", "wifi.png", "otp.png").Run()
+	_ = os.Remove("text.png")
+	_ = os.Remove("wifi.png")
+	_ = os.Remove("otp.png")
 }
