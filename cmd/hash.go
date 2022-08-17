@@ -36,28 +36,28 @@ var hashCmd = &cobra.Command{
 }
 
 var hashSubCmdMd5 = &cobra.Command{
-	Use:   "md5",
+	Use:   HashMd5,
 	Args:  cobra.ExactArgs(1),
 	Short: "Print MD5 Checksums",
 	Run:   Hasher.Run,
 }
 
 var hashSubCmdSha1 = &cobra.Command{
-	Use:   "sha1",
+	Use:   HashSha1,
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-1 Checksums",
 	Run:   Hasher.Run,
 }
 
 var hashSubCmdSha256 = &cobra.Command{
-	Use:   "sha256",
+	Use:   HashSha256,
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-256 Checksums",
 	Run:   Hasher.Run,
 }
 
 var hashSubCmdSha512 = &cobra.Command{
-	Use:   "sha512",
+	Use:   HashSha512,
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-512 Checksums",
 	Run:   Hasher.Run,
@@ -80,16 +80,7 @@ func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
 	var hasher hash.Hash
 	var out string
 	var err error
-	switch cmd.Name() {
-	case HashMd5:
-		hasher = HashAlgorithm(HashMd5)
-	case HashSha1:
-		hasher = HashAlgorithm(HashSha1)
-	case HashSha256:
-		hasher = HashAlgorithm(HashSha256)
-	case HashSha512:
-		hasher = HashAlgorithm(HashSha512)
-	}
+	hasher = HashAlgorithm(cmd.Name())
 	if h.check {
 		h.CheckFile(hasher, args[0])
 		return
