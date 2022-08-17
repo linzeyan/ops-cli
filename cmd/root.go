@@ -117,17 +117,6 @@ const (
 	HashSha512_256 = "sha512_256"
 )
 
-var HashAlgorithm = map[string]hash.Hash{
-	HashMd5:        md5.New(),
-	HashSha1:       sha1.New(),
-	HashSha224:     sha256.New224(),
-	HashSha256:     sha256.New(),
-	HashSha384:     sha512.New384(),
-	HashSha512:     sha512.New(),
-	HashSha512_224: sha512.New512_224(),
-	HashSha512_256: sha512.New512_256(),
-}
-
 const (
 	ImTypeAudio = "audio"
 	ImTypeFile  = "file"
@@ -253,6 +242,20 @@ func Config(subFn ConfigBlock) error {
 func Examples(s string) string {
 	c := color.New(color.FgYellow)
 	return c.Sprintf(`%s`, s)
+}
+
+func HashAlgorithm(alg string) hash.Hash {
+	m := map[string]hash.Hash{
+		HashMd5:        md5.New(),
+		HashSha1:       sha1.New(),
+		HashSha224:     sha256.New224(),
+		HashSha256:     sha256.New(),
+		HashSha384:     sha512.New384(),
+		HashSha512:     sha512.New(),
+		HashSha512_224: sha512.New512_224(),
+		HashSha512_256: sha512.New512_256(),
+	}
+	return m[alg]
 }
 
 type rootOutput interface {

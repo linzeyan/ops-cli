@@ -82,13 +82,13 @@ func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
 	var err error
 	switch cmd.Name() {
 	case HashMd5:
-		hasher = HashAlgorithm[HashMd5]
+		hasher = HashAlgorithm(HashMd5)
 	case HashSha1:
-		hasher = HashAlgorithm[HashSha1]
+		hasher = HashAlgorithm(HashSha1)
 	case HashSha256:
-		hasher = HashAlgorithm[HashSha256]
+		hasher = HashAlgorithm(HashSha256)
 	case HashSha512:
-		hasher = HashAlgorithm[HashSha512]
+		hasher = HashAlgorithm(HashSha512)
 	}
 	if h.check {
 		h.CheckFile(hasher, args[0])

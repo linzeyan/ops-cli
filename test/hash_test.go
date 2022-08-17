@@ -26,28 +26,28 @@ func TestHashFile(t *testing.T) {
 		},
 	}
 	t.Run(cmd.HashMd5, func(t *testing.T) {
-		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashMd5], testCases.input)
+		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashMd5), testCases.input)
 		if err != nil {
 			t.Error(err)
 		}
 		assert.Equal(t, testCases.expected[cmd.HashMd5], got)
 	})
 	t.Run(cmd.HashSha1, func(t *testing.T) {
-		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha1], testCases.input)
+		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha1), testCases.input)
 		if err != nil {
 			t.Error(err)
 		}
 		assert.Equal(t, testCases.expected[cmd.HashSha1], got)
 	})
 	t.Run(cmd.HashSha256, func(t *testing.T) {
-		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha256], testCases.input)
+		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha256), testCases.input)
 		if err != nil {
 			t.Error(err)
 		}
 		assert.Equal(t, testCases.expected[cmd.HashSha256], got)
 	})
 	t.Run(cmd.HashSha512, func(t *testing.T) {
-		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha512], testCases.input)
+		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha512), testCases.input)
 		if err != nil {
 			t.Error(err)
 		}
@@ -65,7 +65,7 @@ func TestMd5(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(cmd.HashMd5, func(t *testing.T) {
-			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashMd5], testCase.input)
+			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashMd5), testCase.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -84,7 +84,7 @@ func TestSha1(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(cmd.HashSha1, func(t *testing.T) {
-			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha1], testCase.input)
+			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha1), testCase.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -103,7 +103,7 @@ func TestSha256(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(cmd.HashSha256, func(t *testing.T) {
-			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha256], testCase.input)
+			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha256), testCase.input)
 			if err != nil {
 				t.Error(err)
 			}
@@ -131,7 +131,7 @@ func TestSha512(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(cmd.HashSha512, func(t *testing.T) {
-			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm[cmd.HashSha512], testCase.input)
+			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha512), testCase.input)
 			if err != nil {
 				t.Error(err)
 			}
