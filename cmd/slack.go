@@ -25,6 +25,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 
 	"github.com/slack-go/slack"
 	"github.com/spf13/cobra"
@@ -97,7 +98,6 @@ func (s *SlackFlag) Run(cmd *cobra.Command, _ []string) {
 	}
 	switch cmd.Name() {
 	case ImTypeFile:
-		s.fileName = cmd.Name()
 		err = s.Photo()
 	case ImTypePhoto:
 		err = s.Photo()
@@ -164,7 +164,7 @@ func (s *SlackFlag) Photo() error {
 		return err
 	}
 	if s.fileName == "" {
-		s.fileName = "upload.png"
+		_, s.fileName = path.Split(s.arg)
 	}
 	_, err = s.api.UploadFileContext(rootContext, slack.FileUploadParameters{
 		Filetype: "image/png",

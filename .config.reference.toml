@@ -1,16 +1,20 @@
-[west]
-account = "account"
-api_key = "apikey"
-
-[telegram]
-chat_id = 12345678
-token = "token:token"
-
-[slack]
-channel_id = "CHANNEL"
+[discord]
+channel_id = "channelID"
 token = "token"
 
 [line]
 access_token = "Channel Access Token"
 id = ""
 secret = "Channel Secret"
+
+[slack]
+channel_id = "CHANNEL"
+token = "token"
+
+[telegram]
+chat_id = 12345678
+token = "token:token"
+
+[west]
+account = "account"
+api_key = "apikey"

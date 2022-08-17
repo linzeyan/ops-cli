@@ -6,6 +6,7 @@ require (
 	github.com/abhinav/goldmark-hashtag v0.2.0
 	github.com/abhinav/goldmark-mermaid v0.1.1
 	github.com/abhinav/goldmark-toc v0.2.1
+	github.com/bwmarrin/discordgo v0.25.0
 	github.com/fatih/color v1.13.0
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/line/line-bot-sdk-go/v7 v7.16.0
