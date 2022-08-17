@@ -43,35 +43,35 @@ var encodeCmd = &cobra.Command{
 var encodeSubCmdBase32Hex = &cobra.Command{
 	Use:   "base32hex",
 	Args:  cobra.ExactArgs(1),
-	Short: "base32 hex encoding or decoding",
+	Short: "Base32 hex encoding or decoding",
 	Run:   Encoder.Run,
 }
 
 var encodeSubCmdBase32Std = &cobra.Command{
 	Use:   "base32std",
 	Args:  cobra.ExactArgs(1),
-	Short: "base32 standard encoding or decoding",
+	Short: "Base32 standard encoding or decoding",
 	Run:   Encoder.Run,
 }
 
 var encodeSubCmdBase64Std = &cobra.Command{
 	Use:   "base64std",
 	Args:  cobra.ExactArgs(1),
-	Short: "base64 standard encoding or decoding",
+	Short: "Base64 standard encoding or decoding",
 	Run:   Encoder.Run,
 }
 
 var encodeSubCmdBase64URL = &cobra.Command{
 	Use:   "base64url",
 	Args:  cobra.ExactArgs(1),
-	Short: "base64 url encoding or decoding",
+	Short: "Base64 url encoding or decoding",
 	Run:   Encoder.Run,
 }
 
 var encodeSubCmdHex = &cobra.Command{
 	Use:   "hex",
 	Args:  cobra.ExactArgs(1),
-	Short: "hexadecimal encoding or decoding",
+	Short: "Hexadecimal encoding or decoding",
 	Run:   Encoder.Run,
 }
 
