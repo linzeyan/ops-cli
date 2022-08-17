@@ -67,6 +67,23 @@ var convertSubCmdCSV2YAML = &cobra.Command{
 	Run:   convertCmdGlobalVar.Run,
 }
 
+/* DOS. */
+var convertSubCmdDOS2Unix = &cobra.Command{
+	Use:   "dos2unix",
+	Short: "Convert DOS to Unix format",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			_ = cmd.Help()
+			os.Exit(0)
+		}
+		for _, f := range args {
+			if err := Dos2Unix(f); err != nil {
+				log.Printf("%s: %v\n", f, err)
+			}
+		}
+	},
+}
+
 /* JSON. */
 var convertSubCmdJSON2CSV = &cobra.Command{
 	Use:   "json2csv",
@@ -93,12 +110,22 @@ var convertSubCmdJSON2YAML = &cobra.Command{
 var convertSubCmdMarkdown2HTML = &cobra.Command{
 	Use:   "markdown2html",
 	Short: "Convert markdown to html format",
-	Run:   convertCmdGlobalVar.Run,
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := convertCmdGlobalVar.ConvertMarkdown2HTML(); err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+	},
 }
 var convertSubCmdMarkdown2PDF = &cobra.Command{
 	Use:   "markdown2pdf",
 	Short: "Convert markdown to pdf format",
-	Run:   convertCmdGlobalVar.Run,
+	Run: func(_ *cobra.Command, _ []string) {
+		if err := convertCmdGlobalVar.ConvertMarkdown2PDF(); err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+	},
 }
 
 /* TOML. */
@@ -176,6 +203,8 @@ func init() {
 
 	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.inFile, "in", "i", "", "Input file")
 	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.outFile, "out", "o", "", "Output file")
+	/* dos2unix */
+	convertCmd.AddCommand(convertSubCmdDOS2Unix)
 	/* Markdown */
 	convertCmd.AddCommand(convertSubCmdMarkdown2HTML, convertSubCmdMarkdown2PDF)
 	/* CSV */
@@ -202,20 +231,6 @@ type ConvertFlag struct {
 func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
 	if !ValidFile(c.inFile) || c.outFile == "" {
 		os.Exit(1)
-	}
-	switch cmd.Name() {
-	case FileTypeMarkdown + "2" + FileTypeHTML:
-		if err := c.ConvertMarkdown2HTML(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		return
-	case FileTypeMarkdown + "2" + FileTypePDF:
-		if err := c.ConvertMarkdown2PDF(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		return
 	}
 	slice := strings.Split(cmd.Name(), "2")
 	c.inType = slice[0]
