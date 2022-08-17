@@ -23,6 +23,7 @@ import (
 	"crypto/sha512"
 	"hash"
 	"io"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -30,7 +31,37 @@ import (
 
 var hashCmd = &cobra.Command{
 	Use:   "hash",
-	Short: "hash string",
+	Short: "Hash string or file",
+	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+	DisableFlagsInUseLine: true,
+}
+
+var hashSubCmdMd5 = &cobra.Command{
+	Use:   "md5",
+	Args:  cobra.ExactArgs(1),
+	Short: "Print MD5 Checksums",
+	Run:   Hasher.Run,
+}
+
+var hashSubCmdSha1 = &cobra.Command{
+	Use:   "sha1",
+	Args:  cobra.ExactArgs(1),
+	Short: "Print SHA-1 Checksums",
+	Run:   Hasher.Run,
+}
+
+var hashSubCmdSha256 = &cobra.Command{
+	Use:   "sha256",
+	Args:  cobra.ExactArgs(1),
+	Short: "Print SHA-256 Checksums",
+	Run:   Hasher.Run,
+}
+
+var hashSubCmdSha512 = &cobra.Command{
+	Use:   "sha512",
+	Args:  cobra.ExactArgs(1),
+	Short: "Print SHA-512 Checksums",
 	Run:   Hasher.Run,
 }
 
@@ -38,12 +69,30 @@ var Hasher HashFlag
 
 func init() {
 	rootCmd.AddCommand(hashCmd)
+
+	hashCmd.AddCommand(hashSubCmdMd5, hashSubCmdSha1, hashSubCmdSha256, hashSubCmdSha512)
 }
 
 type HashFlag struct{}
 
 func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
-
+	var out string
+	var err error
+	switch cmd.Name() {
+	case "md5":
+		out, err = h.Md5Hash(args[0])
+	case "sha1":
+		out, err = h.Sha1Hash(args[0])
+	case "sha256":
+		out, err = h.Sha256Hash(args[0])
+	case "sha512":
+		out, err = h.Sha512Hash(args[0])
+	}
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	PrintString(out)
 }
 
 func (h *HashFlag) Md5Hash(i any) (string, error) {
