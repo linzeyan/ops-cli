@@ -113,7 +113,7 @@ func (e *EncrytpFlag) getKey() []byte {
 	if err != nil {
 		return nil
 	}
-	_, filename := path.Split(e.file)
+	filename := path.Base(e.file)
 	err = os.WriteFile(filename+keyFileExtension, []byte(key), os.ModePerm)
 	if err != nil {
 		return nil
