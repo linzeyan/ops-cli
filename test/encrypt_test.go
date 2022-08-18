@@ -1,11 +1,32 @@
 package test_test
 
 import (
+	"os"
 	"os/exec"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestEncryptAes(t *testing.T) {
+	expected := mainGo
+	fileRaw, err := os.ReadFile(expected)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := cmd.Encryptor.AesEncrypt("84815131446564008011748691915873", expected); err != nil {
+		t.Error(err)
+	}
+	if err := cmd.Encryptor.AesDecrypt("84815131446564008011748691915873", expected); err != nil {
+		t.Error(err)
+	}
+	fileRecover, err := os.ReadFile(expected)
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Equal(t, fileRaw, fileRecover)
+}
 
 func TestEncrypt(t *testing.T) {
 	const subCommand = "encrypt"
