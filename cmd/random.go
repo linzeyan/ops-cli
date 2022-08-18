@@ -17,12 +17,12 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"crypto/rand"
 	"log"
 	"math/big"
 	mathRand "math/rand"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -94,9 +94,6 @@ func init() {
 type RandomFlag struct {
 	/* Bind flags */
 	length, lower, upper, symbol, number int
-
-	/* Output string */
-	result string
 }
 
 func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
@@ -104,72 +101,84 @@ func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 	var p RandomString
 	switch cmd.Name() {
 	case "number":
-		randomCmdGlobalVar.result, err = p.GenerateString(randomCmdGlobalVar.length, Numbers)
+		p, err = p.GenerateString(randomCmdGlobalVar.length, Numbers)
 	case "symbol":
-		randomCmdGlobalVar.result, err = p.GenerateString(randomCmdGlobalVar.length, Symbols)
+		p, err = p.GenerateString(randomCmdGlobalVar.length, Symbols)
 	case "uppercase":
-		randomCmdGlobalVar.result, err = p.GenerateString(randomCmdGlobalVar.length, UppercaseLetters)
+		p, err = p.GenerateString(randomCmdGlobalVar.length, UppercaseLetters)
 	case "lowercase":
-		randomCmdGlobalVar.result, err = p.GenerateString(randomCmdGlobalVar.length, LowercaseLetters)
+		p, err = p.GenerateString(randomCmdGlobalVar.length, LowercaseLetters)
 	case "random":
-		randomCmdGlobalVar.result, err = p.GenerateAll(randomCmdGlobalVar.length, randomCmdGlobalVar.lower, randomCmdGlobalVar.upper, randomCmdGlobalVar.symbol, randomCmdGlobalVar.number)
+		p, err = p.GenerateAll(randomCmdGlobalVar.length, randomCmdGlobalVar.lower, randomCmdGlobalVar.upper, randomCmdGlobalVar.symbol, randomCmdGlobalVar.number)
 	}
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	PrintString(randomCmdGlobalVar.result)
+	PrintString(p)
 }
 
-type RandomString struct{}
+type RandomString []byte
 
-func (RandomString) GenerateString(length int, charSet RandomCharacter) (string, error) {
-	var s strings.Builder
+func (RandomString) GenerateString(length int, charSet RandomCharacter) ([]byte, error) {
+	var buf bytes.Buffer
 	var err error
 	for i := int(0); i < length; i++ {
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-		if err = s.WriteByte(charSet[n.Int64()]); err != nil {
-			return "", err
+		if err = buf.WriteByte(charSet[n.Int64()]); err != nil {
+			return nil, err
 		}
 	}
-	return s.String(), err
+	return buf.Bytes(), err
 }
 
-func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) (string, error) {
+func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) ([]byte, error) {
 	var err error
-	var remain string
+	var remain []byte
+	var result []byte
 	leave := length - minLower - minUpper - minSymbol - minNumber
 	if leave < 0 {
-		return "", ErrInvalidLength
+		return nil, ErrInvalidLength
 	}
 	lower, err := r.GenerateString(minLower, LowercaseLetters)
 	if err != nil {
-		return lower, err
+		return result, err
 	}
+	result = append(result, lower...)
 	upper, err := r.GenerateString(minUpper, UppercaseLetters)
 	if err != nil {
-		return upper, err
+		return result, err
 	}
+	result = append(result, upper...)
 	symbol, err := r.GenerateString(minSymbol, Symbols)
 	if err != nil {
-		return symbol, err
+		return result, err
 	}
+	result = append(result, symbol...)
 	num, err := r.GenerateString(minNumber, Numbers)
 	if err != nil {
-		return num, err
+		return result, err
 	}
+	result = append(result, num...)
 	if leave != 0 {
 		remain, err = r.GenerateString(leave, AllSet)
 		if err != nil {
-			return remain, err
+			return result, err
 		}
 	}
-	result := []byte(lower + upper + symbol + num + remain)
+	result = append(result, remain...)
 	mathRand.Shuffle(len(result), func(i, j int) {
 		result[i], result[j] = result[j], result[i]
 	})
-	return string(result), err
+	return result, err
+}
+
+func (r RandomString) String() string {
+	if r == nil {
+		return "<nil>"
+	}
+	return string(r)
 }

@@ -105,11 +105,11 @@ func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 	if err != nil {
 		return nil
 	}
-	err = os.WriteFile(path.Base(filename)+keyFileExtension, []byte(key), perm)
+	err = os.WriteFile(path.Base(filename)+keyFileExtension, key, perm)
 	if err != nil {
 		return nil
 	}
-	return []byte(key)
+	return key
 }
 
 func (e *EncrytpFlag) AesEncrypt(secret, filename string) error {
