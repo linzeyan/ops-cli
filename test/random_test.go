@@ -47,7 +47,7 @@ func TestRandom(t *testing.T) {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
 			out, err := exec.Command(mainCommand, testCases[i].input...).Output()
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			got := string(out)
 			assert.Len(t, strings.TrimRight(got, "\n"), testCases[i].expectedLength)
@@ -81,7 +81,7 @@ func TestBinaryRandom(t *testing.T) {
 	for i := range args {
 		t.Run(args[i][1], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
-				t.Error(err)
+				t.Error(args[i], err)
 			}
 		})
 	}

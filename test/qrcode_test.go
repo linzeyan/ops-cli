@@ -23,7 +23,7 @@ func TestQrcode(t *testing.T) {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
 			err := exec.Command(mainCommand, testCases[i].input...).Run()
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			assert.FileExists(t, testCases[i].expected)
 		})
@@ -45,7 +45,7 @@ func TestQrcodeRead(t *testing.T) {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
 			got, err := exec.Command(mainCommand, testCases[i].input...).Output()
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			assert.FileExists(t, testCases[i].input[4])
 			assert.Equal(t, testCases[i].expected, string(got))
@@ -68,7 +68,7 @@ func TestBinaryQrcode(t *testing.T) {
 	for i := range args {
 		t.Run(args[i][1], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
-				t.Error(err)
+				t.Error(args[i], err)
 			}
 		})
 	}

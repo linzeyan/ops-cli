@@ -23,14 +23,14 @@ func TestBinaryOtp(t *testing.T) {
 	for i := range calculateArgs {
 		t.Run(calculateArgs[i][2], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, calculateArgs[i]...).Run(); err != nil {
-				t.Error(err)
+				t.Error(calculateArgs[i], err)
 			}
 		})
 	}
 	for i := range generateArgs {
 		t.Run(generateArgs[i][2], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, generateArgs[i]...).Run(); err != nil {
-				t.Error(err)
+				t.Error(generateArgs[i], err)
 			}
 		})
 	}

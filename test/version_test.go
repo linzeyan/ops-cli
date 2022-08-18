@@ -16,7 +16,7 @@ func TestBinaryVersion(t *testing.T) {
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, args[i]).Run(); err != nil {
-				t.Error(err)
+				t.Error(args[i], err)
 			}
 		})
 	}

@@ -20,7 +20,7 @@ func TestBinarySystem(t *testing.T) {
 	for i := range args {
 		t.Run(args[i][1], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
-				t.Error(err)
+				t.Error(args[i], err)
 			}
 		})
 	}

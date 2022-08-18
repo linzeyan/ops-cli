@@ -24,7 +24,7 @@ func TestDoc(t *testing.T) {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
 			err := exec.Command(mainCommand, testCases[i].input...).Run()
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			assert.FileExists(t, testCases[i].expected)
 		})
@@ -39,7 +39,7 @@ func TestBinaryDoc(t *testing.T) {
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, args[i], "-d", "doc").Run(); err != nil {
-				t.Error(err)
+				t.Error(args[i], err)
 			}
 		})
 	}

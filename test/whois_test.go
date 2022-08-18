@@ -38,7 +38,7 @@ func TestWhois(t *testing.T) {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
 			got, err := exec.Command(mainCommand, testCases[i].input...).Output()
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			assert.JSONEq(t, testCases[i].expected, string(got))
 		})
@@ -65,7 +65,7 @@ func TestWhoisRegistrar(t *testing.T) {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
 			got, err := exec.Command(mainCommand, testCases[i].input...).Output()
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			assert.Equal(t, testCases[i].expected, string(got))
 		})
@@ -79,7 +79,7 @@ func TestBinaryWhois(t *testing.T) {
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, testHost, args[i]).Run(); err != nil {
-				t.Error(err)
+				t.Error(args[i], err)
 			}
 		})
 		time.Sleep(time.Second * 2)

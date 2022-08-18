@@ -34,25 +34,25 @@ func TestConvert(t *testing.T) {
 		t.Run(testCases[i].input[3], func(t *testing.T) {
 			err := exec.Command(mainCommand, testCases[i].input...).Run()
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			assert.FileExists(t, testCases[i].input[7])
 
 			fileExpected, err := os.ReadFile(testCases[i].expected)
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			expected, err := cmd.Encoder.Base64StdEncode(fileExpected)
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			fileGot, err := os.ReadFile(testCases[i].input[7])
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			got, err := cmd.Encoder.Base64StdEncode(fileGot)
 			if err != nil {
-				t.Error(err)
+				t.Error(testCases[i].input, err)
 			}
 			assert.Equal(t, expected, got)
 			_ = os.Remove(testCases[i].input[7])
@@ -70,7 +70,7 @@ func TestBinaryConvert(t *testing.T) {
 		output := fmt.Sprintf("out.%s", slice[1])
 		t.Run(cmd, func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, cmd, "-i", input, "-o", output).Run(); err != nil {
-				t.Error(err)
+				t.Error(cmd, err)
 			}
 			_ = os.Remove(output)
 		})
