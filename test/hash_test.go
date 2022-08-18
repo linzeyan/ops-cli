@@ -8,51 +8,48 @@ import (
 )
 
 func TestHashFile(t *testing.T) {
-	if isWindows() {
-		if err := cmd.Dos2Unix(license); err != nil {
-			t.Error(err)
-		}
-	}
-	testCases := struct {
+	testCases := []struct {
 		input    string
 		expected map[string]string
 	}{
-		license,
-		map[string]string{
-			cmd.HashMd5:    "3b83ef96387f14655fc854ddc3c6bd57",
-			cmd.HashSha1:   "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
-			cmd.HashSha256: "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-			cmd.HashSha512: "98f6b79b778f7b0a15415bd750c3a8a097d650511cb4ec8115188e115c47053fe700f578895c097051c9bc3dfb6197c2b13a15de203273e1a3218884f86e90e8",
-		},
+		{"../LICENSE",
+			map[string]string{
+				cmd.HashMd5:    "3b83ef96387f14655fc854ddc3c6bd57",
+				cmd.HashSha1:   "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
+				cmd.HashSha256: "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+				cmd.HashSha512: "98f6b79b778f7b0a15415bd750c3a8a097d650511cb4ec8115188e115c47053fe700f578895c097051c9bc3dfb6197c2b13a15de203273e1a3218884f86e90e8",
+			}},
+		{"../README.md",
+			map[string]string{
+				cmd.HashMd5:    "a99966c9dc94d557036e0d62c8b76cc8",
+				cmd.HashSha1:   "2d800a59428389dae926f24976001fd2f0364814",
+				cmd.HashSha256: "794d312e8f6526de3f5736cebbd239224f79e9cfc27f22de95deb131f0664258",
+				cmd.HashSha512: "b0de061b27b3489c2b91babadb65b3eaaf4e200b34ce4ff6a50aba181a2c5b30b700ab3680c93ae74712de4c9391c711e4ea2c63925ac20828c92b779dc5e1e4",
+			}},
+		{"../.config.reference.toml",
+			map[string]string{
+				cmd.HashMd5:    "c77cd59606783713bf4d191ea8c8a8a6",
+				cmd.HashSha1:   "5e82a6dc4f61ba1f6973f22942cf191079b751ec",
+				cmd.HashSha256: "7f03c5a348ffb59d88e07a7cebff37af63387a4144e2b146824a2f18aeffc606",
+				cmd.HashSha512: "e442f0ee8755c78c9a8502b70a44cd4589452ad24b9eb4e41ce9df0cfbf85d8c22adb912e00eb5ca27a4f46181e23a0e679bd0d246cbf59cb4427397ee55d2a4",
+			}},
 	}
-	t.Run(cmd.HashMd5, func(t *testing.T) {
-		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashMd5), testCases.input)
-		if err != nil {
-			t.Error(err)
+	for _, testCase := range testCases {
+		if isWindows() {
+			if err := cmd.Dos2Unix(testCase.input); err != nil {
+				t.Error(err)
+			}
 		}
-		assert.Equal(t, testCases.expected[cmd.HashMd5], got)
-	})
-	t.Run(cmd.HashSha1, func(t *testing.T) {
-		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha1), testCases.input)
-		if err != nil {
-			t.Error(err)
+		for k, v := range testCase.expected {
+			t.Run(k, func(t *testing.T) {
+				got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(k), testCase.input)
+				if err != nil {
+					t.Error(err)
+				}
+				assert.Equal(t, v, got)
+			})
 		}
-		assert.Equal(t, testCases.expected[cmd.HashSha1], got)
-	})
-	t.Run(cmd.HashSha256, func(t *testing.T) {
-		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha256), testCases.input)
-		if err != nil {
-			t.Error(err)
-		}
-		assert.Equal(t, testCases.expected[cmd.HashSha256], got)
-	})
-	t.Run(cmd.HashSha512, func(t *testing.T) {
-		got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha512), testCases.input)
-		if err != nil {
-			t.Error(err)
-		}
-		assert.Equal(t, testCases.expected[cmd.HashSha512], got)
-	})
+	}
 }
 
 func TestMd5(t *testing.T) {

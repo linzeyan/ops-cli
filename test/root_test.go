@@ -12,7 +12,6 @@ import (
 )
 
 const (
-	license     = "../LICENSE"
 	mainCommand = "go"
 	mainGo      = "../main.go"
 	runCommand  = "run"
