@@ -19,19 +19,12 @@ func TestHashFile(t *testing.T) {
 				cmd.HashSha256: "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
 				cmd.HashSha512: "98f6b79b778f7b0a15415bd750c3a8a097d650511cb4ec8115188e115c47053fe700f578895c097051c9bc3dfb6197c2b13a15de203273e1a3218884f86e90e8",
 			}},
-		{"../README.md",
+		{"assets/proxy.yaml",
 			map[string]string{
-				cmd.HashMd5:    "a99966c9dc94d557036e0d62c8b76cc8",
-				cmd.HashSha1:   "2d800a59428389dae926f24976001fd2f0364814",
-				cmd.HashSha256: "794d312e8f6526de3f5736cebbd239224f79e9cfc27f22de95deb131f0664258",
-				cmd.HashSha512: "b0de061b27b3489c2b91babadb65b3eaaf4e200b34ce4ff6a50aba181a2c5b30b700ab3680c93ae74712de4c9391c711e4ea2c63925ac20828c92b779dc5e1e4",
-			}},
-		{"../.config.reference.toml",
-			map[string]string{
-				cmd.HashMd5:    "c77cd59606783713bf4d191ea8c8a8a6",
-				cmd.HashSha1:   "5e82a6dc4f61ba1f6973f22942cf191079b751ec",
-				cmd.HashSha256: "7f03c5a348ffb59d88e07a7cebff37af63387a4144e2b146824a2f18aeffc606",
-				cmd.HashSha512: "e442f0ee8755c78c9a8502b70a44cd4589452ad24b9eb4e41ce9df0cfbf85d8c22adb912e00eb5ca27a4f46181e23a0e679bd0d246cbf59cb4427397ee55d2a4",
+				cmd.HashMd5:    "e18b4913dc4b2d61e39c6bd53c9d5f4f",
+				cmd.HashSha1:   "1207ddb9d9d65835d43587d246a1a6a0bed13d02",
+				cmd.HashSha256: "4cd53bc452432e850e83f9e3db5215d8fa6d9fb10d5de01157abe011ac69d90f",
+				cmd.HashSha512: "1a2a649cf401e6c6762698364af83e02324f2c8ee7d3c42605c8ac67dc8230622c38ef10833309033bab4b13077555e16e41fdc777b381deeddced3f26b9d0ec",
 			}},
 	}
 	for _, testCase := range testCases {
