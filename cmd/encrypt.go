@@ -39,7 +39,7 @@ var encryptCmd = &cobra.Command{
 var encryptSubCmdAes = &cobra.Command{
 	Use:   "aes",
 	Short: "Encrypt or decrypt",
-	Run:   encryptCmdGlobalVar.Run,
+	Run:   encryptCmdGlobalVar.AesRun,
 }
 
 var encryptCmdGlobalVar EncrytpFlag
@@ -49,8 +49,7 @@ func init() {
 
 	encryptCmd.PersistentFlags().BoolVarP(&encryptCmdGlobalVar.decrypt, "decrypt", "d", false, "Decrypt")
 	encryptCmd.PersistentFlags().StringVarP(&encryptCmdGlobalVar.key, "key", "k", "", "Specify the encrypt key text or key file")
-	encryptCmd.PersistentFlags().StringVarP(&encryptCmdGlobalVar.inFile, "input-file", "i", "", "Specify the input file")
-	encryptCmd.PersistentFlags().StringVarP(&encryptCmdGlobalVar.outFile, "output-file", "o", "", "Specify the output file")
+	encryptCmd.PersistentFlags().StringVarP(&encryptCmdGlobalVar.file, "file", "f", "", "Specify the file")
 
 	encryptCmd.AddCommand(encryptSubCmdAes)
 }
@@ -58,23 +57,28 @@ func init() {
 type EncrytpFlag struct {
 	decrypt bool
 	key     string
-	inFile  string
-	outFile string
+	file    string
 }
 
-func (e *EncrytpFlag) Run(cmd *cobra.Command, _ []string) {
+func (e *EncrytpFlag) AesRun(cmd *cobra.Command, _ []string) {
 	var err error
-	switch cmd.Name() {
-	case "aes":
-		switch e.decrypt {
-		case true:
-			err = e.AesDecrypt()
-		default:
-			err = e.AesEncrypt()
+
+	if e.decrypt {
+		if err = e.AesDecrypt(); err != nil {
+			log.Println(err)
+			os.Exit(1)
 		}
-	default:
+		if err = os.Rename(e.file+".raw", e.file); err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+		return
 	}
-	if err != nil {
+	if err = e.AesEncrypt(); err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	if err = os.Rename(e.file+".bin", e.file); err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
@@ -109,7 +113,7 @@ func (e *EncrytpFlag) getKey() []byte {
 	if err != nil {
 		return nil
 	}
-	_, filename := path.Split(e.inFile)
+	_, filename := path.Split(e.file)
 	err = os.WriteFile(filename+keyFileExtension, []byte(key), os.ModePerm)
 	if err != nil {
 		return nil
@@ -118,7 +122,7 @@ func (e *EncrytpFlag) getKey() []byte {
 }
 
 func (e *EncrytpFlag) AesEncrypt() error {
-	f, err := os.Open(e.inFile)
+	f, err := os.Open(e.file)
 	if err != nil {
 		return err
 	}
@@ -131,10 +135,7 @@ func (e *EncrytpFlag) AesEncrypt() error {
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return err
 	}
-	if e.outFile == "" {
-		e.outFile = e.inFile + ".bin"
-	}
-	out, err := os.OpenFile(e.outFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	out, err := os.OpenFile(e.file+".bin", os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -162,7 +163,7 @@ func (e *EncrytpFlag) AesEncrypt() error {
 }
 
 func (e *EncrytpFlag) AesDecrypt() error {
-	f, err := os.Open(e.inFile)
+	f, err := os.Open(e.file)
 	if err != nil {
 		return err
 	}
@@ -181,10 +182,7 @@ func (e *EncrytpFlag) AesDecrypt() error {
 	if err != nil {
 		return err
 	}
-	if e.outFile == "" {
-		e.outFile = e.inFile + ".raw"
-	}
-	out, err := os.OpenFile(e.outFile, os.O_RDWR|os.O_CREATE, os.ModePerm)
+	out, err := os.OpenFile(e.file+".raw", os.O_RDWR|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return err
 	}
