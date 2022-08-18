@@ -28,39 +28,55 @@ import (
 )
 
 var hashCmd = &cobra.Command{
-	Use:   "hash",
+	Use:   "hash [file]",
 	Short: "Hash string or file",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+	Run: func(cmd *cobra.Command, args []string) {
+		if Hasher.check && len(args) != 0 {
+			Hasher.CheckFile(args[0])
+			return
+		}
+		if Hasher.list && len(args) != 0 {
+			Hasher.ListAll(args[0])
+			return
+		}
+		_ = cmd.Help()
+	},
+}
+
+var hashSubCmdMd5 = &cobra.Command{
+	Use:   HashMd5 + " [string|file]",
+	Args:  cobra.ExactArgs(1),
+	Short: "Print MD5 Checksums",
+	Run:   Hasher.Run,
 
 	DisableFlagsInUseLine: true,
 }
 
-var hashSubCmdMd5 = &cobra.Command{
-	Use:   HashMd5,
-	Args:  cobra.ExactArgs(1),
-	Short: "Print MD5 Checksums",
-	Run:   Hasher.Run,
-}
-
 var hashSubCmdSha1 = &cobra.Command{
-	Use:   HashSha1,
+	Use:   HashSha1 + " [string|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-1 Checksums",
 	Run:   Hasher.Run,
+
+	DisableFlagsInUseLine: true,
 }
 
 var hashSubCmdSha256 = &cobra.Command{
-	Use:   HashSha256,
+	Use:   HashSha256 + " [string|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-256 Checksums",
 	Run:   Hasher.Run,
+
+	DisableFlagsInUseLine: true,
 }
 
 var hashSubCmdSha512 = &cobra.Command{
-	Use:   HashSha512,
+	Use:   HashSha512 + " [string|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-512 Checksums",
 	Run:   Hasher.Run,
+
+	DisableFlagsInUseLine: true,
 }
 
 var Hasher HashFlag
@@ -68,12 +84,14 @@ var Hasher HashFlag
 func init() {
 	rootCmd.AddCommand(hashCmd)
 
-	hashCmd.PersistentFlags().BoolVarP(&Hasher.check, "check", "c", false, "Read SHA sums from the file and check them")
+	hashCmd.Flags().BoolVarP(&Hasher.check, "check", "c", false, "Read SHA sums from the file and check them")
+	hashCmd.Flags().BoolVarP(&Hasher.list, "list", "l", false, "List multiple SHA sums for the specify input")
 	hashCmd.AddCommand(hashSubCmdMd5, hashSubCmdSha1, hashSubCmdSha256, hashSubCmdSha512)
 }
 
 type HashFlag struct {
 	check bool
+	list  bool
 }
 
 func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
@@ -81,10 +99,6 @@ func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
 	var out string
 	var err error
 	hasher = HashAlgorithm(cmd.Name())
-	if h.check {
-		h.CheckFile(hasher, args[0])
-		return
-	}
 	out, err = h.Hash(hasher, args[0])
 	if err != nil {
 		log.Println(err)
@@ -125,7 +139,7 @@ func (h *HashFlag) WriteFile(hasher hash.Hash, filename string) (string, error) 
 	return Encoder.HexEncode(hasher.Sum(nil))
 }
 
-func (h *HashFlag) CheckFile(hasher hash.Hash, filename string) {
+func (h *HashFlag) CheckFile(filename string) {
 	var err error
 	f, err := os.Open(filename)
 	if err != nil {
@@ -135,7 +149,18 @@ func (h *HashFlag) CheckFile(hasher hash.Hash, filename string) {
 	defer f.Close()
 	reader := bufio.NewScanner(f)
 	for reader.Scan() {
+		var hasher hash.Hash
 		slice := strings.Fields(reader.Text())
+		switch len([]byte(slice[0])) {
+		case 32:
+			hasher = HashAlgorithm(HashMd5)
+		case 40:
+			hasher = HashAlgorithm(HashSha1)
+		case 64:
+			hasher = HashAlgorithm(HashSha256)
+		case 128:
+			hasher = HashAlgorithm(HashSha512)
+		}
 		got, err := h.WriteFile(hasher, slice[1])
 		if err != nil {
 			PrintString(err)
@@ -145,5 +170,18 @@ func (h *HashFlag) CheckFile(hasher hash.Hash, filename string) {
 			PrintString(slice[1] + ": OK")
 		}
 		hasher.Reset()
+	}
+}
+
+func (h *HashFlag) ListAll(s string) {
+	algs := []string{HashMd5, HashSha1, HashSha256, HashSha512}
+	for _, alg := range algs {
+		hasher := HashAlgorithm(alg)
+		out, err := h.Hash(hasher, s)
+		if err != nil {
+			PrintString(err)
+			continue
+		}
+		PrintString(strings.ToUpper(alg) + ":\t" + out)
 	}
 }
