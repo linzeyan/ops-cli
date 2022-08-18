@@ -10,22 +10,22 @@ import (
 )
 
 func TestEncryptAes(t *testing.T) {
-	expected := mainGo
-	fileRaw, err := os.ReadFile(expected)
+	input := mainGo
+	expected, err := os.ReadFile(input)
 	if err != nil {
 		t.Error(err)
 	}
-	if err := cmd.Encryptor.AesEncrypt("84815131446564008011748691915873", expected); err != nil {
+	if err := cmd.Encryptor.AesEncrypt("84815131446564008011748691915873", input); err != nil {
 		t.Error(err)
 	}
-	if err := cmd.Encryptor.AesDecrypt("84815131446564008011748691915873", expected); err != nil {
+	if err := cmd.Encryptor.AesDecrypt("84815131446564008011748691915873", input); err != nil {
 		t.Error(err)
 	}
-	fileRecover, err := os.ReadFile(expected)
+	got, err := os.ReadFile(input)
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, fileRaw, fileRecover)
+	assert.Equal(t, expected, got)
 }
 
 func TestEncrypt(t *testing.T) {

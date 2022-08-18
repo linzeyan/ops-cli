@@ -38,19 +38,11 @@ func TestConvert(t *testing.T) {
 			}
 			assert.FileExists(t, testCases[i].input[7])
 
-			fileExpected, err := os.ReadFile(testCases[i].expected)
+			expected, err := os.ReadFile(testCases[i].expected)
 			if err != nil {
 				t.Error(testCases[i].input, err)
 			}
-			expected, err := cmd.Encoder.Base64StdEncode(fileExpected)
-			if err != nil {
-				t.Error(testCases[i].input, err)
-			}
-			fileGot, err := os.ReadFile(testCases[i].input[7])
-			if err != nil {
-				t.Error(testCases[i].input, err)
-			}
-			got, err := cmd.Encoder.Base64StdEncode(fileGot)
+			got, err := os.ReadFile(testCases[i].input[7])
 			if err != nil {
 				t.Error(testCases[i].input, err)
 			}
