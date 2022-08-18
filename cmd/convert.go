@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"log"
 	"os"
+	"path"
 	"strings"
 
 	hashtag "github.com/abhinav/goldmark-hashtag"
@@ -229,12 +230,16 @@ type ConvertFlag struct {
 }
 
 func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
-	if !ValidFile(c.inFile) || c.outFile == "" {
+	if !ValidFile(c.inFile) {
 		os.Exit(1)
 	}
 	slice := strings.Split(cmd.Name(), "2")
 	c.inType = slice[0]
 	c.outType = slice[1]
+	if c.outFile == "" {
+		dir, filename := path.Split(c.inFile)
+		c.outFile = path.Join(dir, strings.Replace(filename, slice[0], slice[1], 1))
+	}
 	if err := c.Convert(); err != nil {
 		log.Println(err)
 		os.Exit(1)
