@@ -104,13 +104,13 @@ func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 	var p RandomString
 	switch cmd.Name() {
 	case "number":
-		randomCmdGlobalVar.result, err = p.genString(randomCmdGlobalVar.length, Numbers)
+		randomCmdGlobalVar.result, err = p.GenerateString(randomCmdGlobalVar.length, Numbers)
 	case "symbol":
-		randomCmdGlobalVar.result, err = p.genString(randomCmdGlobalVar.length, Symbols)
+		randomCmdGlobalVar.result, err = p.GenerateString(randomCmdGlobalVar.length, Symbols)
 	case "uppercase":
-		randomCmdGlobalVar.result, err = p.genString(randomCmdGlobalVar.length, UppercaseLetters)
+		randomCmdGlobalVar.result, err = p.GenerateString(randomCmdGlobalVar.length, UppercaseLetters)
 	case "lowercase":
-		randomCmdGlobalVar.result, err = p.genString(randomCmdGlobalVar.length, LowercaseLetters)
+		randomCmdGlobalVar.result, err = p.GenerateString(randomCmdGlobalVar.length, LowercaseLetters)
 	case "random":
 		randomCmdGlobalVar.result, err = p.GenerateAll(randomCmdGlobalVar.length, randomCmdGlobalVar.lower, randomCmdGlobalVar.upper, randomCmdGlobalVar.symbol, randomCmdGlobalVar.number)
 	}
@@ -123,7 +123,7 @@ func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 
 type RandomString struct{}
 
-func (RandomString) genString(length int, charSet RandomCharacter) (string, error) {
+func (RandomString) GenerateString(length int, charSet RandomCharacter) (string, error) {
 	var s strings.Builder
 	var err error
 	for i := int(0); i < length; i++ {
@@ -145,24 +145,24 @@ func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumb
 	if leave < 0 {
 		return "", ErrInvalidLength
 	}
-	lower, err := r.genString(minLower, LowercaseLetters)
+	lower, err := r.GenerateString(minLower, LowercaseLetters)
 	if err != nil {
 		return lower, err
 	}
-	upper, err := r.genString(minUpper, UppercaseLetters)
+	upper, err := r.GenerateString(minUpper, UppercaseLetters)
 	if err != nil {
 		return upper, err
 	}
-	symbol, err := r.genString(minSymbol, Symbols)
+	symbol, err := r.GenerateString(minSymbol, Symbols)
 	if err != nil {
 		return symbol, err
 	}
-	num, err := r.genString(minNumber, Numbers)
+	num, err := r.GenerateString(minNumber, Numbers)
 	if err != nil {
 		return num, err
 	}
 	if leave != 0 {
-		remain, err = r.genString(leave, AllSet)
+		remain, err = r.GenerateString(leave, AllSet)
 		if err != nil {
 			return remain, err
 		}
