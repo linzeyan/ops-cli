@@ -121,7 +121,7 @@ func (d *DiscordFlag) File() error {
 	if err != nil {
 		return err
 	}
-	_, filename := path.Split(d.arg)
+	filename := path.Base(d.arg)
 	defer f.Close()
 	d.resp, err = d.api.ChannelFileSend(d.channel, filename, f)
 	return err

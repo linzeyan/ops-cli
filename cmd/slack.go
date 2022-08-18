@@ -82,8 +82,7 @@ type SlackFlag struct {
 	channel string
 	arg     string
 
-	fileName string
-	api      *slack.Client
+	api *slack.Client
 }
 
 func (s *SlackFlag) Run(cmd *cobra.Command, _ []string) {
@@ -163,12 +162,9 @@ func (s *SlackFlag) Photo() error {
 	if err := f.Sync(); err != nil {
 		return err
 	}
-	if s.fileName == "" {
-		_, s.fileName = path.Split(s.arg)
-	}
 	_, err = s.api.UploadFileContext(rootContext, slack.FileUploadParameters{
 		Filetype: "image/png",
-		Filename: s.fileName,
+		Filename: path.Base(s.arg),
 		Channels: []string{s.channel},
 		File:     uploadFileKey,
 	})
