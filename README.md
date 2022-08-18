@@ -40,6 +40,7 @@ Usage:
   ops-cli [command]
 
 Available Commands:
+  Discord     Send message to Discord
   LINE        Send message to LINE
   Slack       Send message to Slack
   Telegram    Send message to Telegram
@@ -48,8 +49,11 @@ Available Commands:
   convert     Convert data format
   dig         Resolve domain name
   doc         Generate documentation
-  encode      encode and decode string
+  dos2unix    Convert file eol to unix style
+  encode      Encode and decode string or file
+  encrypt     Encrypt or decrypt file
   geoip       Print IP geographic information
+  hash        Hash string or file
   help        Help about any command
   icp         Check ICP status
   otp         Calculate passcode or generate secret
