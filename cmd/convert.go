@@ -256,14 +256,14 @@ func (c *ConvertFlag) Convert() error {
 	})
 }
 
-func (c *ConvertFlag) Load() error {
+func (c *ConvertFlag) ConvertMarkdown2HTML() error {
 	var err error
 	c.readFile, err = os.ReadFile(c.inFile)
-	return err
-}
-
-func (c *ConvertFlag) ConvertMarkdown2HTML() error {
-	if err := c.Load(); err != nil {
+	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(c.inFile)
+	if err != nil {
 		return err
 	}
 	md := goldmark.New(
@@ -295,11 +295,17 @@ func (c *ConvertFlag) ConvertMarkdown2HTML() error {
 	if err := md.Convert(c.readFile, &buf); err != nil {
 		return err
 	}
-	return c.WriteFile(buf.Bytes())
+	return os.WriteFile(c.outFile, buf.Bytes(), stat.Mode())
 }
 
 func (c *ConvertFlag) ConvertMarkdown2PDF() error {
-	if err := c.Load(); err != nil {
+	var err error
+	c.readFile, err = os.ReadFile(c.inFile)
+	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(c.inFile)
+	if err != nil {
 		return err
 	}
 	md := goldmark.New(
@@ -334,9 +340,5 @@ func (c *ConvertFlag) ConvertMarkdown2PDF() error {
 	if err := md.Convert(c.readFile, &buf); err != nil {
 		return err
 	}
-	return c.WriteFile(buf.Bytes())
-}
-
-func (c *ConvertFlag) WriteFile(content []byte) error {
-	return os.WriteFile(c.outFile, content, os.ModePerm)
+	return os.WriteFile(c.outFile, buf.Bytes(), stat.Mode())
 }

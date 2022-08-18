@@ -49,7 +49,11 @@ func Dos2Unix(filename string) error {
 	if err != nil {
 		return err
 	}
+	stat, err := os.Stat(filename)
+	if err != nil {
+		return err
+	}
 	eol := regexp.MustCompile(`\r\n`)
 	f = eol.ReplaceAllLiteral(f, []byte{'\n'})
-	return os.WriteFile(filename, f, os.ModePerm)
+	return os.WriteFile(filename, f, stat.Mode())
 }

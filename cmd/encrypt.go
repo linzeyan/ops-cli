@@ -76,7 +76,7 @@ func (e *EncrytpFlag) AesRun(cmd *cobra.Command, _ []string) {
 	}
 }
 
-func (e *EncrytpFlag) getKey(secret, filename string) []byte {
+func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 	const keyFileExtension = ".key"
 	/* Read key file. */
 	if ValidFile(secret) {
@@ -105,7 +105,7 @@ func (e *EncrytpFlag) getKey(secret, filename string) []byte {
 	if err != nil {
 		return nil
 	}
-	err = os.WriteFile(path.Base(filename)+keyFileExtension, []byte(key), os.ModePerm)
+	err = os.WriteFile(path.Base(filename)+keyFileExtension, []byte(key), perm)
 	if err != nil {
 		return nil
 	}
@@ -118,16 +118,16 @@ func (e *EncrytpFlag) AesEncrypt(secret, filename string) error {
 		return err
 	}
 	defer f.Close()
-	block, err := aes.NewCipher(e.getKey(secret, filename))
+	fInfo, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	block, err := aes.NewCipher(e.getKey(secret, filename, fInfo.Mode()))
 	if err != nil {
 		return err
 	}
 	iv := make([]byte, block.BlockSize())
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return err
-	}
-	fInfo, err := f.Stat()
-	if err != nil {
 		return err
 	}
 	out, err := os.OpenFile(filename+".bin", os.O_RDWR|os.O_CREATE, fInfo.Mode())
@@ -166,11 +166,11 @@ func (e *EncrytpFlag) AesDecrypt(secret, filename string) error {
 		return err
 	}
 	defer f.Close()
-	block, err := aes.NewCipher(e.getKey(secret, filename))
+	fInfo, err := f.Stat()
 	if err != nil {
 		return err
 	}
-	fInfo, err := f.Stat()
+	block, err := aes.NewCipher(e.getKey(secret, filename, fInfo.Mode()))
 	if err != nil {
 		return err
 	}
