@@ -5,16 +5,20 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - ".github/**"
-      - "scripts/**"
-      - "vendor/**"
-      - "LICENSE"
-      - "README.md"
-      - ".config**"
-      - ".gitignore"
-      - ".go**"
-      - ".pre-commit-config.yaml"
+    paths:
+      - "cmd/**"
+      - "test/**"
+      - "main.go"
+    # paths-ignore:
+    #   - ".github/**"
+    #   - "scripts/**"
+    #   - "vendor/**"
+    #   - "LICENSE"
+    #   - "README.md"
+    #   - ".config**"
+    #   - ".gitignore"
+    #   - ".go**"
+    #   - ".pre-commit-config.yaml"
 
 permissions:
   contents: read
