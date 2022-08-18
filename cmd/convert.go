@@ -27,12 +27,10 @@ import (
 	mermaid "github.com/abhinav/goldmark-mermaid"
 	toc "github.com/abhinav/goldmark-toc"
 	"github.com/spf13/cobra"
-	pdf "github.com/stephenafamo/goldmark-pdf"
 	"github.com/tomwright/dasel"
 	"github.com/tomwright/dasel/storage"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
-	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
@@ -118,16 +116,6 @@ var convertSubCmdMarkdown2HTML = &cobra.Command{
 		}
 	},
 }
-var convertSubCmdMarkdown2PDF = &cobra.Command{
-	Use:   "markdown2pdf",
-	Short: "Convert markdown to pdf format",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := convertCmdGlobalVar.ConvertMarkdown2PDF(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-	},
-}
 
 /* TOML. */
 var convertSubCmdTOML2CSV = &cobra.Command{
@@ -207,7 +195,7 @@ func init() {
 	/* dos2unix */
 	convertCmd.AddCommand(convertSubCmdDOS2Unix)
 	/* Markdown */
-	convertCmd.AddCommand(convertSubCmdMarkdown2HTML, convertSubCmdMarkdown2PDF)
+	convertCmd.AddCommand(convertSubCmdMarkdown2HTML)
 	/* CSV */
 	convertCmd.AddCommand(convertSubCmdCSV2JSON, convertSubCmdCSV2TOML, convertSubCmdCSV2XML, convertSubCmdCSV2YAML)
 	/* JSON */
@@ -276,7 +264,6 @@ func (c *ConvertFlag) ConvertMarkdown2HTML() error {
 			extension.Typographer,
 			emoji.Emoji,
 			&hashtag.Extender{},
-			highlighting.Highlighting,
 			&mermaid.Extender{},
 			&toc.Extender{},
 		),
@@ -289,51 +276,6 @@ func (c *ConvertFlag) ConvertMarkdown2HTML() error {
 		goldmark.WithRendererOptions(
 			html.WithHardWraps(),
 			html.WithXHTML(),
-		),
-	)
-	var buf bytes.Buffer
-	if err := md.Convert(c.readFile, &buf); err != nil {
-		return err
-	}
-	return os.WriteFile(c.outFile, buf.Bytes(), stat.Mode())
-}
-
-func (c *ConvertFlag) ConvertMarkdown2PDF() error {
-	var err error
-	c.readFile, err = os.ReadFile(c.inFile)
-	if err != nil {
-		return err
-	}
-	stat, err := os.Stat(c.inFile)
-	if err != nil {
-		return err
-	}
-	md := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			extension.Linkify,
-			extension.Strikethrough,
-			extension.Table,
-			extension.TaskList,
-			extension.Typographer,
-			emoji.Emoji,
-			&hashtag.Extender{},
-			highlighting.Highlighting,
-			&mermaid.Extender{},
-		),
-		goldmark.WithParserOptions(
-			parser.WithAutoHeadingID(),
-			parser.WithBlockParsers(),
-			parser.WithInlineParsers(),
-			parser.WithParagraphTransformers(),
-		),
-		goldmark.WithRenderer(
-			pdf.New(
-				pdf.WithContext(rootContext),
-				pdf.WithHeadingFont(pdf.GetTextFont("IBM Plex Serif", pdf.FontLora)),
-				pdf.WithBodyFont(pdf.GetTextFont("Open Sans", pdf.FontRoboto)),
-				pdf.WithCodeFont(pdf.GetCodeFont("Inconsolata", pdf.FontRobotoMono)),
-			),
 		),
 	)
 	var buf bytes.Buffer
