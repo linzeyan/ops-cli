@@ -6,9 +6,7 @@ env:
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - ./scripts/generate.bash
-    # you may remove this if you don't need go generate
     # - go generate ./...
 
 builds:
@@ -59,7 +57,7 @@ changelog:
 
 nfpms:
   - id: packages
-    file_name_template: "{{ .ConventionalFileName }}"
+    file_name_template: '{{ .ProjectName }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}{{ with .Mips }}_{{ . }}{{ end }}{{ if not (eq .Amd64 "v1") }}{{ .Amd64 }}{{ end }}'
     maintainer: ZeYanLin <zeyanlin@outlook.com>
     license: Apache-2.0
     homepage: https://github.com/linzeyan/ops-cli
@@ -93,7 +91,7 @@ nfpms:
     #   - git
     # recommends:
     #   - golang
-    version_metadata: git
+    # version_metadata: git
 
 brews:
   - name: "{{ .ProjectName }}"
