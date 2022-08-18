@@ -238,7 +238,7 @@ func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
 	c.outType = slice[1]
 	if c.outFile == "" {
 		dir, filename := path.Split(c.inFile)
-		c.outFile = path.Join(dir, strings.Replace(filename, slice[0], slice[1], 1))
+		c.outFile = path.Join(dir, strings.Replace(filename, path.Ext(filename), "."+slice[1], 1))
 	}
 	if err := c.Convert(); err != nil {
 		log.Println(err)
