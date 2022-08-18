@@ -113,6 +113,14 @@ func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 }
 
 func (e *EncrytpFlag) AesEncrypt(secret, filename string) error {
+	err := e.aesEncrypt(secret, filename)
+	if err != nil {
+		return err
+	}
+	return os.Rename(filename+".bin", filename)
+}
+
+func (e *EncrytpFlag) aesEncrypt(secret, filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -154,13 +162,18 @@ func (e *EncrytpFlag) AesEncrypt(secret, filename string) error {
 		}
 	}
 	_, err = out.Write(iv)
-	if err != nil {
-		return err
-	}
-	return os.Rename(filename+".bin", filename)
+	return err
 }
 
 func (e *EncrytpFlag) AesDecrypt(secret, filename string) error {
+	err := e.aesDecrypt(secret, filename)
+	if err != nil {
+		return err
+	}
+	return os.Rename(filename+".raw", filename)
+}
+
+func (e *EncrytpFlag) aesDecrypt(secret, filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -207,5 +220,5 @@ func (e *EncrytpFlag) AesDecrypt(secret, filename string) error {
 			return err
 		}
 	}
-	return os.Rename(filename+".raw", filename)
+	return err
 }
