@@ -27,7 +27,7 @@ env:
   CGO_ENABLED: 0
 
 jobs:
-  golangci-lint:
+  lint:
     permissions:
       contents: read # for actions/checkout to fetch code
       pull-requests: read # for golangci/golangci-lint-action to fetch pull requests
@@ -49,7 +49,9 @@ jobs:
         with:
           args: --timeout=5m
 
-  test:
+  go-test:
+    needs:
+      - lint
     strategy:
       fail-fast: false
       matrix:

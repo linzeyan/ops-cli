@@ -9,7 +9,7 @@ jobs:
   test:
     uses: ./.github/workflows/test.yaml
 
-  goreleaser:
+  build:
     runs-on: ubuntu-latest
     needs:
       - test
