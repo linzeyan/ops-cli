@@ -1,2 +1,0 @@
-# expandUrl
-Expand shorten URL.

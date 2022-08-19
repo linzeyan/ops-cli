@@ -3,8 +3,6 @@ package common
 import (
 	"context"
 	"errors"
-	"io"
-	"net/http"
 	"os"
 	"regexp"
 	"time"
@@ -20,6 +18,7 @@ var (
 var (
 	ErrConfigContent = errors.New("config content is incorrect")
 	ErrConfigTable   = errors.New("table not found in the config")
+	ErrInvalidURL    = errors.New("invalid URL")
 	ErrStatusCode    = errors.New("status code is not 200")
 )
 
@@ -41,38 +40,4 @@ func Dos2Unix(filename string) error {
 func Examples(s string) string {
 	c := color.New(color.FgYellow)
 	return c.Sprintf(`%s`, s)
-}
-
-/* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
-func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, error) {
-	var method string
-	if len(methods) == 0 {
-		method = http.MethodGet
-	} else {
-		method = methods[0]
-	}
-	var client = &http.Client{
-		Transport: &http.Transport{
-			DisableKeepAlives: true,
-		},
-	}
-	req, err := http.NewRequestWithContext(Context, method, url, body)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	}
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode == http.StatusOK {
-		content, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return content, err
-	}
-	return nil, ErrStatusCode
 }

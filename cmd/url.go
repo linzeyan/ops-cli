@@ -20,8 +20,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/linzeyan/expandUrl"
 	"github.com/linzeyan/ops-cli/cmd/common"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,11 @@ var urlCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Expand shorten url",
 	Run: func(_ *cobra.Command, args []string) {
-		result, err := expandUrl.Expand(args[0])
+		if !validator.ValidURL(args[0]) {
+			log.Println(common.ErrInvalidURL)
+			os.Exit(1)
+		}
+		result, err := common.HTTPRequestRedirectURL(args[0])
 		if err != nil {
 			log.Println(err)
 			os.Exit(1)

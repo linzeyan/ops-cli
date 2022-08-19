@@ -104,9 +104,6 @@ github.com/inconshreveable/mousetrap
 # github.com/line/line-bot-sdk-go/v7 v7.16.0
 ## explicit; go 1.11
 github.com/line/line-bot-sdk-go/v7/linebot
-# github.com/linzeyan/expandUrl v0.2.0
-## explicit; go 1.18
-github.com/linzeyan/expandUrl
 # github.com/linzeyan/icp v0.3.1
 ## explicit; go 1.17
 github.com/linzeyan/icp
