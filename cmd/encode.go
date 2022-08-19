@@ -249,12 +249,12 @@ func (e *EncodeFlag) PemEncode(b *pem.Block) (string, error) {
 	return buf.String(), err
 }
 
-func (e *EncodeFlag) PemDecode(b []byte) (*pem.Block, error) {
+func (e *EncodeFlag) PemDecode(b []byte) ([]byte, error) {
 	p, _ := pem.Decode(b)
 	if p == nil {
-		return p, ErrFileType
+		return nil, ErrFileType
 	}
-	return p, nil
+	return p.Bytes, nil
 }
 
 func (e *EncodeFlag) XMLEncode(i any) (string, error) {

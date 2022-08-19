@@ -155,7 +155,7 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	cert, err := x509.ParseCertificates(crtPem.Bytes)
+	cert, err := x509.ParseCertificates(crtPem)
 	if err != nil {
 		return nil, err
 	}

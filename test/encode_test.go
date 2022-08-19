@@ -88,7 +88,7 @@ func TestPem(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	assert.Equal(t, expected, string(got.Bytes))
+	assert.Equal(t, expected, string(got))
 }
 
 func TestEncode(t *testing.T) {
