@@ -19,6 +19,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"image/jpeg"
 	"image/png"
@@ -70,8 +71,8 @@ var slackCmdGlobalVar SlackFlag
 func init() {
 	rootCmd.AddCommand(slackCmd)
 
-	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.token, "token", "t", "", "Bot token (required)")
-	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.channel, "channel", "c", "", "Channel ID")
+	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.Token, "token", "t", "", "Bot token (required)")
+	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.Channel, "channel", "c", "", "Channel ID")
 	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.arg, "arg", "a", "", "Input argument")
 
 	slackCmd.AddCommand(slackSubCmdFile)
@@ -80,8 +81,8 @@ func init() {
 }
 
 type SlackFlag struct {
-	token   string
-	channel string
+	Token   string `json:"token"`
+	Channel string `json:"channel_id"`
 	arg     string
 
 	api *slack.Client
@@ -113,15 +114,24 @@ func (s *SlackFlag) Run(cmd *cobra.Command, _ []string) {
 
 func (s *SlackFlag) Init() error {
 	var err error
-	if s.token == "" && rootConfig != "" {
-		if err = Config(ConfigBlockSlack); err != nil {
+	if s.Token == "" && rootConfig != "" {
+		v, err := common.Config(rootConfig, common.Slack)
+		if err != nil {
+			return err
+		}
+		b, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(b, s)
+		if err != nil {
 			return err
 		}
 	}
-	if s.token == "" {
+	if s.Token == "" {
 		return ErrTokenNotFound
 	}
-	s.api = slack.New(s.token)
+	s.api = slack.New(s.Token)
 	if s.api == nil {
 		return ErrInitialFailed
 	}
@@ -130,7 +140,7 @@ func (s *SlackFlag) Init() error {
 
 func (s *SlackFlag) Text() error {
 	input := slack.MsgOptionText(s.arg, false)
-	_, _, _, err := s.api.SendMessageContext(common.Context, s.channel, input)
+	_, _, _, err := s.api.SendMessageContext(common.Context, s.Channel, input)
 	return err
 }
 
@@ -167,7 +177,7 @@ func (s *SlackFlag) Photo() error {
 	_, err = s.api.UploadFileContext(common.Context, slack.FileUploadParameters{
 		Filetype: "image/png",
 		Filename: path.Base(s.arg),
-		Channels: []string{s.channel},
+		Channels: []string{s.Channel},
 		File:     uploadFileKey,
 	})
 	if err != nil {

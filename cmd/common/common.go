@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -55,6 +56,49 @@ func (b ByteSize) String() string {
 		return fmt.Sprintf("%.2fKB", b/KB)
 	}
 	return fmt.Sprintf("%.2fB", b)
+}
+
+/* Read config.toml. */
+type ConfigBlock string
+
+const (
+	Discord  ConfigBlock = "discord"
+	ICP      ConfigBlock = "west"
+	LINE     ConfigBlock = "line"
+	Slack    ConfigBlock = "slack"
+	Telegram ConfigBlock = "telegram"
+)
+
+func (c ConfigBlock) String() string {
+	return string(c)
+}
+
+type readConfig struct {
+	Table ConfigBlock
+}
+
+func (c readConfig) Get(config string) (map[string]interface{}, error) {
+	viper.SetConfigFile(config)
+	viper.SetConfigType("toml")
+	if err := viper.ReadInConfig(); err != nil {
+		return nil, err
+	}
+	all := viper.AllSettings()
+	values, ok := all[c.Table.String()]
+	if !ok {
+		return nil, errors.New("table not found in config")
+	}
+	v, ok := values.(map[string]interface{})
+	if !ok {
+		return nil, errors.New("config content is incorrect")
+	}
+	return v, nil
+}
+
+/* Get secret token from config. */
+func Config(config string, t ConfigBlock) (map[string]interface{}, error) {
+	r := readConfig{Table: t}
+	return r.Get(config)
 }
 
 /* Print examples with color. */

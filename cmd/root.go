@@ -23,22 +23,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
-
-type ConfigBlock string
-
-const (
-	ConfigBlockDiscord  ConfigBlock = "discord."
-	ConfigBlockICP      ConfigBlock = "west."
-	ConfigBlockLINE     ConfigBlock = "line."
-	ConfigBlockSlack    ConfigBlock = "slack."
-	ConfigBlockTelegram ConfigBlock = "telegram."
-)
-
-func (c ConfigBlock) String() string {
-	return string(c)
-}
 
 const (
 	DocTypeMan      = "man"
@@ -106,62 +91,6 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, "Output JSON format")
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, "Output YAML format")
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", "Specify config path (toml)")
-}
-
-/* Get secret token from config. */
-func Config(subFn ConfigBlock) error {
-	var err error
-	if rootConfig == "" {
-		return ErrConfNotFound
-	}
-	viper.SetConfigFile(rootConfig)
-	viper.SetConfigType(FileTypeTOML)
-	if err = viper.ReadInConfig(); err != nil {
-		return err
-	}
-	switch subFn {
-	case ConfigBlockICP:
-		if icpCmdGlobalVar.account == "" {
-			icpCmdGlobalVar.account = viper.GetString(ConfigBlockICP.String() + "account")
-		}
-		if icpCmdGlobalVar.key == "" {
-			icpCmdGlobalVar.key = viper.GetString(ConfigBlockICP.String() + "api_key")
-		}
-	case ConfigBlockTelegram:
-		if telegramCmdGlobalVar.token == "" {
-			telegramCmdGlobalVar.token = viper.GetString(ConfigBlockTelegram.String() + "token")
-		}
-		if telegramCmdGlobalVar.chat == 0 {
-			telegramCmdGlobalVar.chat = viper.GetInt64(ConfigBlockTelegram.String() + "chat_id")
-		}
-	case ConfigBlockSlack:
-		if slackCmdGlobalVar.token == "" {
-			slackCmdGlobalVar.token = viper.GetString(ConfigBlockSlack.String() + "token")
-		}
-		if slackCmdGlobalVar.channel == "" {
-			slackCmdGlobalVar.channel = viper.GetString(ConfigBlockSlack.String() + "channel_id")
-		}
-	case ConfigBlockLINE:
-		if lineCmdGlobalVar.secret == "" {
-			lineCmdGlobalVar.secret = viper.GetString(ConfigBlockLINE.String() + "secret")
-		}
-		if lineCmdGlobalVar.token == "" {
-			lineCmdGlobalVar.token = viper.GetString(ConfigBlockLINE.String() + "access_token")
-		}
-		if lineCmdGlobalVar.id == "" {
-			lineCmdGlobalVar.id = viper.GetString(ConfigBlockLINE.String() + "id")
-		}
-	case ConfigBlockDiscord:
-		if discordCmdGlobalVar.token == "" {
-			discordCmdGlobalVar.token = viper.GetString(ConfigBlockDiscord.String() + "token")
-		}
-		if discordCmdGlobalVar.channel == "" {
-			discordCmdGlobalVar.channel = viper.GetString(ConfigBlockDiscord.String() + "channel_id")
-		}
-	default:
-		return ErrConfNotFound
-	}
-	return err
 }
 
 type OutputFormat interface {

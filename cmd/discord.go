@@ -17,11 +17,13 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"path"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -56,17 +58,17 @@ var discordCmdGlobalVar DiscordFlag
 func init() {
 	rootCmd.AddCommand(discordCmd)
 
-	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.token, "token", "t", "", "Token")
-	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.channel, "channel-id", "c", "", "Channel ID")
+	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.Token, "token", "t", "", "Token")
+	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.Channel, "channel-id", "c", "", "Channel ID")
 	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.arg, "arg", "a", "", "Input argument")
 
 	discordCmd.AddCommand(discordSubCmdFile, discordSubCmdText, discordSubCmdTextTS)
 }
 
 type DiscordFlag struct {
+	Token   string `json:"token"`
+	Channel string `json:"channel_id"`
 	arg     string
-	token   string
-	channel string
 
 	api  *discordgo.Session
 	resp *discordgo.Message
@@ -99,16 +101,25 @@ func (d *DiscordFlag) Run(cmd *cobra.Command, args []string) {
 
 func (d *DiscordFlag) Init() error {
 	var err error
-	if d.token == "" && rootConfig != "" {
-		if err = Config(ConfigBlockDiscord); err != nil {
+	if d.Token == "" && rootConfig != "" {
+		v, err := common.Config(rootConfig, common.Discord)
+		if err != nil {
+			return err
+		}
+		b, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(b, d)
+		if err != nil {
 			return err
 		}
 	}
-	if d.token == "" {
+	if d.Token == "" {
 		return ErrTokenNotFound
 	}
 
-	d.api, err = discordgo.New("Bot " + d.token)
+	d.api, err = discordgo.New("Bot " + d.Token)
 	if d.api == nil {
 		return ErrInitialFailed
 	}
@@ -123,18 +134,18 @@ func (d *DiscordFlag) File() error {
 	}
 	filename := path.Base(d.arg)
 	defer f.Close()
-	d.resp, err = d.api.ChannelFileSend(d.channel, filename, f)
+	d.resp, err = d.api.ChannelFileSend(d.Channel, filename, f)
 	return err
 }
 
 func (d *DiscordFlag) Text() error {
 	var err error
-	d.resp, err = d.api.ChannelMessageSend(d.channel, d.arg)
+	d.resp, err = d.api.ChannelMessageSend(d.Channel, d.arg)
 	return err
 }
 
 func (d *DiscordFlag) TextTTS() error {
 	var err error
-	d.resp, err = d.api.ChannelMessageSendTTS(d.channel, d.arg)
+	d.resp, err = d.api.ChannelMessageSendTTS(d.Channel, d.arg)
 	return err
 }

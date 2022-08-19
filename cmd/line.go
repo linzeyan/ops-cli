@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -88,10 +89,10 @@ var lineCmdGlobalVar LineFlag
 func init() {
 	rootCmd.AddCommand(lineCmd)
 
-	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.secret, "secret", "s", "", "Channel Secret")
-	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.token, "token", "t", "", "Channel Access Token")
+	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.Secret, "secret", "s", "", "Channel Secret")
+	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.Token, "token", "t", "", "Channel Access Token")
 	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.arg, "arg", "a", "", "Function Argument")
-	lineCmd.PersistentFlags().StringVar(&lineCmdGlobalVar.id, "id", "", "UserID/GroupID/RoomID")
+	lineCmd.PersistentFlags().StringVar(&lineCmdGlobalVar.ID, "id", "", "UserID/GroupID/RoomID")
 
 	lineCmd.AddCommand(lineSubCmdID)
 	lineCmd.AddCommand(lineSubCmdPhoto)
@@ -100,9 +101,9 @@ func init() {
 }
 
 type LineFlag struct {
-	secret string
-	token  string
-	id     string
+	Secret string `json:"secret"`
+	Token  string `json:"access_token"`
+	ID     string `json:"id"`
 	arg    string
 
 	api  *linebot.Client
@@ -111,15 +112,24 @@ type LineFlag struct {
 
 func (l *LineFlag) Init() error {
 	var err error
-	if (l.secret == "" || l.token == "") && rootConfig != "" {
-		if err = Config(ConfigBlockLINE); err != nil {
+	if (l.Secret == "" || l.Token == "") && rootConfig != "" {
+		v, err := common.Config(rootConfig, common.LINE)
+		if err != nil {
+			return err
+		}
+		b, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(b, l)
+		if err != nil {
 			return err
 		}
 	}
-	if l.secret == "" || l.token == "" {
+	if l.Secret == "" || l.Token == "" {
 		return ErrTokenNotFound
 	}
-	l.api, err = linebot.New(l.secret, l.token)
+	l.api, err = linebot.New(l.Secret, l.Token)
 	if l.api == nil {
 		return ErrInitialFailed
 	}
@@ -171,13 +181,13 @@ func (l *LineFlag) Run(cmd *cobra.Command, _ []string) {
 	switch cmd.Name() {
 	case ImTypeText:
 		input := linebot.NewTextMessage(l.arg)
-		l.resp, err = l.api.PushMessage(l.id, input).Do()
+		l.resp, err = l.api.PushMessage(l.ID, input).Do()
 	case ImTypePhoto:
 		input := linebot.NewImageMessage(l.arg, l.arg)
-		l.resp, err = l.api.PushMessage(l.id, input).Do()
+		l.resp, err = l.api.PushMessage(l.ID, input).Do()
 	case ImTypeVideo:
 		input := linebot.NewVideoMessage(l.arg, l.arg)
-		l.resp, err = l.api.PushMessage(l.id, input).Do()
+		l.resp, err = l.api.PushMessage(l.ID, input).Do()
 	}
 	if err != nil {
 		log.Println(err)

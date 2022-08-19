@@ -17,8 +17,10 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"log"
 	"os"
+	"strconv"
 
 	tgBot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -90,8 +92,8 @@ var telegramCmdGlobalVar TelegramFlag
 func init() {
 	rootCmd.AddCommand(telegramCmd)
 
-	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.token, "token", "t", "", "Bot token (required)")
-	telegramCmd.PersistentFlags().Int64VarP(&telegramCmdGlobalVar.chat, "chat-id", "c", 0, "Chat ID")
+	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.Token, "token", "t", "", "Bot token (required)")
+	telegramCmd.PersistentFlags().Int64VarP(&telegramCmdGlobalVar.Chat, "chat-id", "c", 0, "Chat ID")
 	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.arg, "arg", "a", "", "Input argument")
 	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.caption, "caption", "", "", "Add caption for file")
 
@@ -106,10 +108,11 @@ func init() {
 
 type TelegramFlag struct {
 	/* Bind flags */
-	token   string
-	chat    int64
-	arg     string
-	caption string
+	Token      string `json:"token"`
+	ChatString string `json:"chat_id"`
+	Chat       int64
+	arg        string
+	caption    string
 
 	api  *tgBot.BotAPI
 	resp tgBot.Message
@@ -117,15 +120,29 @@ type TelegramFlag struct {
 
 func (t *TelegramFlag) Init() error {
 	var err error
-	if t.token == "" && rootConfig != "" {
-		if err = Config(ConfigBlockTelegram); err != nil {
+	if t.Token == "" && rootConfig != "" {
+		v, err := common.Config(rootConfig, common.Telegram)
+		if err != nil {
 			return err
 		}
+		b, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(b, t)
+		if err != nil {
+			return err
+		}
+		i, err := strconv.ParseInt(t.ChatString, 10, 64)
+		if err != nil {
+			return err
+		}
+		t.Chat = i
 	}
-	if t.token == "" {
+	if t.Token == "" {
 		return ErrTokenNotFound
 	}
-	t.api, err = tgBot.NewBotAPI(t.token)
+	t.api, err = tgBot.NewBotAPI(t.Token)
 	if t.api == nil {
 		return ErrInitialFailed
 	}
@@ -133,64 +150,64 @@ func (t *TelegramFlag) Init() error {
 }
 
 func (t TelegramFlag) Animation() error {
-	input := tgBot.NewAnimation(t.chat, t.parseFile(t.arg))
+	input := tgBot.NewAnimation(t.Chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
 func (t *TelegramFlag) Audio() error {
-	input := tgBot.NewAudio(t.chat, t.parseFile(t.arg))
+	input := tgBot.NewAudio(t.Chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
 func (t TelegramFlag) ChatDescription() error {
-	input := tgBot.NewChatDescription(t.chat, t.arg)
+	input := tgBot.NewChatDescription(t.Chat, t.arg)
 	return t.send(input)
 }
 
 func (t TelegramFlag) ChatPhoto() error {
-	input := tgBot.NewChatPhoto(t.chat, t.parseFile(t.arg))
+	input := tgBot.NewChatPhoto(t.Chat, t.parseFile(t.arg))
 	return t.send(input)
 }
 
 func (t TelegramFlag) ChatTitle() error {
-	input := tgBot.NewChatTitle(t.chat, t.arg)
+	input := tgBot.NewChatTitle(t.Chat, t.arg)
 	return t.send(input)
 }
 
 func (t TelegramFlag) Dice() error {
-	input := tgBot.NewDice(t.chat)
+	input := tgBot.NewDice(t.Chat)
 	return t.send(input)
 }
 
 func (t *TelegramFlag) File() error {
-	input := tgBot.NewDocument(t.chat, t.parseFile(t.arg))
+	input := tgBot.NewDocument(t.Chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
 func (t *TelegramFlag) Text() error {
-	input := tgBot.NewMessage(t.chat, t.arg)
+	input := tgBot.NewMessage(t.Chat, t.arg)
 	input.ParseMode = tgBot.ModeMarkdownV2
 	input.DisableWebPagePreview = true
 	return t.send(input)
 }
 
 func (t *TelegramFlag) Photo() error {
-	input := tgBot.NewPhoto(t.chat, t.parseFile(t.arg))
+	input := tgBot.NewPhoto(t.Chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
 func (t *TelegramFlag) Video() error {
-	input := tgBot.NewVideo(t.chat, t.parseFile(t.arg))
+	input := tgBot.NewVideo(t.Chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }
 
 func (t *TelegramFlag) Voice() error {
-	input := tgBot.NewVoice(t.chat, t.parseFile(t.arg))
+	input := tgBot.NewVoice(t.Chat, t.parseFile(t.arg))
 	input.Caption = t.caption
 	return t.send(input)
 }

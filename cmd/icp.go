@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 
@@ -30,19 +31,30 @@ var icpCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	Run: func(_ *cobra.Command, args []string) {
-		if (icpCmdGlobalVar.account == "" || icpCmdGlobalVar.key == "") && rootConfig != "" {
-			if err := Config(ConfigBlockICP); err != nil {
+		if (icpCmdGlobalVar.Account == "" || icpCmdGlobalVar.Key == "") && rootConfig != "" {
+			v, err := common.Config(rootConfig, common.ICP)
+			if err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
+			b, err := json.Marshal(v)
+			if err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
+			err = json.Unmarshal(b, &icpCmdGlobalVar)
+			if err != nil {
 				log.Println(err)
 				os.Exit(1)
 			}
 		}
-		if icpCmdGlobalVar.account == "" || icpCmdGlobalVar.key == "" {
+		if icpCmdGlobalVar.Account == "" || icpCmdGlobalVar.Key == "" {
 			log.Println(ErrTokenNotFound)
 			os.Exit(1)
 		}
 		icp.Domain = args[0]
-		icp.WestAccount = icpCmdGlobalVar.account
-		icp.WestApiKey = icpCmdGlobalVar.key
+		icp.WestAccount = icpCmdGlobalVar.Account
+		icp.WestApiKey = icpCmdGlobalVar.Key
 		OutputDefaultYAML(map[string]string{icp.Domain: icp.Check()})
 	},
 	Example: common.Examples(`# Print the ICP status
@@ -54,11 +66,12 @@ var icpCmdGlobalVar IcpFlags
 func init() {
 	rootCmd.AddCommand(icpCmd)
 
-	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.account, "account", "a", "", "Enter the WEST account")
-	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.key, "key", "k", "", "Enter the WEST api key")
+	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.Account, "account", "a", "", "Enter the WEST account")
+	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.Key, "key", "k", "", "Enter the WEST api key")
 	icpCmd.MarkFlagsRequiredTogether("account", "key")
 }
 
 type IcpFlags struct {
-	account, key string
+	Account string `json:"account"`
+	Key     string `json:"api_key"`
 }
