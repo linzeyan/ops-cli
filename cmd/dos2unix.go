@@ -24,7 +24,7 @@ import (
 )
 
 var dos2unixCmd = &cobra.Command{
-	Use:   "dos2unix",
+	Use:   "dos2unix [file...]",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Convert file eol to unix style",
 	Run: func(_ *cobra.Command, args []string) {
@@ -34,6 +34,8 @@ var dos2unixCmd = &cobra.Command{
 			}
 		}
 	},
+	DisableFlagsInUseLine: true,
+	DisableFlagParsing:    true,
 }
 
 func init() {

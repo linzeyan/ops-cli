@@ -61,19 +61,18 @@ var convertSubCmdCSV2YAML = &cobra.Command{
 
 /* DOS. */
 var convertSubCmdDOS2Unix = &cobra.Command{
-	Use:   "dos2unix",
+	Use:   "dos2unix [file...]",
+	Args:  cobra.MinimumNArgs(1),
 	Short: "Convert DOS to Unix format",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			_ = cmd.Help()
-			os.Exit(0)
-		}
+	Run: func(_ *cobra.Command, args []string) {
 		for _, f := range args {
 			if err := common.Dos2Unix(f); err != nil {
 				log.Printf("%s: %v\n", f, err)
 			}
 		}
 	},
+	DisableFlagsInUseLine: true,
+	DisableFlagParsing:    true,
 }
 
 /* JSON. */

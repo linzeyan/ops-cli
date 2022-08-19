@@ -40,6 +40,7 @@ var urlCmd = &cobra.Command{
 	Example: common.Examples(`# Get the real URL from the shortened URL
 ops-cli url https://goo.gl/maps/b37Aq3Anc7taXQDd9`),
 	DisableFlagsInUseLine: true,
+	DisableFlagParsing:    true,
 }
 
 func init() {
