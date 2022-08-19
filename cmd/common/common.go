@@ -15,7 +15,7 @@ var (
 	TimeNow = time.Now().Local()
 )
 
-/* Print examples with color. */
+/* Print string with color. */
 func Examples(s string) string {
 	c := color.New(color.FgYellow)
 	return c.Sprintf(`%s`, s)
