@@ -1,8 +1,6 @@
 package common
 
 import (
-	"errors"
-
 	"github.com/spf13/viper"
 )
 
@@ -10,11 +8,12 @@ import (
 type ConfigBlock string
 
 const (
-	Discord  ConfigBlock = "discord"
-	ICP      ConfigBlock = "west"
-	LINE     ConfigBlock = "line"
-	Slack    ConfigBlock = "slack"
-	Telegram ConfigBlock = "telegram"
+	configType ConfigBlock = "toml"
+	Discord    ConfigBlock = "discord"
+	ICP        ConfigBlock = "west"
+	LINE       ConfigBlock = "line"
+	Slack      ConfigBlock = "slack"
+	Telegram   ConfigBlock = "telegram"
 )
 
 func (c ConfigBlock) String() string {
@@ -23,24 +22,25 @@ func (c ConfigBlock) String() string {
 
 type readConfig struct {
 	table ConfigBlock
+	value map[string]interface{}
 }
 
-func (c readConfig) get(config string) (map[string]interface{}, error) {
+func (r *readConfig) get(config string) (map[string]interface{}, error) {
 	viper.SetConfigFile(config)
-	viper.SetConfigType("toml")
+	viper.SetConfigType(configType.String())
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
 	}
 	all := viper.AllSettings()
-	values, ok := all[c.table.String()]
+	values, ok := all[r.table.String()]
 	if !ok {
-		return nil, errors.New("table not found in config")
+		return nil, ErrConfigTable
 	}
-	v, ok := values.(map[string]interface{})
+	r.value, ok = values.(map[string]interface{})
 	if !ok {
-		return nil, errors.New("config content is incorrect")
+		return nil, ErrConfigContent
 	}
-	return v, nil
+	return r.value, nil
 }
 
 /* Get secret token from config. */

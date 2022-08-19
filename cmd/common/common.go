@@ -17,6 +17,12 @@ var (
 	TimeNow = time.Now().Local()
 )
 
+var (
+	ErrConfigContent = errors.New("config content is incorrect")
+	ErrConfigTable   = errors.New("table not found in the config")
+	ErrStatusCode    = errors.New("status code is not 200")
+)
+
 func Dos2Unix(filename string) error {
 	f, err := os.ReadFile(filename)
 	if err != nil {
@@ -68,5 +74,5 @@ func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, 
 		}
 		return content, err
 	}
-	return nil, errors.New("status code is not 200")
+	return nil, ErrStatusCode
 }

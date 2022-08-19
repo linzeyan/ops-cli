@@ -30,5 +30,8 @@ func HashAlgorithm(alg string) hash.Hash {
 		HashSha512_224: sha512.New512_224(),
 		HashSha512_256: sha512.New512_256(),
 	}
-	return m[alg]
+	if h, ok := m[alg]; ok {
+		return h
+	}
+	return nil
 }
