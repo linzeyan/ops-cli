@@ -26,6 +26,7 @@ import (
 	hashtag "github.com/abhinav/goldmark-hashtag"
 	mermaid "github.com/abhinav/goldmark-mermaid"
 	toc "github.com/abhinav/goldmark-toc"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"github.com/tomwright/dasel"
 	"github.com/tomwright/dasel/storage"
@@ -218,7 +219,7 @@ type ConvertFlag struct {
 }
 
 func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
-	if !ValidFile(c.inFile) {
+	if !validator.ValidFile(c.inFile) {
 		os.Exit(1)
 	}
 	slice := strings.Split(cmd.Name(), "2")

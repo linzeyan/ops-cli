@@ -25,6 +25,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -71,9 +72,9 @@ func (cf *CertFlag) Run(cmd *cobra.Command, args []string) {
 	var err error
 	input := args[0]
 	switch {
-	case ValidFile(input):
+	case validator.ValidFile(input):
 		cf.resp, err = cf.resp.CheckFile(input)
-	case ValidDomain(input) || ValidIPv4(input):
+	case validator.ValidDomain(input) || validator.ValidIPv4(input):
 		cf.resp, err = cf.resp.CheckHost(input + ":" + cf.port)
 	default:
 		os.Exit(1)

@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -79,7 +80,7 @@ func (e *EncrytpFlag) AesRun(cmd *cobra.Command, _ []string) {
 func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 	const keyFileExtension = ".key"
 	/* Read key file. */
-	if ValidFile(secret) {
+	if validator.ValidFile(secret) {
 		key, err := os.ReadFile(secret)
 		if err != nil {
 			return nil

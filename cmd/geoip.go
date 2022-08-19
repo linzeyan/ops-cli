@@ -25,6 +25,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -82,7 +83,7 @@ type geoIPSingle struct {
 
 func (geoIPSingle) Request(geoipInput string) (*geoIPSingle, error) {
 	/* Valid IP */
-	if !ValidIP(geoipInput) {
+	if !validator.ValidIP(geoipInput) {
 		return nil, ErrInvalidIP
 	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
@@ -106,7 +107,7 @@ func (geoIPBatch) Request(geoipBatch []string) (*geoIPBatch, error) {
 	/* Valid IP and combine args */
 	for i := range geoipBatch {
 		switch {
-		case ValidIP(geoipBatch[i]):
+		case validator.ValidIP(geoipBatch[i]):
 			ips += fmt.Sprintf(`"%s", `, geoipBatch[i])
 		default:
 			ip, err := net.LookupIP(geoipBatch[i])

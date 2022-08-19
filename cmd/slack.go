@@ -27,6 +27,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/slack-go/slack"
 	"github.com/spf13/cobra"
 )
@@ -136,9 +137,9 @@ func (s *SlackFlag) Photo() error {
 	var base64Image string
 	var err error
 	switch {
-	case ValidFile(s.arg):
+	case validator.ValidFile(s.arg):
 		base64Image, err = s.localFile()
-	case ValidURL(s.arg):
+	case validator.ValidURL(s.arg):
 		base64Image, err = s.remoteFile()
 	}
 	if err != nil {

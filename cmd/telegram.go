@@ -21,6 +21,7 @@ import (
 	"os"
 
 	tgBot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -243,9 +244,9 @@ func (t *TelegramFlag) Run(cmd *cobra.Command, _ []string) {
 
 func (t *TelegramFlag) parseFile(s string) tgBot.RequestFileData {
 	switch {
-	case ValidFile(s):
+	case validator.ValidFile(s):
 		return tgBot.FilePath(s)
-	case ValidURL(s):
+	case validator.ValidURL(s):
 		return tgBot.FileURL(s)
 	}
 	return nil

@@ -28,6 +28,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -98,7 +99,7 @@ func (e *EncodeFlag) Run(cmd *cobra.Command, args []string) {
 	var err error
 	var out string
 	var data any
-	switch ValidFile(args[0]) {
+	switch validator.ValidFile(args[0]) {
 	case true:
 		data, err = os.ReadFile(args[0])
 		if err != nil {

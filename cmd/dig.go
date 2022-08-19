@@ -22,6 +22,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )
@@ -49,7 +50,7 @@ var digCmd = &cobra.Command{
 		case lens > 1:
 			/* Find which arg is domain. */
 			for i := range args {
-				if ValidDomain(args[i]) || ValidIP(args[i]) {
+				if validator.ValidDomain(args[i]) || validator.ValidIP(args[i]) {
 					digDomain = args[i]
 					argsWithoutDomain = append(args[:i], args[i+1:]...)
 					break

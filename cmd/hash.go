@@ -24,6 +24,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -111,7 +112,7 @@ func (h *HashFlag) Hash(hasher hash.Hash, i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
-		if ValidFile(data) {
+		if validator.ValidFile(data) {
 			return h.WriteFile(hasher, data)
 		}
 		_, err = hasher.Write([]byte(data))

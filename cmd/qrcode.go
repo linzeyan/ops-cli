@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/linzeyan/qrcode"
 	"github.com/spf13/cobra"
 )
@@ -39,7 +40,7 @@ var qrcodeSubCmdRead = &cobra.Command{
 	Short: "Read QR code and print message",
 	Run: func(_ *cobra.Command, args []string) {
 		qrcodeCmdGlobalVar.text = args[0]
-		if !ValidFile(qrcodeCmdGlobalVar.text) {
+		if !validator.ValidFile(qrcodeCmdGlobalVar.text) {
 			log.Println(ErrFileNotFound)
 			os.Exit(1)
 		}

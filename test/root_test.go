@@ -8,7 +8,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/linzeyan/ops-cli/cmd"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 )
 
 const (
@@ -51,7 +51,7 @@ func TestDomain(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(fmt.Sprintf("%s", testCases[i].input), func(t *testing.T) {
-			if got := cmd.ValidDomain(testCases[i].input); got != testCases[i].expected {
+			if got := validator.ValidDomain(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -71,7 +71,7 @@ func TestFile(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := cmd.ValidFile(testCases[i].input); got != testCases[i].expected {
+			if got := validator.ValidFile(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -91,7 +91,7 @@ func TestIP(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := cmd.ValidIP(testCases[i].input); got != testCases[i].expected {
+			if got := validator.ValidIP(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -111,7 +111,7 @@ func TestIPv4(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := cmd.ValidIPv4(testCases[i].input); got != testCases[i].expected {
+			if got := validator.ValidIPv4(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -131,7 +131,7 @@ func TestIPv6(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := cmd.ValidIPv6(testCases[i].input); got != testCases[i].expected {
+			if got := validator.ValidIPv6(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -154,7 +154,7 @@ func TestUrl(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := cmd.ValidURL(testCases[i].input); got != testCases[i].expected {
+			if got := validator.ValidURL(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
