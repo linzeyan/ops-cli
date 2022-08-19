@@ -3,6 +3,8 @@ package common
 import (
 	"io"
 	"net/http"
+
+	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
 const UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
@@ -35,6 +37,37 @@ func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, 
 		return nil, ErrStatusCode
 	}
 	return io.ReadAll(resp.Body)
+}
+
+func HTTPRequestContentGB18030(url string, body io.Reader, methods ...string) ([]byte, error) {
+	var method string
+	if len(methods) == 0 {
+		method = http.MethodGet
+	} else {
+		method = methods[0]
+	}
+	var client = &http.Client{
+		Transport: &http.Transport{
+			DisableKeepAlives: true,
+		},
+	}
+	req, err := http.NewRequestWithContext(Context, method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	resp, err := client.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, ErrStatusCode
+	}
+	reader := simplifiedchinese.GB18030.NewDecoder().Reader(resp.Body)
+	return io.ReadAll(reader)
 }
 
 func HTTPRequestRedirectURL(uri string) (string, error) {
