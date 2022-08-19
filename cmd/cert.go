@@ -120,7 +120,7 @@ func (c *certResponse) CheckHost(host string) (*certResponse, error) {
 	defer conn.Close()
 
 	cert := conn.ConnectionState().PeerCertificates[0]
-	dayRemain := cert.NotAfter.Local().Sub(rootNow)
+	dayRemain := cert.NotAfter.Local().Sub(common.TimeNow)
 	var out = certResponse{
 		ExpiryTime: cert.NotAfter.Local().Format(time.RFC3339),
 		DNS:        cert.DNSNames,
@@ -165,7 +165,7 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 		return nil, ErrParseCert
 	}
 
-	dayRemain := cert[0].NotAfter.Local().Sub(rootNow)
+	dayRemain := cert[0].NotAfter.Local().Sub(common.TimeNow)
 	var out = certResponse{
 		ExpiryTime: cert[0].NotAfter.Local().Format(time.RFC3339),
 		DNS:        cert[0].DNSNames,

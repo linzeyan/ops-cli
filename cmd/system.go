@@ -23,6 +23,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
@@ -181,9 +182,9 @@ func (s *SystemFlag) DiskUsage() error {
 	s.diskResp = systemDiskUsageResponse{
 		Path:        info.Path,
 		Fstype:      info.Fstype,
-		Total:       ByteSize(info.Total).String(),
-		Free:        ByteSize(info.Free).String(),
-		Used:        ByteSize(info.Used).String(),
+		Total:       common.ByteSize(info.Total).String(),
+		Free:        common.ByteSize(info.Free).String(),
+		Used:        common.ByteSize(info.Used).String(),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
 	return err
@@ -262,10 +263,10 @@ func (s *SystemFlag) MemUsage() error {
 		return err
 	}
 	s.memResp = systemMemInfoResponse{
-		Total:       ByteSize(info.Total).String(),
-		Available:   ByteSize(info.Available).String(),
-		Free:        ByteSize(info.Free).String(),
-		Used:        ByteSize(info.Used).String(),
+		Total:       common.ByteSize(info.Total).String(),
+		Available:   common.ByteSize(info.Available).String(),
+		Free:        common.ByteSize(info.Free).String(),
+		Used:        common.ByteSize(info.Used).String(),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
 	return err

@@ -17,59 +17,14 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"errors"
 	"fmt"
-	"hash"
-	"io"
 	"log"
-	"net/http"
 	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
-
-type ByteSize float64
-
-const (
-	_           = iota
-	KB ByteSize = 1 << (10 * iota)
-	MB
-	GB
-	TB
-	PB
-	EB
-	ZB
-	YB
-)
-
-func (b ByteSize) String() string {
-	switch {
-	case b >= YB:
-		return fmt.Sprintf("%.2fYB", b/YB)
-	case b >= ZB:
-		return fmt.Sprintf("%.2fZB", b/ZB)
-	case b >= EB:
-		return fmt.Sprintf("%.2fEB", b/EB)
-	case b >= PB:
-		return fmt.Sprintf("%.2fPB", b/PB)
-	case b >= TB:
-		return fmt.Sprintf("%.2fTB", b/TB)
-	case b >= GB:
-		return fmt.Sprintf("%.2fGB", b/GB)
-	case b >= MB:
-		return fmt.Sprintf("%.2fMB", b/MB)
-	case b >= KB:
-		return fmt.Sprintf("%.2fKB", b/KB)
-	}
-	return fmt.Sprintf("%.2fB", b)
-}
 
 type ConfigBlock string
 
@@ -102,17 +57,6 @@ const (
 )
 
 const (
-	HashMd5        = "md5"
-	HashSha1       = "sha1"
-	HashSha224     = "sha224"
-	HashSha256     = "sha256"
-	HashSha384     = "sha384"
-	HashSha512     = "sha512"
-	HashSha512_224 = "sha512_224"
-	HashSha512_256 = "sha512_256"
-)
-
-const (
 	ImTypeAudio = "audio"
 	ImTypeFile  = "file"
 	ImTypeID    = "id"
@@ -120,16 +64,6 @@ const (
 	ImTypeText  = "text"
 	ImTypeVideo = "video"
 	ImTypeVoice = "voice"
-)
-
-type RandomCharacter string
-
-const (
-	LowercaseLetters RandomCharacter = "abcdefghijklmnopqrstuvwxyz"
-	UppercaseLetters RandomCharacter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	Symbols          RandomCharacter = "~!@#$%^&*()_+`-={}|[]\\:\"<>?,./"
-	Numbers          RandomCharacter = "0123456789"
-	AllSet           RandomCharacter = LowercaseLetters + UppercaseLetters + Symbols + Numbers
 )
 
 var (
@@ -161,9 +95,6 @@ var (
 	rootOutputJSON bool
 	rootOutputYAML bool
 )
-
-var rootNow = time.Now().Local()
-var rootContext = context.Background()
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
@@ -233,25 +164,11 @@ func Config(subFn ConfigBlock) error {
 	return err
 }
 
-func HashAlgorithm(alg string) hash.Hash {
-	m := map[string]hash.Hash{
-		HashMd5:        md5.New(),
-		HashSha1:       sha1.New(),
-		HashSha224:     sha256.New224(),
-		HashSha256:     sha256.New(),
-		HashSha384:     sha512.New384(),
-		HashSha512:     sha512.New(),
-		HashSha512_224: sha512.New512_224(),
-		HashSha512_256: sha512.New512_256(),
-	}
-	return m[alg]
-}
-
-type rootOutput interface {
+type OutputFormat interface {
 	String()
 }
 
-func OutputInterfaceString(r rootOutput) {
+func OutputInterfaceString(r OutputFormat) {
 	switch {
 	case rootOutputJSON:
 		PrintJSON(r)
@@ -317,38 +234,4 @@ func PrintYAML(i any) {
 
 func PrintString(i any) {
 	fmt.Printf("%s\n", i)
-}
-
-/* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
-func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, error) {
-	var method string
-	if len(methods) == 0 {
-		method = http.MethodGet
-	} else {
-		method = methods[0]
-	}
-	var client = &http.Client{
-		Transport: &http.Transport{
-			DisableKeepAlives: true,
-		},
-	}
-	req, err := http.NewRequestWithContext(rootContext, method, url, body)
-	if err != nil {
-		return nil, err
-	}
-	resp, err := client.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	}
-	if err != nil {
-		return nil, err
-	}
-	if resp.StatusCode == http.StatusOK {
-		content, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-		return content, err
-	}
-	return nil, ErrResponseStatus
 }

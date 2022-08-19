@@ -171,5 +171,5 @@ func (w WhoisFlag) CalculateDays(t string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return int(s.Local().Sub(rootNow.Local()).Hours() / 24), err
+	return int(s.Local().Sub(common.TimeNow.Local()).Hours() / 24), err
 }

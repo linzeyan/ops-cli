@@ -93,11 +93,11 @@ type OtpFlag struct {
 func (o *OtpFlag) SetTimeInterval() int64 {
 	switch o.period {
 	case 15:
-		return rootNow.Unix() / 15
+		return common.TimeNow.Unix() / 15
 	case 60:
-		return rootNow.Unix() / 60
+		return common.TimeNow.Unix() / 60
 	default:
-		return rootNow.Unix() / 30
+		return common.TimeNow.Unix() / 30
 	}
 }
 
@@ -114,9 +114,9 @@ func (o *OtpFlag) SetDigits() [2]int {
 
 func (o *OtpFlag) SetAlgorithm() func() hash.Hash {
 	switch strings.ToLower(o.alg) {
-	case HashSha256:
+	case common.HashSha256:
 		return sha256.New
-	case HashSha512:
+	case common.HashSha512:
 		return sha512.New
 	default:
 		return sha1.New

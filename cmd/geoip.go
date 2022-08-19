@@ -89,7 +89,7 @@ func (geoIPSingle) Request(geoipInput string) (*geoIPSingle, error) {
 	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 
-	content, err := HTTPRequestContent(apiURL, nil)
+	content, err := common.HTTPRequestContent(apiURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (geoIPBatch) Request(geoipBatch []string) (*geoIPBatch, error) {
 	ips = strings.TrimRight(ips, `, `) + `]`
 
 	apiURL := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
-	content, err := HTTPRequestContent(apiURL, strings.NewReader(ips), http.MethodPost)
+	content, err := common.HTTPRequestContent(apiURL, strings.NewReader(ips), http.MethodPost)
 	if err != nil {
 		return nil, err
 	}

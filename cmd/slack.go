@@ -130,7 +130,7 @@ func (s *SlackFlag) Init() error {
 
 func (s *SlackFlag) Text() error {
 	input := slack.MsgOptionText(s.arg, false)
-	_, _, _, err := s.api.SendMessageContext(rootContext, s.channel, input)
+	_, _, _, err := s.api.SendMessageContext(common.Context, s.channel, input)
 	return err
 }
 
@@ -147,7 +147,7 @@ func (s *SlackFlag) Photo() error {
 		return err
 	}
 
-	uploadFileKey := fmt.Sprintf("upload-f-to-slack-%d", rootNow.UnixNano())
+	uploadFileKey := fmt.Sprintf("upload-f-to-slack-%d", common.TimeNow.UnixNano())
 	decode, err := Encoder.Base64StdDecode(base64Image)
 	if err != nil {
 		return err
@@ -164,7 +164,7 @@ func (s *SlackFlag) Photo() error {
 	if err := f.Sync(); err != nil {
 		return err
 	}
-	_, err = s.api.UploadFileContext(rootContext, slack.FileUploadParameters{
+	_, err = s.api.UploadFileContext(common.Context, slack.FileUploadParameters{
 		Filetype: "image/png",
 		Filename: path.Base(s.arg),
 		Channels: []string{s.channel},
@@ -202,7 +202,7 @@ func (s *SlackFlag) localFile() (string, error) {
 }
 
 func (s *SlackFlag) remoteFile() (string, error) {
-	content, err := HTTPRequestContent(s.arg, nil)
+	content, err := common.HTTPRequestContent(s.arg, nil)
 	if err != nil {
 		return "", err
 	}

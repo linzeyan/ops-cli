@@ -24,6 +24,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
@@ -45,7 +46,7 @@ var hashCmd = &cobra.Command{
 }
 
 var hashSubCmdMd5 = &cobra.Command{
-	Use:   HashMd5 + " [string|file]",
+	Use:   common.HashMd5 + " [string|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Print MD5 Checksums",
 	Run:   Hasher.Run,
@@ -54,7 +55,7 @@ var hashSubCmdMd5 = &cobra.Command{
 }
 
 var hashSubCmdSha1 = &cobra.Command{
-	Use:   HashSha1 + " [string|file]",
+	Use:   common.HashSha1 + " [string|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-1 Checksums",
 	Run:   Hasher.Run,
@@ -63,7 +64,7 @@ var hashSubCmdSha1 = &cobra.Command{
 }
 
 var hashSubCmdSha256 = &cobra.Command{
-	Use:   HashSha256 + " [string|file]",
+	Use:   common.HashSha256 + " [string|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-256 Checksums",
 	Run:   Hasher.Run,
@@ -72,7 +73,7 @@ var hashSubCmdSha256 = &cobra.Command{
 }
 
 var hashSubCmdSha512 = &cobra.Command{
-	Use:   HashSha512 + " [string|file]",
+	Use:   common.HashSha512 + " [string|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Print SHA-512 Checksums",
 	Run:   Hasher.Run,
@@ -99,7 +100,7 @@ func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
 	var hasher hash.Hash
 	var out string
 	var err error
-	hasher = HashAlgorithm(cmd.Name())
+	hasher = common.HashAlgorithm(cmd.Name())
 	out, err = h.Hash(hasher, args[0])
 	if err != nil {
 		log.Println(err)
@@ -154,13 +155,13 @@ func (h *HashFlag) CheckFile(filename string) {
 		slice := strings.Fields(reader.Text())
 		switch len([]byte(slice[0])) {
 		case 32:
-			hasher = HashAlgorithm(HashMd5)
+			hasher = common.HashAlgorithm(common.HashMd5)
 		case 40:
-			hasher = HashAlgorithm(HashSha1)
+			hasher = common.HashAlgorithm(common.HashSha1)
 		case 64:
-			hasher = HashAlgorithm(HashSha256)
+			hasher = common.HashAlgorithm(common.HashSha256)
 		case 128:
-			hasher = HashAlgorithm(HashSha512)
+			hasher = common.HashAlgorithm(common.HashSha512)
 		}
 		got, err := h.WriteFile(hasher, slice[1])
 		if err != nil {
@@ -175,9 +176,9 @@ func (h *HashFlag) CheckFile(filename string) {
 }
 
 func (h *HashFlag) ListAll(s string) {
-	algs := []string{HashMd5, HashSha1, HashSha256, HashSha512}
+	algs := []string{common.HashMd5, common.HashSha1, common.HashSha256, common.HashSha512}
 	for _, alg := range algs {
-		hasher := HashAlgorithm(alg)
+		hasher := common.HashAlgorithm(alg)
 		out, err := h.Hash(hasher, s)
 		if err != nil {
 			PrintString(err)

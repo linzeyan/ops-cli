@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,17 +15,17 @@ func TestHashFile(t *testing.T) {
 	}{
 		{"../LICENSE",
 			map[string]string{
-				cmd.HashMd5:    "3b83ef96387f14655fc854ddc3c6bd57",
-				cmd.HashSha1:   "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
-				cmd.HashSha256: "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
-				cmd.HashSha512: "98f6b79b778f7b0a15415bd750c3a8a097d650511cb4ec8115188e115c47053fe700f578895c097051c9bc3dfb6197c2b13a15de203273e1a3218884f86e90e8",
+				common.HashMd5:    "3b83ef96387f14655fc854ddc3c6bd57",
+				common.HashSha1:   "2b8b815229aa8a61e483fb4ba0588b8b6c491890",
+				common.HashSha256: "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+				common.HashSha512: "98f6b79b778f7b0a15415bd750c3a8a097d650511cb4ec8115188e115c47053fe700f578895c097051c9bc3dfb6197c2b13a15de203273e1a3218884f86e90e8",
 			}},
 		{"assets/proxy.yaml",
 			map[string]string{
-				cmd.HashMd5:    "e18b4913dc4b2d61e39c6bd53c9d5f4f",
-				cmd.HashSha1:   "1207ddb9d9d65835d43587d246a1a6a0bed13d02",
-				cmd.HashSha256: "4cd53bc452432e850e83f9e3db5215d8fa6d9fb10d5de01157abe011ac69d90f",
-				cmd.HashSha512: "1a2a649cf401e6c6762698364af83e02324f2c8ee7d3c42605c8ac67dc8230622c38ef10833309033bab4b13077555e16e41fdc777b381deeddced3f26b9d0ec",
+				common.HashMd5:    "e18b4913dc4b2d61e39c6bd53c9d5f4f",
+				common.HashSha1:   "1207ddb9d9d65835d43587d246a1a6a0bed13d02",
+				common.HashSha256: "4cd53bc452432e850e83f9e3db5215d8fa6d9fb10d5de01157abe011ac69d90f",
+				common.HashSha512: "1a2a649cf401e6c6762698364af83e02324f2c8ee7d3c42605c8ac67dc8230622c38ef10833309033bab4b13077555e16e41fdc777b381deeddced3f26b9d0ec",
 			}},
 	}
 	for _, testCase := range testCases {
@@ -35,7 +36,7 @@ func TestHashFile(t *testing.T) {
 		}
 		for k, v := range testCase.expected {
 			t.Run(k, func(t *testing.T) {
-				got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(k), testCase.input)
+				got, err := cmd.Hasher.Hash(common.HashAlgorithm(k), testCase.input)
 				if err != nil {
 					t.Error(testCase.input, k, v, err)
 				}
@@ -54,8 +55,8 @@ func TestMd5(t *testing.T) {
 		{"https://github.com", "3097fca9b1ec8942c4305e550ef1b50a"},
 	}
 	for _, testCase := range testCases {
-		t.Run(cmd.HashMd5, func(t *testing.T) {
-			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashMd5), testCase.input)
+		t.Run(common.HashMd5, func(t *testing.T) {
+			got, err := cmd.Hasher.Hash(common.HashAlgorithm(common.HashMd5), testCase.input)
 			if err != nil {
 				t.Error(testCase.input, err)
 			}
@@ -73,8 +74,8 @@ func TestSha1(t *testing.T) {
 		{"https://github.com", "84b7e44aa54d002eac8d00f5bfa9cc93410f2a48"},
 	}
 	for _, testCase := range testCases {
-		t.Run(cmd.HashSha1, func(t *testing.T) {
-			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha1), testCase.input)
+		t.Run(common.HashSha1, func(t *testing.T) {
+			got, err := cmd.Hasher.Hash(common.HashAlgorithm(common.HashSha1), testCase.input)
 			if err != nil {
 				t.Error(testCase.input, err)
 			}
@@ -92,8 +93,8 @@ func TestSha256(t *testing.T) {
 		{"https://github.com", "996e1f714b08e971ec79e3bea686287e66441f043177999a13dbc546d8fe402a"},
 	}
 	for _, testCase := range testCases {
-		t.Run(cmd.HashSha256, func(t *testing.T) {
-			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha256), testCase.input)
+		t.Run(common.HashSha256, func(t *testing.T) {
+			got, err := cmd.Hasher.Hash(common.HashAlgorithm(common.HashSha256), testCase.input)
 			if err != nil {
 				t.Error(testCase.input, err)
 			}
@@ -120,8 +121,8 @@ func TestSha512(t *testing.T) {
 		},
 	}
 	for _, testCase := range testCases {
-		t.Run(cmd.HashSha512, func(t *testing.T) {
-			got, err := cmd.Hasher.Hash(cmd.HashAlgorithm(cmd.HashSha512), testCase.input)
+		t.Run(common.HashSha512, func(t *testing.T) {
+			got, err := cmd.Hasher.Hash(common.HashAlgorithm(common.HashSha512), testCase.input)
 			if err != nil {
 				t.Error(testCase.input, err)
 			}

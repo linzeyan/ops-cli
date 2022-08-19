@@ -119,6 +119,16 @@ func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 	PrintString(p)
 }
 
+type RandomCharacter string
+
+const (
+	LowercaseLetters RandomCharacter = "abcdefghijklmnopqrstuvwxyz"
+	UppercaseLetters RandomCharacter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	Symbols          RandomCharacter = "~!@#$%^&*()_+`-={}|[]\\:\"<>?,./"
+	Numbers          RandomCharacter = "0123456789"
+	AllSet           RandomCharacter = LowercaseLetters + UppercaseLetters + Symbols + Numbers
+)
+
 type RandomString []byte
 
 func (RandomString) GenerateString(length int, charSet RandomCharacter) ([]byte, error) {
