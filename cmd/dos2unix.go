@@ -18,22 +18,18 @@ package cmd
 
 import (
 	"log"
-	"os"
-	"regexp"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
 var dos2unixCmd = &cobra.Command{
 	Use:   "dos2unix",
+	Args:  cobra.MinimumNArgs(1),
 	Short: "Convert file eol to unix style",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			_ = cmd.Help()
-			os.Exit(0)
-		}
+	Run: func(_ *cobra.Command, args []string) {
 		for _, f := range args {
-			if err := Dos2Unix(f); err != nil {
+			if err := common.Dos2Unix(f); err != nil {
 				log.Printf("%s: %v\n", f, err)
 			}
 		}
@@ -42,18 +38,4 @@ var dos2unixCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(dos2unixCmd)
-}
-
-func Dos2Unix(filename string) error {
-	f, err := os.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-	stat, err := os.Stat(filename)
-	if err != nil {
-		return err
-	}
-	eol := regexp.MustCompile(`\r\n`)
-	f = eol.ReplaceAllLiteral(f, []byte{'\n'})
-	return os.WriteFile(filename, f, stat.Mode())
 }

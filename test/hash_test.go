@@ -30,7 +30,7 @@ func TestHashFile(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		if isWindows() {
-			if err := cmd.Dos2Unix(testCase.input); err != nil {
+			if err := common.Dos2Unix(testCase.input); err != nil {
 				t.Error(err)
 			}
 		}

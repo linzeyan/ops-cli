@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"os"
+	"regexp"
 	"time"
 
 	"github.com/fatih/color"
@@ -14,6 +16,20 @@ var (
 	Context = context.Background()
 	TimeNow = time.Now().Local()
 )
+
+func Dos2Unix(filename string) error {
+	f, err := os.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(filename)
+	if err != nil {
+		return err
+	}
+	eol := regexp.MustCompile(`\r\n`)
+	f = eol.ReplaceAllLiteral(f, []byte{'\n'})
+	return os.WriteFile(filename, f, stat.Mode())
+}
 
 /* Print string with color. */
 func Examples(s string) string {

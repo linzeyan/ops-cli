@@ -69,7 +69,7 @@ var convertSubCmdDOS2Unix = &cobra.Command{
 			os.Exit(0)
 		}
 		for _, f := range args {
-			if err := Dos2Unix(f); err != nil {
+			if err := common.Dos2Unix(f); err != nil {
 				log.Printf("%s: %v\n", f, err)
 			}
 		}
