@@ -12,7 +12,7 @@ channel_id = "CHANNEL"
 token = "token"
 
 [telegram]
-chat_id = 12345678
+chat_id = "12345678"
 token = "token:token"
 
 [west]
