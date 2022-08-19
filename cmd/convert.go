@@ -17,25 +17,16 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
 	"log"
 	"os"
 	"path"
 	"strings"
 
-	hashtag "github.com/abhinav/goldmark-hashtag"
-	mermaid "github.com/abhinav/goldmark-mermaid"
-	toc "github.com/abhinav/goldmark-toc"
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"github.com/tomwright/dasel"
 	"github.com/tomwright/dasel/storage"
-	"github.com/yuin/goldmark"
-	emoji "github.com/yuin/goldmark-emoji"
-	"github.com/yuin/goldmark/extension"
-	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer/html"
 )
 
 var convertCmd = &cobra.Command{
@@ -105,18 +96,6 @@ var convertSubCmdJSON2YAML = &cobra.Command{
 	Use:   "json2yaml",
 	Short: "Convert json to yaml format",
 	Run:   convertCmdGlobalVar.Run,
-}
-
-/* Markdown. */
-var convertSubCmdMarkdown2HTML = &cobra.Command{
-	Use:   "markdown2html",
-	Short: "Convert markdown to html format",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := convertCmdGlobalVar.ConvertMarkdown2HTML(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-	},
 }
 
 /* TOML. */
@@ -196,8 +175,6 @@ func init() {
 	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.outFile, "out", "o", "", "Output file")
 	/* dos2unix */
 	convertCmd.AddCommand(convertSubCmdDOS2Unix)
-	/* Markdown */
-	convertCmd.AddCommand(convertSubCmdMarkdown2HTML)
 	/* CSV */
 	convertCmd.AddCommand(convertSubCmdCSV2JSON, convertSubCmdCSV2TOML, convertSubCmdCSV2XML, convertSubCmdCSV2YAML)
 	/* JSON */
@@ -215,12 +192,11 @@ type ConvertFlag struct {
 	inType  string
 	outFile string
 	outType string
-
-	readFile []byte
 }
 
 func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
 	if !validator.ValidFile(c.inFile) {
+		log.Println(`Error: required flag(s) "in" not set`)
 		os.Exit(1)
 	}
 	slice := strings.Split(cmd.Name(), "2")
@@ -244,45 +220,4 @@ func (c *ConvertFlag) Convert() error {
 	return node.WriteToFile(c.outFile, c.outType, []storage.ReadWriteOption{
 		storage.PrettyPrintOption(true),
 	})
-}
-
-func (c *ConvertFlag) ConvertMarkdown2HTML() error {
-	var err error
-	c.readFile, err = os.ReadFile(c.inFile)
-	if err != nil {
-		return err
-	}
-	stat, err := os.Stat(c.inFile)
-	if err != nil {
-		return err
-	}
-	md := goldmark.New(
-		goldmark.WithExtensions(
-			extension.GFM,
-			extension.Linkify,
-			extension.Strikethrough,
-			extension.Table,
-			extension.TaskList,
-			extension.Typographer,
-			emoji.Emoji,
-			&hashtag.Extender{},
-			&mermaid.Extender{},
-			&toc.Extender{},
-		),
-		goldmark.WithParserOptions(
-			parser.WithAutoHeadingID(),
-			parser.WithBlockParsers(),
-			parser.WithInlineParsers(),
-			parser.WithParagraphTransformers(),
-		),
-		goldmark.WithRendererOptions(
-			html.WithHardWraps(),
-			html.WithXHTML(),
-		),
-	)
-	var buf bytes.Buffer
-	if err := md.Convert(c.readFile, &buf); err != nil {
-		return err
-	}
-	return os.WriteFile(c.outFile, buf.Bytes(), stat.Mode())
 }
