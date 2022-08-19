@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -117,11 +116,7 @@ func (l *LineFlag) Init() error {
 		if err != nil {
 			return err
 		}
-		b, err := json.Marshal(v)
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(b, l)
+		err = Encoder.JSONMarshaler(v, l)
 		if err != nil {
 			return err
 		}

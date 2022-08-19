@@ -244,6 +244,18 @@ func (e *EncodeFlag) JSONDecode(r io.Reader, i any) (any, error) {
 	return i, err
 }
 
+func (e *EncodeFlag) JSONMarshaler(src, dst any) error {
+	bytes, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(bytes, dst)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (e *EncodeFlag) PemEncode(b *pem.Block) (string, error) {
 	var buf bytes.Buffer
 	err := pem.Encode(&buf, b)

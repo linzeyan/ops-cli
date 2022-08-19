@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"strconv"
@@ -108,11 +107,11 @@ func init() {
 
 type TelegramFlag struct {
 	/* Bind flags */
-	Token      string `json:"token"`
-	ChatString string `json:"chat_id"`
-	Chat       int64
-	arg        string
-	caption    string
+	Token   string `json:"token"`
+	ChatID  string `json:"chat_id"`
+	Chat    int64
+	arg     string
+	caption string
 
 	api  *tgBot.BotAPI
 	resp tgBot.Message
@@ -125,15 +124,11 @@ func (t *TelegramFlag) Init() error {
 		if err != nil {
 			return err
 		}
-		b, err := json.Marshal(v)
+		err = Encoder.JSONMarshaler(v, t)
 		if err != nil {
 			return err
 		}
-		err = json.Unmarshal(b, t)
-		if err != nil {
-			return err
-		}
-		i, err := strconv.ParseInt(t.ChatString, 10, 64)
+		i, err := strconv.ParseInt(t.ChatID, 10, 64)
 		if err != nil {
 			return err
 		}

@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"path"
@@ -106,11 +105,7 @@ func (d *DiscordFlag) Init() error {
 		if err != nil {
 			return err
 		}
-		b, err := json.Marshal(v)
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(b, d)
+		err = Encoder.JSONMarshaler(v, d)
 		if err != nil {
 			return err
 		}

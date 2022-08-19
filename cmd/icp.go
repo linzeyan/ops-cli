@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 
@@ -37,12 +36,7 @@ var icpCmd = &cobra.Command{
 				log.Println(err)
 				os.Exit(1)
 			}
-			b, err := json.Marshal(v)
-			if err != nil {
-				log.Println(err)
-				os.Exit(1)
-			}
-			err = json.Unmarshal(b, &icpCmdGlobalVar)
+			err = Encoder.JSONMarshaler(v, &icpCmdGlobalVar)
 			if err != nil {
 				log.Println(err)
 				os.Exit(1)

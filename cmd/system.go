@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -288,13 +287,13 @@ type systemNetIOResponse struct {
 }
 
 type systemNetInterfaceResponse struct {
-	Index        int      `json:"index"`
-	MTU          int      `json:"mtu"`
-	Name         string   `json:"name"`
-	HardwareAddr string   `json:"hardwareAddr"`
-	Flags        []string `json:"flags"`
+	Index        int      `json:"index,omitempty"`
+	MTU          int      `json:"mtu,omitempty"`
+	Name         string   `json:"name,omitempty"`
+	HardwareAddr string   `json:"hardwareAddr,omitempty"`
+	Flags        []string `json:"flags,omitempty"`
 
-	Addrs net.InterfaceAddrList `json:"addrs"`
+	Addrs net.InterfaceAddrList `json:"addrs,omitempty"`
 }
 
 func (s *SystemFlag) NetInfo() error {
@@ -302,11 +301,8 @@ func (s *SystemFlag) NetInfo() error {
 	if err != nil {
 		return err
 	}
-	data, err := json.Marshal(info[0])
+	err = Encoder.JSONMarshaler(info[0], &s.netResp)
 	if err != nil {
-		return err
-	}
-	if err := json.Unmarshal(data, &s.netResp); err != nil {
 		return err
 	}
 	if !s.iface && !s.aiface {

@@ -74,17 +74,17 @@ func (c ConfigBlock) String() string {
 }
 
 type readConfig struct {
-	Table ConfigBlock
+	table ConfigBlock
 }
 
-func (c readConfig) Get(config string) (map[string]interface{}, error) {
+func (c readConfig) get(config string) (map[string]interface{}, error) {
 	viper.SetConfigFile(config)
 	viper.SetConfigType("toml")
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
 	}
 	all := viper.AllSettings()
-	values, ok := all[c.Table.String()]
+	values, ok := all[c.table.String()]
 	if !ok {
 		return nil, errors.New("table not found in config")
 	}
@@ -97,8 +97,8 @@ func (c readConfig) Get(config string) (map[string]interface{}, error) {
 
 /* Get secret token from config. */
 func Config(config string, t ConfigBlock) (map[string]interface{}, error) {
-	r := readConfig{Table: t}
-	return r.Get(config)
+	r := readConfig{table: t}
+	return r.get(config)
 }
 
 /* Print examples with color. */

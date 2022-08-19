@@ -19,7 +19,6 @@ package cmd
 import (
 	"bytes"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"image/jpeg"
 	"image/png"
@@ -119,11 +118,7 @@ func (s *SlackFlag) Init() error {
 		if err != nil {
 			return err
 		}
-		b, err := json.Marshal(v)
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(b, s)
+		err = Encoder.JSONMarshaler(v, s)
 		if err != nil {
 			return err
 		}
