@@ -102,11 +102,8 @@ func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 	}
 	/* If secret is not a file and not a valid key, generate a new key. */
 	var p RandomString
-	key, err := p.GenerateString(32, AllSet)
-	if err != nil {
-		return nil
-	}
-	err = os.WriteFile(path.Base(filename)+keyFileExtension, key, perm)
+	key := p.GenerateString(32, AllSet)
+	err := os.WriteFile(path.Base(filename)+keyFileExtension, key, perm)
 	if err != nil {
 		return nil
 	}

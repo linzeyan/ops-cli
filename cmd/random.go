@@ -19,10 +19,8 @@ package cmd
 import (
 	"bytes"
 	"crypto/rand"
-	"log"
 	"math/big"
 	mathRand "math/rand"
-	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
@@ -79,25 +77,10 @@ var randomSubCmdBootstrap = &cobra.Command{
 	Use:   "bootstrap-token",
 	Short: "Generate a bootstrap token",
 	Run: func(_ *cobra.Command, _ []string) {
-		var id, token string
-		var err error
 		var r RandomString
-		r, err = r.GenerateString(11, AllSet)
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		id, err = Encoder.HexEncode(r.Bytes()[0:3])
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		token, err = Encoder.HexEncode(r.Bytes()[3:])
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		PrintString(id + "." + token)
+		r = r.GenerateString(11, AllSet)
+		id := r.Hex()
+		PrintString(id[0:6] + "." + id[6:])
 	},
 	Example: common.Examples(`# Generate a bootstrap token
 ops-cli random bootstrap-token`),
@@ -129,23 +112,18 @@ type RandomFlag struct {
 }
 
 func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
-	var err error
 	var p RandomString
 	switch cmd.Name() {
 	case "number":
-		p, err = p.GenerateString(randomCmdGlobalVar.length, Numbers)
+		p = p.GenerateString(randomCmdGlobalVar.length, Numbers)
 	case "symbol":
-		p, err = p.GenerateString(randomCmdGlobalVar.length, Symbols)
+		p = p.GenerateString(randomCmdGlobalVar.length, Symbols)
 	case "uppercase":
-		p, err = p.GenerateString(randomCmdGlobalVar.length, UppercaseLetters)
+		p = p.GenerateString(randomCmdGlobalVar.length, UppercaseLetters)
 	case "lowercase":
-		p, err = p.GenerateString(randomCmdGlobalVar.length, LowercaseLetters)
+		p = p.GenerateString(randomCmdGlobalVar.length, LowercaseLetters)
 	case "random":
-		p, err = p.GenerateAll(randomCmdGlobalVar.length, randomCmdGlobalVar.lower, randomCmdGlobalVar.upper, randomCmdGlobalVar.symbol, randomCmdGlobalVar.number)
-	}
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		p = p.GenerateAll(randomCmdGlobalVar.length, randomCmdGlobalVar.lower, randomCmdGlobalVar.upper, randomCmdGlobalVar.symbol, randomCmdGlobalVar.number)
 	}
 	PrintString(p)
 }
@@ -162,60 +140,46 @@ const (
 
 type RandomString []byte
 
-func (RandomString) GenerateString(length int, charSet RandomCharacter) ([]byte, error) {
+func (RandomString) GenerateString(length int, charSet RandomCharacter) RandomString {
 	var buf bytes.Buffer
-	var err error
 	for i := int(0); i < length; i++ {
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))
 		if err != nil {
-			return nil, err
+			return nil
 		}
 		if err = buf.WriteByte(charSet[n.Int64()]); err != nil {
-			return nil, err
+			return nil
 		}
 	}
-	return buf.Bytes(), err
+	return buf.Bytes()
 }
 
-func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) ([]byte, error) {
-	var err error
-	var remain []byte
-	var result []byte
+func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) RandomString {
+	var result RandomString
 	leave := length - minLower - minUpper - minSymbol - minNumber
 	if leave < 0 {
-		return nil, ErrInvalidLength
+		return nil
 	}
-	lower, err := r.GenerateString(minLower, LowercaseLetters)
-	if err != nil {
-		return result, err
-	}
+	lower := r.GenerateString(minLower, LowercaseLetters)
 	result = append(result, lower...)
-	upper, err := r.GenerateString(minUpper, UppercaseLetters)
-	if err != nil {
-		return result, err
-	}
+
+	upper := r.GenerateString(minUpper, UppercaseLetters)
 	result = append(result, upper...)
-	symbol, err := r.GenerateString(minSymbol, Symbols)
-	if err != nil {
-		return result, err
-	}
+
+	symbol := r.GenerateString(minSymbol, Symbols)
 	result = append(result, symbol...)
-	num, err := r.GenerateString(minNumber, Numbers)
-	if err != nil {
-		return result, err
-	}
+
+	num := r.GenerateString(minNumber, Numbers)
 	result = append(result, num...)
+
 	if leave != 0 {
-		remain, err = r.GenerateString(leave, AllSet)
-		if err != nil {
-			return result, err
-		}
+		remain := r.GenerateString(leave, AllSet)
+		result = append(result, remain...)
 	}
-	result = append(result, remain...)
 	mathRand.Shuffle(len(result), func(i, j int) {
 		result[i], result[j] = result[j], result[i]
 	})
-	return result, err
+	return result
 }
 
 func (r RandomString) Base64() string {
