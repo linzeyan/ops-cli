@@ -30,18 +30,20 @@ import (
 )
 
 var hashCmd = &cobra.Command{
-	Use:   "hash [file]",
+	Use:   "hash [string|file]",
+	Args:  cobra.ExactArgs(1),
 	Short: "Hash string or file",
 	Run: func(cmd *cobra.Command, args []string) {
-		if Hasher.check && len(args) != 0 {
+		switch {
+		case Hasher.check:
 			Hasher.CheckFile(args[0])
 			return
-		}
-		if Hasher.list && len(args) != 0 {
+		case Hasher.list:
 			Hasher.ListAll(args[0])
 			return
+		default:
+			_ = cmd.Help()
 		}
-		_ = cmd.Help()
 	},
 }
 
@@ -97,11 +99,8 @@ type HashFlag struct {
 }
 
 func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
-	var hasher hash.Hash
-	var out string
-	var err error
-	hasher = common.HashAlgorithm(cmd.Name())
-	out, err = h.Hash(hasher, args[0])
+	hasher := common.HashAlgorithm(cmd.Name())
+	out, err := h.Hash(hasher, args[0])
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
@@ -142,7 +141,6 @@ func (h *HashFlag) WriteFile(hasher hash.Hash, filename string) (string, error) 
 }
 
 func (h *HashFlag) CheckFile(filename string) {
-	var err error
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Println(err)
@@ -177,6 +175,7 @@ func (h *HashFlag) CheckFile(filename string) {
 
 func (h *HashFlag) ListAll(s string) {
 	algs := []string{common.HashMd5, common.HashSha1, common.HashSha256, common.HashSha512}
+	m := make(map[string]string)
 	for _, alg := range algs {
 		hasher := common.HashAlgorithm(alg)
 		out, err := h.Hash(hasher, s)
@@ -184,6 +183,7 @@ func (h *HashFlag) ListAll(s string) {
 			PrintString(err)
 			continue
 		}
-		PrintString(strings.ToUpper(alg) + ":\t" + out)
+		m[strings.ToUpper(alg)] = out
 	}
+	OutputDefaultYAML(m)
 }
