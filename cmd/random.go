@@ -75,6 +75,36 @@ var randomSubCmdUpper = &cobra.Command{
 ops-cli random uppercase`),
 }
 
+var randomSubCmdBootstrap = &cobra.Command{
+	Use:   "bootstrap-token",
+	Short: "Generate a bootstrap token",
+	Run: func(_ *cobra.Command, _ []string) {
+		var id, token string
+		var err error
+		var r RandomString
+		r, err = r.GenerateString(11, AllSet)
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+		id, err = Encoder.HexEncode(r.Bytes()[0:3])
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+		token, err = Encoder.HexEncode(r.Bytes()[3:])
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+		PrintString(id + "." + token)
+	},
+	Example: common.Examples(`# Generate a bootstrap token
+ops-cli random bootstrap-token`),
+	DisableFlagParsing:    true,
+	DisableFlagsInUseLine: true,
+}
+
 var randomCmdGlobalVar RandomFlag
 
 func init() {
@@ -90,6 +120,7 @@ func init() {
 	randomCmd.AddCommand(randomSubCmdNumber)
 	randomCmd.AddCommand(randomSubCmdSymbol)
 	randomCmd.AddCommand(randomSubCmdUpper)
+	randomCmd.AddCommand(randomSubCmdBootstrap)
 }
 
 type RandomFlag struct {
@@ -187,9 +218,29 @@ func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumb
 	return result, err
 }
 
+func (r RandomString) Base64() string {
+	out, err := Encoder.Base64StdEncode(r.Bytes())
+	if err != nil {
+		return ""
+	}
+	return out
+}
+
+func (r RandomString) Hex() string {
+	out, err := Encoder.HexEncode(r.Bytes())
+	if err != nil {
+		return ""
+	}
+	return out
+}
+
 func (r RandomString) String() string {
 	if r == nil {
 		return "<nil>"
 	}
 	return string(r)
+}
+
+func (r RandomString) Bytes() []byte {
+	return []byte(r)
 }
