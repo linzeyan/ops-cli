@@ -7,7 +7,7 @@ import (
 	"github.com/linzeyan/ops-cli/cmd/validator"
 )
 
-func TestDomain(t *testing.T) {
+func TestValidatorDomain(t *testing.T) {
 	testCases := []struct {
 		input    interface{}
 		expected bool
@@ -28,7 +28,7 @@ func TestDomain(t *testing.T) {
 	}
 }
 
-func TestFile(t *testing.T) {
+func TestValidatorFile(t *testing.T) {
 	testCases := []struct {
 		input    string
 		expected bool
@@ -48,7 +48,7 @@ func TestFile(t *testing.T) {
 	}
 }
 
-func TestIP(t *testing.T) {
+func TestValidatorIP(t *testing.T) {
 	testCases := []struct {
 		input    string
 		expected bool
@@ -68,7 +68,7 @@ func TestIP(t *testing.T) {
 	}
 }
 
-func TestIPv4(t *testing.T) {
+func TestValidatorIPv4(t *testing.T) {
 	testCases := []struct {
 		input    string
 		expected bool
@@ -88,7 +88,7 @@ func TestIPv4(t *testing.T) {
 	}
 }
 
-func TestIPv6(t *testing.T) {
+func TestValidatorIPv6(t *testing.T) {
 	testCases := []struct {
 		input    string
 		expected bool
@@ -108,7 +108,7 @@ func TestIPv6(t *testing.T) {
 	}
 }
 
-func TestUrl(t *testing.T) {
+func TestValidatorUrl(t *testing.T) {
 	testCases := []struct {
 		input    string
 		expected bool
