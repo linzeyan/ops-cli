@@ -22,6 +22,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
@@ -109,7 +110,7 @@ var digCmd = &cobra.Command{
 		}
 		OutputInterfaceString(&digOutput)
 	},
-	Example: Examples(`# Query A record
+	Example: common.Examples(`# Query A record
 ops-cli dig google.com
 ops-cli dig @1.1.1.1 google.com A
 ops-cli dig @8.8.8.8 google.com AAAA

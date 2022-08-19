@@ -25,6 +25,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +35,7 @@ var certCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Check tls cert expiry time",
 	Run:   certCmdGlobalVar.Run,
-	Example: Examples(`# Print certificate expiration time, DNS, IP and issuer
+	Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
 ops-cli cert www.google.com
 
 # Only print certificate expiration time

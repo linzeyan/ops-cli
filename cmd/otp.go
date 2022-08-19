@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -45,7 +46,7 @@ var otpSubCmdCalculate = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Calculate passcode",
 	Run:   otpCmdGlobalVar.Run,
-	Example: Examples(`# Calculate the passcode for the specified secret
+	Example: common.Examples(`# Calculate the passcode for the specified secret
 ops-cli otp calculate 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
 ops-cli otp calculate 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
 
@@ -57,7 +58,7 @@ var otpSubCmdGenerate = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate otp secret",
 	Run:   otpCmdGlobalVar.Run,
-	Example: Examples(`# Generate OTP and specify a period of 15 seconds
+	Example: common.Examples(`# Generate OTP and specify a period of 15 seconds
 ops-cli otp generate -p 15
 
 # Generate OTP and specify SHA256 algorithm

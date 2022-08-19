@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +47,7 @@ var whoisCmd = &cobra.Command{
 		}
 		OutputInterfaceString(resp)
 	},
-	Example: Examples(`# Search domain
+	Example: common.Examples(`# Search domain
 ops-cli whois apple.com`),
 }
 

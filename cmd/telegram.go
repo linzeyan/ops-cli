@@ -21,6 +21,7 @@ import (
 	"os"
 
 	tgBot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
@@ -43,7 +44,7 @@ var telegramSubCmdFile = &cobra.Command{
 	Use:   "file",
 	Short: "Send file to Telegram",
 	Run:   telegramCmdGlobalVar.Run,
-	Example: Examples(`# Send file
+	Example: common.Examples(`# Send file
 ops-cli Telegram file -t bot_token -c chat_id -a '~/readme.md'`),
 }
 
@@ -51,7 +52,7 @@ var telegramSubCmdID = &cobra.Command{
 	Use:   "id",
 	Short: "Get chat ID",
 	Run:   telegramCmdGlobalVar.Run,
-	Example: Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
+	Example: common.Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
 ops-cli Telegram id --config ~/.config.toml`),
 }
 
@@ -59,7 +60,7 @@ var telegramSubCmdText = &cobra.Command{
 	Use:   "text",
 	Short: "Send text to Telegram",
 	Run:   telegramCmdGlobalVar.Run,
-	Example: Examples(`# Send message
+	Example: common.Examples(`# Send message
 ops-cli Telegram text -t bot_token -c chat_id -a 'Hello word'`),
 }
 
@@ -67,7 +68,7 @@ var telegramSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
 	Short: "Send photo to Telegram",
 	Run:   telegramCmdGlobalVar.Run,
-	Example: Examples(`# Send photo
+	Example: common.Examples(`# Send photo
 ops-cli Telegram photo -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
 ops-cli Telegram photo -t bot_token -c chat_id -a '~/photo/cat.png'`),
 }

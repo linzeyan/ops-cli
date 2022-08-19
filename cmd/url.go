@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/linzeyan/expandUrl"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +37,7 @@ var urlCmd = &cobra.Command{
 		}
 		PrintString(result)
 	},
-	Example: Examples(`# Get the real URL from the shortened URL
+	Example: common.Examples(`# Get the real URL from the shortened URL
 ops-cli url https://goo.gl/maps/b37Aq3Anc7taXQDd9`),
 	DisableFlagsInUseLine: true,
 }

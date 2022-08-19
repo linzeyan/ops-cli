@@ -31,7 +31,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -232,12 +231,6 @@ func Config(subFn ConfigBlock) error {
 		return ErrConfNotFound
 	}
 	return err
-}
-
-/* Print examples with color. */
-func Examples(s string) string {
-	c := color.New(color.FgYellow)
-	return c.Sprintf(`%s`, s)
 }
 
 func HashAlgorithm(alg string) hash.Hash {

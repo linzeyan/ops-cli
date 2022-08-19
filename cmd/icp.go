@@ -21,6 +21,7 @@ import (
 	"os"
 
 	"github.com/linzeyan/icp"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -44,7 +45,7 @@ var icpCmd = &cobra.Command{
 		icp.WestApiKey = icpCmdGlobalVar.key
 		OutputDefaultYAML(map[string]string{icp.Domain: icp.Check()})
 	},
-	Example: Examples(`# Print the ICP status
+	Example: common.Examples(`# Print the ICP status
 ops-cli icp -a account -k api_key google.com`),
 }
 

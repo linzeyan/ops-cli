@@ -25,6 +25,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
@@ -50,7 +51,7 @@ var geoipCmd = &cobra.Command{
 		}
 		OutputDefaultJSON(out)
 	},
-	Example: Examples(`# Print IP geographic information
+	Example: common.Examples(`# Print IP geographic information
 ops-cli geoip 1.1.1.1
 
 # Print multiple IP geographic informations

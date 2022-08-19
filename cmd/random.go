@@ -24,6 +24,7 @@ import (
 	mathRand "math/rand"
 	"os"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -32,7 +33,7 @@ var randomCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	Short: "Generate random string",
 	Run:   randomCmdGlobalVar.Run,
-	Example: Examples(`# Generate a random string
+	Example: common.Examples(`# Generate a random string
 ops-cli random
 
 # Generate a random string of length 32
@@ -46,7 +47,7 @@ var randomSubCmdLower = &cobra.Command{
 	Use:   "lowercase",
 	Short: "Generate a string consisting of lowercase letters",
 	Run:   randomCmdGlobalVar.Run,
-	Example: Examples(` Generate a random string of lowercase letters
+	Example: common.Examples(` Generate a random string of lowercase letters
 ops-cli random lowercase`),
 }
 
@@ -54,7 +55,7 @@ var randomSubCmdNumber = &cobra.Command{
 	Use:   "number",
 	Short: "Generate a string consisting of numbers",
 	Run:   randomCmdGlobalVar.Run,
-	Example: Examples(`Generate a random string of numbers of length 100
+	Example: common.Examples(`Generate a random string of numbers of length 100
 ops-cli random number -l 100`),
 }
 
@@ -62,7 +63,7 @@ var randomSubCmdSymbol = &cobra.Command{
 	Use:   "symbol",
 	Short: "Generate a string consisting of symbols",
 	Run:   randomCmdGlobalVar.Run,
-	Example: Examples(`# Generate a random string of symbols
+	Example: common.Examples(`# Generate a random string of symbols
 ops-cli random symbol`),
 }
 
@@ -70,7 +71,7 @@ var randomSubCmdUpper = &cobra.Command{
 	Use:   "uppercase",
 	Short: "Generate a string consisting of uppercase letters",
 	Run:   randomCmdGlobalVar.Run,
-	Example: Examples(`# Generate a random string of uppercase letters
+	Example: common.Examples(`# Generate a random string of uppercase letters
 ops-cli random uppercase`),
 }
 

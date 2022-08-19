@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +38,7 @@ var lineCmd = &cobra.Command{
 var lineSubCmdText = &cobra.Command{
 	Use:   "text",
 	Short: "Send message to LINE",
-	Example: Examples(`# Send text to LINE chat
+	Example: common.Examples(`# Send text to LINE chat
 ops-cli LINE text -s secret -t token --id GroupID -a 'Hello LINE'`),
 	Run: lineCmdGlobalVar.Run,
 }
@@ -46,7 +47,7 @@ var lineSubCmdID = &cobra.Command{
 	Use:   "id",
 	Args:  cobra.ExactArgs(1),
 	Short: "Get chat ID from LINE",
-	Example: Examples(`# Get chat ID from LINE,
+	Example: common.Examples(`# Get chat ID from LINE,
 # execute this command will listen on 80 port,
 # type and sent 'id' in the chat,
 # then console will print ID.
@@ -69,7 +70,7 @@ ops-cli LINE id https://callback_url`),
 var lineSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
 	Short: "Send photo to LINE",
-	Example: Examples(`# Send photo to LINE chat
+	Example: common.Examples(`# Send photo to LINE chat
 ops-cli LINE photo -s secret -t token --id GroupID -a https://img.url`),
 	Run: lineCmdGlobalVar.Run,
 }
@@ -77,7 +78,7 @@ ops-cli LINE photo -s secret -t token --id GroupID -a https://img.url`),
 var lineSubCmdVideo = &cobra.Command{
 	Use:   "video",
 	Short: "Send video to LINE",
-	Example: Examples(`# Send video to LINE chat
+	Example: common.Examples(`# Send video to LINE chat
 ops-cli LINE video -s secret -t token --id GroupID -a https://video.url`),
 	Run: lineCmdGlobalVar.Run,
 }

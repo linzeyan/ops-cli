@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/linzeyan/qrcode"
 	"github.com/spf13/cobra"
@@ -51,7 +52,7 @@ var qrcodeSubCmdRead = &cobra.Command{
 		}
 		PrintString(result)
 	},
-	Example: Examples(`# Read QR code and print message
+	Example: common.Examples(`# Read QR code and print message
 ops-cli qrcode read qrcode.png`),
 	DisableFlagsInUseLine: true,
 }
@@ -69,7 +70,7 @@ var qrcodeSubCmdText = &cobra.Command{
 			os.Exit(1)
 		}
 	},
-	Example: Examples(`# Generate QR code with text
+	Example: common.Examples(`# Generate QR code with text
 ops-cli qrcode text https://www.google.com -o out.png
 ops-cli qrcode text https://www.google.com -o out.png -s 500`),
 }
@@ -94,7 +95,7 @@ var qrcodeSubCmdOtp = &cobra.Command{
 			os.Exit(1)
 		}
 	},
-	Example: Examples(`# Generate OTP QR code
+	Example: common.Examples(`# Generate OTP QR code
 ops-cli qrcode otp --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --otp-issuer aws`),
 }
 
@@ -112,7 +113,7 @@ var qrcodeSubCmdWifi = &cobra.Command{
 			os.Exit(1)
 		}
 	},
-	Example: Examples(`# Generate WiFi QR code
+	Example: common.Examples(`# Generate WiFi QR code
 ops-cli qrcode wifi --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid -o wifi.png`),
 }
 

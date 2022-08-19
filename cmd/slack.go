@@ -27,6 +27,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/slack-go/slack"
 	"github.com/spf13/cobra"
@@ -44,7 +45,7 @@ var slackSubCmdFile = &cobra.Command{
 	Use:   "file",
 	Short: "Send file to Slack",
 	Run:   slackCmdGlobalVar.Run,
-	Example: Examples(`# Send file
+	Example: common.Examples(`# Send file
 ops-cli Slack file -a "/tmp/a.txt" --config ~/.config.toml`),
 }
 
@@ -52,7 +53,7 @@ var slackSubCmdText = &cobra.Command{
 	Use:   "text",
 	Short: "Send text to Slack",
 	Run:   slackCmdGlobalVar.Run,
-	Example: Examples(`# Send text
+	Example: common.Examples(`# Send text
 ops-cli Slack text -a "Hello World!"`),
 }
 
@@ -60,7 +61,7 @@ var slackSubCmdPhoto = &cobra.Command{
 	Use:   "photo",
 	Short: "Send photo to Slack",
 	Run:   slackCmdGlobalVar.Run,
-	Example: Examples(`# Send photo
+	Example: common.Examples(`# Send photo
 ops-cli Slack photo -a "~/robot.png"`),
 }
 

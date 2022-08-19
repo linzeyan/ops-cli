@@ -26,6 +26,7 @@ import (
 	hashtag "github.com/abhinav/goldmark-hashtag"
 	mermaid "github.com/abhinav/goldmark-mermaid"
 	toc "github.com/abhinav/goldmark-toc"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"github.com/tomwright/dasel"
@@ -172,7 +173,7 @@ var convertSubCmdYAML2JSON = &cobra.Command{
 	Use:   "yaml2json",
 	Short: "Convert yaml to json format",
 	Run:   convertCmdGlobalVar.Run,
-	Example: Examples(`# Convert yaml to json
+	Example: common.Examples(`# Convert yaml to json
 ops-cli convert yaml2json -i input.yaml -o output.json`),
 }
 var convertSubCmdYAML2TOML = &cobra.Command{
