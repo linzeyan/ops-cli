@@ -18,7 +18,9 @@ var (
 var (
 	ErrConfigContent = errors.New("config content is incorrect")
 	ErrConfigTable   = errors.New("table not found in the config")
+	ErrInvalidArg    = errors.New("invalid argument")
 	ErrInvalidURL    = errors.New("invalid URL")
+	ErrPicSize       = errors.New("picture size is too small")
 	ErrStatusCode    = errors.New("status code is not 200")
 )
 
