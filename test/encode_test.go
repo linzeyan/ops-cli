@@ -1,7 +1,6 @@
 package test_test
 
 import (
-	"encoding/pem"
 	"os/exec"
 	"testing"
 
@@ -76,11 +75,7 @@ func TestHex(t *testing.T) {
 
 func TestPem(t *testing.T) {
 	expected := mainCommand
-	block := &pem.Block{
-		Type:  "OPS KEY",
-		Bytes: []byte(expected),
-	}
-	encode, err := cmd.Encoder.PemEncode(block)
+	encode, err := cmd.Encoder.PemEncode(expected, "OPS KEY")
 	if err != nil {
 		t.Error(err)
 	}
