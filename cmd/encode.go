@@ -28,6 +28,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -176,7 +177,7 @@ func (e *EncodeFlag) Base32HexEncode(i any) (string, error) {
 	case []byte:
 		return base32.HexEncoding.EncodeToString(data), err
 	default:
-		return "", ErrInvalidVar
+		return "", common.ErrInvalidArg
 	}
 }
 
@@ -192,7 +193,7 @@ func (e *EncodeFlag) Base32StdEncode(i any) (string, error) {
 	case []byte:
 		return base32.StdEncoding.EncodeToString(data), err
 	default:
-		return "", ErrInvalidVar
+		return "", common.ErrInvalidArg
 	}
 }
 
@@ -208,7 +209,7 @@ func (e *EncodeFlag) Base64StdEncode(i any) (string, error) {
 	case []byte:
 		return base64.StdEncoding.EncodeToString(data), err
 	default:
-		return "", ErrInvalidVar
+		return "", common.ErrInvalidArg
 	}
 }
 
@@ -224,7 +225,7 @@ func (e *EncodeFlag) Base64URLEncode(i any) (string, error) {
 	case []byte:
 		return base64.URLEncoding.EncodeToString(data), err
 	default:
-		return "", ErrInvalidVar
+		return "", common.ErrInvalidArg
 	}
 }
 
@@ -240,7 +241,7 @@ func (e *EncodeFlag) HexEncode(i any) (string, error) {
 	case []byte:
 		return hex.EncodeToString(data), err
 	default:
-		return "", ErrInvalidVar
+		return "", common.ErrInvalidArg
 	}
 }
 
@@ -251,7 +252,7 @@ func (e *EncodeFlag) HexDecode(s string) ([]byte, error) {
 func (e *EncodeFlag) JSONEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := json.NewEncoder(&buf)
-	encoder.SetIndent("", "  ")
+	encoder.SetIndent("", common.IndentTwoSpaces)
 	err := encoder.Encode(i)
 	return buf.String(), err
 }
@@ -274,9 +275,24 @@ func (e *EncodeFlag) JSONMarshaler(src, dst any) error {
 	return nil
 }
 
-func (e *EncodeFlag) PemEncode(b *pem.Block) (string, error) {
+func (e *EncodeFlag) PemEncode(i any, t ...string) (string, error) {
+	var err error
+	var block = &pem.Block{Type: ""}
+	switch data := i.(type) {
+	case string:
+		block.Bytes = []byte(data)
+	case []byte:
+		block.Bytes = data
+	default:
+		return "", common.ErrInvalidArg
+	}
 	var buf bytes.Buffer
-	err := pem.Encode(&buf, b)
+	if len(t) != 0 {
+		for _, arg := range t {
+			block.Type += arg
+		}
+	}
+	err = pem.Encode(&buf, block)
 	return buf.String(), err
 }
 
@@ -291,7 +307,7 @@ func (e *EncodeFlag) PemDecode(b []byte) ([]byte, error) {
 func (e *EncodeFlag) XMLEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := xml.NewEncoder(&buf)
-	encoder.Indent("", "  ")
+	encoder.Indent("", common.IndentTwoSpaces)
 	err := encoder.Encode(i)
 	return buf.String(), err
 }

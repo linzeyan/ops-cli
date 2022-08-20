@@ -10,6 +10,10 @@ import (
 	"github.com/fatih/color"
 )
 
+const (
+	IndentTwoSpaces = "  "
+)
+
 var (
 	Context = context.Background()
 	TimeNow = time.Now().Local()

@@ -21,6 +21,7 @@ import (
 	"crypto/rand"
 	"math/big"
 	mathRand "math/rand"
+	"regexp"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
@@ -145,7 +146,9 @@ func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 		return
 	case Base64.String():
 		b := p.Rand(randomCmdGlobalVar.length)
-		out, _ := Encoder.Base64StdEncode(b)
+		encode, _ := Encoder.PemEncode(b)
+		re := regexp.MustCompile("-.*-\n")
+		out := re.ReplaceAllString(encode, "")
 		PrintString(out)
 		return
 	case Hex.String():
