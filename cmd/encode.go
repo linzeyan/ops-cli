@@ -33,6 +33,24 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+type EncodeType string
+
+const (
+	Base32    EncodeType = "base32"
+	Base64    EncodeType = "base64"
+	Hex       EncodeType = "hex"
+	Std       EncodeType = "std"
+	URL       EncodeType = "url"
+	Base32Hex EncodeType = Base32 + Hex
+	Base32Std EncodeType = Base32 + Std
+	Base64Std EncodeType = Base64 + Std
+	Base64URL EncodeType = Base64 + URL
+)
+
+func (e EncodeType) String() string {
+	return string(e)
+}
+
 var encodeCmd = &cobra.Command{
 	Use:   "encode",
 	Short: "Encode and decode string or file",
@@ -42,35 +60,35 @@ var encodeCmd = &cobra.Command{
 }
 
 var encodeSubCmdBase32Hex = &cobra.Command{
-	Use:   "base32hex",
+	Use:   Base32Hex.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Base32 hex encoding or decoding",
 	Run:   Encoder.Run,
 }
 
 var encodeSubCmdBase32Std = &cobra.Command{
-	Use:   "base32std",
+	Use:   Base32Std.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Base32 standard encoding or decoding",
 	Run:   Encoder.Run,
 }
 
 var encodeSubCmdBase64Std = &cobra.Command{
-	Use:   "base64std",
+	Use:   Base64Std.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Base64 standard encoding or decoding",
 	Run:   Encoder.Run,
 }
 
 var encodeSubCmdBase64URL = &cobra.Command{
-	Use:   "base64url",
+	Use:   Base64URL.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Base64 url encoding or decoding",
 	Run:   Encoder.Run,
 }
 
 var encodeSubCmdHex = &cobra.Command{
-	Use:   "hex",
+	Use:   Hex.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Hexadecimal encoding or decoding",
 	Run:   Encoder.Run,
@@ -109,16 +127,16 @@ func (e *EncodeFlag) Run(cmd *cobra.Command, args []string) {
 	case false:
 		data = args[0]
 	}
-	switch cmd.Name() {
-	case "base32hex":
+	switch EncodeType(cmd.Name()) {
+	case Base32Hex:
 		out, err = e.Base32HexEncode(data)
-	case "base32std":
+	case Base32, Base32Std:
 		out, err = e.Base32StdEncode(data)
-	case "base64std":
+	case Base64, Base64Std, Std:
 		out, err = e.Base64StdEncode(data)
-	case "base64url":
+	case Base64URL, URL:
 		out, err = e.Base64URLEncode(data)
-	case "hex":
+	case Hex:
 		out, err = e.HexEncode(data)
 	}
 	if err != nil {
@@ -131,16 +149,16 @@ func (e *EncodeFlag) Run(cmd *cobra.Command, args []string) {
 func (e *EncodeFlag) RunDecode(cmd *cobra.Command, args []string) {
 	var err error
 	var out []byte
-	switch cmd.Name() {
-	case "base32hex":
+	switch EncodeType(cmd.Name()) {
+	case Base32Hex:
 		out, err = e.Base32HexDecode(args[0])
-	case "base32std":
+	case Base32, Base32Std:
 		out, err = e.Base32StdDecode(args[0])
-	case "base64std":
+	case Base64, Base64Std, Std:
 		out, err = e.Base64StdDecode(args[0])
-	case "base64url":
+	case URL, Base64URL:
 		out, err = e.Base64URLDecode(args[0])
-	case "hex":
+	case Hex:
 		out, err = e.HexDecode(args[0])
 	}
 	if err != nil {

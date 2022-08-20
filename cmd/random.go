@@ -19,8 +19,10 @@ package cmd
 import (
 	"bytes"
 	"crypto/rand"
+	"log"
 	"math/big"
 	mathRand "math/rand"
+	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
@@ -76,16 +78,26 @@ ops-cli random uppercase`),
 var randomSubCmdBootstrap = &cobra.Command{
 	Use:   "bootstrap-token",
 	Short: "Generate a bootstrap token",
-	Run: func(_ *cobra.Command, _ []string) {
-		var r RandomString
-		r = r.GenerateString(11, AllSet)
-		id := r.Hex()
-		PrintString(id[0:6] + "." + id[6:])
-	},
+	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate a bootstrap token
 ops-cli random bootstrap-token`),
 	DisableFlagParsing:    true,
 	DisableFlagsInUseLine: true,
+}
+
+var randomSubCmdBase64 = &cobra.Command{
+	Use:   "base64",
+	Short: "Generate a base64 string",
+	Run:   randomCmdGlobalVar.Run,
+	Example: common.Examples(`# Generate a base64 string
+ops-cli random base64 -l 100`),
+}
+var randomSubCmdHex = &cobra.Command{
+	Use:   "hex",
+	Short: "Generate a hexadecimal string",
+	Run:   randomCmdGlobalVar.Run,
+	Example: common.Examples(`# Generate a hexadecimal string
+ops-cli random hex -l 30`),
 }
 
 var randomCmdGlobalVar RandomFlag
@@ -103,6 +115,8 @@ func init() {
 	randomCmd.AddCommand(randomSubCmdNumber)
 	randomCmd.AddCommand(randomSubCmdSymbol)
 	randomCmd.AddCommand(randomSubCmdUpper)
+	randomCmd.AddCommand(randomSubCmdBase64)
+	randomCmd.AddCommand(randomSubCmdHex)
 	randomCmd.AddCommand(randomSubCmdBootstrap)
 }
 
@@ -112,6 +126,10 @@ type RandomFlag struct {
 }
 
 func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
+	if randomCmdGlobalVar.length <= 0 {
+		log.Println(common.ErrInvalidArg)
+		os.Exit(1)
+	}
 	var p RandomString
 	switch cmd.Name() {
 	case "number":
@@ -124,6 +142,23 @@ func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 		p = p.GenerateString(randomCmdGlobalVar.length, LowercaseLetters)
 	case "random":
 		p = p.GenerateAll(randomCmdGlobalVar.length, randomCmdGlobalVar.lower, randomCmdGlobalVar.upper, randomCmdGlobalVar.symbol, randomCmdGlobalVar.number)
+	case "bootstrap-token":
+		r1 := p.Rand(3)
+		r2 := p.Rand(8)
+		id, _ := Encoder.HexEncode(r1)
+		token, _ := Encoder.HexEncode(r2)
+		PrintString(id + "." + token)
+		return
+	case Base64.String():
+		b := p.Rand(randomCmdGlobalVar.length)
+		out, _ := Encoder.Base64StdEncode(b)
+		PrintString(out)
+		return
+	case Hex.String():
+		b := p.Rand(randomCmdGlobalVar.length)
+		out, _ := Encoder.HexEncode(b)
+		PrintString(out)
+		return
 	}
 	PrintString(p)
 }
@@ -182,20 +217,13 @@ func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumb
 	return result
 }
 
-func (r RandomString) Base64() string {
-	out, err := Encoder.Base64StdEncode(r.Bytes())
+func (r RandomString) Rand(length int) []byte {
+	b := make([]byte, length)
+	_, err := rand.Read(b)
 	if err != nil {
-		return ""
+		return nil
 	}
-	return out
-}
-
-func (r RandomString) Hex() string {
-	out, err := Encoder.HexEncode(r.Bytes())
-	if err != nil {
-		return ""
-	}
-	return out
+	return b
 }
 
 func (r RandomString) String() string {
