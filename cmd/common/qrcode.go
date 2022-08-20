@@ -16,9 +16,13 @@ import (
 	qrread "github.com/makiuchi-d/gozxing/qrcode"
 )
 
+/* Generate QR code by giving content. */
 func GenerateQRCode(content string, size int, dest string) error {
 	if size <= 10 {
-		return ErrPicSize
+		size = 600
+	}
+	if dest == "" {
+		dest = "./qrcode.png"
 	}
 	if content == "" {
 		return ErrInvalidArg

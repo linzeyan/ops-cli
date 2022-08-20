@@ -39,6 +39,7 @@ func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, 
 	return io.ReadAll(resp.Body)
 }
 
+/* Same as HttpRequestContent, but read content in GB18030 format. */
 func HTTPRequestContentGB18030(url string, body io.Reader, methods ...string) ([]byte, error) {
 	var method string
 	if len(methods) == 0 {
@@ -70,6 +71,7 @@ func HTTPRequestContentGB18030(url string, body io.Reader, methods ...string) ([
 	return io.ReadAll(reader)
 }
 
+/* Return redirect url. */
 func HTTPRequestRedirectURL(uri string) (string, error) {
 	var result = uri
 	var client = &http.Client{
