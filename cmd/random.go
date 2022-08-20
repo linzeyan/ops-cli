@@ -84,14 +84,14 @@ ops-cli random bootstrap-token`),
 }
 
 var randomSubCmdBase64 = &cobra.Command{
-	Use:   "base64",
+	Use:   Base64.String(),
 	Short: "Generate a base64 string",
 	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate a base64 string
 ops-cli random base64 -l 100`),
 }
 var randomSubCmdHex = &cobra.Command{
-	Use:   "hex",
+	Use:   Hex.String(),
 	Short: "Generate a hexadecimal string",
 	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate a hexadecimal string
