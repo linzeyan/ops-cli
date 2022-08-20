@@ -19,10 +19,8 @@ package cmd
 import (
 	"bytes"
 	"crypto/rand"
-	"log"
 	"math/big"
 	mathRand "math/rand"
-	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
@@ -126,10 +124,6 @@ type RandomFlag struct {
 }
 
 func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
-	if randomCmdGlobalVar.length <= 0 {
-		log.Println(common.ErrInvalidArg)
-		os.Exit(1)
-	}
 	var p RandomString
 	switch cmd.Name() {
 	case "number":
@@ -160,7 +154,7 @@ func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 		PrintString(out)
 		return
 	}
-	PrintString(p)
+	PrintString(p.String())
 }
 
 type RandomCharacter string
@@ -176,8 +170,11 @@ const (
 type RandomString []byte
 
 func (RandomString) GenerateString(length int, charSet RandomCharacter) RandomString {
+	if length <= 0 {
+		return nil
+	}
 	var buf bytes.Buffer
-	for i := int(0); i < length; i++ {
+	for i := 0; i < length; i++ {
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))
 		if err != nil {
 			return nil
@@ -190,7 +187,22 @@ func (RandomString) GenerateString(length int, charSet RandomCharacter) RandomSt
 }
 
 func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) RandomString {
+	if length <= 0 {
+		return nil
+	}
 	var result RandomString
+	if minLower < 0 {
+		minLower = 0
+	}
+	if minUpper < 0 {
+		minUpper = 0
+	}
+	if minSymbol < 0 {
+		minSymbol = 0
+	}
+	if minNumber < 0 {
+		minNumber = 0
+	}
 	leave := length - minLower - minUpper - minSymbol - minNumber
 	if leave < 0 {
 		return nil
@@ -218,6 +230,9 @@ func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumb
 }
 
 func (r RandomString) Rand(length int) []byte {
+	if length <= 0 {
+		return nil
+	}
 	b := make([]byte, length)
 	_, err := rand.Read(b)
 	if err != nil {
