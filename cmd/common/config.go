@@ -26,10 +26,10 @@ type readConfig struct {
 	config string
 	format string
 	table  ConfigBlock
-	value  map[string]interface{}
+	value  map[string]any
 }
 
-func (r *readConfig) get() (map[string]interface{}, error) {
+func (r *readConfig) get() (map[string]any, error) {
 	viper.SetConfigFile(r.config)
 	viper.SetConfigType(r.format)
 	if err := viper.ReadInConfig(); err != nil {
@@ -40,7 +40,7 @@ func (r *readConfig) get() (map[string]interface{}, error) {
 	if !ok {
 		return nil, ErrConfigTable
 	}
-	r.value, ok = values.(map[string]interface{})
+	r.value, ok = values.(map[string]any)
 	if !ok {
 		return nil, ErrConfigContent
 	}
@@ -48,7 +48,7 @@ func (r *readConfig) get() (map[string]interface{}, error) {
 }
 
 /* Get secret token from config. */
-func Config(config string, table ConfigBlock) map[string]interface{} {
+func Config(config string, table ConfigBlock) map[string]any {
 	r := &readConfig{config: config, format: "toml", table: table}
 	v, err := r.get()
 	if err != nil {

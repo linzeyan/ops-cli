@@ -9,7 +9,7 @@ import (
 
 func TestValidatorDomain(t *testing.T) {
 	testCases := []struct {
-		input    interface{}
+		input    any
 		expected bool
 	}{
 		{"1.1.1.1", false},

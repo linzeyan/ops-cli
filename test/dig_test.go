@@ -12,7 +12,7 @@ func TestDig(t *testing.T) {
 	const subCommand = "dig"
 	testCases := []struct {
 		input    []string
-		expected interface{}
+		expected any
 	}{
 		{[]string{runCommand, mainGo, subCommand, "@8.8.8.8", "1.1.1.1", "PTR"}, "one.one.one.one."},
 		{[]string{runCommand, mainGo, subCommand, "apple.com", "@8.8.8.8"}, "17.253.144.10"},

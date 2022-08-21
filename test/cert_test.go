@@ -11,7 +11,7 @@ func TestCert(t *testing.T) {
 	const subCommand = "cert"
 	testCases := []struct {
 		input    []string
-		expected interface{}
+		expected any
 	}{
 		{[]string{runCommand, mainGo, subCommand, "www.google.com", "--dns"}, "[\n  \"www.google.com\"\n]\n\n"},
 		{[]string{runCommand, mainGo, subCommand, "1.1.1.1", "--dns"}, "[\n  \"cloudflare-dns.com\",\n  \"*.cloudflare-dns.com\",\n  \"one.one.one.one\"\n]\n\n"},
