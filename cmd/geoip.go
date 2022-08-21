@@ -32,12 +32,15 @@ import (
 
 var geoipCmd = &cobra.Command{
 	Use:   "geoip [IP1] [IP2]",
-	Args:  cobra.MinimumNArgs(1),
 	Short: "Print IP geographic information",
 	Run: func(_ *cobra.Command, args []string) {
 		var out any
 		var err error
 		switch len(args) {
+		case 0:
+			var resp []byte
+			resp, err = common.HTTPRequestContent("https://myexternalip.com/raw", nil)
+			out = map[string]string{"ip": string(resp)}
 		case 1:
 			var r geoIPSingle
 			out, err = r.Request(args[0])
