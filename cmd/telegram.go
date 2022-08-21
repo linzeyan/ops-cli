@@ -120,10 +120,7 @@ type TelegramFlag struct {
 func (t *TelegramFlag) Init() error {
 	var err error
 	if t.Token == "" && rootConfig != "" {
-		v, err := common.Config(rootConfig, common.Telegram)
-		if err != nil {
-			return err
-		}
+		v := common.Config(rootConfig, common.Telegram)
 		err = Encoder.JSONMarshaler(v, t)
 		if err != nil {
 			return err

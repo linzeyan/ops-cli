@@ -35,12 +35,8 @@ var icpCmd = &cobra.Command{
 	Short: "Check ICP status",
 	Run: func(_ *cobra.Command, args []string) {
 		if (icpCmdGlobalVar.flags.Account == "" || icpCmdGlobalVar.flags.Key == "") && rootConfig != "" {
-			v, err := common.Config(rootConfig, common.ICP)
-			if err != nil {
-				log.Println(err)
-				os.Exit(1)
-			}
-			err = Encoder.JSONMarshaler(v, &icpCmdGlobalVar.flags)
+			v := common.Config(rootConfig, common.ICP)
+			err := Encoder.JSONMarshaler(v, &icpCmdGlobalVar.flags)
 			if err != nil {
 				log.Println(err)
 				os.Exit(1)

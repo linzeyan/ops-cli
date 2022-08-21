@@ -101,10 +101,7 @@ func (d *DiscordFlag) Run(cmd *cobra.Command, args []string) {
 func (d *DiscordFlag) Init() error {
 	var err error
 	if d.Token == "" && rootConfig != "" {
-		v, err := common.Config(rootConfig, common.Discord)
-		if err != nil {
-			return err
-		}
+		v := common.Config(rootConfig, common.Discord)
 		err = Encoder.JSONMarshaler(v, d)
 		if err != nil {
 			return err

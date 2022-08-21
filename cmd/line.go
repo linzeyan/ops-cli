@@ -112,10 +112,7 @@ type LineFlag struct {
 func (l *LineFlag) Init() error {
 	var err error
 	if (l.Secret == "" || l.Token == "") && rootConfig != "" {
-		v, err := common.Config(rootConfig, common.LINE)
-		if err != nil {
-			return err
-		}
+		v := common.Config(rootConfig, common.LINE)
 		err = Encoder.JSONMarshaler(v, l)
 		if err != nil {
 			return err
