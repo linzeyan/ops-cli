@@ -14,35 +14,35 @@ func TestURL(t *testing.T) {
 		expected string
 	}{
 		{
-			[]string{runCommand, mainGo, subCommand, "https://reurl.cc/MNN9Gv"},
+			[]string{runCommand, mainGo, subCommand, "expand", "https://reurl.cc/MNN9Gv"},
 			"https://www.setn.com/News.aspx?NewsID=1161776&utm_campaign=viewallnews\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "https://bit.ly/3ogGuB1"},
+			[]string{runCommand, mainGo, subCommand, "expand", "https://bit.ly/3ogGuB1"},
 			"https://theinitium.com/article/20220721-mainland-covid-prolonged-grief-disorder/?utm_source=Telegram&utm_medium=Telegram&utm_campaign=Telegram\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "https://youtu.be/uLGSEoN5KwI"},
+			[]string{runCommand, mainGo, subCommand, "expand", "https://youtu.be/uLGSEoN5KwI"},
 			"https://www.youtube.com/watch?v=uLGSEoN5KwI&feature=youtu.be\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "https://utm.to/48vy8a"},
+			[]string{runCommand, mainGo, subCommand, "expand", "https://utm.to/48vy8a"},
 			"https://www.storm.mg/lifestyle/4366824?utm_source=telegram&utm_medium=post\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "https://lihi1.cc/itv4p"},
+			[]string{runCommand, mainGo, subCommand, "expand", "https://lihi1.cc/itv4p"},
 			"https://www.businessweekly.com.tw/focus/indep/6007870?utm_source=Line&utm_medium=social&utm_content=bw&utm_campaign=content\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "https://linshibi.pros.is/4c7llt"},
+			[]string{runCommand, mainGo, subCommand, "expand", "https://linshibi.pros.is/4c7llt"},
 			"https://open.firstory.me/story/cl5k47dii00eo01zxamrp684m/platforms\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "https://spoti.fi/3O6QgAb"},
+			[]string{runCommand, mainGo, subCommand, "expand", "https://spoti.fi/3O6QgAb"},
 			"https://open.spotify.com/episode/0XOruTQxsN295v0ePD2YAk\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "https://redd.it/p2xbpj"},
+			[]string{runCommand, mainGo, subCommand, "expand", "https://redd.it/p2xbpj"},
 			"https://www.reddit.com/comments/p2xbpj\n",
 		},
 	}
@@ -61,9 +61,9 @@ func TestURL(t *testing.T) {
 func TestBinaryURL(t *testing.T) {
 	const subCommand = "url"
 	args := [][]string{
-		{subCommand, "https://goo.gl/maps/b37Aq3Anc7taXQDd9"},
-		{subCommand, "https://reurl.cc/7peeZl"},
-		{subCommand, "https://bit.ly/3gk7w5x"},
+		{subCommand, "expand", "https://goo.gl/maps/b37Aq3Anc7taXQDd9"},
+		{subCommand, "expand", "https://reurl.cc/7peeZl"},
+		{subCommand, "expand", "https://bit.ly/3gk7w5x"},
 	}
 	for i := range args {
 		t.Run(args[i][1], func(t *testing.T) {
