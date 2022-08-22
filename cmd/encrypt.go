@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -30,6 +31,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	EncryptModeCBC = "CBC"
+	EncryptModeCFB = "CFB"
+)
 const (
 	keyFileExtension  = ".key"
 	tempFileExtension = ".temp"
@@ -59,16 +64,24 @@ ops-cli encrypt file ~/README.md -k '45984614e8f7d6c5' -d
 ops-cli encrypt file ~/README.md -k key.txt -d`),
 }
 
+var encryptSubCmdString = &cobra.Command{
+	Use:   "string",
+	Args:  cobra.ExactArgs(1),
+	Short: "Encrypt or decrypt string",
+	Run:   Encryptor.StringRun,
+}
+
 var Encryptor EncrytpFlag
 
 func init() {
 	rootCmd.AddCommand(encryptCmd)
 
 	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, "Decrypt")
+	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Specify the encrypt mode(CFB/OFB/CTR)")
+	encryptCmd.PersistentFlags().StringVarP(&Encryptor.key, "key", "k", "", "Specify the encrypt key text or key file")
 
 	encryptCmd.AddCommand(encryptSubCmdFile)
-	encryptSubCmdFile.Flags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Specify the encrypt mode(CFB/OFB/CTR)")
-	encryptSubCmdFile.Flags().StringVarP(&Encryptor.key, "key", "k", "", "Specify the encrypt key text or key file")
+	encryptCmd.AddCommand(encryptSubCmdString)
 }
 
 type EncrytpFlag struct {
@@ -129,11 +142,13 @@ func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 
 func (e *EncrytpFlag) stream(b cipher.Block, iv []byte) cipher.Stream {
 	switch e.mode {
-	case "CFB":
+	case EncryptModeCFB:
 		if e.decrypt {
 			return cipher.NewCFBDecrypter(b, iv)
 		}
 		return cipher.NewCFBEncrypter(b, iv)
+	case "CTR":
+		return cipher.NewCTR(b, iv)
 	case "OFB":
 		return cipher.NewOFB(b, iv)
 	default:
@@ -234,4 +249,95 @@ func (e *EncrytpFlag) DecryptFile(secret, filename string) error {
 		}
 	}
 	return err
+}
+
+func (e *EncrytpFlag) StringRun(cmd *cobra.Command, args []string) {
+	var err error
+	var out string
+	text := args[0]
+	if e.decrypt {
+		out, err = e.DecryptString(e.key, text)
+	} else {
+		out, err = e.EncryptString(e.key, text)
+	}
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	PrintString(out)
+}
+
+func (e *EncrytpFlag) EncryptString(secret, text string) (string, error) {
+	var out []byte
+	var err error
+	key := []byte(secret)
+	plainText := []byte(text)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+	switch e.mode {
+	case "CBC":
+		out = make([]byte, aes.BlockSize+len(plainText))
+		iv := out[:aes.BlockSize]
+		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+			return "", err
+		}
+		padding := aes.BlockSize - len(plainText)%aes.BlockSize
+		padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+		plainText = append(plainText, padtext...)
+		cbc := cipher.NewCBCEncrypter(block, iv)
+		cbc.CryptBlocks(out, plainText)
+	case EncryptModeCFB:
+		out = make([]byte, aes.BlockSize+len(plainText))
+		iv := out[:aes.BlockSize]
+		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+			return "", err
+		}
+		stream := cipher.NewCFBEncrypter(block, iv)
+		stream.XORKeyStream(out[aes.BlockSize:], plainText)
+	case "GCM":
+		gcm, err := cipher.NewGCM(block)
+		if err != nil {
+			return "", err
+		}
+		nonce := make([]byte, gcm.NonceSize())
+		out = gcm.Seal(nonce, nonce, []byte(text), nil)
+	}
+	return Encoder.Base64URLEncode(out)
+}
+
+func (e *EncrytpFlag) DecryptString(secret, text string) (string, error) {
+	var out []byte
+	var err error
+	key := []byte(secret)
+	cipherText, err := Encoder.Base64URLDecode(text)
+	if err != nil {
+		return "", err
+	}
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+	switch e.mode {
+	case "CBC":
+		// cbc := cipher.NewCBCDecrypter(block, key[:aes.BlockSize])
+	case EncryptModeCFB:
+		iv := cipherText[:aes.BlockSize]
+		stream := cipher.NewCFBDecrypter(block, iv)
+		out = cipherText[aes.BlockSize:]
+		stream.XORKeyStream(out, out)
+	case "GCM":
+		gcm, err := cipher.NewGCM(block)
+		if err != nil {
+			return "", err
+		}
+		nonceSize := gcm.NonceSize()
+		nonce, enc := cipherText[:nonceSize], cipherText[nonceSize:]
+		out, err = gcm.Open(nil, nonce, enc, nil)
+		if err != nil {
+			return "", err
+		}
+	}
+	return string(out), err
 }
