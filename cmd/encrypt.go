@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
@@ -47,6 +48,15 @@ var encryptSubCmdFile = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Encrypt or decrypt file",
 	Run:   Encryptor.FileRun,
+	Example: common.Examples(`# Encrypt file
+ops-cli encrypt file ~/README.md
+ops-cli encrypt file ~/README.md -k '45984614e8f7d6c5'
+ops-cli encrypt file ~/README.md -k key.txt
+
+# Decrypt file
+ops-cli encrypt file ~/README.md -d -k ~/README.md.key
+ops-cli encrypt file ~/README.md -k '45984614e8f7d6c5' -d
+ops-cli encrypt file ~/README.md -k key.txt -d`),
 }
 
 var Encryptor EncrytpFlag
@@ -57,7 +67,7 @@ func init() {
 	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, "Decrypt")
 
 	encryptCmd.AddCommand(encryptSubCmdFile)
-	encryptSubCmdFile.Flags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Specify the encrypt mode")
+	encryptSubCmdFile.Flags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Specify the encrypt mode(CFB/OFB/CTR)")
 	encryptSubCmdFile.Flags().StringVarP(&Encryptor.key, "key", "k", "", "Specify the encrypt key text or key file")
 }
 
