@@ -51,6 +51,7 @@ func init() {
 	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, "Decrypt")
 	encryptCmd.PersistentFlags().StringVarP(&Encryptor.key, "key", "k", "", "Specify the encrypt key text or key file")
 	encryptCmd.PersistentFlags().StringVarP(&Encryptor.file, "file", "f", "", "Specify the file")
+	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Specify the encrypt mode")
 
 	encryptCmd.AddCommand(encryptSubCmdAes)
 }
@@ -59,6 +60,7 @@ type EncrytpFlag struct {
 	decrypt bool
 	key     string
 	file    string
+	mode    string
 }
 
 func (e *EncrytpFlag) AesRun(cmd *cobra.Command, _ []string) {
@@ -118,6 +120,20 @@ func (e *EncrytpFlag) AesEncrypt(secret, filename string) error {
 	return os.Rename(filename+".bin", filename)
 }
 
+func (e *EncrytpFlag) stream(b cipher.Block, iv []byte) cipher.Stream {
+	switch e.mode {
+	case "CFB":
+		if e.decrypt {
+			return cipher.NewCFBDecrypter(b, iv)
+		}
+		return cipher.NewCFBEncrypter(b, iv)
+	case "OFB":
+		return cipher.NewOFB(b, iv)
+	default:
+		return cipher.NewCTR(b, iv)
+	}
+}
+
 func (e *EncrytpFlag) aesEncrypt(secret, filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
@@ -142,7 +158,7 @@ func (e *EncrytpFlag) aesEncrypt(secret, filename string) error {
 	}
 	defer out.Close()
 	buf := make([]byte, 1024)
-	stream := cipher.NewCTR(block, iv)
+	stream := e.stream(block, iv)
 	for {
 		n, err := f.Read(buf)
 		if n > 0 {
@@ -197,7 +213,7 @@ func (e *EncrytpFlag) aesDecrypt(secret, filename string) error {
 	}
 	defer out.Close()
 	buf := make([]byte, 1024)
-	stream := cipher.NewCTR(block, iv)
+	stream := e.stream(block, iv)
 	for {
 		n, err := f.Read(buf)
 		if n > 0 {
