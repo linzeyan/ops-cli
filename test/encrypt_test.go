@@ -15,10 +15,10 @@ func TestEncryptAes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := cmd.Encryptor.AesEncrypt("84815131446564008011748691915873", input); err != nil {
+	if err := cmd.Encryptor.EncryptFile("84815131446564008011748691915873", input); err != nil {
 		t.Error(err)
 	}
-	if err := cmd.Encryptor.AesDecrypt("84815131446564008011748691915873", input); err != nil {
+	if err := cmd.Encryptor.DecryptFile("84815131446564008011748691915873", input); err != nil {
 		t.Error(err)
 	}
 	got, err := os.ReadFile(input)
@@ -34,8 +34,8 @@ func TestEncrypt(t *testing.T) {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, "aes", "-f", "../.gitignore", "-k", "32449939618748684094059431382108"}, "../.gitignore"},
-		{[]string{runCommand, mainGo, subCommand, "aes", "-f", "../.gitignore", "-k", "32449939618748684094059431382108", "-d"}, "../.gitignore"},
+		{[]string{runCommand, mainGo, subCommand, "file", "../.gitignore", "-k", "32449939618748684094059431382108"}, "../.gitignore"},
+		{[]string{runCommand, mainGo, subCommand, "file", "../.gitignore", "-k", "32449939618748684094059431382108", "-d"}, "../.gitignore"},
 	}
 
 	for i := range testCases {
@@ -52,8 +52,8 @@ func TestEncrypt(t *testing.T) {
 func TestBinaryEncrypt(t *testing.T) {
 	const subCommand = "encrypt"
 	args := [][]string{
-		{subCommand, "aes", "-f", "../.gitignore", "-k", "32449939618748684094059431382108"},
-		{subCommand, "aes", "-f", "../.gitignore", "-k", "32449939618748684094059431382108", "-d"},
+		{subCommand, "file", "../.gitignore", "-k", "32449939618748684094059431382108"},
+		{subCommand, "file", "../.gitignore", "-k", "32449939618748684094059431382108", "-d"},
 	}
 
 	for i := range args {

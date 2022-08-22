@@ -29,18 +29,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	keyFileExtension  = ".key"
+	tempFileExtension = ".temp"
+)
+
 var encryptCmd = &cobra.Command{
 	Use:   "encrypt",
-	Short: "Encrypt or decrypt file",
+	Short: "Encrypt or decrypt",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
 	DisableFlagsInUseLine: true,
 }
 
-var encryptSubCmdAes = &cobra.Command{
-	Use:   "aes",
-	Short: "Encrypt or decrypt",
-	Run:   Encryptor.AesRun,
+var encryptSubCmdFile = &cobra.Command{
+	Use:   "file",
+	Args:  cobra.ExactArgs(1),
+	Short: "Encrypt or decrypt file",
+	Run:   Encryptor.FileRun,
 }
 
 var Encryptor EncrytpFlag
@@ -49,38 +55,37 @@ func init() {
 	rootCmd.AddCommand(encryptCmd)
 
 	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, "Decrypt")
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.key, "key", "k", "", "Specify the encrypt key text or key file")
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.file, "file", "f", "", "Specify the file")
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Specify the encrypt mode")
 
-	encryptCmd.AddCommand(encryptSubCmdAes)
+	encryptCmd.AddCommand(encryptSubCmdFile)
+	encryptSubCmdFile.Flags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Specify the encrypt mode")
+	encryptSubCmdFile.Flags().StringVarP(&Encryptor.key, "key", "k", "", "Specify the encrypt key text or key file")
 }
 
 type EncrytpFlag struct {
 	decrypt bool
 	key     string
-	file    string
 	mode    string
 }
 
-func (e *EncrytpFlag) AesRun(cmd *cobra.Command, _ []string) {
+func (e *EncrytpFlag) FileRun(cmd *cobra.Command, args []string) {
 	var err error
-
+	filename := args[0]
 	if e.decrypt {
-		if err = e.AesDecrypt(e.key, e.file); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		return
+		err = e.DecryptFile(e.key, filename)
+	} else {
+		err = e.EncryptFile(e.key, filename)
 	}
-	if err = e.AesEncrypt(e.key, e.file); err != nil {
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+	if err = os.Rename(filename+tempFileExtension, filename); err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
 }
 
 func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
-	const keyFileExtension = ".key"
 	/* Read key file. */
 	if validator.ValidFile(secret) {
 		key, err := os.ReadFile(secret)
@@ -112,14 +117,6 @@ func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 	return key
 }
 
-func (e *EncrytpFlag) AesEncrypt(secret, filename string) error {
-	err := e.aesEncrypt(secret, filename)
-	if err != nil {
-		return err
-	}
-	return os.Rename(filename+".bin", filename)
-}
-
 func (e *EncrytpFlag) stream(b cipher.Block, iv []byte) cipher.Stream {
 	switch e.mode {
 	case "CFB":
@@ -134,7 +131,7 @@ func (e *EncrytpFlag) stream(b cipher.Block, iv []byte) cipher.Stream {
 	}
 }
 
-func (e *EncrytpFlag) aesEncrypt(secret, filename string) error {
+func (e *EncrytpFlag) EncryptFile(secret, filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -152,7 +149,7 @@ func (e *EncrytpFlag) aesEncrypt(secret, filename string) error {
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return err
 	}
-	out, err := os.OpenFile(filename+".bin", os.O_RDWR|os.O_CREATE, fInfo.Mode())
+	out, err := os.OpenFile(filename+tempFileExtension, os.O_RDWR|os.O_CREATE, fInfo.Mode())
 	if err != nil {
 		return err
 	}
@@ -179,15 +176,7 @@ func (e *EncrytpFlag) aesEncrypt(secret, filename string) error {
 	return err
 }
 
-func (e *EncrytpFlag) AesDecrypt(secret, filename string) error {
-	err := e.aesDecrypt(secret, filename)
-	if err != nil {
-		return err
-	}
-	return os.Rename(filename+".raw", filename)
-}
-
-func (e *EncrytpFlag) aesDecrypt(secret, filename string) error {
+func (e *EncrytpFlag) DecryptFile(secret, filename string) error {
 	f, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -207,7 +196,7 @@ func (e *EncrytpFlag) aesDecrypt(secret, filename string) error {
 	if err != nil {
 		return err
 	}
-	out, err := os.OpenFile(filename+".raw", os.O_RDWR|os.O_CREATE, fInfo.Mode())
+	out, err := os.OpenFile(filename+tempFileExtension, os.O_RDWR|os.O_CREATE, fInfo.Mode())
 	if err != nil {
 		return err
 	}
