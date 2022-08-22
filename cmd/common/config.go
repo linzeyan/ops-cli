@@ -22,15 +22,20 @@ func (c ConfigBlock) String() string {
 	return string(c)
 }
 
+/* Read config by Viper and return key/value to map struct. */
 type readConfig struct {
-	config string
+	/* Specify the config path. */
+	path string
+	/* Specify the config type. */
 	format string
-	table  ConfigBlock
-	value  map[string]any
+	/* Specify the config field. */
+	table ConfigBlock
+	/* Return the key/value to mapping. */
+	value map[string]any
 }
 
 func (r *readConfig) get() (map[string]any, error) {
-	viper.SetConfigFile(r.config)
+	viper.SetConfigFile(r.path)
 	viper.SetConfigType(r.format)
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
@@ -47,9 +52,9 @@ func (r *readConfig) get() (map[string]any, error) {
 	return r.value, nil
 }
 
-/* Get secret token from config. */
-func Config(config string, table ConfigBlock) map[string]any {
-	r := &readConfig{config: config, format: "toml", table: table}
+/* Get secret token and other settings from config. */
+func Config(path string, table ConfigBlock) map[string]any {
+	r := &readConfig{path: path, format: "toml", table: table}
 	v, err := r.get()
 	if err != nil {
 		log.Println(err)
