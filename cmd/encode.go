@@ -278,20 +278,22 @@ func (e *EncodeFlag) JSONMarshaler(src, dst any) error {
 func (e *EncodeFlag) PemEncode(i any, t ...string) (string, error) {
 	var err error
 	var block = &pem.Block{Type: ""}
-	switch data := i.(type) {
-	case string:
-		block.Bytes = []byte(data)
-	case []byte:
-		block.Bytes = data
-	default:
-		return "", common.ErrInvalidArg
-	}
-	var buf bytes.Buffer
 	if len(t) != 0 {
 		for _, arg := range t {
 			block.Type += arg
 		}
 	}
+	switch data := i.(type) {
+	case string:
+		block.Bytes = []byte(data)
+	case []byte:
+		block.Bytes = data
+	case *pem.Block:
+		block = data
+	default:
+		return "", common.ErrInvalidArg
+	}
+	var buf bytes.Buffer
 	err = pem.Encode(&buf, block)
 	return buf.String(), err
 }
