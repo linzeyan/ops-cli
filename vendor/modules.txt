@@ -104,12 +104,6 @@ github.com/inconshreveable/mousetrap
 # github.com/line/line-bot-sdk-go/v7 v7.16.0
 ## explicit; go 1.11
 github.com/line/line-bot-sdk-go/v7/linebot
-# github.com/linzeyan/icp v0.3.1
-## explicit; go 1.17
-github.com/linzeyan/icp
-# github.com/linzeyan/qrcode v0.0.3
-## explicit; go 1.18
-github.com/linzeyan/qrcode
 # github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0
 ## explicit; go 1.16
 github.com/lufia/plan9stats
