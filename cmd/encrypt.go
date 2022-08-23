@@ -56,11 +56,13 @@ var encryptSubCmdFile = &cobra.Command{
 	Run:   Encryptor.FileRun,
 	Example: common.Examples(`# Encrypt file
 ops-cli encrypt file ~/README.md
+ops-cli encrypt file ~/README.md --config ~/config.toml
 ops-cli encrypt file ~/README.md -k '45984614e8f7d6c5'
 ops-cli encrypt file ~/README.md -k key.txt
 
 # Decrypt file
 ops-cli encrypt file ~/README.md -d -k ~/README.md.key
+ops-cli encrypt file ~/README.md -d --config ~/config.toml
 ops-cli encrypt file ~/README.md -k '45984614e8f7d6c5' -d
 ops-cli encrypt file ~/README.md -k key.txt -d`),
 }
@@ -70,6 +72,15 @@ var encryptSubCmdString = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Encrypt or decrypt string",
 	Run:   Encryptor.StringRun,
+	Example: common.Examples(`# Encrypt string
+ops-cli encrypt string "Hello World!" --config ~/config.toml
+ops-cli encrypt string "Hello World!" -k '45984614e8f7d6c5'
+ops-cli encrypt string "Hello World!" -k key.txt
+
+# Decrypt string
+ops-cli encrypt string "Hello World!" -d --config ~/config.toml
+ops-cli encrypt string "Hello World!" -k '45984614e8f7d6c5' -d
+ops-cli encrypt string "Hello World!" -k key.txt -d`),
 }
 
 var Encryptor EncrytpFlag
@@ -110,7 +121,7 @@ func (e *EncrytpFlag) FileRun(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
+func (e *EncrytpFlag) findKey(secret string) []byte {
 	/* Read key file. */
 	if validator.ValidFile(secret) {
 		key, err := os.ReadFile(secret)
@@ -121,20 +132,27 @@ func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 		case 16, 24, 32:
 			return key
 		}
-		return nil
 	}
-	/* secret is a key */
+	/* If secret is a key. */
 	byteKey := []byte(secret)
 	switch len(byteKey) {
 	case 16, 24, 32:
 		return byteKey
 	}
+	/* Read key in the config. */
 	if secret == "" && rootConfig != "" {
 		v := common.Config(rootConfig, common.Encrypt)
 		if err := Encoder.JSONMarshaler(v, e); err != nil {
 			return nil
 		}
 		return []byte(e.Key)
+	}
+	return nil
+}
+
+func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
+	if key := e.findKey(secret); key != nil {
+		return key
 	}
 	if e.decrypt {
 		return nil
@@ -264,11 +282,8 @@ func (e *EncrytpFlag) StringRun(cmd *cobra.Command, args []string) {
 	var err error
 	var out string
 	text := args[0]
-	if e.Key == "" && rootConfig != "" {
-		v := common.Config(rootConfig, common.Encrypt)
-		if err := Encoder.JSONMarshaler(v, e); err != nil {
-			return
-		}
+	if key := e.findKey(e.Key); key != nil {
+		e.Key = string(key)
 	}
 	if e.decrypt {
 		out, err = e.DecryptString(e.Key, text)
@@ -307,6 +322,8 @@ func (e *EncrytpFlag) EncryptString(secret, text string) (string, error) {
 		}
 		nonce := make([]byte, gcm.NonceSize())
 		out = gcm.Seal(nonce, nonce, []byte(text), nil)
+	default:
+		return "", err
 	}
 	return Encoder.Base64URLEncode(out)
 }
@@ -340,6 +357,8 @@ func (e *EncrytpFlag) DecryptString(secret, text string) (string, error) {
 		if err != nil {
 			return "", err
 		}
+	default:
+		return "", err
 	}
 	return string(out), err
 }
