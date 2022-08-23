@@ -21,7 +21,6 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"log"
 	"os"
 
 	"golang.org/x/crypto/ssh"
@@ -34,7 +33,7 @@ import (
 var sshCmd = &cobra.Command{
 	Use:   "ssh-keygen",
 	Short: "Generate SSH keypair",
-	Run:   sshCmdGlobalVar.Run,
+	RunE:  sshCmdGlobalVar.RunE,
 }
 
 var sshCmdGlobalVar sshFlag
@@ -62,15 +61,14 @@ func (r *sshFlag) Init() {
 	}
 }
 
-func (r *sshFlag) Run(_ *cobra.Command, _ []string) {
+func (r *sshFlag) RunE(_ *cobra.Command, _ []string) error {
 	r.Init()
 	rsaFile := r.path
 	pubFile := r.path + ".pub"
 	/* Generate rsa keypair. */
 	key, err := rsa.GenerateKey(rand.Reader, r.bit)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	/* Encode and write private key to file. */
 	privateKey, err := Encoder.PemEncode(&pem.Block{
@@ -78,22 +76,16 @@ func (r *sshFlag) Run(_ *cobra.Command, _ []string) {
 		Bytes: x509.MarshalPKCS1PrivateKey(key),
 	})
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	if err = os.WriteFile(rsaFile, []byte(privateKey), common.FileModeROwner); err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	/* Marshal public key. */
 	pub, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	publicKey := ssh.MarshalAuthorizedKey(pub)
-	if err = os.WriteFile(pubFile, publicKey, common.FileModeROwner); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	return os.WriteFile(pubFile, publicKey, common.FileModeROwner)
 }

@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"log"
 	"os"
 	"path"
 
@@ -39,17 +38,16 @@ var urlSubCmdExpand = &cobra.Command{
 	Use:   "expand [url]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Expand shorten url",
-	Run: func(_ *cobra.Command, args []string) {
+	RunE: func(_ *cobra.Command, args []string) error {
 		if !validator.ValidURL(args[0]) {
-			log.Println(common.ErrInvalidURL)
-			os.Exit(1)
+			return common.ErrInvalidURL
 		}
 		result, err := common.HTTPRequestRedirectURL(args[0])
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
 		PrintString(result)
+		return err
 	},
 	Example: common.Examples(`# Get the real URL from the shortened URL
 ops-cli url expand https://goo.gl/maps/b37Aq3Anc7taXQDd9`),
@@ -61,10 +59,10 @@ var urlSubCmdGet = &cobra.Command{
 	Use:   "get [url] [output]",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Get file from url",
-	Run: func(_ *cobra.Command, args []string) {
+	RunE: func(_ *cobra.Command, args []string) error {
+		var err error
 		if !validator.ValidURL(args[0]) {
-			log.Println(common.ErrInvalidURL)
-			os.Exit(1)
+			return common.ErrInvalidURL
 		}
 		filename := path.Base(args[0])
 		if len(args) > 1 {
@@ -72,14 +70,13 @@ var urlSubCmdGet = &cobra.Command{
 		}
 		result, err := common.HTTPRequestContent(args[0], nil)
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
 		err = os.WriteFile(filename, result, common.FileModeRAll)
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
+		return err
 	},
 	Example: common.Examples(`# Get the file from URL
 ops-cli url get https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.reference.yml`),
