@@ -42,7 +42,7 @@ func init() {
 	rootCmd.AddCommand(sshCmd)
 
 	sshCmd.Flags().IntVarP(&sshCmdGlobalVar.bit, "bits", "b", 4096, "Specifies the number of bits in the key to create.")
-	sshCmd.Flags().StringVarP(&sshCmdGlobalVar.path, "file", "f", "./id_rsa", "Specify the file path to generate.")
+	sshCmd.Flags().StringVarP(&sshCmdGlobalVar.path, "file", "f", "id_rsa", "Specify the file path to generate.")
 }
 
 type sshFlag struct {
@@ -50,21 +50,23 @@ type sshFlag struct {
 	path string
 }
 
-func (r *sshFlag) Init() {
-	if r.bit <= 2048 {
-		r.bit = 2048
+/* Init checks bit and file exist or not, and return files name. */
+func (r *sshFlag) Init() (string, string) {
+	if r.bit < 4096 {
+		r.bit = 4096
 	}
-	if validator.ValidFile(r.path) || validator.ValidFile(r.path+".pub") {
-		PrintString(r.path + " exist.")
-		r.path += "_new"
-		PrintString("Use " + r.path)
+	privateKeyFile := r.path
+	if validator.ValidFile(privateKeyFile) {
+		PrintString(privateKeyFile + " exist.")
+		privateKeyFile += "_new"
+		PrintString("Use " + privateKeyFile)
 	}
+	publicKeyFile := privateKeyFile + ".pub"
+	return privateKeyFile, publicKeyFile
 }
 
 func (r *sshFlag) RunE(_ *cobra.Command, _ []string) error {
-	r.Init()
-	rsaFile := r.path
-	pubFile := r.path + ".pub"
+	rsaFile, pubFile := r.Init()
 	/* Generate rsa keypair. */
 	key, err := rsa.GenerateKey(rand.Reader, r.bit)
 	if err != nil {
@@ -81,11 +83,17 @@ func (r *sshFlag) RunE(_ *cobra.Command, _ []string) error {
 	if err = os.WriteFile(rsaFile, []byte(privateKey), common.FileModeROwner); err != nil {
 		return err
 	}
+	PrintString(rsaFile + " generated")
 	/* Marshal public key. */
 	pub, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
 		return err
 	}
 	publicKey := ssh.MarshalAuthorizedKey(pub)
-	return os.WriteFile(pubFile, publicKey, common.FileModeROwner)
+	err = os.WriteFile(pubFile, publicKey, common.FileModeROwner)
+	if err != nil {
+		return err
+	}
+	PrintString(pubFile + " generated")
+	return err
 }
