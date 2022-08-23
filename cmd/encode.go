@@ -264,15 +264,22 @@ func (e *EncodeFlag) JSONDecode(r io.Reader, i any) (any, error) {
 }
 
 func (e *EncodeFlag) JSONMarshaler(src, dst any) error {
-	bytes, err := json.Marshal(src)
-	if err != nil {
-		return err
+	var err error
+	switch data := src.(type) {
+	case []byte:
+		if err = json.Unmarshal(data, dst); err != nil {
+			return err
+		}
+	default:
+		bytes, err := json.Marshal(data)
+		if err != nil {
+			return err
+		}
+		if err = json.Unmarshal(bytes, dst); err != nil {
+			return err
+		}
 	}
-	err = json.Unmarshal(bytes, dst)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (e *EncodeFlag) PemEncode(i any, t ...string) (string, error) {

@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -106,5 +105,5 @@ func (i *ICPResponse) Request() error {
 	/* Find String */
 	re := regexp.MustCompile("{.*}")
 	match := fmt.Sprintln(re.FindString(string(resp)))
-	return json.Unmarshal([]byte(match), i)
+	return Encoder.JSONMarshaler([]byte(match), i)
 }

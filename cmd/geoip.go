@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -97,8 +96,7 @@ func (geoIPSingle) Request(geoipInput string) (*geoIPSingle, error) {
 		return nil, err
 	}
 	var data geoIPSingle
-	err = json.Unmarshal(content, &data)
-	if err != nil {
+	if err = Encoder.JSONMarshaler(content, &data); err != nil {
 		return nil, err
 	}
 	return &data, err
@@ -129,8 +127,7 @@ func (geoIPBatch) Request(geoipBatch []string) (*geoIPBatch, error) {
 		return nil, err
 	}
 	var data geoIPBatch
-	err = json.Unmarshal(content, &data)
-	if err != nil {
+	if err = Encoder.JSONMarshaler(content, &data); err != nil {
 		return nil, err
 	}
 	return &data, err
