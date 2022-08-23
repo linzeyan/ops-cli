@@ -2,6 +2,9 @@
 channel_id = "channelID"
 token = "token"
 
+[encrypt]
+key = ""
+
 [line]
 access_token = "Channel Access Token"
 id = ""

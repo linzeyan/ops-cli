@@ -79,15 +79,16 @@ func init() {
 
 	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, "Decrypt")
 	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Encrypt mode(CFB/OFB/CTR/GCM)")
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.key, "key", "k", "", "Specify the encrypt key text or key file")
+	encryptCmd.PersistentFlags().StringVarP(&Encryptor.Key, "key", "k", "", "Specify the encrypt key text or key file")
 
 	encryptCmd.AddCommand(encryptSubCmdFile)
 	encryptCmd.AddCommand(encryptSubCmdString)
 }
 
 type EncrytpFlag struct {
+	Key string `json:"key"`
+
 	decrypt bool
-	key     string
 	mode    string
 }
 
@@ -95,9 +96,9 @@ func (e *EncrytpFlag) FileRun(cmd *cobra.Command, args []string) {
 	var err error
 	filename := args[0]
 	if e.decrypt {
-		err = e.DecryptFile(e.key, filename)
+		err = e.DecryptFile(e.Key, filename)
 	} else {
-		err = e.EncryptFile(e.key, filename)
+		err = e.EncryptFile(e.Key, filename)
 	}
 	if err != nil {
 		log.Println(err)
@@ -127,6 +128,13 @@ func (e *EncrytpFlag) getKey(secret, filename string, perm os.FileMode) []byte {
 	switch len(byteKey) {
 	case 16, 24, 32:
 		return byteKey
+	}
+	if secret == "" && rootConfig != "" {
+		v := common.Config(rootConfig, common.Encrypt)
+		if err := Encoder.JSONMarshaler(v, e); err != nil {
+			return nil
+		}
+		return []byte(e.Key)
 	}
 	if e.decrypt {
 		return nil
@@ -256,10 +264,16 @@ func (e *EncrytpFlag) StringRun(cmd *cobra.Command, args []string) {
 	var err error
 	var out string
 	text := args[0]
+	if e.Key == "" && rootConfig != "" {
+		v := common.Config(rootConfig, common.Encrypt)
+		if err := Encoder.JSONMarshaler(v, e); err != nil {
+			return
+		}
+	}
 	if e.decrypt {
-		out, err = e.DecryptString(e.key, text)
+		out, err = e.DecryptString(e.Key, text)
 	} else {
-		out, err = e.EncryptString(e.key, text)
+		out, err = e.EncryptString(e.Key, text)
 	}
 	if err != nil {
 		log.Println(err)

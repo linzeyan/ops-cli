@@ -12,6 +12,7 @@ type ConfigBlock string
 
 const (
 	Discord  ConfigBlock = "discord"
+	Encrypt  ConfigBlock = "encrypt"
 	ICP      ConfigBlock = "west"
 	LINE     ConfigBlock = "line"
 	Slack    ConfigBlock = "slack"
