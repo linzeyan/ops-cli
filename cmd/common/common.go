@@ -14,6 +14,11 @@ const (
 	IndentTwoSpaces = "  "
 )
 
+const (
+	FileModeROwner os.FileMode = 0600
+	FileModeRAll   os.FileMode = 0644
+)
+
 var (
 	Context = context.Background()
 	TimeNow = time.Now().Local()

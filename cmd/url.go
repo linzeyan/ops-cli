@@ -75,7 +75,7 @@ var urlSubCmdGet = &cobra.Command{
 			log.Println(err)
 			os.Exit(1)
 		}
-		err = os.WriteFile(filename, result, os.FileMode(0644))
+		err = os.WriteFile(filename, result, common.FileModeRAll)
 		if err != nil {
 			log.Println(err)
 			os.Exit(1)
