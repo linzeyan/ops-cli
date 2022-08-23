@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -32,8 +31,10 @@ import (
 )
 
 const (
-	EncryptModeCBC = "CBC"
 	EncryptModeCFB = "CFB"
+	EncryptModeCTR = "CTR"
+	EncryptModeGCM = "GCM"
+	EncryptModeOFB = "OFB"
 )
 const (
 	keyFileExtension  = ".key"
@@ -77,7 +78,7 @@ func init() {
 	rootCmd.AddCommand(encryptCmd)
 
 	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, "Decrypt")
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Specify the encrypt mode(CFB/OFB/CTR)")
+	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Encrypt mode(CFB/OFB/CTR/GCM)")
 	encryptCmd.PersistentFlags().StringVarP(&Encryptor.key, "key", "k", "", "Specify the encrypt key text or key file")
 
 	encryptCmd.AddCommand(encryptSubCmdFile)
@@ -147,9 +148,9 @@ func (e *EncrytpFlag) stream(b cipher.Block, iv []byte) cipher.Stream {
 			return cipher.NewCFBDecrypter(b, iv)
 		}
 		return cipher.NewCFBEncrypter(b, iv)
-	case "CTR":
+	case EncryptModeCTR:
 		return cipher.NewCTR(b, iv)
-	case "OFB":
+	case EncryptModeOFB:
 		return cipher.NewOFB(b, iv)
 	default:
 		return cipher.NewCTR(b, iv)
@@ -277,26 +278,15 @@ func (e *EncrytpFlag) EncryptString(secret, text string) (string, error) {
 		return "", err
 	}
 	switch e.mode {
-	case "CBC":
+	case EncryptModeCFB, EncryptModeCTR, EncryptModeOFB:
 		out = make([]byte, aes.BlockSize+len(plainText))
 		iv := out[:aes.BlockSize]
 		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 			return "", err
 		}
-		padding := aes.BlockSize - len(plainText)%aes.BlockSize
-		padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-		plainText = append(plainText, padtext...)
-		cbc := cipher.NewCBCEncrypter(block, iv)
-		cbc.CryptBlocks(out, plainText)
-	case EncryptModeCFB:
-		out = make([]byte, aes.BlockSize+len(plainText))
-		iv := out[:aes.BlockSize]
-		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-			return "", err
-		}
-		stream := cipher.NewCFBEncrypter(block, iv)
+		stream := e.stream(block, iv)
 		stream.XORKeyStream(out[aes.BlockSize:], plainText)
-	case "GCM":
+	case EncryptModeGCM:
 		gcm, err := cipher.NewGCM(block)
 		if err != nil {
 			return "", err
@@ -320,14 +310,12 @@ func (e *EncrytpFlag) DecryptString(secret, text string) (string, error) {
 		return "", err
 	}
 	switch e.mode {
-	case "CBC":
-		// cbc := cipher.NewCBCDecrypter(block, key[:aes.BlockSize])
-	case EncryptModeCFB:
+	case EncryptModeCFB, EncryptModeCTR, EncryptModeOFB:
 		iv := cipherText[:aes.BlockSize]
-		stream := cipher.NewCFBDecrypter(block, iv)
+		stream := e.stream(block, iv)
 		out = cipherText[aes.BlockSize:]
 		stream.XORKeyStream(out, out)
-	case "GCM":
+	case EncryptModeGCM:
 		gcm, err := cipher.NewGCM(block)
 		if err != nil {
 			return "", err
