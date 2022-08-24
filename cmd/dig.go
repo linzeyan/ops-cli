@@ -131,7 +131,7 @@ var digOutput digResponse
 func init() {
 	rootCmd.AddCommand(digCmd)
 
-	digCmd.Flags().StringVarP(&digNetwork, "net", "n", "tcp", "udp/tcp")
+	digCmd.Flags().StringVarP(&digNetwork, "net", "n", "tcp", common.Usage("udp/tcp"))
 }
 
 type digResponseFormat struct {

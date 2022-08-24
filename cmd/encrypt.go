@@ -88,9 +88,9 @@ var Encryptor EncrytpFlag
 func init() {
 	rootCmd.AddCommand(encryptCmd)
 
-	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, "Decrypt")
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", "Encrypt mode(CFB/OFB/CTR/GCM)")
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.Key, "key", "k", "", "Specify the encrypt key text or key file")
+	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, common.Usage("Decrypt"))
+	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", common.Usage("Encrypt mode(CFB/OFB/CTR/GCM)"))
+	encryptCmd.PersistentFlags().StringVarP(&Encryptor.Key, "key", "k", "", common.Usage("Specify the encrypt key text or key file"))
 
 	encryptCmd.AddCommand(encryptSubCmdFile)
 	encryptCmd.AddCommand(encryptSubCmdString)

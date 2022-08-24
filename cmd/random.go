@@ -85,14 +85,14 @@ ops-cli random bootstrap-token`),
 }
 
 var randomSubCmdBase64 = &cobra.Command{
-	Use:   Base64.String(),
+	Use:   common.Base64,
 	Short: "Generate a base64 string",
 	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate a base64 string
 ops-cli random base64 -l 100`),
 }
 var randomSubCmdHex = &cobra.Command{
-	Use:   Hex.String(),
+	Use:   common.Hex,
 	Short: "Generate a hexadecimal string",
 	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate a hexadecimal string
@@ -104,11 +104,11 @@ var randomCmdGlobalVar RandomFlag
 func init() {
 	rootCmd.AddCommand(randomCmd)
 
-	randomCmd.PersistentFlags().IntVarP(&randomCmdGlobalVar.length, "length", "l", 24, "Specify the string length")
-	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.lower, "lower", "o", 4, "Number of lowercase letters to include in the string")
-	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.upper, "upper", "u", 4, "Number of uppercase letters to include in the string")
-	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.symbol, "symbol", "s", 4, "Number of symbols to include in the string")
-	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.number, "number", "n", 4, "Number of digits to include in the string")
+	randomCmd.PersistentFlags().IntVarP(&randomCmdGlobalVar.length, "length", "l", 24, common.Usage("Specify the string length"))
+	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.lower, "lower", "o", 4, common.Usage("Number of lowercase letters to include in the string"))
+	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.upper, "upper", "u", 4, common.Usage("Number of uppercase letters to include in the string"))
+	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.symbol, "symbol", "s", 4, common.Usage("Number of symbols to include in the string"))
+	randomCmd.Flags().IntVarP(&randomCmdGlobalVar.number, "number", "n", 4, common.Usage("Number of digits to include in the string"))
 
 	randomCmd.AddCommand(randomSubCmdLower)
 	randomCmd.AddCommand(randomSubCmdNumber)
@@ -144,14 +144,14 @@ func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 		token, _ := Encoder.HexEncode(r2)
 		PrintString(id + "." + token)
 		return
-	case Base64.String():
+	case common.Base64:
 		b := p.Rand(randomCmdGlobalVar.length)
 		encode, _ := Encoder.PemEncode(b)
 		re := regexp.MustCompile("-.*-\n")
 		out := re.ReplaceAllString(encode, "")
 		PrintString(out)
 		return
-	case Hex.String():
+	case common.Hex:
 		b := p.Rand(randomCmdGlobalVar.length)
 		out, _ := Encoder.HexEncode(b)
 		PrintString(out)

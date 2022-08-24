@@ -56,10 +56,10 @@ var whoisCmdGlobalVar WhoisFlag
 func init() {
 	rootCmd.AddCommand(whoisCmd)
 
-	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.ns, "ns", "n", false, "Only print Name Servers")
-	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.expiry, "expiry", "e", false, "Only print expiry time")
-	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.registrar, "registrar", "r", false, "Only print Registrar")
-	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.days, "days", "d", false, "Only print the remaining days")
+	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.ns, "ns", "n", false, common.Usage("Only print Name Servers"))
+	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.expiry, "expiry", "e", false, common.Usage("Only print expiry time"))
+	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.registrar, "registrar", "r", false, common.Usage("Only print Registrar"))
+	whoisCmd.Flags().BoolVarP(&whoisCmdGlobalVar.days, "days", "d", false, common.Usage("Only print the remaining days"))
 }
 
 type WhoisResponse struct {

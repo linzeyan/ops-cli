@@ -70,9 +70,9 @@ var slackCmdGlobalVar SlackFlag
 func init() {
 	rootCmd.AddCommand(slackCmd)
 
-	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.Token, "token", "t", "", "Bot token (required)")
-	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.Channel, "channel", "c", "", "Channel ID")
-	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.arg, "arg", "a", "", "Input argument")
+	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.Token, "token", "t", "", common.Usage("Bot token (required)"))
+	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.Channel, "channel", "c", "", common.Usage("Channel ID"))
+	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.arg, "arg", "a", "", common.Usage("Input argument"))
 
 	slackCmd.AddCommand(slackSubCmdFile)
 	slackCmd.AddCommand(slackSubCmdText)

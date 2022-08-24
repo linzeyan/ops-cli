@@ -37,8 +37,10 @@ import (
 
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "Update ops-cli to the latest release",
+	Short: fmt.Sprintf("Update %s to the latest release", rootCmd.Name()),
 	RunE:  updateCmdGlobalVar.RunE,
+
+	DisableFlagsInUseLine: true,
 }
 
 var updateCmdGlobalVar updateFlag

@@ -25,7 +25,6 @@ import (
 	"encoding/pem"
 	"encoding/xml"
 	"io"
-	"log"
 	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -33,24 +32,6 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
-
-type EncodeType string
-
-const (
-	Base32    EncodeType = "base32"
-	Base64    EncodeType = "base64"
-	Hex       EncodeType = "hex"
-	Std       EncodeType = "std"
-	URL       EncodeType = "url"
-	Base32Hex EncodeType = Base32 + Hex
-	Base32Std EncodeType = Base32 + Std
-	Base64Std EncodeType = Base64 + Std
-	Base64URL EncodeType = Base64 + URL
-)
-
-func (e EncodeType) String() string {
-	return string(e)
-}
 
 var encodeCmd = &cobra.Command{
 	Use:   "encode",
@@ -61,35 +42,35 @@ var encodeCmd = &cobra.Command{
 }
 
 var encodeSubCmdBase32Hex = &cobra.Command{
-	Use:   Base32Hex.String(),
+	Use:   common.Base32Hex,
 	Args:  cobra.ExactArgs(1),
 	Short: "Base32 hex encoding or decoding",
 	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase32Std = &cobra.Command{
-	Use:   Base32Std.String(),
+	Use:   common.Base32Std,
 	Args:  cobra.ExactArgs(1),
 	Short: "Base32 standard encoding or decoding",
 	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase64Std = &cobra.Command{
-	Use:   Base64Std.String(),
+	Use:   common.Base64Std,
 	Args:  cobra.ExactArgs(1),
 	Short: "Base64 standard encoding or decoding",
 	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase64URL = &cobra.Command{
-	Use:   Base64URL.String(),
+	Use:   common.Base64URL,
 	Args:  cobra.ExactArgs(1),
 	Short: "Base64 url encoding or decoding",
 	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdHex = &cobra.Command{
-	Use:   Hex.String(),
+	Use:   common.Hex,
 	Args:  cobra.ExactArgs(1),
 	Short: "Hexadecimal encoding or decoding",
 	RunE:  Encoder.RunE,
@@ -100,7 +81,7 @@ var Encoder EncodeFlag
 func init() {
 	rootCmd.AddCommand(encodeCmd)
 
-	encodeCmd.PersistentFlags().BoolVarP(&Encoder.decode, "decode", "d", false, "Decodes input")
+	encodeCmd.PersistentFlags().BoolVarP(&Encoder.decode, "decode", "d", false, common.Usage("Decodes input"))
 	encodeCmd.AddCommand(encodeSubCmdBase32Hex, encodeSubCmdBase32Std)
 	encodeCmd.AddCommand(encodeSubCmdBase64Std, encodeSubCmdBase64URL)
 	encodeCmd.AddCommand(encodeSubCmdHex)
@@ -113,8 +94,7 @@ type EncodeFlag struct {
 func (e *EncodeFlag) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	if e.decode {
-		e.RunDecode(cmd, args)
-		return err
+		return e.RunDecode(cmd, args)
 	}
 	var out string
 	var data any
@@ -127,16 +107,16 @@ func (e *EncodeFlag) RunE(cmd *cobra.Command, args []string) error {
 	case false:
 		data = args[0]
 	}
-	switch EncodeType(cmd.Name()) {
-	case Base32Hex:
+	switch cmd.Name() {
+	case common.Base32Hex:
 		out, err = e.Base32HexEncode(data)
-	case Base32, Base32Std:
+	case common.Base32Std:
 		out, err = e.Base32StdEncode(data)
-	case Base64, Base64Std, Std:
+	case common.Base64Std:
 		out, err = e.Base64StdEncode(data)
-	case Base64URL, URL:
+	case common.Base64URL:
 		out, err = e.Base64URLEncode(data)
-	case Hex:
+	case common.Hex:
 		out, err = e.HexEncode(data)
 	}
 	if err != nil {
@@ -146,26 +126,26 @@ func (e *EncodeFlag) RunE(cmd *cobra.Command, args []string) error {
 	return err
 }
 
-func (e *EncodeFlag) RunDecode(cmd *cobra.Command, args []string) {
+func (e *EncodeFlag) RunDecode(cmd *cobra.Command, args []string) error {
 	var err error
 	var out []byte
-	switch EncodeType(cmd.Name()) {
-	case Base32Hex:
+	switch cmd.Name() {
+	case common.Base32Hex:
 		out, err = e.Base32HexDecode(args[0])
-	case Base32, Base32Std:
+	case common.Base32Std:
 		out, err = e.Base32StdDecode(args[0])
-	case Base64, Base64Std, Std:
+	case common.Base64Std:
 		out, err = e.Base64StdDecode(args[0])
-	case URL, Base64URL:
+	case common.Base64URL:
 		out, err = e.Base64URLDecode(args[0])
-	case Hex:
+	case common.Hex:
 		out, err = e.HexDecode(args[0])
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	PrintString(out)
+	return err
 }
 
 func (e *EncodeFlag) Base32HexEncode(i any) (string, error) {

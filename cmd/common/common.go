@@ -53,3 +53,8 @@ func Examples(s string) string {
 	c := color.New(color.FgYellow)
 	return c.Sprintf(`%s`, s)
 }
+
+func Usage(s string) string {
+	c := color.New(color.FgGreen)
+	return c.Sprintf(`%s`, s)
+}

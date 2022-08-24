@@ -170,8 +170,8 @@ var convertCmdGlobalVar ConvertFlag
 func init() {
 	rootCmd.AddCommand(convertCmd)
 
-	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.inFile, "in", "i", "", "Input file")
-	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.outFile, "out", "o", "", "Output file")
+	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.inFile, "in", "i", "", common.Usage("Input file"))
+	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.outFile, "out", "o", "", common.Usage("Output file"))
 	/* dos2unix */
 	convertCmd.AddCommand(convertSubCmdDOS2Unix)
 	/* CSV */

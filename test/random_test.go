@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -68,8 +69,8 @@ func TestBinaryRandom(t *testing.T) {
 		{subCommand, "number", "-l", "50"},
 		{subCommand, "symbol", "-l", "60"},
 		{subCommand, "bootstrap-token", "-l", "60"},
-		{subCommand, cmd.Base64.String(), "-l", "100"},
-		{subCommand, cmd.Hex.String(), "-l", "10"},
+		{subCommand, common.Base64, "-l", "100"},
+		{subCommand, common.Hex, "-l", "10"},
 		{subCommand, "-l", "70"},
 		{subCommand, "-s", "10"},
 		{subCommand, "-o", "10", "-s", "10", "-l", "32"},

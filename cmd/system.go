@@ -124,8 +124,8 @@ func init() {
 	systemCmd.AddCommand(systemSubCmdMemory)
 	systemCmd.AddCommand(systemSubCmdNetwork)
 
-	systemSubCmdNetwork.Flags().BoolVarP(&systemCmdGlobalVar.aiface, "all-interfaces", "a", false, "Display all interfaces")
-	systemSubCmdNetwork.Flags().BoolVarP(&systemCmdGlobalVar.iface, "interface", "i", false, "Display interfaces")
+	systemSubCmdNetwork.Flags().BoolVarP(&systemCmdGlobalVar.aiface, "all-interfaces", "a", false, common.Usage("Display all interfaces"))
+	systemSubCmdNetwork.Flags().BoolVarP(&systemCmdGlobalVar.iface, "interface", "i", false, common.Usage("Display interfaces"))
 }
 
 type SystemFlag struct {

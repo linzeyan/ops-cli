@@ -41,8 +41,8 @@ var sshCmdGlobalVar sshFlag
 func init() {
 	rootCmd.AddCommand(sshCmd)
 
-	sshCmd.Flags().IntVarP(&sshCmdGlobalVar.bit, "bits", "b", 4096, "Specifies the number of bits in the key to create.")
-	sshCmd.Flags().StringVarP(&sshCmdGlobalVar.path, "file", "f", "id_rsa", "Specify the file path to generate.")
+	sshCmd.Flags().IntVarP(&sshCmdGlobalVar.bit, "bits", "b", 4096, common.Usage("Specifies the number of bits in the key to create"))
+	sshCmd.Flags().StringVarP(&sshCmdGlobalVar.path, "file", "f", "id_rsa", common.Usage("Specify the file path to generate"))
 }
 
 type sshFlag struct {

@@ -91,10 +91,10 @@ var telegramCmdGlobalVar TelegramFlag
 func init() {
 	rootCmd.AddCommand(telegramCmd)
 
-	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.Token, "token", "t", "", "Bot token (required)")
-	telegramCmd.PersistentFlags().Int64VarP(&telegramCmdGlobalVar.Chat, "chat-id", "c", 0, "Chat ID")
-	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.arg, "arg", "a", "", "Input argument")
-	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.caption, "caption", "", "", "Add caption for file")
+	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.Token, "token", "t", "", common.Usage("Bot token (required)"))
+	telegramCmd.PersistentFlags().Int64VarP(&telegramCmdGlobalVar.Chat, "chat-id", "c", 0, common.Usage("Chat ID"))
+	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.arg, "arg", "a", "", common.Usage("Input argument"))
+	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.caption, "caption", "", "", common.Usage("Add caption for file"))
 
 	telegramCmd.AddCommand(telegramSubCmdAudio)
 	telegramCmd.AddCommand(telegramSubCmdFile)

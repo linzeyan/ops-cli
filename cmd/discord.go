@@ -57,9 +57,9 @@ var discordCmdGlobalVar DiscordFlag
 func init() {
 	rootCmd.AddCommand(discordCmd)
 
-	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.Token, "token", "t", "", "Token")
-	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.Channel, "channel-id", "c", "", "Channel ID")
-	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.arg, "arg", "a", "", "Input argument")
+	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.Token, "token", "t", "", common.Usage("Token"))
+	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.Channel, "channel-id", "c", "", common.Usage("Channel ID"))
+	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.arg, "arg", "a", "", common.Usage("Input argument"))
 
 	discordCmd.AddCommand(discordSubCmdFile, discordSubCmdText, discordSubCmdTextTS)
 }

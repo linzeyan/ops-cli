@@ -57,8 +57,8 @@ var icpCmdGlobalVar ICPResponse
 func init() {
 	rootCmd.AddCommand(icpCmd)
 
-	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.flags.Account, "account", "a", "", "Enter the WEST account")
-	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.flags.Key, "key", "k", "", "Enter the WEST api key")
+	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))
+	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.flags.Key, "key", "k", "", common.Usage("Enter the WEST api key"))
 	icpCmd.MarkFlagsRequiredTogether("account", "key")
 }
 

@@ -35,3 +35,13 @@ func HashAlgorithm(alg string) hash.Hash {
 	}
 	return nil
 }
+
+const (
+	Base32    = "base32"
+	Base64    = "base64"
+	Hex       = "hex"
+	Base32Hex = Base32 + Hex
+	Base32Std = Base32 + "std"
+	Base64Std = Base64 + "std"
+	Base64URL = Base64 + "url"
+)

@@ -88,8 +88,8 @@ var Hasher HashFlag
 func init() {
 	rootCmd.AddCommand(hashCmd)
 
-	hashCmd.Flags().BoolVarP(&Hasher.check, "check", "c", false, "Read SHA sums from the file and check them")
-	hashCmd.Flags().BoolVarP(&Hasher.list, "list", "l", false, "List multiple SHA sums for the specify input")
+	hashCmd.Flags().BoolVarP(&Hasher.check, "check", "c", false, common.Usage("Read SHA sums from the file and check them"))
+	hashCmd.Flags().BoolVarP(&Hasher.list, "list", "l", false, common.Usage("List multiple SHA sums for the specify input"))
 	hashCmd.AddCommand(hashSubCmdMd5, hashSubCmdSha1, hashSubCmdSha256, hashSubCmdSha512)
 }
 

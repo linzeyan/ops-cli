@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -92,16 +93,16 @@ func TestEncode(t *testing.T) {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, cmd.Base32Hex.String(), testHost}, "CTNMUPRCCKN66RRD\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Base32Std.String(), testHost}, "M5XW6Z3MMUXGG33N\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Base64Std.String(), testHost}, "Z29vZ2xlLmNvbQ==\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Base64URL.String(), testHost}, "Z29vZ2xlLmNvbQ==\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Hex.String(), testHost}, "676f6f676c652e636f6d\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Base32Hex.String(), "-d", "ALQLICHPEH636KHJ"}, "UuY29tL3R3\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Base32Std.String(), "-d", "JBGTMTDZHEZWI==="}, "HM6Ly93d\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Base64Std.String(), "-d", "aWxsZWdhbA=="}, "illegal\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Base64URL.String(), "-d", "aHR0cHM6Ly9naXRodWIuY29t"}, "https://github.com\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.Hex.String(), "-d", "64617461"}, "data\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Base32Hex, testHost}, "CTNMUPRCCKN66RRD\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Base32Std, testHost}, "M5XW6Z3MMUXGG33N\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Base64Std, testHost}, "Z29vZ2xlLmNvbQ==\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Base64URL, testHost}, "Z29vZ2xlLmNvbQ==\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Hex, testHost}, "676f6f676c652e636f6d\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Base32Hex, "-d", "ALQLICHPEH636KHJ"}, "UuY29tL3R3\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Base32Std, "-d", "JBGTMTDZHEZWI==="}, "HM6Ly93d\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Base64Std, "-d", "aWxsZWdhbA=="}, "illegal\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Base64URL, "-d", "aHR0cHM6Ly9naXRodWIuY29t"}, "https://github.com\n"},
+		{[]string{runCommand, mainGo, subCommand, common.Hex, "-d", "64617461"}, "data\n"},
 	}
 
 	for i := range testCases {
@@ -118,16 +119,16 @@ func TestEncode(t *testing.T) {
 func TestBinaryEncode(t *testing.T) {
 	const subCommand = "encode"
 	args := [][]string{
-		{subCommand, cmd.Base32Hex.String(), testHost},
-		{subCommand, cmd.Base32Std.String(), testHost},
-		{subCommand, cmd.Base64Std.String(), testHost},
-		{subCommand, cmd.Base64URL.String(), testHost},
-		{subCommand, cmd.Hex.String(), testHost},
-		{subCommand, cmd.Base32Hex.String(), "C5O70R35", "-d"},
-		{subCommand, cmd.Base32Std.String(), "MFYHA3DF", "-d"},
-		{subCommand, cmd.Base64Std.String(), "YXBwbGU=", "-d"},
-		{subCommand, cmd.Base64URL.String(), "aHR0cHM6Ly93d3cuYXBwbGUuY29tL3R3", "-d"},
-		{subCommand, cmd.Hex.String(), "6170706c65", "-d"},
+		{subCommand, common.Base32Hex, testHost},
+		{subCommand, common.Base32Std, testHost},
+		{subCommand, common.Base64Std, testHost},
+		{subCommand, common.Base64URL, testHost},
+		{subCommand, common.Hex, testHost},
+		{subCommand, common.Base32Hex, "C5O70R35", "-d"},
+		{subCommand, common.Base32Std, "MFYHA3DF", "-d"},
+		{subCommand, common.Base64Std, "YXBwbGU=", "-d"},
+		{subCommand, common.Base64URL, "aHR0cHM6Ly93d3cuYXBwbGUuY29tL3R3", "-d"},
+		{subCommand, common.Hex, "6170706c65", "-d"},
 	}
 
 	for i := range args {

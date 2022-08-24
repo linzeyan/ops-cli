@@ -23,6 +23,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -54,7 +55,7 @@ var versionFull bool
 func init() {
 	rootCmd.AddCommand(versionCmd)
 
-	versionCmd.Flags().BoolVarP(&versionFull, "complete", "c", false, "Print version information completely")
+	versionCmd.Flags().BoolVarP(&versionFull, "complete", "c", false, common.Usage("Print version information completely"))
 }
 
 type VersionOutput struct {
@@ -68,7 +69,7 @@ func (r VersionOutput) String() {
 	var ver strings.Builder
 	f := reflect.ValueOf(&r).Elem()
 	t := f.Type()
-	ver.WriteString(fmt.Sprintf("%-10s\t%v\n", "App", "ops-cli"))
+	ver.WriteString(fmt.Sprintf("%-10s\t%v\n", "App", rootCmd.Name()))
 	for i := 0; i < f.NumField(); i++ {
 		_, err := ver.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
 		// f.Field(i).Type()

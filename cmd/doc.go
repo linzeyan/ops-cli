@@ -19,6 +19,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
@@ -58,7 +59,7 @@ var docCmdGlobalVar DocFlag
 func init() {
 	rootCmd.AddCommand(docCmd)
 
-	docCmd.PersistentFlags().StringVarP(&docCmdGlobalVar.dir, "dir", "d", "doc", "Specify the path to generate documentation")
+	docCmd.PersistentFlags().StringVarP(&docCmdGlobalVar.dir, "dir", "d", "doc", common.Usage("Specify the path to generate documentation"))
 	docCmd.AddCommand(docSubCmdMan)
 	docCmd.AddCommand(docSubCmdMarkdown)
 	docCmd.AddCommand(docSubCmdRest)

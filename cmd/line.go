@@ -88,10 +88,10 @@ var lineCmdGlobalVar LineFlag
 func init() {
 	rootCmd.AddCommand(lineCmd)
 
-	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.Secret, "secret", "s", "", "Channel Secret")
-	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.Token, "token", "t", "", "Channel Access Token")
-	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.arg, "arg", "a", "", "Function Argument")
-	lineCmd.PersistentFlags().StringVar(&lineCmdGlobalVar.ID, "id", "", "UserID/GroupID/RoomID")
+	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.Secret, "secret", "s", "", common.Usage("Channel Secret"))
+	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.Token, "token", "t", "", common.Usage("Channel Access Token"))
+	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.arg, "arg", "a", "", common.Usage("Function Argument"))
+	lineCmd.PersistentFlags().StringVar(&lineCmdGlobalVar.ID, "id", "", common.Usage("UserID/GroupID/RoomID"))
 
 	lineCmd.AddCommand(lineSubCmdID)
 	lineCmd.AddCommand(lineSubCmdPhoto)

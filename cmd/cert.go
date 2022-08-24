@@ -52,12 +52,12 @@ var certCmdGlobalVar CertFlag
 func init() {
 	rootCmd.AddCommand(certCmd)
 
-	certCmd.Flags().StringVarP(&certCmdGlobalVar.port, "port", "p", "443", "Specify host port")
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.ip, "ip", false, "Only print IP")
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.expiry, "expiry", false, "Only print expiry time")
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.dns, "dns", false, "Only print DNS names")
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.issuer, "issuer", false, "Only print issuer")
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.days, "days", false, "Only print the remaining days")
+	certCmd.Flags().StringVarP(&certCmdGlobalVar.port, "port", "p", "443", common.Usage("Specify host port"))
+	certCmd.Flags().BoolVar(&certCmdGlobalVar.ip, "ip", false, common.Usage("Only print IP"))
+	certCmd.Flags().BoolVar(&certCmdGlobalVar.expiry, "expiry", false, common.Usage("Only print expiry time"))
+	certCmd.Flags().BoolVar(&certCmdGlobalVar.dns, "dns", false, common.Usage("Only print DNS names"))
+	certCmd.Flags().BoolVar(&certCmdGlobalVar.issuer, "issuer", false, common.Usage("Only print issuer"))
+	certCmd.Flags().BoolVar(&certCmdGlobalVar.days, "days", false, common.Usage("Only print the remaining days"))
 }
 
 type CertFlag struct {

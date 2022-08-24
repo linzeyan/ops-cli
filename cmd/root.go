@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -89,9 +90,9 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, "Output JSON format")
-	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, "Output YAML format")
-	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", "Specify config path (toml)")
+	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, common.Usage("Output JSON format"))
+	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, common.Usage("Output YAML format"))
+	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path (toml)"))
 }
 
 type OutputFormat interface {
