@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -33,25 +32,25 @@ var docCmd = &cobra.Command{
 var docSubCmdMan = &cobra.Command{
 	Use:   "man",
 	Short: "Generate man page documentation",
-	Run:   docCmdGlobalVar.Run,
+	RunE:  docCmdGlobalVar.RunE,
 }
 
 var docSubCmdMarkdown = &cobra.Command{
 	Use:   "markdown",
 	Short: "Generate markdown documentation",
-	Run:   docCmdGlobalVar.Run,
+	RunE:  docCmdGlobalVar.RunE,
 }
 
 var docSubCmdRest = &cobra.Command{
 	Use:   "rest",
 	Short: "Generate rest documentation",
-	Run:   docCmdGlobalVar.Run,
+	RunE:  docCmdGlobalVar.RunE,
 }
 
 var docSubCmdYaml = &cobra.Command{
 	Use:   "yaml",
 	Short: "Generate yaml documentation",
-	Run:   docCmdGlobalVar.Run,
+	RunE:  docCmdGlobalVar.RunE,
 }
 
 var docCmdGlobalVar DocFlag
@@ -82,11 +81,10 @@ func (d *DocFlag) createDir() error {
 	return err
 }
 
-func (d *DocFlag) Run(cmd *cobra.Command, _ []string) {
+func (d *DocFlag) RunE(cmd *cobra.Command, _ []string) error {
 	var err error
 	if err = d.createDir(); err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	switch cmd.Name() {
 	case DocTypeMan:
@@ -102,8 +100,5 @@ func (d *DocFlag) Run(cmd *cobra.Command, _ []string) {
 	case DocTypeYaml:
 		err = doc.GenYamlTree(rootCmd, d.dir)
 	}
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	return err
 }

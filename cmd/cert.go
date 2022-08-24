@@ -21,7 +21,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -34,7 +33,7 @@ var certCmd = &cobra.Command{
 	Use:   "cert [host|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Check tls cert expiry time",
-	Run:   certCmdGlobalVar.Run,
+	RunE:  certCmdGlobalVar.RunE,
 	Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
 ops-cli cert www.google.com
 
@@ -69,7 +68,7 @@ type CertFlag struct {
 	resp *certResponse
 }
 
-func (cf *CertFlag) Run(cmd *cobra.Command, args []string) {
+func (cf *CertFlag) RunE(cmd *cobra.Command, args []string) error {
 	var err error
 	input := args[0]
 	switch {
@@ -78,15 +77,13 @@ func (cf *CertFlag) Run(cmd *cobra.Command, args []string) {
 	case validator.ValidDomain(input) || validator.ValidIPv4(input):
 		cf.resp, err = cf.resp.CheckHost(input + ":" + cf.port)
 	default:
-		os.Exit(1)
+		return common.ErrInvalidArg
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	if cf.resp == nil {
-		log.Println(ErrEmptyResponse)
-		os.Exit(1)
+		return common.ErrResponse
 	}
 	switch {
 	default:
@@ -102,6 +99,7 @@ func (cf *CertFlag) Run(cmd *cobra.Command, args []string) {
 	case cf.days:
 		PrintString(cf.resp.Days)
 	}
+	return err
 }
 
 type certResponse struct {

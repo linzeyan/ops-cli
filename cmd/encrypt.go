@@ -269,13 +269,12 @@ func (e *EncrytpFlag) DecryptFile(secret, filename string) error {
 			}
 		}
 		if err == io.EOF {
-			break
+			return nil
 		}
 		if err != nil {
 			return err
 		}
 	}
-	return err
 }
 
 func (e *EncrytpFlag) StringRun(cmd *cobra.Command, args []string) {

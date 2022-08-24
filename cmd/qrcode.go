@@ -38,17 +38,16 @@ var qrcodeSubCmdRead = &cobra.Command{
 	Use:   "read",
 	Args:  cobra.ExactArgs(1),
 	Short: "Read QR code and print message",
-	Run: func(_ *cobra.Command, args []string) {
+	RunE: func(_ *cobra.Command, args []string) error {
 		if !validator.ValidFile(args[0]) {
-			log.Println(ErrFileNotFound)
-			os.Exit(1)
+			return ErrFileNotFound
 		}
 		result, err := common.ReadQRCode(args[0])
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
 		PrintString(result)
+		return nil
 	},
 	Example: common.Examples(`# Read QR code and print message
 ops-cli qrcode read qrcode.png`),
@@ -59,7 +58,7 @@ var qrcodeSubCmdText = &cobra.Command{
 	Use:   "text",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Generate QR code with text",
-	Run:   qrcodeCmdGlobalVar.GenerateRun,
+	RunE:  qrcodeCmdGlobalVar.GenerateRunE,
 	Example: common.Examples(`# Generate QR code with text
 ops-cli qrcode text https://www.google.com -o out.png
 ops-cli qrcode text https://www.google.com -o out.png -s 500`),
@@ -68,7 +67,7 @@ ops-cli qrcode text https://www.google.com -o out.png -s 500`),
 var qrcodeSubCmdOtp = &cobra.Command{
 	Use:   "otp",
 	Short: "Generate OTP QR code",
-	Run:   qrcodeCmdGlobalVar.GenerateRun,
+	RunE:  qrcodeCmdGlobalVar.GenerateRunE,
 	Example: common.Examples(`# Generate OTP QR code
 ops-cli qrcode otp --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --otp-issuer aws`),
 }
@@ -76,7 +75,7 @@ ops-cli qrcode otp --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --ot
 var qrcodeSubCmdWifi = &cobra.Command{
 	Use:   "wifi",
 	Short: "Generate WiFi QR code",
-	Run:   qrcodeCmdGlobalVar.GenerateRun,
+	RunE:  qrcodeCmdGlobalVar.GenerateRunE,
 	Example: common.Examples(`# Generate WiFi QR code
 ops-cli qrcode wifi --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid -o wifi.png`),
 }
@@ -120,7 +119,7 @@ type QrcodeFlag struct {
 	otpAccount, otpSecret, otpIssuer string
 }
 
-func (qr *QrcodeFlag) GenerateRun(cmd *cobra.Command, args []string) {
+func (qr *QrcodeFlag) GenerateRunE(cmd *cobra.Command, args []string) error {
 	var err error
 	switch cmd.Name() {
 	case "text":
@@ -145,8 +144,5 @@ func (qr *QrcodeFlag) GenerateRun(cmd *cobra.Command, args []string) {
 			qr.wifiSsid, qr.wifiType, qr.wifiPass)
 		err = common.GenerateQRCode(qr.text, qr.size, qr.output)
 	}
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	return err
 }

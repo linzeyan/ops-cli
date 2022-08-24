@@ -18,10 +18,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"regexp"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -32,25 +30,23 @@ var icpCmd = &cobra.Command{
 	Use:   "icp [domain]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
-	Run: func(_ *cobra.Command, args []string) {
+	RunE: func(_ *cobra.Command, args []string) error {
 		if (icpCmdGlobalVar.flags.Account == "" || icpCmdGlobalVar.flags.Key == "") && rootConfig != "" {
 			v := common.Config(rootConfig, common.ICP)
 			err := Encoder.JSONMarshaler(v, &icpCmdGlobalVar.flags)
 			if err != nil {
-				log.Println(err)
-				os.Exit(1)
+				return err
 			}
 		}
 		if icpCmdGlobalVar.flags.Account == "" || icpCmdGlobalVar.flags.Key == "" {
-			log.Println(ErrTokenNotFound)
-			os.Exit(1)
+			return ErrTokenNotFound
 		}
 		icpCmdGlobalVar.flags.domain = args[0]
 		if err := icpCmdGlobalVar.Request(); err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
 		OutputDefaultYAML(icpCmdGlobalVar)
+		return nil
 	},
 	Example: common.Examples(`# Print the ICP status
 ops-cli icp -a account -k api_key google.com`),

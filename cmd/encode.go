@@ -64,35 +64,35 @@ var encodeSubCmdBase32Hex = &cobra.Command{
 	Use:   Base32Hex.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Base32 hex encoding or decoding",
-	Run:   Encoder.Run,
+	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase32Std = &cobra.Command{
 	Use:   Base32Std.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Base32 standard encoding or decoding",
-	Run:   Encoder.Run,
+	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase64Std = &cobra.Command{
 	Use:   Base64Std.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Base64 standard encoding or decoding",
-	Run:   Encoder.Run,
+	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase64URL = &cobra.Command{
 	Use:   Base64URL.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Base64 url encoding or decoding",
-	Run:   Encoder.Run,
+	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdHex = &cobra.Command{
 	Use:   Hex.String(),
 	Args:  cobra.ExactArgs(1),
 	Short: "Hexadecimal encoding or decoding",
-	Run:   Encoder.Run,
+	RunE:  Encoder.RunE,
 }
 
 var Encoder EncodeFlag
@@ -110,20 +110,19 @@ type EncodeFlag struct {
 	decode bool
 }
 
-func (e *EncodeFlag) Run(cmd *cobra.Command, args []string) {
+func (e *EncodeFlag) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	if e.decode {
 		e.RunDecode(cmd, args)
-		return
+		return err
 	}
-	var err error
 	var out string
 	var data any
 	switch validator.ValidFile(args[0]) {
 	case true:
 		data, err = os.ReadFile(args[0])
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
 	case false:
 		data = args[0]
@@ -141,10 +140,10 @@ func (e *EncodeFlag) Run(cmd *cobra.Command, args []string) {
 		out, err = e.HexEncode(data)
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	PrintString(out)
+	return err
 }
 
 func (e *EncodeFlag) RunDecode(cmd *cobra.Command, args []string) {
