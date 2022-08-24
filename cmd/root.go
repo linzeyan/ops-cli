@@ -163,5 +163,12 @@ func PrintYAML(i any) {
 }
 
 func PrintString(i any) {
-	fmt.Printf("%s\n", i)
+	switch data := i.(type) {
+	case string, []byte:
+		fmt.Printf("%s\n", data)
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		fmt.Printf("%d\n", data)
+	default:
+		fmt.Printf("%v\n", data)
+	}
 }
