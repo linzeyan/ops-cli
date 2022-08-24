@@ -26,15 +26,6 @@ import (
 /* Read config.toml. */
 type ConfigBlock string
 
-const (
-	Discord  ConfigBlock = "discord"
-	Encrypt  ConfigBlock = "encrypt"
-	ICP      ConfigBlock = "west"
-	LINE     ConfigBlock = "line"
-	Slack    ConfigBlock = "slack"
-	Telegram ConfigBlock = "telegram"
-)
-
 func (c ConfigBlock) String() string {
 	return string(c)
 }

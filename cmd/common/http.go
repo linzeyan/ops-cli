@@ -23,8 +23,6 @@ import (
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
-const UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
-
 /* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
 func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, error) {
 	var method string

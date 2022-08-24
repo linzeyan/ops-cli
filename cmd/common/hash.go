@@ -24,17 +24,6 @@ import (
 	"hash"
 )
 
-const (
-	HashMd5        = "md5"
-	HashSha1       = "sha1"
-	HashSha224     = "sha224"
-	HashSha256     = "sha256"
-	HashSha384     = "sha384"
-	HashSha512     = "sha512"
-	HashSha512_224 = "sha512_224"
-	HashSha512_256 = "sha512_256"
-)
-
 func HashAlgorithm(alg string) hash.Hash {
 	m := map[string]hash.Hash{
 		HashMd5:        md5.New(),
@@ -51,13 +40,3 @@ func HashAlgorithm(alg string) hash.Hash {
 	}
 	return nil
 }
-
-const (
-	Base32    = "base32"
-	Base64    = "base64"
-	Hex       = "hex"
-	Base32Hex = Base32 + Hex
-	Base32Std = Base32 + "std"
-	Base64Std = Base64 + "std"
-	Base64URL = Base64 + "url"
-)
