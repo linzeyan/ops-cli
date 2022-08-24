@@ -111,9 +111,7 @@ func (*Version) Split(tag string) *Version {
 	}
 }
 
-/* Compare compares latest version to current version,
-returns 1 if newer, 0 if the same, -1 if older.
-*/
+/* Compare compares latest version to current version, returns 1 if newer, 0 if the same, -1 if older. */
 func (v *Version) Compare(latest *Version) int {
 	if v.Major < latest.Major {
 		return -1
@@ -146,9 +144,7 @@ type Repository struct {
 	ExtractFunc    func() error
 }
 
-/* fetchLatestVersion fetchs the latest release version tag,
-and return struct.
-*/
+/* fetchLatestVersion fetchs the latest release version tag, and return struct. */
 func (r *Repository) fetchLatestVersion(username, repo string) *Repository {
 	const githubURL = "https://github.com/%s/%s/releases/"
 	urlBase := fmt.Sprintf(githubURL, username, repo)
@@ -326,9 +322,7 @@ func (Updater) CurrentVersion() *Version {
 	return v.Split(appVersion)
 }
 
-/* Get current version to compare with latest version,
-and if need to update fetch the executable file path.
-*/
+/* Get current version to compare with latest version, and if need to update fetch the executable file path. */
 func (u *Updater) init() *Updater {
 	current := u.CurrentVersion()
 	var latest *Version
