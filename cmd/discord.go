@@ -19,7 +19,7 @@ package cmd
 import (
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -124,7 +124,7 @@ func (d *DiscordFlag) File() error {
 	if err != nil {
 		return err
 	}
-	filename := path.Base(d.arg)
+	filename := filepath.Base(d.arg)
 	defer f.Close()
 	d.resp, err = d.api.ChannelFileSend(d.Channel, filename, f)
 	return err

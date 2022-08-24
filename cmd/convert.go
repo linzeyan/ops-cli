@@ -19,7 +19,7 @@ package cmd
 import (
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -202,8 +202,8 @@ func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
 	c.inType = slice[0]
 	c.outType = slice[1]
 	if c.outFile == "" {
-		dir, filename := path.Split(c.inFile)
-		c.outFile = path.Join(dir, strings.Replace(filename, path.Ext(filename), "."+slice[1], 1))
+		dir, filename := filepath.Split(c.inFile)
+		c.outFile = filepath.Join(dir, strings.Replace(filename, filepath.Ext(filename), "."+slice[1], 1))
 	}
 	if err := c.Convert(); err != nil {
 		log.Println(err)

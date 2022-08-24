@@ -18,7 +18,7 @@ package cmd
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
@@ -64,7 +64,7 @@ var urlSubCmdGet = &cobra.Command{
 		if !validator.ValidURL(args[0]) {
 			return common.ErrInvalidURL
 		}
-		filename := path.Base(args[0])
+		filename := filepath.Base(args[0])
 		if len(args) > 1 {
 			filename = args[1]
 		}

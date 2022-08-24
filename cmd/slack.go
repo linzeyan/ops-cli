@@ -25,7 +25,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
@@ -168,7 +168,7 @@ func (s *SlackFlag) Photo() error {
 	}
 	_, err = s.api.UploadFileContext(common.Context, slack.FileUploadParameters{
 		Filetype: "image/png",
-		Filename: path.Base(s.arg),
+		Filename: filepath.Base(s.arg),
 		Channels: []string{s.Channel},
 		File:     uploadFileKey,
 	})
