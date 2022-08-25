@@ -101,5 +101,5 @@ func (i *ICPResponse) Request() error {
 	/* Find String */
 	re := regexp.MustCompile("{.*}")
 	match := fmt.Sprintln(re.FindString(string(resp)))
-	return Encoder.JSONMarshaler([]byte(match), i)
+	return Encoder.JSONMarshaler(match, i)
 }

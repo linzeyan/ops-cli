@@ -245,6 +245,10 @@ func (e *EncodeFlag) JSONDecode(r io.Reader, i any) (any, error) {
 func (e *EncodeFlag) JSONMarshaler(src, dst any) error {
 	var err error
 	switch data := src.(type) {
+	case string:
+		if err = json.Unmarshal([]byte(data), dst); err != nil {
+			return err
+		}
 	case []byte:
 		if err = json.Unmarshal(data, dst); err != nil {
 			return err
