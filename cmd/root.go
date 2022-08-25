@@ -17,22 +17,12 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
-)
-
-var (
-	ErrArgNotFound   = errors.New("argument not found")
-	ErrFileNotFound  = errors.New("file not found")
-	ErrInitialFailed = errors.New("initial failed")
-	ErrInvalidVar    = errors.New("invalid variable")
-	ErrParseCert     = errors.New("can not correctly parse certificate")
-	ErrTokenNotFound = errors.New("token not found")
 )
 
 var rootCmd = &cobra.Command{

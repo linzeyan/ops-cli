@@ -160,7 +160,7 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 		return nil, err
 	}
 	if cert == nil {
-		return nil, ErrParseCert
+		return nil, common.ErrInvalidFile
 	}
 
 	dayRemain := cert[0].NotAfter.Local().Sub(common.TimeNow)

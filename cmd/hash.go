@@ -119,7 +119,7 @@ func (h *HashFlag) Hash(hasher hash.Hash, i any) (string, error) {
 	case []byte:
 		_, err = hasher.Write(data)
 	default:
-		return "", ErrInvalidVar
+		return "", common.ErrInvalidArg
 	}
 	if err != nil {
 		return "", err

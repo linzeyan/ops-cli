@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"log"
 	"os"
 	"path/filepath"
 
@@ -37,19 +36,19 @@ var discordCmd = &cobra.Command{
 var discordSubCmdFile = &cobra.Command{
 	Use:   common.SubCommandFile,
 	Short: "Send file to Discord",
-	Run:   discordCmdGlobalVar.Run,
+	RunE:  discordCmdGlobalVar.RunE,
 }
 
 var discordSubCmdText = &cobra.Command{
 	Use:   common.SubCommandText,
 	Short: "Send text to Discord",
-	Run:   discordCmdGlobalVar.Run,
+	RunE:  discordCmdGlobalVar.RunE,
 }
 
 var discordSubCmdTextTS = &cobra.Command{
 	Use:   common.SubCommandText + "TS",
 	Short: "Send text to speech to Discord",
-	Run:   discordCmdGlobalVar.Run,
+	RunE:  discordCmdGlobalVar.RunE,
 }
 
 var discordCmdGlobalVar DiscordFlag
@@ -73,15 +72,13 @@ type DiscordFlag struct {
 	resp *discordgo.Message
 }
 
-func (d *DiscordFlag) Run(cmd *cobra.Command, args []string) {
+func (d *DiscordFlag) RunE(cmd *cobra.Command, args []string) error {
 	if d.arg == "" {
-		log.Println(ErrArgNotFound)
-		os.Exit(1)
+		return common.ErrInvalidArg
 	}
 	var err error
 	if err = d.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	switch cmd.Name() {
 	case common.SubCommandFile:
@@ -92,10 +89,10 @@ func (d *DiscordFlag) Run(cmd *cobra.Command, args []string) {
 		err = d.TextTTS()
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	OutputDefaultNone(d.resp)
+	return err
 }
 
 func (d *DiscordFlag) Init() error {
@@ -108,12 +105,12 @@ func (d *DiscordFlag) Init() error {
 		}
 	}
 	if d.Token == "" {
-		return ErrTokenNotFound
+		return common.ErrInvalidToken
 	}
 
 	d.api, err = discordgo.New("Bot " + d.Token)
 	if d.api == nil {
-		return ErrInitialFailed
+		return common.ErrFailedInitial
 	}
 	return err
 }

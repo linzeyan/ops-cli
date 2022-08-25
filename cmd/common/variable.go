@@ -25,10 +25,12 @@ import (
 var (
 	ErrConfigContent = errors.New("config content is incorrect")
 	ErrConfigTable   = errors.New("table not found in the config")
+	ErrFailedInitial = errors.New("initial failed")
 	ErrIllegalPath   = errors.New("illegal file path")
 	ErrInvalidArg    = errors.New("invalid argument")
 	ErrInvalidIP     = errors.New("invalid IP")
 	ErrInvalidFile   = errors.New("invalid file format")
+	ErrInvalidToken  = errors.New("invalid token")
 	ErrInvalidURL    = errors.New("invalid URL")
 	ErrResponse      = errors.New("response error")
 	ErrStatusCode    = errors.New("status code is not 200")

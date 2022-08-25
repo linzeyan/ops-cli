@@ -17,8 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"log"
-	"os"
 	"strconv"
 
 	tgBot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -38,13 +36,13 @@ var telegramCmd = &cobra.Command{
 var telegramSubCmdAudio = &cobra.Command{
 	Use:   common.SubCommandAudio,
 	Short: "Send audio file to Telegram",
-	Run:   telegramCmdGlobalVar.Run,
+	RunE:  telegramCmdGlobalVar.RunE,
 }
 
 var telegramSubCmdFile = &cobra.Command{
 	Use:   common.SubCommandFile,
 	Short: "Send file to Telegram",
-	Run:   telegramCmdGlobalVar.Run,
+	RunE:  telegramCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send file
 -t bot_token -c chat_id -a '~/readme.md'`, common.CommandTelegram, common.SubCommandFile),
 }
@@ -52,7 +50,7 @@ var telegramSubCmdFile = &cobra.Command{
 var telegramSubCmdID = &cobra.Command{
 	Use:   common.SubCommandID,
 	Short: "Get chat ID",
-	Run:   telegramCmdGlobalVar.Run,
+	RunE:  telegramCmdGlobalVar.RunE,
 	Example: common.Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
 --config ~/.config.toml`, common.CommandTelegram, common.SubCommandID),
 }
@@ -60,7 +58,7 @@ var telegramSubCmdID = &cobra.Command{
 var telegramSubCmdText = &cobra.Command{
 	Use:   common.SubCommandText,
 	Short: "Send text to Telegram",
-	Run:   telegramCmdGlobalVar.Run,
+	RunE:  telegramCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send message
 -t bot_token -c chat_id -a 'Hello word'`, common.CommandTelegram, common.SubCommandText),
 }
@@ -68,7 +66,7 @@ var telegramSubCmdText = &cobra.Command{
 var telegramSubCmdPhoto = &cobra.Command{
 	Use:   common.SubCommandPhoto,
 	Short: "Send photo to Telegram",
-	Run:   telegramCmdGlobalVar.Run,
+	RunE:  telegramCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send photo
 -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
 -t bot_token -c chat_id -a '~/photo/cat.png'`, common.CommandTelegram, common.SubCommandPhoto),
@@ -77,13 +75,13 @@ var telegramSubCmdPhoto = &cobra.Command{
 var telegramSubCmdVideo = &cobra.Command{
 	Use:   common.SubCommandVideo,
 	Short: "Send video file to Telegram",
-	Run:   telegramCmdGlobalVar.Run,
+	RunE:  telegramCmdGlobalVar.RunE,
 }
 
 var telegramSubCmdVoice = &cobra.Command{
 	Use:   common.SubCommandVoice,
 	Short: "Send voice file to Telegram",
-	Run:   telegramCmdGlobalVar.Run,
+	RunE:  telegramCmdGlobalVar.RunE,
 }
 
 var telegramCmdGlobalVar TelegramFlag
@@ -132,11 +130,11 @@ func (t *TelegramFlag) Init() error {
 		t.Chat = i
 	}
 	if t.Token == "" {
-		return ErrTokenNotFound
+		return common.ErrInvalidToken
 	}
 	t.api, err = tgBot.NewBotAPI(t.Token)
 	if t.api == nil {
-		return ErrInitialFailed
+		return common.ErrFailedInitial
 	}
 	return err
 }
@@ -219,15 +217,13 @@ func (t *TelegramFlag) GetUpdate() {
 	}
 }
 
-func (t *TelegramFlag) Run(cmd *cobra.Command, _ []string) {
+func (t *TelegramFlag) RunE(cmd *cobra.Command, _ []string) error {
 	if t.arg == "" {
-		log.Println(ErrArgNotFound)
-		os.Exit(1)
+		return common.ErrInvalidArg
 	}
 	var err error
 	if err = t.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	switch cmd.Name() {
 	case common.SubCommandAudio:
@@ -246,10 +242,10 @@ func (t *TelegramFlag) Run(cmd *cobra.Command, _ []string) {
 		err = t.Voice()
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	OutputDefaultNone(t.resp)
+	return err
 }
 
 func (t *TelegramFlag) parseFile(s string) tgBot.RequestFileData {

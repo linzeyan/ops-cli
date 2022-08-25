@@ -41,7 +41,7 @@ var lineSubCmdText = &cobra.Command{
 	Short: "Send message to LINE",
 	Example: common.Examples(`# Send text to LINE chat
 -s secret -t token --id GroupID -a 'Hello LINE'`, common.CommandLINE, common.SubCommandText),
-	Run: lineCmdGlobalVar.Run,
+	RunE: lineCmdGlobalVar.RunE,
 }
 
 var lineSubCmdID = &cobra.Command{
@@ -73,7 +73,7 @@ var lineSubCmdPhoto = &cobra.Command{
 	Short: "Send photo to LINE",
 	Example: common.Examples(`# Send photo to LINE chat
 -s secret -t token --id GroupID -a https://img.url`, common.CommandLINE, common.SubCommandPhoto),
-	Run: lineCmdGlobalVar.Run,
+	RunE: lineCmdGlobalVar.RunE,
 }
 
 var lineSubCmdVideo = &cobra.Command{
@@ -81,7 +81,7 @@ var lineSubCmdVideo = &cobra.Command{
 	Short: "Send video to LINE",
 	Example: common.Examples(`# Send video to LINE chat
 -s secret -t token --id GroupID -a https://video.url`, common.CommandLINE, common.SubCommandVideo),
-	Run: lineCmdGlobalVar.Run,
+	RunE: lineCmdGlobalVar.RunE,
 }
 
 var lineCmdGlobalVar LineFlag
@@ -120,11 +120,11 @@ func (l *LineFlag) Init() error {
 		}
 	}
 	if l.Secret == "" || l.Token == "" {
-		return ErrTokenNotFound
+		return common.ErrInvalidToken
 	}
 	l.api, err = linebot.New(l.Secret, l.Token)
 	if l.api == nil {
-		return ErrInitialFailed
+		return common.ErrFailedInitial
 	}
 	return err
 }
@@ -170,15 +170,13 @@ func (l *LineFlag) GetID() {
 	}
 }
 
-func (l *LineFlag) Run(cmd *cobra.Command, _ []string) {
+func (l *LineFlag) RunE(cmd *cobra.Command, _ []string) error {
 	if l.arg == "" {
-		log.Println(ErrArgNotFound)
-		os.Exit(1)
+		return common.ErrInvalidArg
 	}
 	var err error
 	if err = l.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	switch cmd.Name() {
 	case common.SubCommandText:
@@ -192,8 +190,8 @@ func (l *LineFlag) Run(cmd *cobra.Command, _ []string) {
 		l.resp, err = l.api.PushMessage(l.ID, input).Do()
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	OutputDefaultNone(l.resp)
+	return err
 }

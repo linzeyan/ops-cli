@@ -39,7 +39,7 @@ var icpCmd = &cobra.Command{
 			}
 		}
 		if icpCmdGlobalVar.flags.Account == "" || icpCmdGlobalVar.flags.Key == "" {
-			return ErrTokenNotFound
+			return common.ErrInvalidToken
 		}
 		icpCmdGlobalVar.flags.domain = args[0]
 		if err := icpCmdGlobalVar.Request(); err != nil {

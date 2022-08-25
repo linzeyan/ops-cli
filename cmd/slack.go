@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"image/jpeg"
 	"image/png"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -44,7 +43,7 @@ var slackCmd = &cobra.Command{
 var slackSubCmdFile = &cobra.Command{
 	Use:   common.SubCommandFile,
 	Short: "Send file to Slack",
-	Run:   slackCmdGlobalVar.Run,
+	RunE:  slackCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send file
 -a "/tmp/a.txt" --config ~/.config.toml`, common.CommandSlack, common.SubCommandFile),
 }
@@ -52,7 +51,7 @@ var slackSubCmdFile = &cobra.Command{
 var slackSubCmdText = &cobra.Command{
 	Use:   common.SubCommandText,
 	Short: "Send text to Slack",
-	Run:   slackCmdGlobalVar.Run,
+	RunE:  slackCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send text
 -a "Hello World!"`, common.CommandSlack, common.SubCommandText),
 }
@@ -60,7 +59,7 @@ var slackSubCmdText = &cobra.Command{
 var slackSubCmdPhoto = &cobra.Command{
 	Use:   common.SubCommandPhoto,
 	Short: "Send photo to Slack",
-	Run:   slackCmdGlobalVar.Run,
+	RunE:  slackCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send photo
 -a "~/robot.png"`, common.CommandSlack, common.SubCommandPhoto),
 }
@@ -87,15 +86,13 @@ type SlackFlag struct {
 	api *slack.Client
 }
 
-func (s *SlackFlag) Run(cmd *cobra.Command, _ []string) {
+func (s *SlackFlag) RunE(cmd *cobra.Command, _ []string) error {
 	if s.arg == "" {
-		log.Println(ErrArgNotFound)
-		os.Exit(1)
+		return common.ErrInvalidArg
 	}
 	var err error
 	if err = s.Init(); err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	switch cmd.Name() {
 	case common.SubCommandFile:
@@ -105,10 +102,7 @@ func (s *SlackFlag) Run(cmd *cobra.Command, _ []string) {
 	case common.SubCommandText:
 		err = s.Text()
 	}
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	return err
 }
 
 func (s *SlackFlag) Init() error {
@@ -121,11 +115,11 @@ func (s *SlackFlag) Init() error {
 		}
 	}
 	if s.Token == "" {
-		return ErrTokenNotFound
+		return common.ErrInvalidToken
 	}
 	s.api = slack.New(s.Token)
 	if s.api == nil {
-		return ErrInitialFailed
+		return common.ErrFailedInitial
 	}
 	return err
 }

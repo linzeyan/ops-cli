@@ -18,8 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
@@ -40,7 +38,7 @@ var qrcodeSubCmdRead = &cobra.Command{
 	Short: "Read QR code and print message",
 	RunE: func(_ *cobra.Command, args []string) error {
 		if !validator.ValidFile(args[0]) {
-			return ErrFileNotFound
+			return common.ErrInvalidArg
 		}
 		result, err := common.ReadQRCode(args[0])
 		if err != nil {
@@ -131,16 +129,14 @@ func (qr *QrcodeFlag) GenerateRunE(cmd *cobra.Command, args []string) error {
 		err = common.GenerateQRCode(qr.text, qr.size, qr.output)
 	case common.CommandOtp:
 		if qr.otpSecret == "" {
-			log.Println(ErrArgNotFound)
-			os.Exit(1)
+			return common.ErrInvalidArg
 		}
 		qr.text = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`,
 			qr.otpIssuer, qr.otpAccount, qr.otpSecret, qr.otpIssuer)
 		err = common.GenerateQRCode(qr.text, qr.size, qr.output)
 	case common.SubCommandWiFi:
 		if qr.wifiSsid == "" {
-			log.Println(ErrArgNotFound)
-			os.Exit(1)
+			return common.ErrInvalidArg
 		}
 		qr.text = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`,
 			qr.wifiSsid, qr.wifiType, qr.wifiPass)
