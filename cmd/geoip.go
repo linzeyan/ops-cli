@@ -87,7 +87,7 @@ type geoIPSingle struct {
 func (geoIPSingle) Request(geoipInput string) (*geoIPSingle, error) {
 	/* Valid IP */
 	if !validator.ValidIP(geoipInput) {
-		return nil, ErrInvalidIP
+		return nil, common.ErrInvalidIP
 	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 

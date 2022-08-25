@@ -287,7 +287,7 @@ func (e *EncodeFlag) PemEncode(i any, t ...string) (string, error) {
 func (e *EncodeFlag) PemDecode(b []byte) ([]byte, error) {
 	p, _ := pem.Decode(b)
 	if p == nil {
-		return nil, ErrFileType
+		return nil, common.ErrInvalidFile
 	}
 	return p.Bytes, nil
 }

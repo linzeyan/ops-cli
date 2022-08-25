@@ -29,9 +29,7 @@ import (
 var (
 	ErrArgNotFound   = errors.New("argument not found")
 	ErrFileNotFound  = errors.New("file not found")
-	ErrFileType      = errors.New("file type not correct")
 	ErrInitialFailed = errors.New("initial failed")
-	ErrInvalidIP     = errors.New("invalid IP")
 	ErrInvalidVar    = errors.New("invalid variable")
 	ErrParseCert     = errors.New("can not correctly parse certificate")
 	ErrTokenNotFound = errors.New("token not found")
