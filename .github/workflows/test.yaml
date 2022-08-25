@@ -28,16 +28,25 @@ env:
 
 jobs:
   lint:
+    strategy:
+      fail-fast: false
+      matrix:
+        goVersion:
+          - 18
+        os:
+          - macos
+          - ubuntu
+          - windows
     permissions:
       contents: read # for actions/checkout to fetch code
       pull-requests: read # for golangci/golangci-lint-action to fetch pull requests
-    name: "lint"
-    runs-on: ubuntu-latest
+    name: "lint ${{ matrix.os }} | 1.${{ matrix.goVersion }}.x"
+    runs-on: ${{ matrix.os }}-latest
     steps:
-      - name: Install go
+      - name: "Install go1.${{ matrix.goVersion }}.x"
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18
+          go-version: 1.${{ matrix.goVersion }}.x
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -48,6 +57,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3.2
         with:
           args: --timeout=5m
+          version: v1.48.0
 
   go-test:
     needs:
@@ -62,7 +72,7 @@ jobs:
           - ubuntu
           - windows
 
-    name: "${{ matrix.os }} | 1.${{ matrix.goVersion }}.x"
+    name: "go-test ${{ matrix.os }} | 1.${{ matrix.goVersion }}.x"
     runs-on: ${{ matrix.os }}-latest
     steps:
       - name: "Install go1.${{ matrix.goVersion }}.x"
