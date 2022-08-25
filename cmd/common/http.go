@@ -18,7 +18,9 @@ package common
 
 import (
 	"io"
+	"net"
 	"net/http"
+	"time"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
@@ -32,8 +34,15 @@ func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, 
 		method = methods[0]
 	}
 	var client = &http.Client{
+		Timeout: 15 * time.Second,
 		Transport: &http.Transport{
-			DisableKeepAlives: true,
+			Dial: (&net.Dialer{
+				Timeout:   10 * time.Second,
+				KeepAlive: 5 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
 	req, err := http.NewRequestWithContext(Context, method, url, body)
@@ -62,8 +71,15 @@ func HTTPRequestContentGB18030(url string, body io.Reader, methods ...string) ([
 		method = methods[0]
 	}
 	var client = &http.Client{
+		Timeout: 15 * time.Second,
 		Transport: &http.Transport{
-			DisableKeepAlives: true,
+			Dial: (&net.Dialer{
+				Timeout:   10 * time.Second,
+				KeepAlive: 5 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
 	req, err := http.NewRequestWithContext(Context, method, url, body)
@@ -89,8 +105,15 @@ func HTTPRequestContentGB18030(url string, body io.Reader, methods ...string) ([
 func HTTPRequestRedirectURL(uri string) (string, error) {
 	var result = uri
 	var client = &http.Client{
+		Timeout: 15 * time.Second,
 		Transport: &http.Transport{
-			DisableKeepAlives: true,
+			Dial: (&net.Dialer{
+				Timeout:   10 * time.Second,
+				KeepAlive: 1 * time.Second,
+			}).Dial,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
 		},
 		CheckRedirect: func(req *http.Request, _ []*http.Request) error {
 			result = req.URL.String()

@@ -21,6 +21,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -137,7 +138,7 @@ func (l *LineFlag) GetID() {
 			os.Exit(1)
 		}
 		for i := range events {
-			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == ImTypeID {
+			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == common.SubCommandID {
 				switch s := events[i].Source; s.Type {
 				case linebot.EventSourceTypeGroup:
 					PrintString(s.GroupID)
@@ -153,7 +154,16 @@ func (l *LineFlag) GetID() {
 		}
 	})
 
-	err = http.ListenAndServe(":80", nil)
+	server := &http.Server{
+		Addr: ":80",
+
+		ReadTimeout:       5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		ReadHeaderTimeout: 3 * time.Second,
+		IdleTimeout:       300 * time.Second,
+	}
+
+	err = server.ListenAndServe()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Printf("error starting server: %s\n", err)
 		os.Exit(1)

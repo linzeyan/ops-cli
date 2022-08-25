@@ -211,7 +211,7 @@ func (t *TelegramFlag) GetUpdate() {
 
 	for update := range updates {
 		if update.Message != nil { // If we got a message
-			if update.Message.Text == ImTypeID {
+			if update.Message.Text == common.SubCommandID {
 				PrintString(update.Message.Chat.ID)
 				break
 			}

@@ -26,32 +26,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	DocTypeMan      = "man"
-	DocTypeMarkdown = "markdown"
-	DocTypeReST     = "rest"
-	DocTypeYaml     = "yaml"
-)
-
-const (
-	FileTypeHTML     = "html"
-	FileTypeJSON     = "json"
-	FileTypeMarkdown = "markdown"
-	FileTypePDF      = "pdf"
-	FileTypeTOML     = "toml"
-	FileTypeYAML     = "yaml"
-)
-
-const (
-	ImTypeAudio = "audio"
-	ImTypeFile  = "file"
-	ImTypeID    = "id"
-	ImTypePhoto = "photo"
-	ImTypeText  = "text"
-	ImTypeVideo = "video"
-	ImTypeVoice = "voice"
-)
-
 var (
 	ErrArgNotFound    = errors.New("argument not found")
 	ErrConfNotFound   = errors.New("config not found")
