@@ -31,7 +31,7 @@ import (
 )
 
 var whoisCmd = &cobra.Command{
-	Use:   common.CommandWhois + " [domain]",
+	Use:   common.CommandWhois + " domain",
 	Args:  cobra.ExactArgs(1),
 	Short: "List domain name information",
 	Run: func(_ *cobra.Command, args []string) {

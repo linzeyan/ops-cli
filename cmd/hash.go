@@ -30,7 +30,7 @@ import (
 )
 
 var hashCmd = &cobra.Command{
-	Use:   common.CommandHash + " [string|file]",
+	Use:   common.CommandHash + " [-c check|-l list] [checksums.txt|string or file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Hash string or file",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -45,6 +45,7 @@ var hashCmd = &cobra.Command{
 			_ = cmd.Help()
 		}
 	},
+	DisableFlagsInUseLine: true,
 }
 
 var hashSubCmdMd5 = &cobra.Command{

@@ -27,7 +27,7 @@ import (
 )
 
 var icpCmd = &cobra.Command{
-	Use:   common.CommandIcp + " [domain]",
+	Use:   common.CommandIcp + " domain",
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	RunE: func(_ *cobra.Command, args []string) error {

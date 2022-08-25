@@ -28,6 +28,7 @@ var (
 	ErrFailedInitial = errors.New("initial failed")
 	ErrIllegalPath   = errors.New("illegal file path")
 	ErrInvalidArg    = errors.New("invalid argument")
+	ErrInvalidFlag   = errors.New("required flag(s) not set")
 	ErrInvalidIP     = errors.New("invalid IP")
 	ErrInvalidFile   = errors.New("invalid file format")
 	ErrInvalidToken  = errors.New("invalid token")

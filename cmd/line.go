@@ -53,18 +53,17 @@ var lineSubCmdID = &cobra.Command{
 # type and sent 'id' in the chat,
 # then console will print ID.
 https://callback_url`, common.CommandLINE, common.SubCommandID),
-	Run: func(_ *cobra.Command, args []string) {
+	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		if err = lineCmdGlobalVar.Init(); err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
 		lineCmdGlobalVar.resp, err = lineCmdGlobalVar.api.SetWebhookEndpointURL(args[0]).Do()
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
 		lineCmdGlobalVar.GetID()
+		return err
 	},
 }
 
@@ -172,7 +171,7 @@ func (l *LineFlag) GetID() {
 
 func (l *LineFlag) RunE(cmd *cobra.Command, _ []string) error {
 	if l.arg == "" {
-		return common.ErrInvalidArg
+		return common.ErrInvalidFlag
 	}
 	var err error
 	if err = l.Init(); err != nil {

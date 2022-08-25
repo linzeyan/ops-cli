@@ -74,7 +74,7 @@ type DiscordFlag struct {
 
 func (d *DiscordFlag) RunE(cmd *cobra.Command, args []string) error {
 	if d.arg == "" {
-		return common.ErrInvalidArg
+		return common.ErrInvalidFlag
 	}
 	var err error
 	if err = d.Init(); err != nil {

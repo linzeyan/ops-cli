@@ -219,7 +219,7 @@ func (t *TelegramFlag) GetUpdate() {
 
 func (t *TelegramFlag) RunE(cmd *cobra.Command, _ []string) error {
 	if t.arg == "" {
-		return common.ErrInvalidArg
+		return common.ErrInvalidFlag
 	}
 	var err error
 	if err = t.Init(); err != nil {

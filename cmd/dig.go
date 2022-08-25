@@ -18,8 +18,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"os"
+	"runtime"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -32,7 +31,7 @@ var digCmd = &cobra.Command{
 	Use:   common.CommandDig + " [host] [@server] [type]",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Resolve domain name",
-	Run: func(_ *cobra.Command, args []string) {
+	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		var argsWithoutDomain []string
 		var argsType []string
@@ -40,14 +39,13 @@ var digCmd = &cobra.Command{
 		case lens == 1:
 			digDomain = args[0]
 			if err = digOutput.Request(dns.TypeA); err != nil {
-				log.Println(err)
-				os.Exit(1)
+				return err
 			}
 			if digOutput == nil {
-				return
+				return err
 			}
 			OutputInterfaceString(&digOutput)
-			return
+			return nil
 		case lens > 1:
 			/* Find which arg is domain. */
 			for i := range args {
@@ -102,13 +100,13 @@ var digCmd = &cobra.Command{
 			err = digOutput.Request(dns.TypeANY)
 		}
 		if err != nil {
-			log.Println(err)
-			os.Exit(1)
+			return err
 		}
 		if digOutput == nil {
-			return
+			return err
 		}
 		OutputInterfaceString(&digOutput)
+		return err
 	},
 	Example: common.Examples(`# Query A record
 google.com
@@ -169,7 +167,7 @@ func (d digResponse) Request(digType uint16) error {
 		return err
 	}
 	if len(resp.Answer) == 0 {
-		os.Exit(0)
+		return err
 	}
 
 	for i := range resp.Answer {
@@ -204,6 +202,9 @@ func (d digResponse) Request(digType uint16) error {
 }
 
 func (d digResponse) GetLocalServer() (string, error) {
+	if runtime.GOOS == "windows" {
+		return "1.1.1.1", nil
+	}
 	const resolvConfig = "/etc/resolv.conf"
 	s, err := dns.ClientConfigFromFile(resolvConfig)
 	if err != nil {

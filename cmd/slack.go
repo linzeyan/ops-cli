@@ -88,7 +88,7 @@ type SlackFlag struct {
 
 func (s *SlackFlag) RunE(cmd *cobra.Command, _ []string) error {
 	if s.arg == "" {
-		return common.ErrInvalidArg
+		return common.ErrInvalidFlag
 	}
 	var err error
 	if err = s.Init(); err != nil {

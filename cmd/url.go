@@ -35,7 +35,7 @@ var urlCmd = &cobra.Command{
 }
 
 var urlSubCmdExpand = &cobra.Command{
-	Use:   common.SubCommandExpand + " [url]",
+	Use:   common.SubCommandExpand + " url",
 	Args:  cobra.ExactArgs(1),
 	Short: "Expand shorten url",
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -56,7 +56,7 @@ https://goo.gl/maps/b37Aq3Anc7taXQDd9`, common.CommandURL, common.SubCommandExpa
 }
 
 var urlSubCmdGet = &cobra.Command{
-	Use:   common.SubCommandGet + " [url] [output]",
+	Use:   common.SubCommandGet + " url [output]",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Get file from url",
 	RunE: func(_ *cobra.Command, args []string) error {

@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -41,27 +40,27 @@ var convertCmd = &cobra.Command{
 var convertSubCmdCSV2JSON = &cobra.Command{
 	Use:   "csv2json",
 	Short: "Convert csv to json format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdCSV2TOML = &cobra.Command{
 	Use:   "csv2toml",
 	Short: "Convert csv to toml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdCSV2XML = &cobra.Command{
 	Use:   "csv2xml",
 	Short: "Convert csv to xml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdCSV2YAML = &cobra.Command{
 	Use:   "csv2yaml",
 	Short: "Convert csv to yaml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 
 /* DOS. */
 var convertSubCmdDOS2Unix = &cobra.Command{
-	Use:   "dos2unix [file...]",
+	Use:   "dos2unix file...",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Convert DOS to Unix format",
 	Run: func(_ *cobra.Command, args []string) {
@@ -79,90 +78,90 @@ var convertSubCmdDOS2Unix = &cobra.Command{
 var convertSubCmdJSON2CSV = &cobra.Command{
 	Use:   "json2csv",
 	Short: "Convert json to csv format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdJSON2TOML = &cobra.Command{
 	Use:   "json2toml",
 	Short: "Convert json to toml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdJSON2XML = &cobra.Command{
 	Use:   "json2xml",
 	Short: "Convert json to xml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdJSON2YAML = &cobra.Command{
 	Use:   "json2yaml",
 	Short: "Convert json to yaml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 
 /* TOML. */
 var convertSubCmdTOML2CSV = &cobra.Command{
 	Use:   "toml2csv",
 	Short: "Convert toml to csv format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdTOML2JSON = &cobra.Command{
 	Use:   "toml2json",
 	Short: "Convert toml to json format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdTOML2XML = &cobra.Command{
 	Use:   "toml2xml",
 	Short: "Convert toml to xml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdTOML2YAML = &cobra.Command{
 	Use:   "toml2yaml",
 	Short: "Convert toml to yaml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 
 /* XML. */
 var convertSubCmdXML2CSV = &cobra.Command{
 	Use:   "xml2csv",
 	Short: "Convert xml to csv format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdXML2JSON = &cobra.Command{
 	Use:   "xml2json",
 	Short: "Convert xml to json format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdXML2TOML = &cobra.Command{
 	Use:   "xml2toml",
 	Short: "Convert xml to toml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdXML2YAML = &cobra.Command{
 	Use:   "xml2yaml",
 	Short: "Convert xml to yaml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 
 /* YAML. */
 var convertSubCmdYAML2CSV = &cobra.Command{
 	Use:   "yaml2csv",
 	Short: "Convert yaml to csv format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdYAML2JSON = &cobra.Command{
 	Use:   "yaml2json",
 	Short: "Convert yaml to json format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 	Example: common.Examples(`# Convert yaml to json
 -i input.yaml -o output.json`, common.CommandConvert, common.SubCommandYaml2JSON),
 }
 var convertSubCmdYAML2TOML = &cobra.Command{
 	Use:   "yaml2toml",
 	Short: "Convert yaml to toml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdYAML2XML = &cobra.Command{
 	Use:   "yaml2xml",
 	Short: "Convert yaml to xml format",
-	Run:   convertCmdGlobalVar.Run,
+	RunE:  convertCmdGlobalVar.RunE,
 }
 
 var convertCmdGlobalVar ConvertFlag
@@ -170,7 +169,7 @@ var convertCmdGlobalVar ConvertFlag
 func init() {
 	rootCmd.AddCommand(convertCmd)
 
-	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.inFile, "in", "i", "", common.Usage("Input file"))
+	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.inFile, "in", "i", "", common.Usage("Input file (required)"))
 	convertCmd.PersistentFlags().StringVarP(&convertCmdGlobalVar.outFile, "out", "o", "", common.Usage("Output file"))
 	/* dos2unix */
 	convertCmd.AddCommand(convertSubCmdDOS2Unix)
@@ -193,10 +192,9 @@ type ConvertFlag struct {
 	outType string
 }
 
-func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
+func (c *ConvertFlag) RunE(cmd *cobra.Command, _ []string) error {
 	if !validator.ValidFile(c.inFile) {
-		log.Println(`Error: required flag(s) "in" not set`)
-		os.Exit(1)
+		return common.ErrInvalidFlag
 	}
 	slice := strings.Split(cmd.Name(), "2")
 	c.inType = slice[0]
@@ -205,10 +203,7 @@ func (c *ConvertFlag) Run(cmd *cobra.Command, _ []string) {
 		dir, filename := filepath.Split(c.inFile)
 		c.outFile = filepath.Join(dir, strings.Replace(filename, filepath.Ext(filename), "."+slice[1], 1))
 	}
-	if err := c.Convert(); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	return c.Convert()
 }
 
 func (c *ConvertFlag) Convert() error {
