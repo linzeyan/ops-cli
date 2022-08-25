@@ -27,7 +27,7 @@ import (
 )
 
 var icpCmd = &cobra.Command{
-	Use:   "icp [domain]",
+	Use:   common.CommandIcp + " [domain]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Check ICP status",
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -49,7 +49,7 @@ var icpCmd = &cobra.Command{
 		return nil
 	},
 	Example: common.Examples(`# Print the ICP status
-ops-cli icp -a account -k api_key google.com`),
+-a account -k api_key google.com`, common.CommandIcp),
 }
 
 var icpCmdGlobalVar ICPResponse

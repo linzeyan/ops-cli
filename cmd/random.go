@@ -28,58 +28,50 @@ import (
 )
 
 var randomCmd = &cobra.Command{
-	Use:   "random",
+	Use:   common.CommandRandom,
 	Args:  cobra.NoArgs,
 	Short: "Generate random string",
 	Run:   randomCmdGlobalVar.Run,
-	Example: common.Examples(`# Generate a random string
-ops-cli random
-
-# Generate a random string of length 32
-ops-cli random -l 32
+	Example: common.Examples(`# Generate a random string of length 32
+-l 32
 
 # Generate a random string of length 32 consisting of 10 symbols, 10 lowercase letters, 10 uppercase letters, 2 numbers
-ops-cli random -l 32 -s 10 -o 10 -u 10 -n 2`),
+-l 32 -s 10 -o 10 -u 10 -n 2`, common.CommandRandom),
 }
 
 var randomSubCmdLower = &cobra.Command{
-	Use:   "lowercase",
+	Use:   common.SubCommandLowercase,
 	Short: "Generate a string consisting of lowercase letters",
 	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(` Generate a random string of lowercase letters
-ops-cli random lowercase`),
+-l 10`, common.CommandRandom, common.SubCommandLowercase),
 }
 
 var randomSubCmdNumber = &cobra.Command{
-	Use:   "number",
+	Use:   common.SubCommandNumber,
 	Short: "Generate a string consisting of numbers",
 	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(`Generate a random string of numbers of length 100
-ops-cli random number -l 100`),
+-l 100`, common.CommandRandom, common.SubCommandNumber),
 }
 
 var randomSubCmdSymbol = &cobra.Command{
-	Use:   "symbol",
+	Use:   common.SubCommandSymbol,
 	Short: "Generate a string consisting of symbols",
 	Run:   randomCmdGlobalVar.Run,
-	Example: common.Examples(`# Generate a random string of symbols
-ops-cli random symbol`),
 }
 
 var randomSubCmdUpper = &cobra.Command{
-	Use:   "uppercase",
+	Use:   common.SubCommandUppercase,
 	Short: "Generate a string consisting of uppercase letters",
 	Run:   randomCmdGlobalVar.Run,
-	Example: common.Examples(`# Generate a random string of uppercase letters
-ops-cli random uppercase`),
 }
 
 var randomSubCmdBootstrap = &cobra.Command{
-	Use:   "bootstrap-token",
+	Use:   common.SubCommandBootstrap,
 	Short: "Generate a bootstrap token",
 	Run:   randomCmdGlobalVar.Run,
-	Example: common.Examples(`# Generate a bootstrap token
-ops-cli random bootstrap-token`),
+
 	DisableFlagParsing:    true,
 	DisableFlagsInUseLine: true,
 }
@@ -89,14 +81,15 @@ var randomSubCmdBase64 = &cobra.Command{
 	Short: "Generate a base64 string",
 	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate a base64 string
-ops-cli random base64 -l 100`),
+-l 100`, common.CommandRandom, common.Base64),
 }
+
 var randomSubCmdHex = &cobra.Command{
 	Use:   common.Hex,
 	Short: "Generate a hexadecimal string",
 	Run:   randomCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate a hexadecimal string
-ops-cli random hex -l 30`),
+-l 30`, common.CommandRandom, common.Hex),
 }
 
 var randomCmdGlobalVar RandomFlag
@@ -127,17 +120,17 @@ type RandomFlag struct {
 func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
 	var p RandomString
 	switch cmd.Name() {
-	case "number":
+	case common.SubCommandNumber:
 		p = p.GenerateString(randomCmdGlobalVar.length, Numbers)
-	case "symbol":
+	case common.SubCommandSymbol:
 		p = p.GenerateString(randomCmdGlobalVar.length, Symbols)
-	case "uppercase":
+	case common.SubCommandUppercase:
 		p = p.GenerateString(randomCmdGlobalVar.length, UppercaseLetters)
-	case "lowercase":
+	case common.SubCommandLowercase:
 		p = p.GenerateString(randomCmdGlobalVar.length, LowercaseLetters)
-	case "random":
+	case common.CommandRandom:
 		p = p.GenerateAll(randomCmdGlobalVar.length, randomCmdGlobalVar.lower, randomCmdGlobalVar.upper, randomCmdGlobalVar.symbol, randomCmdGlobalVar.number)
-	case "bootstrap-token":
+	case common.SubCommandBootstrap:
 		r1 := p.Rand(3)
 		r2 := p.Rand(8)
 		id, _ := Encoder.HexEncode(r1)

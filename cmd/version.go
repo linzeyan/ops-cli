@@ -28,7 +28,7 @@ import (
 )
 
 var versionCmd = &cobra.Command{
-	Use:   "version",
+	Use:   common.CommandVersion,
 	Short: "Print version information",
 	Run: func(_ *cobra.Command, _ []string) {
 		var v = VersionOutput{
@@ -69,7 +69,7 @@ func (r VersionOutput) String() {
 	var ver strings.Builder
 	f := reflect.ValueOf(&r).Elem()
 	t := f.Type()
-	ver.WriteString(fmt.Sprintf("%-10s\t%v\n", "App", rootCmd.Name()))
+	ver.WriteString(fmt.Sprintf("%-10s\t%v\n", "App", common.CommandRoot))
 	for i := 0; i < f.NumField(); i++ {
 		_, err := ver.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
 		// f.Field(i).Type()
@@ -79,6 +79,6 @@ func (r VersionOutput) String() {
 		}
 	}
 	ver.WriteString("Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>\n")
-	ver.WriteString("Source available at https://github.com/linzeyan/ops-cli")
+	ver.WriteString(fmt.Sprintf("Source available at https://github.com/%s/%s", common.RepoOwner, common.CommandRoot))
 	PrintString(ver.String())
 }

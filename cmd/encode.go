@@ -34,7 +34,7 @@ import (
 )
 
 var encodeCmd = &cobra.Command{
-	Use:   "encode",
+	Use:   common.CommandEncode,
 	Short: "Encode and decode string or file",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 

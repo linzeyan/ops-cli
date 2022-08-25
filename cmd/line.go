@@ -28,7 +28,7 @@ import (
 )
 
 var lineCmd = &cobra.Command{
-	Use:   "LINE",
+	Use:   common.CommandLINE,
 	Short: "Send message to LINE",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -36,22 +36,22 @@ var lineCmd = &cobra.Command{
 }
 
 var lineSubCmdText = &cobra.Command{
-	Use:   "text",
+	Use:   common.SubCommandText,
 	Short: "Send message to LINE",
 	Example: common.Examples(`# Send text to LINE chat
-ops-cli LINE text -s secret -t token --id GroupID -a 'Hello LINE'`),
+-s secret -t token --id GroupID -a 'Hello LINE'`, common.CommandLINE, common.SubCommandText),
 	Run: lineCmdGlobalVar.Run,
 }
 
 var lineSubCmdID = &cobra.Command{
-	Use:   "id",
+	Use:   common.SubCommandID,
 	Args:  cobra.ExactArgs(1),
 	Short: "Get chat ID from LINE",
 	Example: common.Examples(`# Get chat ID from LINE,
 # execute this command will listen on 80 port,
 # type and sent 'id' in the chat,
 # then console will print ID.
-ops-cli LINE id https://callback_url`),
+https://callback_url`, common.CommandLINE, common.SubCommandID),
 	Run: func(_ *cobra.Command, args []string) {
 		var err error
 		if err = lineCmdGlobalVar.Init(); err != nil {
@@ -68,18 +68,18 @@ ops-cli LINE id https://callback_url`),
 }
 
 var lineSubCmdPhoto = &cobra.Command{
-	Use:   "photo",
+	Use:   common.SubCommandPhoto,
 	Short: "Send photo to LINE",
 	Example: common.Examples(`# Send photo to LINE chat
-ops-cli LINE photo -s secret -t token --id GroupID -a https://img.url`),
+-s secret -t token --id GroupID -a https://img.url`, common.CommandLINE, common.SubCommandPhoto),
 	Run: lineCmdGlobalVar.Run,
 }
 
 var lineSubCmdVideo = &cobra.Command{
-	Use:   "video",
+	Use:   common.SubCommandVideo,
 	Short: "Send video to LINE",
 	Example: common.Examples(`# Send video to LINE chat
-ops-cli LINE video -s secret -t token --id GroupID -a https://video.url`),
+-s secret -t token --id GroupID -a https://video.url`, common.CommandLINE, common.SubCommandVideo),
 	Run: lineCmdGlobalVar.Run,
 }
 
@@ -171,13 +171,13 @@ func (l *LineFlag) Run(cmd *cobra.Command, _ []string) {
 		os.Exit(1)
 	}
 	switch cmd.Name() {
-	case ImTypeText:
+	case common.SubCommandText:
 		input := linebot.NewTextMessage(l.arg)
 		l.resp, err = l.api.PushMessage(l.ID, input).Do()
-	case ImTypePhoto:
+	case common.SubCommandPhoto:
 		input := linebot.NewImageMessage(l.arg, l.arg)
 		l.resp, err = l.api.PushMessage(l.ID, input).Do()
-	case ImTypeVideo:
+	case common.SubCommandVideo:
 		input := linebot.NewVideoMessage(l.arg, l.arg)
 		l.resp, err = l.api.PushMessage(l.ID, input).Do()
 	}

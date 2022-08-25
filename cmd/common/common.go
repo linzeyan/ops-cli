@@ -38,9 +38,28 @@ func Dos2Unix(filename string) error {
 }
 
 /* Print string with color. */
-func Examples(s string) string {
+func Examples(example string, cmdName ...string) string {
+	var prefix = " "
+	for _, v := range cmdName {
+		prefix = prefix + v + " "
+	}
+	prefix = CommandRoot + prefix
+
+	re := regexp.MustCompile(`(?P<command>.*)`)
+	template := prefix + "$command\n"
+	result := []byte{}
+	for _, submatches := range re.FindAllStringSubmatchIndex(example, -1) {
+		result = re.ExpandString(result, template, example, submatches)
+	}
+
+	replace1 := regexp.MustCompile(prefix + `#`)
+	restore1 := replace1.ReplaceAllString(string(result), "#")
+	replace2 := regexp.MustCompile(prefix + `\n`)
+	restore2 := replace2.ReplaceAllString(restore1, "\n")
+	replace3 := regexp.MustCompile(`\n$`)
+	out := replace3.ReplaceAllString(restore2, "")
 	c := color.New(color.FgYellow)
-	return c.Sprintf(`%s`, s)
+	return c.Sprintf(`%s`, out)
 }
 
 func Usage(s string) string {

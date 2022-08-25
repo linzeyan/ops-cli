@@ -30,7 +30,7 @@ import (
 )
 
 var convertCmd = &cobra.Command{
-	Use:   "convert",
+	Use:   common.CommandConvert,
 	Short: "Convert data format",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -152,7 +152,7 @@ var convertSubCmdYAML2JSON = &cobra.Command{
 	Short: "Convert yaml to json format",
 	Run:   convertCmdGlobalVar.Run,
 	Example: common.Examples(`# Convert yaml to json
-ops-cli convert yaml2json -i input.yaml -o output.json`),
+-i input.yaml -o output.json`, common.CommandConvert, common.SubCommandYaml2JSON),
 }
 var convertSubCmdYAML2TOML = &cobra.Command{
 	Use:   "yaml2toml",

@@ -27,7 +27,7 @@ import (
 )
 
 var discordCmd = &cobra.Command{
-	Use:   "Discord",
+	Use:   common.CommandDiscord,
 	Short: "Send message to Discord",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -35,19 +35,19 @@ var discordCmd = &cobra.Command{
 }
 
 var discordSubCmdFile = &cobra.Command{
-	Use:   "file",
+	Use:   common.SubCommandFile,
 	Short: "Send file to Discord",
 	Run:   discordCmdGlobalVar.Run,
 }
 
 var discordSubCmdText = &cobra.Command{
-	Use:   "text",
+	Use:   common.SubCommandText,
 	Short: "Send text to Discord",
 	Run:   discordCmdGlobalVar.Run,
 }
 
 var discordSubCmdTextTS = &cobra.Command{
-	Use:   "textTS",
+	Use:   common.SubCommandText + "TS",
 	Short: "Send text to speech to Discord",
 	Run:   discordCmdGlobalVar.Run,
 }
@@ -84,11 +84,11 @@ func (d *DiscordFlag) Run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	switch cmd.Name() {
-	case ImTypeFile:
+	case common.SubCommandFile:
 		err = d.File()
-	case ImTypeText:
+	case common.SubCommandText:
 		err = d.Text()
-	case ImTypeText + "TS":
+	case common.SubCommandText + "TS":
 		err = d.TextTTS()
 	}
 	if err != nil {

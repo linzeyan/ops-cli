@@ -30,7 +30,7 @@ import (
 )
 
 var geoipCmd = &cobra.Command{
-	Use:   "geoip [IP1] [IP2]",
+	Use:   common.CommandGeoip + " [IP1] [IP2]",
 	Short: "Print IP geographic information",
 	Run: func(_ *cobra.Command, args []string) {
 		var out any
@@ -54,10 +54,10 @@ var geoipCmd = &cobra.Command{
 		OutputDefaultJSON(out)
 	},
 	Example: common.Examples(`# Print IP geographic information
-ops-cli geoip 1.1.1.1
+1.1.1.1
 
 # Print multiple IP geographic informations
-ops-cli geoip 1.1.1.1 8.8.8.8`),
+1.1.1.1 8.8.8.8`, common.CommandGeoip),
 	DisableFlagsInUseLine: true,
 }
 

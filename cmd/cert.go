@@ -30,21 +30,21 @@ import (
 )
 
 var certCmd = &cobra.Command{
-	Use:   "cert [host|file]",
+	Use:   common.CommandCert + " [host|file]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Check tls cert expiry time",
 	RunE:  certCmdGlobalVar.RunE,
 	Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
-ops-cli cert www.google.com
+www.google.com
 
 # Only print certificate expiration time
-ops-cli cert 1.1.1.1 --expiry
+1.1.1.1 --expiry
 
 # Only print certificate DNS
-ops-cli cert www.google.com --dns
+www.google.com --dns
 
 # Print certificate expiration time, DNS and issuer
-ops-cli cert example.com.crt`),
+example.com.crt`, common.CommandCert),
 }
 
 var certCmdGlobalVar CertFlag

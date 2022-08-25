@@ -31,7 +31,7 @@ import (
 )
 
 var sshCmd = &cobra.Command{
-	Use:   "ssh-keygen",
+	Use:   common.CommandSSH,
 	Short: "Generate SSH keypair",
 	RunE:  sshCmdGlobalVar.RunE,
 }

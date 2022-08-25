@@ -55,6 +55,58 @@ const (
 )
 
 const (
+	CommandRoot     = "ops-cli"
+	CommandCert     = "cert"
+	CommandConvert  = "convert"
+	CommandDig      = "dig"
+	CommandDiscord  = "Discord"
+	CommandDoc      = "doc"
+	CommandDos2Unix = "dos2unix"
+	CommandEncode   = "encode"
+	CommandEncrypt  = "encrypt"
+	CommandGeoip    = "geoip"
+	CommandHash     = "hash"
+	CommandIcp      = "icp"
+	CommandLINE     = "LINE"
+	CommandOtp      = "otp"
+	CommandQrcode   = "qrcode"
+	CommandRandom   = "random"
+	CommandSlack    = "Slack"
+	CommandSSH      = "ssh-keygen"
+	CommandSystem   = "system"
+	CommandTelegram = "Telegram"
+	CommandUpdate   = "update"
+	CommandURL      = "url"
+	CommandVersion  = "version"
+	CommandWhois    = "whois"
+
+	SubCommandAudio     = "audio"
+	SubCommandBootstrap = "bootstrap-token"
+	SubCommandCalculate = "calculate"
+	SubCommandExpand    = "expand"
+	SubCommandFile      = "file"
+	SubCommandGenerate  = "generate"
+	SubCommandGet       = "get"
+	SubCommandID        = "id"
+	SubCommandLowercase = "lowercase"
+	SubCommandMan       = "man"
+	SubCommandMarkdown  = "markdown"
+	SubCommandNumber    = "number"
+	SubCommandPhoto     = "photo"
+	SubCommandRead      = "read"
+	SubCommandReST      = "rest"
+	SubCommandString    = "string"
+	SubCommandSymbol    = "symbol"
+	SubCommandText      = "text"
+	SubCommandUppercase = "uppercase"
+	SubCommandVideo     = "video"
+	SubCommandVoice     = "voice"
+	SubCommandWiFi      = "wifi"
+	SubCommandYaml      = "yaml"
+	SubCommandYaml2JSON = "yaml2json"
+)
+
+const (
 	HashMd5        = "md5"
 	HashSha1       = "sha1"
 	HashSha224     = "sha224"
@@ -67,6 +119,8 @@ const (
 
 const (
 	IndentTwoSpaces = "  "
+
+	RepoOwner = "linzeyan"
 
 	UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
 )

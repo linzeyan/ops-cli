@@ -33,7 +33,7 @@ import (
 )
 
 var systemCmd = &cobra.Command{
-	Use:   "system",
+	Use:   common.CommandSystem,
 	Short: "Display system informations",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 

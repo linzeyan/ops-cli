@@ -29,7 +29,7 @@ import (
 )
 
 var digCmd = &cobra.Command{
-	Use:   "dig [host] [@server] [type]",
+	Use:   common.CommandDig + " [host] [@server] [type]",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Resolve domain name",
 	Run: func(_ *cobra.Command, args []string) {
@@ -111,18 +111,18 @@ var digCmd = &cobra.Command{
 		OutputInterfaceString(&digOutput)
 	},
 	Example: common.Examples(`# Query A record
-ops-cli dig google.com
-ops-cli dig @1.1.1.1 google.com A
-ops-cli dig @8.8.8.8 google.com AAAA
+google.com
+@1.1.1.1 google.com A
+@8.8.8.8 google.com AAAA
 
 # Query CNAME record
-ops-cli dig tw.yahoo.com CNAME
+tw.yahoo.com CNAME
 
 # Query ANY record
-ops-cli dig google.com ANY
+google.com ANY
 
 # Query PTR record
-ops-cli dig 1.1.1.1 PTR`),
+1.1.1.1 PTR`, common.CommandDig),
 }
 
 var digNetwork, digDomain, digServer string

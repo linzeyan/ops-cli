@@ -42,7 +42,7 @@ const (
 )
 
 var encryptCmd = &cobra.Command{
-	Use:   "encrypt",
+	Use:   common.CommandEncrypt,
 	Short: "Encrypt or decrypt",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -50,37 +50,37 @@ var encryptCmd = &cobra.Command{
 }
 
 var encryptSubCmdFile = &cobra.Command{
-	Use:   "file",
+	Use:   common.SubCommandFile,
 	Args:  cobra.ExactArgs(1),
 	Short: "Encrypt or decrypt file",
 	Run:   Encryptor.FileRun,
 	Example: common.Examples(`# Encrypt file
-ops-cli encrypt file ~/README.md
-ops-cli encrypt file ~/README.md --config ~/config.toml
-ops-cli encrypt file ~/README.md -k '45984614e8f7d6c5'
-ops-cli encrypt file ~/README.md -k key.txt
+~/README.md
+~/README.md --config ~/config.toml
+~/README.md -k '45984614e8f7d6c5'
+~/README.md -k key.txt
 
 # Decrypt file
-ops-cli encrypt file ~/README.md -d -k ~/README.md.key
-ops-cli encrypt file ~/README.md -d --config ~/config.toml
-ops-cli encrypt file ~/README.md -k '45984614e8f7d6c5' -d
-ops-cli encrypt file ~/README.md -k key.txt -d`),
+~/README.md -d -k ~/README.md.key
+~/README.md -d --config ~/config.toml
+~/README.md -k '45984614e8f7d6c5' -d
+~/README.md -k key.txt -d`, common.CommandEncrypt, common.SubCommandFile),
 }
 
 var encryptSubCmdString = &cobra.Command{
-	Use:   "string",
+	Use:   common.SubCommandString,
 	Args:  cobra.ExactArgs(1),
 	Short: "Encrypt or decrypt string",
 	Run:   Encryptor.StringRun,
 	Example: common.Examples(`# Encrypt string
-ops-cli encrypt string "Hello World!" --config ~/config.toml
-ops-cli encrypt string "Hello World!" -k '45984614e8f7d6c5'
-ops-cli encrypt string "Hello World!" -k key.txt
+"Hello World!" --config ~/config.toml
+"Hello World!" -k '45984614e8f7d6c5'
+"Hello World!" -k key.txt
 
 # Decrypt string
-ops-cli encrypt string "Hello World!" -d --config ~/config.toml
-ops-cli encrypt string "Hello World!" -k '45984614e8f7d6c5' -d
-ops-cli encrypt string "Hello World!" -k key.txt -d`),
+"Hello World!" -d --config ~/config.toml
+"Hello World!" -k '45984614e8f7d6c5' -d
+"Hello World!" -k key.txt -d`, common.CommandEncrypt, common.SubCommandString),
 }
 
 var Encryptor EncrytpFlag

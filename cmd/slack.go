@@ -34,7 +34,7 @@ import (
 )
 
 var slackCmd = &cobra.Command{
-	Use:   "Slack",
+	Use:   common.CommandSlack,
 	Short: "Send message to Slack",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -42,27 +42,27 @@ var slackCmd = &cobra.Command{
 }
 
 var slackSubCmdFile = &cobra.Command{
-	Use:   "file",
+	Use:   common.SubCommandFile,
 	Short: "Send file to Slack",
 	Run:   slackCmdGlobalVar.Run,
 	Example: common.Examples(`# Send file
-ops-cli Slack file -a "/tmp/a.txt" --config ~/.config.toml`),
+-a "/tmp/a.txt" --config ~/.config.toml`, common.CommandSlack, common.SubCommandFile),
 }
 
 var slackSubCmdText = &cobra.Command{
-	Use:   "text",
+	Use:   common.SubCommandText,
 	Short: "Send text to Slack",
 	Run:   slackCmdGlobalVar.Run,
 	Example: common.Examples(`# Send text
-ops-cli Slack text -a "Hello World!"`),
+-a "Hello World!"`, common.CommandSlack, common.SubCommandText),
 }
 
 var slackSubCmdPhoto = &cobra.Command{
-	Use:   "photo",
+	Use:   common.SubCommandPhoto,
 	Short: "Send photo to Slack",
 	Run:   slackCmdGlobalVar.Run,
 	Example: common.Examples(`# Send photo
-ops-cli Slack photo -a "~/robot.png"`),
+-a "~/robot.png"`, common.CommandSlack, common.SubCommandPhoto),
 }
 
 var slackCmdGlobalVar SlackFlag
@@ -98,11 +98,11 @@ func (s *SlackFlag) Run(cmd *cobra.Command, _ []string) {
 		os.Exit(1)
 	}
 	switch cmd.Name() {
-	case ImTypeFile:
+	case common.SubCommandFile:
 		err = s.Photo()
-	case ImTypePhoto:
+	case common.SubCommandPhoto:
 		err = s.Photo()
-	case ImTypeText:
+	case common.SubCommandText:
 		err = s.Text()
 	}
 	if err != nil {

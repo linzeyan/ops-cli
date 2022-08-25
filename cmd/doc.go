@@ -25,7 +25,7 @@ import (
 )
 
 var docCmd = &cobra.Command{
-	Use:   "doc",
+	Use:   common.CommandDoc,
 	Short: "Generate documentation",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 }
@@ -88,17 +88,17 @@ func (d *DocFlag) RunE(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	switch cmd.Name() {
-	case DocTypeMan:
+	case common.SubCommandMan:
 		header := &doc.GenManHeader{
 			Title:   "MINE",
 			Section: "3",
 		}
 		err = doc.GenManTree(rootCmd, header, d.dir)
-	case DocTypeMarkdown:
+	case common.SubCommandMarkdown:
 		err = doc.GenMarkdownTree(rootCmd, d.dir)
-	case DocTypeReST:
+	case common.SubCommandReST:
 		err = doc.GenReSTTree(rootCmd, d.dir)
-	case DocTypeYaml:
+	case common.SubCommandYaml:
 		err = doc.GenYamlTree(rootCmd, d.dir)
 	}
 	return err

@@ -34,7 +34,7 @@ import (
 )
 
 var otpCmd = &cobra.Command{
-	Use:   "otp",
+	Use:   common.CommandOtp,
 	Short: "Calculate passcode or generate secret",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -42,30 +42,30 @@ var otpCmd = &cobra.Command{
 }
 
 var otpSubCmdCalculate = &cobra.Command{
-	Use:   "calculate",
+	Use:   common.SubCommandCalculate,
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Calculate passcode",
 	Run:   otpCmdGlobalVar.Run,
 	Example: common.Examples(`# Calculate the passcode for the specified secret
-ops-cli otp calculate 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
-ops-cli otp calculate 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
+6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
+6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
 
 # Calculate the passcode of the specified secret, the period is 15 seconds, and the number of digits is 7
-ops-cli otp calculate T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`),
+T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, common.CommandOtp, common.SubCommandCalculate),
 }
 
 var otpSubCmdGenerate = &cobra.Command{
-	Use:   "generate",
+	Use:   common.SubCommandGenerate,
 	Short: "Generate otp secret",
 	Run:   otpCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate OTP and specify a period of 15 seconds
-ops-cli otp generate -p 15
+-p 15
 
 # Generate OTP and specify SHA256 algorithm
-ops-cli otp generate -a sha256
+-a sha256
 
 # Generate OTP and specify SHA512 algorithm, the period is 15 seconds
-ops-cli otp generate -a sha512 -p 15`),
+-a sha512 -p 15`, common.CommandOtp, common.SubCommandGenerate),
 }
 
 var otpCmdGlobalVar OtpFlag
@@ -187,7 +187,7 @@ func (o *OtpFlag) Run(cmd *cobra.Command, args []string) {
 	var result string
 	var err error
 	switch cmd.Name() {
-	case "calculate":
+	case common.SubCommandCalculate:
 		var secret string
 		switch l := len(args); {
 		case l == 1:
@@ -199,7 +199,7 @@ func (o *OtpFlag) Run(cmd *cobra.Command, args []string) {
 			}
 		}
 		result, err = o.TOTP(secret)
-	case "generate":
+	case common.SubCommandGenerate:
 		result, err = o.GenSecret()
 	}
 	if err != nil {

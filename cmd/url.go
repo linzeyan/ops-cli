@@ -26,7 +26,7 @@ import (
 )
 
 var urlCmd = &cobra.Command{
-	Use:   "url",
+	Use:   common.CommandURL,
 	Short: "URL expand or download",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -35,7 +35,7 @@ var urlCmd = &cobra.Command{
 }
 
 var urlSubCmdExpand = &cobra.Command{
-	Use:   "expand [url]",
+	Use:   common.SubCommandExpand + " [url]",
 	Args:  cobra.ExactArgs(1),
 	Short: "Expand shorten url",
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -50,13 +50,13 @@ var urlSubCmdExpand = &cobra.Command{
 		return err
 	},
 	Example: common.Examples(`# Get the real URL from the shortened URL
-ops-cli url expand https://goo.gl/maps/b37Aq3Anc7taXQDd9`),
+https://goo.gl/maps/b37Aq3Anc7taXQDd9`, common.CommandURL, common.SubCommandExpand),
 	DisableFlagsInUseLine: true,
 	DisableFlagParsing:    true,
 }
 
 var urlSubCmdGet = &cobra.Command{
-	Use:   "get [url] [output]",
+	Use:   common.SubCommandGet + " [url] [output]",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Get file from url",
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -79,7 +79,8 @@ var urlSubCmdGet = &cobra.Command{
 		return err
 	},
 	Example: common.Examples(`# Get the file from URL
-ops-cli url get https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.reference.yml`),
+https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.reference.yml`,
+		common.CommandURL, common.SubCommandGet),
 	DisableFlagsInUseLine: true,
 	DisableFlagParsing:    true,
 }

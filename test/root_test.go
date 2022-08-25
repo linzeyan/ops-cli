@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"runtime"
 	"testing"
+
+	"github.com/linzeyan/ops-cli/cmd/common"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 	testHost    = "google.com"
 )
 
-var binaryCommand = "../ops-cli"
+var binaryCommand = "../" + common.CommandRoot
 
 func isWindows() bool {
 	return runtime.GOOS == "windows"
