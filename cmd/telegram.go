@@ -50,7 +50,14 @@ var telegramSubCmdFile = &cobra.Command{
 var telegramSubCmdID = &cobra.Command{
 	Use:   common.SubCommandID,
 	Short: "Get chat ID",
-	RunE:  telegramCmdGlobalVar.RunE,
+	RunE: func(_ *cobra.Command, _ []string) error {
+		var err error
+		if err = telegramCmdGlobalVar.Init(); err != nil {
+			return err
+		}
+		telegramCmdGlobalVar.GetUpdate()
+		return err
+	},
 	Example: common.Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
 --config ~/.config.toml`, common.CommandTelegram, common.SubCommandID),
 }
@@ -230,8 +237,6 @@ func (t *TelegramFlag) RunE(cmd *cobra.Command, _ []string) error {
 		err = t.Audio()
 	case common.SubCommandFile:
 		err = t.File()
-	case common.SubCommandID:
-		t.GetUpdate()
 	case common.SubCommandPhoto:
 		err = t.Photo()
 	case common.SubCommandText:
