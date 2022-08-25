@@ -27,18 +27,14 @@ import (
 )
 
 var (
-	ErrArgNotFound    = errors.New("argument not found")
-	ErrConfNotFound   = errors.New("config not found")
-	ErrEmptyResponse  = errors.New("response is empty")
-	ErrFileNotFound   = errors.New("file not found")
-	ErrFileType       = errors.New("file type not correct")
-	ErrInitialFailed  = errors.New("initial failed")
-	ErrInvalidIP      = errors.New("invalid IP")
-	ErrInvalidLength  = errors.New("invalid length")
-	ErrInvalidVar     = errors.New("invalid variable")
-	ErrParseCert      = errors.New("can not correctly parse certificate")
-	ErrResponseStatus = errors.New("response status code is not 200")
-	ErrTokenNotFound  = errors.New("token not found")
+	ErrArgNotFound   = errors.New("argument not found")
+	ErrFileNotFound  = errors.New("file not found")
+	ErrFileType      = errors.New("file type not correct")
+	ErrInitialFailed = errors.New("initial failed")
+	ErrInvalidIP     = errors.New("invalid IP")
+	ErrInvalidVar    = errors.New("invalid variable")
+	ErrParseCert     = errors.New("can not correctly parse certificate")
+	ErrTokenNotFound = errors.New("token not found")
 )
 
 var rootCmd = &cobra.Command{
