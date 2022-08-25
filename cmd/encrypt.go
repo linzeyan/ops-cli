@@ -21,7 +21,6 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -53,7 +52,7 @@ var encryptSubCmdFile = &cobra.Command{
 	Use:   common.SubCommandFile,
 	Args:  cobra.ExactArgs(1),
 	Short: "Encrypt or decrypt file",
-	Run:   Encryptor.FileRun,
+	RunE:  Encryptor.FileRunE,
 	Example: common.Examples(`# Encrypt file
 ~/README.md
 ~/README.md --config ~/config.toml
@@ -71,7 +70,7 @@ var encryptSubCmdString = &cobra.Command{
 	Use:   common.SubCommandString,
 	Args:  cobra.ExactArgs(1),
 	Short: "Encrypt or decrypt string",
-	Run:   Encryptor.StringRun,
+	RunE:  Encryptor.StringRunE,
 	Example: common.Examples(`# Encrypt string
 "Hello World!" --config ~/config.toml
 "Hello World!" -k '45984614e8f7d6c5'
@@ -103,7 +102,7 @@ type EncrytpFlag struct {
 	mode    string
 }
 
-func (e *EncrytpFlag) FileRun(cmd *cobra.Command, args []string) {
+func (e *EncrytpFlag) FileRunE(cmd *cobra.Command, args []string) error {
 	var err error
 	filename := args[0]
 	if e.decrypt {
@@ -112,13 +111,9 @@ func (e *EncrytpFlag) FileRun(cmd *cobra.Command, args []string) {
 		err = e.EncryptFile(e.Key, filename)
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
-	if err = os.Rename(filename+tempFileExtension, filename); err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
+	return os.Rename(filename+tempFileExtension, filename)
 }
 
 func (e *EncrytpFlag) findKey(secret string) []byte {
@@ -277,12 +272,14 @@ func (e *EncrytpFlag) DecryptFile(secret, filename string) error {
 	}
 }
 
-func (e *EncrytpFlag) StringRun(cmd *cobra.Command, args []string) {
+func (e *EncrytpFlag) StringRunE(cmd *cobra.Command, args []string) error {
 	var err error
 	var out string
 	text := args[0]
 	if key := e.findKey(e.Key); key != nil {
 		e.Key = string(key)
+	} else {
+		return common.ErrInvalidArg
 	}
 	if e.decrypt {
 		out, err = e.DecryptString(e.Key, text)
@@ -290,10 +287,10 @@ func (e *EncrytpFlag) StringRun(cmd *cobra.Command, args []string) {
 		out, err = e.EncryptString(e.Key, text)
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	PrintString(out)
+	return err
 }
 
 func (e *EncrytpFlag) EncryptString(secret, text string) (string, error) {
