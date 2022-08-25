@@ -58,10 +58,13 @@ func (u *updateFlag) RunE(_ *cobra.Command, _ []string) error {
 		PrintString("up-to-date")
 		return nil
 	}
+	PrintString("Update...")
+	PrintString(common.Usage("==> Downloading file from GitHub"))
 	err = updater.Download()
 	if err != nil {
 		return err
 	}
+	PrintString(common.Usage("==> Cleanup..."))
 	err = updater.Rename()
 	if err != nil {
 		return err
@@ -378,11 +381,12 @@ func (u *Updater) Rename() error {
 	if err != nil {
 		return err
 	}
-	err = os.RemoveAll(filepath.Dir(u.Repository.ExtractPath))
+	extractDir := filepath.Dir(u.Repository.ExtractPath)
+	err = os.RemoveAll(extractDir)
 	if err != nil {
 		return err
 	}
-	return err
+	return os.Remove(extractDir)
 }
 
 func NewUpdater(username, repo string) *Updater {
