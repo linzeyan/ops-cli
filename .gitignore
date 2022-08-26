@@ -13,8 +13,12 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-key_*
 
+# Command completion scripts
 completion/
+
+# Repository build path
 dist/
+
+# Command usage documents
 doc/
