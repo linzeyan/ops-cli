@@ -51,7 +51,7 @@ Available Commands:
   doc         Generate documentation
   dos2unix    Convert file eol to unix style
   encode      Encode and decode string or file
-  encrypt     Encrypt or decrypt file
+  encrypt     Encrypt or decrypt
   geoip       Print IP geographic information
   hash        Hash string or file
   help        Help about any command
@@ -59,8 +59,10 @@ Available Commands:
   otp         Calculate passcode or generate secret
   qrcode      Read or generate QR Code
   random      Generate random string
+  ssh-keygen  Generate SSH keypair
   system      Display system informations
-  url         Expand shorten url
+  update      Update ops-cli to the latest release
+  url         URL expand or download
   version     Print version information
   whois       List domain name information
 
