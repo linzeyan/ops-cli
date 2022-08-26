@@ -49,11 +49,12 @@ archives:
       # amd64: x86_64
 
 changelog:
-  sort: asc
-  filters:
-    exclude:
-      - "^docs:"
-      - "^test:"
+  skip: true
+  # sort: asc
+  # filters:
+  #   exclude:
+  #     - "^docs:"
+  #     - "^test:"
 
 nfpms:
   - id: packages
