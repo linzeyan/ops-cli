@@ -36,7 +36,7 @@ import (
 )
 
 var updateCmd = &cobra.Command{
-	Use:   common.CommandUpdate,
+	Use:   CommandUpdate,
 	Short: fmt.Sprintf("Update %s to the latest release", common.CommandRoot),
 	RunE:  updateCmdGlobalVar.RunE,
 

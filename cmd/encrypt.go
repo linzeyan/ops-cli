@@ -41,7 +41,7 @@ const (
 )
 
 var encryptCmd = &cobra.Command{
-	Use:   common.CommandEncrypt,
+	Use:   CommandEncrypt,
 	Short: "Encrypt or decrypt",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -49,7 +49,7 @@ var encryptCmd = &cobra.Command{
 }
 
 var encryptSubCmdFile = &cobra.Command{
-	Use:   common.SubCommandFile,
+	Use:   CommandFile,
 	Args:  cobra.ExactArgs(1),
 	Short: "Encrypt or decrypt file",
 	RunE:  Encryptor.FileRunE,
@@ -63,11 +63,11 @@ var encryptSubCmdFile = &cobra.Command{
 ~/README.md -d -k ~/README.md.key
 ~/README.md -d --config ~/config.toml
 ~/README.md -k '45984614e8f7d6c5' -d
-~/README.md -k key.txt -d`, common.CommandEncrypt, common.SubCommandFile),
+~/README.md -k key.txt -d`, CommandEncrypt, CommandFile),
 }
 
 var encryptSubCmdString = &cobra.Command{
-	Use:   common.SubCommandString,
+	Use:   CommandString,
 	Args:  cobra.ExactArgs(1),
 	Short: "Encrypt or decrypt string",
 	RunE:  Encryptor.StringRunE,
@@ -79,7 +79,7 @@ var encryptSubCmdString = &cobra.Command{
 # Decrypt string
 "Hello World!" -d --config ~/config.toml
 "Hello World!" -k '45984614e8f7d6c5' -d
-"Hello World!" -k key.txt -d`, common.CommandEncrypt, common.SubCommandString),
+"Hello World!" -k key.txt -d`, CommandEncrypt, CommandString),
 }
 
 var Encryptor EncrytpFlag

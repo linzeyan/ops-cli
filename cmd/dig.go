@@ -28,7 +28,7 @@ import (
 )
 
 var digCmd = &cobra.Command{
-	Use:   common.CommandDig + " [host] [@server] [type]",
+	Use:   CommandDig + " [host] [@server] [type]",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Resolve domain name",
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -120,7 +120,7 @@ tw.yahoo.com CNAME
 google.com ANY
 
 # Query PTR record
-1.1.1.1 PTR`, common.CommandDig),
+1.1.1.1 PTR`, CommandDig),
 }
 
 var digNetwork, digDomain, digServer string

@@ -25,7 +25,7 @@ import (
 )
 
 var qrcodeCmd = &cobra.Command{
-	Use:   common.CommandQrcode,
+	Use:   CommandQrcode,
 	Short: "Read or generate QR Code",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -33,7 +33,7 @@ var qrcodeCmd = &cobra.Command{
 }
 
 var qrcodeSubCmdRead = &cobra.Command{
-	Use:   common.SubCommandRead,
+	Use:   CommandRead,
 	Args:  cobra.ExactArgs(1),
 	Short: "Read QR code and print message",
 	RunE: func(_ *cobra.Command, args []string) error {
@@ -48,36 +48,36 @@ var qrcodeSubCmdRead = &cobra.Command{
 		return nil
 	},
 	Example: common.Examples(`# Read QR code and print message
-qrcode.png`, common.CommandQrcode, common.SubCommandRead),
+qrcode.png`, CommandQrcode, CommandRead),
 	DisableFlagsInUseLine: true,
 }
 
 var qrcodeSubCmdText = &cobra.Command{
-	Use:   common.SubCommandText,
+	Use:   CommandText,
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Generate QR code with text",
 	RunE:  qrcodeCmdGlobalVar.GenerateRunE,
 	Example: common.Examples(`# Generate QR code with text
 https://www.google.com -o out.png
-https://www.google.com -o out.png -s 500`, common.CommandQrcode, common.SubCommandText),
+https://www.google.com -o out.png -s 500`, CommandQrcode, CommandText),
 }
 
 var qrcodeSubCmdOtp = &cobra.Command{
-	Use:   common.CommandOtp,
+	Use:   CommandOtp,
 	Short: "Generate OTP QR code",
 	RunE:  qrcodeCmdGlobalVar.GenerateRunE,
 	Example: common.Examples(`# Generate OTP QR code
 --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --otp-issuer aws`,
-		common.CommandQrcode, common.CommandOtp),
+		CommandQrcode, CommandOtp),
 }
 
 var qrcodeSubCmdWifi = &cobra.Command{
-	Use:   common.SubCommandWiFi,
+	Use:   CommandWiFi,
 	Short: "Generate WiFi QR code",
 	RunE:  qrcodeCmdGlobalVar.GenerateRunE,
 	Example: common.Examples(`# Generate WiFi QR code
 --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid -o wifi.png`,
-		common.CommandQrcode, common.SubCommandWiFi),
+		CommandQrcode, CommandWiFi),
 }
 
 var qrcodeCmdGlobalVar QrcodeFlag
@@ -122,19 +122,19 @@ type QrcodeFlag struct {
 func (qr *QrcodeFlag) GenerateRunE(cmd *cobra.Command, args []string) error {
 	var err error
 	switch cmd.Name() {
-	case common.SubCommandText:
+	case CommandText:
 		for i := range args {
 			qr.text += args[i]
 		}
 		err = common.GenerateQRCode(qr.text, qr.size, qr.output)
-	case common.CommandOtp:
+	case CommandOtp:
 		if qr.otpSecret == "" {
 			return common.ErrInvalidArg
 		}
 		qr.text = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`,
 			qr.otpIssuer, qr.otpAccount, qr.otpSecret, qr.otpIssuer)
 		err = common.GenerateQRCode(qr.text, qr.size, qr.output)
-	case common.SubCommandWiFi:
+	case CommandWiFi:
 		if qr.wifiSsid == "" {
 			return common.ErrInvalidArg
 		}

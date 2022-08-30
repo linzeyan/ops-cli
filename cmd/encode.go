@@ -34,7 +34,7 @@ import (
 )
 
 var encodeCmd = &cobra.Command{
-	Use:   common.CommandEncode,
+	Use:   CommandEncode,
 	Short: "Encode and decode string or file",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -42,35 +42,35 @@ var encodeCmd = &cobra.Command{
 }
 
 var encodeSubCmdBase32Hex = &cobra.Command{
-	Use:   common.Base32Hex,
+	Use:   CommandBase32Hex,
 	Args:  cobra.ExactArgs(1),
 	Short: "Base32 hex encoding or decoding",
 	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase32Std = &cobra.Command{
-	Use:   common.Base32Std,
+	Use:   CommandBase32Std,
 	Args:  cobra.ExactArgs(1),
 	Short: "Base32 standard encoding or decoding",
 	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase64Std = &cobra.Command{
-	Use:   common.Base64Std,
+	Use:   CommandBase64Std,
 	Args:  cobra.ExactArgs(1),
 	Short: "Base64 standard encoding or decoding",
 	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdBase64URL = &cobra.Command{
-	Use:   common.Base64URL,
+	Use:   CommandBase64URL,
 	Args:  cobra.ExactArgs(1),
 	Short: "Base64 url encoding or decoding",
 	RunE:  Encoder.RunE,
 }
 
 var encodeSubCmdHex = &cobra.Command{
-	Use:   common.Hex,
+	Use:   CommandHex,
 	Args:  cobra.ExactArgs(1),
 	Short: "Hexadecimal encoding or decoding",
 	RunE:  Encoder.RunE,
@@ -108,15 +108,15 @@ func (e *EncodeFlag) RunE(cmd *cobra.Command, args []string) error {
 		data = args[0]
 	}
 	switch cmd.Name() {
-	case common.Base32Hex:
+	case CommandBase32Hex:
 		out, err = e.Base32HexEncode(data)
-	case common.Base32Std:
+	case CommandBase32Std:
 		out, err = e.Base32StdEncode(data)
-	case common.Base64Std:
+	case CommandBase64Std:
 		out, err = e.Base64StdEncode(data)
-	case common.Base64URL:
+	case CommandBase64URL:
 		out, err = e.Base64URLEncode(data)
-	case common.Hex:
+	case CommandHex:
 		out, err = e.HexEncode(data)
 	}
 	if err != nil {
@@ -130,15 +130,15 @@ func (e *EncodeFlag) RunDecode(cmd *cobra.Command, args []string) error {
 	var err error
 	var out []byte
 	switch cmd.Name() {
-	case common.Base32Hex:
+	case CommandBase32Hex:
 		out, err = e.Base32HexDecode(args[0])
-	case common.Base32Std:
+	case CommandBase32Std:
 		out, err = e.Base32StdDecode(args[0])
-	case common.Base64Std:
+	case CommandBase64Std:
 		out, err = e.Base64StdDecode(args[0])
-	case common.Base64URL:
+	case CommandBase64URL:
 		out, err = e.Base64URLDecode(args[0])
-	case common.Hex:
+	case CommandHex:
 		out, err = e.HexDecode(args[0])
 	}
 	if err != nil {

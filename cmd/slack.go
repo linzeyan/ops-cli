@@ -33,7 +33,7 @@ import (
 )
 
 var slackCmd = &cobra.Command{
-	Use:   common.CommandSlack,
+	Use:   CommandSlack,
 	Short: "Send message to Slack",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -41,27 +41,27 @@ var slackCmd = &cobra.Command{
 }
 
 var slackSubCmdFile = &cobra.Command{
-	Use:   common.SubCommandFile,
+	Use:   CommandFile,
 	Short: "Send file to Slack",
 	RunE:  slackCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send file
--a "/tmp/a.txt" --config ~/.config.toml`, common.CommandSlack, common.SubCommandFile),
+-a "/tmp/a.txt" --config ~/.config.toml`, CommandSlack, CommandFile),
 }
 
 var slackSubCmdText = &cobra.Command{
-	Use:   common.SubCommandText,
+	Use:   CommandText,
 	Short: "Send text to Slack",
 	RunE:  slackCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send text
--a "Hello World!"`, common.CommandSlack, common.SubCommandText),
+-a "Hello World!"`, CommandSlack, CommandText),
 }
 
 var slackSubCmdPhoto = &cobra.Command{
-	Use:   common.SubCommandPhoto,
+	Use:   CommandPhoto,
 	Short: "Send photo to Slack",
 	RunE:  slackCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send photo
--a "~/robot.png"`, common.CommandSlack, common.SubCommandPhoto),
+-a "~/robot.png"`, CommandSlack, CommandPhoto),
 }
 
 var slackCmdGlobalVar SlackFlag
@@ -95,11 +95,11 @@ func (s *SlackFlag) RunE(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	switch cmd.Name() {
-	case common.SubCommandFile:
+	case CommandFile:
 		err = s.Photo()
-	case common.SubCommandPhoto:
+	case CommandPhoto:
 		err = s.Photo()
-	case common.SubCommandText:
+	case CommandText:
 		err = s.Text()
 	}
 	return err

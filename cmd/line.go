@@ -29,7 +29,7 @@ import (
 )
 
 var lineCmd = &cobra.Command{
-	Use:   common.CommandLINE,
+	Use:   CommandLINE,
 	Short: "Send message to LINE",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -37,22 +37,22 @@ var lineCmd = &cobra.Command{
 }
 
 var lineSubCmdText = &cobra.Command{
-	Use:   common.SubCommandText,
+	Use:   CommandText,
 	Short: "Send message to LINE",
 	Example: common.Examples(`# Send text to LINE chat
--s secret -t token --id GroupID -a 'Hello LINE'`, common.CommandLINE, common.SubCommandText),
+-s secret -t token --id GroupID -a 'Hello LINE'`, CommandLINE, CommandText),
 	RunE: lineCmdGlobalVar.RunE,
 }
 
 var lineSubCmdID = &cobra.Command{
-	Use:   common.SubCommandID,
+	Use:   CommandID,
 	Args:  cobra.ExactArgs(1),
 	Short: "Get chat ID from LINE",
 	Example: common.Examples(`# Get chat ID from LINE,
 # execute this command will listen on 80 port,
 # type and sent 'id' in the chat,
 # then console will print ID.
-https://callback_url`, common.CommandLINE, common.SubCommandID),
+https://callback_url`, CommandLINE, CommandID),
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		if err = lineCmdGlobalVar.Init(); err != nil {
@@ -68,18 +68,18 @@ https://callback_url`, common.CommandLINE, common.SubCommandID),
 }
 
 var lineSubCmdPhoto = &cobra.Command{
-	Use:   common.SubCommandPhoto,
+	Use:   CommandPhoto,
 	Short: "Send photo to LINE",
 	Example: common.Examples(`# Send photo to LINE chat
--s secret -t token --id GroupID -a https://img.url`, common.CommandLINE, common.SubCommandPhoto),
+-s secret -t token --id GroupID -a https://img.url`, CommandLINE, CommandPhoto),
 	RunE: lineCmdGlobalVar.RunE,
 }
 
 var lineSubCmdVideo = &cobra.Command{
-	Use:   common.SubCommandVideo,
+	Use:   CommandVideo,
 	Short: "Send video to LINE",
 	Example: common.Examples(`# Send video to LINE chat
--s secret -t token --id GroupID -a https://video.url`, common.CommandLINE, common.SubCommandVideo),
+-s secret -t token --id GroupID -a https://video.url`, CommandLINE, CommandVideo),
 	RunE: lineCmdGlobalVar.RunE,
 }
 
@@ -137,7 +137,7 @@ func (l *LineFlag) GetID() {
 			os.Exit(1)
 		}
 		for i := range events {
-			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == common.SubCommandID {
+			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == CommandID {
 				switch s := events[i].Source; s.Type {
 				case linebot.EventSourceTypeGroup:
 					PrintString(s.GroupID)
@@ -178,13 +178,13 @@ func (l *LineFlag) RunE(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	switch cmd.Name() {
-	case common.SubCommandText:
+	case CommandText:
 		input := linebot.NewTextMessage(l.arg)
 		l.resp, err = l.api.PushMessage(l.ID, input).Do()
-	case common.SubCommandPhoto:
+	case CommandPhoto:
 		input := linebot.NewImageMessage(l.arg, l.arg)
 		l.resp, err = l.api.PushMessage(l.ID, input).Do()
-	case common.SubCommandVideo:
+	case CommandVideo:
 		input := linebot.NewVideoMessage(l.arg, l.arg)
 		l.resp, err = l.api.PushMessage(l.ID, input).Do()
 	}

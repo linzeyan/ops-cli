@@ -34,7 +34,7 @@ import (
 )
 
 var otpCmd = &cobra.Command{
-	Use:   common.CommandOtp,
+	Use:   CommandOtp,
 	Short: "Calculate passcode or generate secret",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -42,7 +42,7 @@ var otpCmd = &cobra.Command{
 }
 
 var otpSubCmdCalculate = &cobra.Command{
-	Use:   common.SubCommandCalculate,
+	Use:   CommandCalculate,
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Calculate passcode",
 	Run:   otpCmdGlobalVar.Run,
@@ -51,11 +51,11 @@ var otpSubCmdCalculate = &cobra.Command{
 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
 
 # Calculate the passcode of the specified secret, the period is 15 seconds, and the number of digits is 7
-T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, common.CommandOtp, common.SubCommandCalculate),
+T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
 }
 
 var otpSubCmdGenerate = &cobra.Command{
-	Use:   common.SubCommandGenerate,
+	Use:   CommandGenerate,
 	Short: "Generate otp secret",
 	Run:   otpCmdGlobalVar.Run,
 	Example: common.Examples(`# Generate OTP and specify a period of 15 seconds
@@ -65,7 +65,7 @@ var otpSubCmdGenerate = &cobra.Command{
 -a sha256
 
 # Generate OTP and specify SHA512 algorithm, the period is 15 seconds
--a sha512 -p 15`, common.CommandOtp, common.SubCommandGenerate),
+-a sha512 -p 15`, CommandOtp, CommandGenerate),
 }
 
 var otpCmdGlobalVar OtpFlag
@@ -187,7 +187,7 @@ func (o *OtpFlag) Run(cmd *cobra.Command, args []string) {
 	var result string
 	var err error
 	switch cmd.Name() {
-	case common.SubCommandCalculate:
+	case CommandCalculate:
 		var secret string
 		switch l := len(args); {
 		case l == 1:
@@ -199,7 +199,7 @@ func (o *OtpFlag) Run(cmd *cobra.Command, args []string) {
 			}
 		}
 		result, err = o.TOTP(secret)
-	case common.SubCommandGenerate:
+	case CommandGenerate:
 		result, err = o.GenSecret()
 	}
 	if err != nil {

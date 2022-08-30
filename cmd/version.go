@@ -28,7 +28,7 @@ import (
 )
 
 var versionCmd = &cobra.Command{
-	Use:   common.CommandVersion,
+	Use:   CommandVersion,
 	Short: "Print version information",
 	Run: func(_ *cobra.Command, _ []string) {
 		var v = VersionOutput{

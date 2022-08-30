@@ -26,7 +26,7 @@ import (
 )
 
 var telegramCmd = &cobra.Command{
-	Use:   common.CommandTelegram,
+	Use:   CommandTelegram,
 	Short: "Send message to Telegram",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -34,21 +34,21 @@ var telegramCmd = &cobra.Command{
 }
 
 var telegramSubCmdAudio = &cobra.Command{
-	Use:   common.SubCommandAudio,
+	Use:   CommandAudio,
 	Short: "Send audio file to Telegram",
 	RunE:  telegramCmdGlobalVar.RunE,
 }
 
 var telegramSubCmdFile = &cobra.Command{
-	Use:   common.SubCommandFile,
+	Use:   CommandFile,
 	Short: "Send file to Telegram",
 	RunE:  telegramCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send file
--t bot_token -c chat_id -a '~/readme.md'`, common.CommandTelegram, common.SubCommandFile),
+-t bot_token -c chat_id -a '~/readme.md'`, CommandTelegram, CommandFile),
 }
 
 var telegramSubCmdID = &cobra.Command{
-	Use:   common.SubCommandID,
+	Use:   CommandID,
 	Short: "Get chat ID",
 	RunE: func(_ *cobra.Command, _ []string) error {
 		var err error
@@ -59,34 +59,34 @@ var telegramSubCmdID = &cobra.Command{
 		return err
 	},
 	Example: common.Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
---config ~/.config.toml`, common.CommandTelegram, common.SubCommandID),
+--config ~/.config.toml`, CommandTelegram, CommandID),
 }
 
 var telegramSubCmdText = &cobra.Command{
-	Use:   common.SubCommandText,
+	Use:   CommandText,
 	Short: "Send text to Telegram",
 	RunE:  telegramCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send message
--t bot_token -c chat_id -a 'Hello word'`, common.CommandTelegram, common.SubCommandText),
+-t bot_token -c chat_id -a 'Hello word'`, CommandTelegram, CommandText),
 }
 
 var telegramSubCmdPhoto = &cobra.Command{
-	Use:   common.SubCommandPhoto,
+	Use:   CommandPhoto,
 	Short: "Send photo to Telegram",
 	RunE:  telegramCmdGlobalVar.RunE,
 	Example: common.Examples(`# Send photo
 -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
--t bot_token -c chat_id -a '~/photo/cat.png'`, common.CommandTelegram, common.SubCommandPhoto),
+-t bot_token -c chat_id -a '~/photo/cat.png'`, CommandTelegram, CommandPhoto),
 }
 
 var telegramSubCmdVideo = &cobra.Command{
-	Use:   common.SubCommandVideo,
+	Use:   CommandVideo,
 	Short: "Send video file to Telegram",
 	RunE:  telegramCmdGlobalVar.RunE,
 }
 
 var telegramSubCmdVoice = &cobra.Command{
-	Use:   common.SubCommandVoice,
+	Use:   CommandVoice,
 	Short: "Send voice file to Telegram",
 	RunE:  telegramCmdGlobalVar.RunE,
 }
@@ -216,7 +216,7 @@ func (t *TelegramFlag) GetUpdate() {
 
 	for update := range updates {
 		if update.Message != nil { // If we got a message
-			if update.Message.Text == common.SubCommandID {
+			if update.Message.Text == CommandID {
 				PrintString(update.Message.Chat.ID)
 				break
 			}
@@ -233,17 +233,17 @@ func (t *TelegramFlag) RunE(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	switch cmd.Name() {
-	case common.SubCommandAudio:
+	case CommandAudio:
 		err = t.Audio()
-	case common.SubCommandFile:
+	case CommandFile:
 		err = t.File()
-	case common.SubCommandPhoto:
+	case CommandPhoto:
 		err = t.Photo()
-	case common.SubCommandText:
+	case CommandText:
 		err = t.Text()
-	case common.SubCommandVideo:
+	case CommandVideo:
 		err = t.Video()
-	case common.SubCommandVoice:
+	case CommandVoice:
 		err = t.Voice()
 	}
 	if err != nil {
