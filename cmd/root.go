@@ -26,7 +26,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   common.CommandRoot,
+	Use:   common.RepoName,
 	Short: "OPS useful tools",
 	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 

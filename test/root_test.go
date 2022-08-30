@@ -17,7 +17,7 @@ const (
 	testHost    = "google.com"
 )
 
-var binaryCommand = "../" + common.CommandRoot
+var binaryCommand = "../" + common.RepoName
 
 func isWindows() bool {
 	return runtime.GOOS == "windows"

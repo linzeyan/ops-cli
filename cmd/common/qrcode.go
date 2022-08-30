@@ -38,7 +38,7 @@ func GenerateQRCode(content string, size int, dest string) error {
 		size = 600
 	}
 	if dest == "" {
-		dest = "./qrcode.png"
+		dest = "qrcode.png"
 	}
 	if content == "" {
 		return ErrInvalidArg

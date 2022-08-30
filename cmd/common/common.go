@@ -43,7 +43,7 @@ func Examples(example string, cmdName ...string) string {
 	for _, v := range cmdName {
 		prefix = prefix + v + " "
 	}
-	prefix = CommandRoot + prefix
+	prefix = RepoName + prefix
 
 	re := regexp.MustCompile(`(?P<command>.*)`)
 	template := prefix + "$command\n"

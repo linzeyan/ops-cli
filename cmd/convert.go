@@ -38,29 +38,29 @@ var convertCmd = &cobra.Command{
 
 /* CSV. */
 var convertSubCmdCSV2JSON = &cobra.Command{
-	Use:   "csv2json",
+	Use:   CommandCsv2JSON,
 	Short: "Convert csv to json format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdCSV2TOML = &cobra.Command{
-	Use:   "csv2toml",
+	Use:   CommandCsv2Toml,
 	Short: "Convert csv to toml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdCSV2XML = &cobra.Command{
-	Use:   "csv2xml",
+	Use:   CommandCsv2XML,
 	Short: "Convert csv to xml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdCSV2YAML = &cobra.Command{
-	Use:   "csv2yaml",
+	Use:   CommandCsv2Yaml,
 	Short: "Convert csv to yaml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 
 /* DOS. */
 var convertSubCmdDOS2Unix = &cobra.Command{
-	Use:   "dos2unix file...",
+	Use:   CommandDos2Unix + "file...",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Convert DOS to Unix format",
 	Run: func(_ *cobra.Command, args []string) {
@@ -76,90 +76,90 @@ var convertSubCmdDOS2Unix = &cobra.Command{
 
 /* JSON. */
 var convertSubCmdJSON2CSV = &cobra.Command{
-	Use:   "json2csv",
+	Use:   CommandJSON2Csv,
 	Short: "Convert json to csv format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdJSON2TOML = &cobra.Command{
-	Use:   "json2toml",
+	Use:   CommandJSON2Toml,
 	Short: "Convert json to toml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdJSON2XML = &cobra.Command{
-	Use:   "json2xml",
+	Use:   CommandJSON2XML,
 	Short: "Convert json to xml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdJSON2YAML = &cobra.Command{
-	Use:   "json2yaml",
+	Use:   CommandJSON2Yaml,
 	Short: "Convert json to yaml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 
 /* TOML. */
 var convertSubCmdTOML2CSV = &cobra.Command{
-	Use:   "toml2csv",
+	Use:   CommandToml2Csv,
 	Short: "Convert toml to csv format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdTOML2JSON = &cobra.Command{
-	Use:   "toml2json",
+	Use:   CommandToml2JSON,
 	Short: "Convert toml to json format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdTOML2XML = &cobra.Command{
-	Use:   "toml2xml",
+	Use:   CommandToml2XML,
 	Short: "Convert toml to xml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdTOML2YAML = &cobra.Command{
-	Use:   "toml2yaml",
+	Use:   CommandToml2Yaml,
 	Short: "Convert toml to yaml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 
 /* XML. */
 var convertSubCmdXML2CSV = &cobra.Command{
-	Use:   "xml2csv",
+	Use:   CommandXML2Csv,
 	Short: "Convert xml to csv format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdXML2JSON = &cobra.Command{
-	Use:   "xml2json",
+	Use:   CommandXML2JSON,
 	Short: "Convert xml to json format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdXML2TOML = &cobra.Command{
-	Use:   "xml2toml",
+	Use:   CommandXML2Toml,
 	Short: "Convert xml to toml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdXML2YAML = &cobra.Command{
-	Use:   "xml2yaml",
+	Use:   CommandXML2Yaml,
 	Short: "Convert xml to yaml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 
 /* YAML. */
 var convertSubCmdYAML2CSV = &cobra.Command{
-	Use:   "yaml2csv",
+	Use:   CommandYaml2Csv,
 	Short: "Convert yaml to csv format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdYAML2JSON = &cobra.Command{
-	Use:   "yaml2json",
+	Use:   CommandYaml2JSON,
 	Short: "Convert yaml to json format",
 	RunE:  convertCmdGlobalVar.RunE,
 	Example: common.Examples(`# Convert yaml to json
 -i input.yaml -o output.json`, CommandConvert, CommandYaml2JSON),
 }
 var convertSubCmdYAML2TOML = &cobra.Command{
-	Use:   "yaml2toml",
+	Use:   CommandYaml2Toml,
 	Short: "Convert yaml to toml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }
 var convertSubCmdYAML2XML = &cobra.Command{
-	Use:   "yaml2xml",
+	Use:   CommandYaml2XML,
 	Short: "Convert yaml to xml format",
 	RunE:  convertCmdGlobalVar.RunE,
 }

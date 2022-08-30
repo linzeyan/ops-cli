@@ -37,7 +37,7 @@ import (
 
 var updateCmd = &cobra.Command{
 	Use:   CommandUpdate,
-	Short: fmt.Sprintf("Update %s to the latest release", common.CommandRoot),
+	Short: fmt.Sprintf("Update %s to the latest release", common.RepoName),
 	RunE:  updateCmdGlobalVar.RunE,
 
 	DisableFlagsInUseLine: true,
@@ -53,7 +53,7 @@ type updateFlag struct{}
 
 func (u *updateFlag) RunE(_ *cobra.Command, _ []string) error {
 	var err error
-	updater := NewUpdater(common.RepoOwner, common.CommandRoot)
+	updater := NewUpdater(common.RepoOwner, common.RepoName)
 	if !updater.Upgrade {
 		PrintString("up-to-date")
 		return nil

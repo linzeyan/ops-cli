@@ -41,7 +41,7 @@ var systemCmd = &cobra.Command{
 }
 
 var systemSubCmdCPU = &cobra.Command{
-	Use:   "cpu",
+	Use:   CommandCPU,
 	Short: "Display cpu informations",
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := systemCmdGlobalVar.CPUInfo(); err != nil {
@@ -53,7 +53,7 @@ var systemSubCmdCPU = &cobra.Command{
 }
 
 var systemSubCmdDisk = &cobra.Command{
-	Use:   "disk",
+	Use:   CommandDisk,
 	Short: "Display disk informations",
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := systemCmdGlobalVar.DiskUsage(); err != nil {
@@ -65,7 +65,7 @@ var systemSubCmdDisk = &cobra.Command{
 }
 
 var systemSubCmdHost = &cobra.Command{
-	Use:   "host",
+	Use:   CommandHost,
 	Short: "Display host informations",
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := systemCmdGlobalVar.HostInfo(); err != nil {
@@ -77,7 +77,7 @@ var systemSubCmdHost = &cobra.Command{
 }
 
 var systemSubCmdLoad = &cobra.Command{
-	Use:   "load",
+	Use:   CommandLoad,
 	Short: "Display load informations",
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := systemCmdGlobalVar.LoadAvg(); err != nil {
@@ -89,7 +89,7 @@ var systemSubCmdLoad = &cobra.Command{
 }
 
 var systemSubCmdMemory = &cobra.Command{
-	Use:   "memory",
+	Use:   CommandMemory,
 	Short: "Display memory informations",
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := systemCmdGlobalVar.MemUsage(); err != nil {
@@ -101,7 +101,7 @@ var systemSubCmdMemory = &cobra.Command{
 }
 
 var systemSubCmdNetwork = &cobra.Command{
-	Use:   "network",
+	Use:   CommandNetwork,
 	Short: "Display network informations",
 	Run: func(_ *cobra.Command, _ []string) {
 		if err := systemCmdGlobalVar.NetInfo(); err != nil {

@@ -31,25 +31,25 @@ var docCmd = &cobra.Command{
 }
 
 var docSubCmdMan = &cobra.Command{
-	Use:   "man",
+	Use:   CommandMan,
 	Short: "Generate man page documentation",
 	RunE:  docCmdGlobalVar.RunE,
 }
 
 var docSubCmdMarkdown = &cobra.Command{
-	Use:   "markdown",
+	Use:   CommandMarkdown,
 	Short: "Generate markdown documentation",
 	RunE:  docCmdGlobalVar.RunE,
 }
 
 var docSubCmdRest = &cobra.Command{
-	Use:   "rest",
+	Use:   CommandReST,
 	Short: "Generate rest documentation",
 	RunE:  docCmdGlobalVar.RunE,
 }
 
 var docSubCmdYaml = &cobra.Command{
-	Use:   "yaml",
+	Use:   CommandYaml,
 	Short: "Generate yaml documentation",
 	RunE:  docCmdGlobalVar.RunE,
 }

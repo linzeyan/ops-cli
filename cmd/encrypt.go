@@ -29,17 +29,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	EncryptModeCFB = "CFB"
-	EncryptModeCTR = "CTR"
-	EncryptModeGCM = "GCM"
-	EncryptModeOFB = "OFB"
-)
-const (
-	keyFileExtension  = ".key"
-	tempFileExtension = ".temp"
-)
-
 var encryptCmd = &cobra.Command{
 	Use:   CommandEncrypt,
 	Short: "Encrypt or decrypt",

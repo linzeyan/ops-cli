@@ -45,10 +45,6 @@ const (
 )
 
 const (
-	CommandRoot = "ops-cli"
-)
-
-const (
 	HashMd5        = "md5"
 	HashSha1       = "sha1"
 	HashSha224     = "sha224"
@@ -63,6 +59,7 @@ const (
 	IndentTwoSpaces = "  "
 
 	RepoOwner = "linzeyan"
+	RepoName  = "ops-cli"
 
 	UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
 )

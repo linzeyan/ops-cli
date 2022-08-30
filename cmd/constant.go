@@ -28,8 +28,15 @@ const (
 	CommandCalculate = "calculate"
 	CommandCert      = "cert"
 	CommandConvert   = "convert"
+	CommandCPU       = "cpu"
+	CommandCsv       = "csv"
+	CommandCsv2JSON  = CommandCsv + "2" + CommandJSON
+	CommandCsv2Toml  = CommandCsv + "2" + CommandToml
+	CommandCsv2XML   = CommandCsv + "2" + CommandXML
+	CommandCsv2Yaml  = CommandCsv + "2" + CommandYaml
 	CommandDig       = "dig"
 	CommandDiscord   = "Discord"
+	CommandDisk      = "disk"
 	CommandDoc       = "doc"
 	CommandDos2Unix  = "dos2unix"
 	CommandEncode    = "encode"
@@ -41,12 +48,21 @@ const (
 	CommandGet       = "get"
 	CommandHash      = "hash"
 	CommandHex       = "hex"
+	CommandHost      = "host"
 	CommandIcp       = "icp"
 	CommandID        = "id"
+	CommandJSON      = "json"
+	CommandJSON2Csv  = CommandJSON + "2" + CommandCsv
+	CommandJSON2Toml = CommandJSON + "2" + CommandToml
+	CommandJSON2XML  = CommandJSON + "2" + CommandXML
+	CommandJSON2Yaml = CommandJSON + "2" + CommandYaml
 	CommandLINE      = "LINE"
+	CommandLoad      = "load"
 	CommandLowercase = "lowercase"
 	CommandMan       = "man"
 	CommandMarkdown  = "markdown"
+	CommandMemory    = "memory"
+	CommandNetwork   = "network"
 	CommandNumber    = "number"
 	CommandOtp       = "otp"
 	CommandPhoto     = "photo"
@@ -61,6 +77,11 @@ const (
 	CommandSystem    = "system"
 	CommandTelegram  = "Telegram"
 	CommandText      = "text"
+	CommandToml      = "toml"
+	CommandToml2Csv  = CommandToml + "2" + CommandCsv
+	CommandToml2JSON = CommandToml + "2" + CommandJSON
+	CommandToml2XML  = CommandToml + "2" + CommandXML
+	CommandToml2Yaml = CommandToml + "2" + CommandYaml
 	CommandUpdate    = "update"
 	CommandUppercase = "uppercase"
 	CommandURL       = "url"
@@ -69,6 +90,26 @@ const (
 	CommandVoice     = "voice"
 	CommandWhois     = "whois"
 	CommandWiFi      = "wifi"
+	CommandXML       = "xml"
+	CommandXML2Csv   = CommandXML + "2" + CommandCsv
+	CommandXML2JSON  = CommandXML + "2" + CommandJSON
+	CommandXML2Toml  = CommandXML + "2" + CommandToml
+	CommandXML2Yaml  = CommandXML + "2" + CommandYaml
 	CommandYaml      = "yaml"
-	CommandYaml2JSON = "yaml2json"
+	CommandYaml2Csv  = CommandYaml + "2" + CommandCsv
+	CommandYaml2JSON = CommandYaml + "2" + CommandJSON
+	CommandYaml2Toml = CommandYaml + "2" + CommandToml
+	CommandYaml2XML  = CommandYaml + "2" + CommandXML
+)
+
+const (
+	EncryptModeCFB = "CFB"
+	EncryptModeCTR = "CTR"
+	EncryptModeGCM = "GCM"
+	EncryptModeOFB = "OFB"
+)
+
+const (
+	keyFileExtension  = ".key"
+	tempFileExtension = ".temp"
 )
