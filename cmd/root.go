@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -127,6 +128,12 @@ func PrintString(i any) {
 		fmt.Printf("%s\n", data)
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		fmt.Printf("%d\n", data)
+	case map[string]string:
+		b := new(bytes.Buffer)
+		for key, value := range data {
+			fmt.Fprintf(b, "%s: %s", key, value)
+		}
+		fmt.Printf("%s\n", b.String())
 	default:
 		fmt.Printf("%v\n", data)
 	}

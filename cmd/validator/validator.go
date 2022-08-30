@@ -56,9 +56,25 @@ func ValidIP(i string) bool {
 	return net.ParseIP(i) != nil
 }
 
+func ValidCIDRIPv4(i string) bool {
+	ip, _, err := net.ParseCIDR(i)
+	if err != nil {
+		return false
+	}
+	return ValidIPv4(ip.String())
+}
+
 /* If i is a ipv4 address return true. */
 func ValidIPv4(i string) bool {
 	return net.ParseIP(i).To4() != nil
+}
+
+func ValidCIDRIPv6(i string) bool {
+	ip, _, err := net.ParseCIDR(i)
+	if err != nil {
+		return false
+	}
+	return ValidIPv6(ip.String())
 }
 
 /* If i is a ipv6 address return true. */

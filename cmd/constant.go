@@ -51,6 +51,7 @@ const (
 	CommandHost      = "host"
 	CommandIcp       = "icp"
 	CommandID        = "id"
+	CommandIP        = "ip"
 	CommandJSON      = "json"
 	CommandJSON2Csv  = CommandJSON + "2" + CommandCsv
 	CommandJSON2Toml = CommandJSON + "2" + CommandToml
