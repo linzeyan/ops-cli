@@ -233,7 +233,7 @@ func (r *Repository) UnGzip() error {
 		if err != nil {
 			return err
 		}
-		paths, err := r.sanitizeExtractPath(downloadPath, header.Name)
+		paths, err := r.sanitizeExtractPath(header.Name, filepath.Dir(downloadPath))
 		if err != nil {
 			return err
 		}
@@ -247,7 +247,7 @@ func (r *Repository) UnGzip() error {
 			continue
 		}
 		if strings.Contains(filepath.Base(paths), r.Repository) {
-			r.ExtractPath = filepath.Join(filepath.Dir(downloadPath), paths)
+			r.ExtractPath = paths
 		}
 
 		file, err := os.OpenFile(paths, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, header.FileInfo().Mode())
@@ -274,7 +274,7 @@ func (r *Repository) UnZip() error {
 		if err != nil {
 			return err
 		}
-		paths, err := r.sanitizeExtractPath(downloadPath, f.Name)
+		paths, err := r.sanitizeExtractPath(f.Name, filepath.Dir(downloadPath))
 		if err != nil {
 			return err
 		}
@@ -289,7 +289,7 @@ func (r *Repository) UnZip() error {
 			continue
 		}
 		if strings.Contains(filepath.Base(paths), r.Repository) {
-			r.ExtractPath = filepath.Join(filepath.Dir(downloadPath), paths)
+			r.ExtractPath = paths
 		}
 
 		dstFile, err := os.OpenFile(paths, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, f.Mode())
@@ -382,11 +382,7 @@ func (u *Updater) Rename() error {
 		return err
 	}
 	extractDir := filepath.Dir(u.Repository.ExtractPath)
-	err = os.RemoveAll(extractDir)
-	if err != nil {
-		return err
-	}
-	return os.Remove(extractDir)
+	return os.RemoveAll(extractDir)
 }
 
 func NewUpdater(username, repo string) *Updater {
