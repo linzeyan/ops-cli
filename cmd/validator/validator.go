@@ -56,7 +56,12 @@ func ValidIP(i string) bool {
 	return net.ParseIP(i) != nil
 }
 
-func ValidCIDRIPv4(i string) bool {
+/* If i is a ipv4 address return true. */
+func ValidIPv4(i string) bool {
+	return net.ParseIP(i).To4() != nil
+}
+
+func ValidIPv4CIDR(i string) bool {
 	ip, _, err := net.ParseCIDR(i)
 	if err != nil {
 		return false
@@ -64,22 +69,17 @@ func ValidCIDRIPv4(i string) bool {
 	return ValidIPv4(ip.String())
 }
 
-/* If i is a ipv4 address return true. */
-func ValidIPv4(i string) bool {
-	return net.ParseIP(i).To4() != nil
+/* If i is a ipv6 address return true. */
+func ValidIPv6(i string) bool {
+	return net.ParseIP(i).To4() == nil && net.ParseIP(i).To16() != nil
 }
 
-func ValidCIDRIPv6(i string) bool {
+func ValidIPv6CIDR(i string) bool {
 	ip, _, err := net.ParseCIDR(i)
 	if err != nil {
 		return false
 	}
 	return ValidIPv6(ip.String())
-}
-
-/* If i is a ipv6 address return true. */
-func ValidIPv6(i string) bool {
-	return net.ParseIP(i).To4() == nil && net.ParseIP(i).To16() != nil
 }
 
 /* If u is a valid url return true. */

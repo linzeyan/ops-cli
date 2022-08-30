@@ -91,12 +91,12 @@ func ParseInterfaces(iface net.InterfaceStatList) map[string]string {
 
 		var addr string
 		for _, a := range v.Addrs {
-			if validator.ValidCIDRIPv4(a.Addr) {
+			if validator.ValidIPv4CIDR(a.Addr) {
 				addr += fmt.Sprintf("%s\n\tinet %s", addr, a.Addr)
 			}
 		}
 		for _, a := range v.Addrs {
-			if validator.ValidCIDRIPv6(a.Addr) {
+			if validator.ValidIPv6CIDR(a.Addr) {
 				addr += fmt.Sprintf("\n\tinet6 %s", a.Addr)
 			}
 		}
