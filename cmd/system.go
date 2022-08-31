@@ -139,29 +139,19 @@ func (s *SystemFlag) CPUInfo() (any, error) {
 	return &resp, err
 }
 
-type systemDiskUsageResponse struct {
-	Path        string `json:"path,omitempty" yaml:"path,omitempty"`
-	Fstype      string `json:"fstype,omitempty" yaml:"fstype,omitempty"`
-	Total       string `json:"total,omitempty" yaml:"total,omitempty"`
-	Free        string `json:"free,omitempty" yaml:"free,omitempty"`
-	Used        string `json:"used,omitempty" yaml:"used,omitempty"`
-	UsedPercent string `json:"usedPercent,omitempty" yaml:"usedPercent,omitempty"`
-}
-
 func (s *SystemFlag) DiskUsage() (any, error) {
 	info, err := disk.Usage("/")
 	if err != nil {
 		return nil, err
 	}
-	diskResp := systemDiskUsageResponse{
-		Path:        info.Path,
-		Fstype:      info.Fstype,
-		Total:       common.ByteSize(info.Total).String(),
-		Free:        common.ByteSize(info.Free).String(),
-		Used:        common.ByteSize(info.Used).String(),
-		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
-	}
-	return &diskResp, err
+	resp := make(map[string]string)
+	resp["path"] = info.Path
+	resp["fstype"] = info.Fstype
+	resp["total"] = common.ByteSize(info.Total).String()
+	resp["free"] = common.ByteSize(info.Free).String()
+	resp["used"] = common.ByteSize(info.Used).String()
+	resp["usedPercent"] = fmt.Sprintf("%0.2f%%", info.UsedPercent)
+	return &resp, err
 }
 
 type systemHostInfoResponse struct {
