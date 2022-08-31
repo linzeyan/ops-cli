@@ -18,8 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -43,13 +41,8 @@ var systemCmd = &cobra.Command{
 var systemSubCmdCPU = &cobra.Command{
 	Use:   CommandCPU,
 	Short: "Display cpu informations",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := systemCmdGlobalVar.CPUInfo(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		OutputDefaultJSON(systemCmdGlobalVar.cpuResp)
-	},
+	RunE:  systemCmdGlobalVar.RunE,
+
 	DisableFlagsInUseLine: true,
 }
 
@@ -106,15 +99,14 @@ func init() {
 	systemCmd.AddCommand(systemSubCmdNetwork)
 }
 
-type SystemFlag struct {
-	cpuResp systemCPUInfoResponse
-}
+type SystemFlag struct{}
 
 func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
 	var err error
 	var resp any
 	switch cmd.Name() {
 	case CommandCPU:
+		resp, err = s.CPUInfo()
 	case CommandDisk:
 		resp, err = s.DiskUsage()
 	case CommandHost:
@@ -142,19 +134,19 @@ type systemCPUInfoResponse struct {
 	CacheSize string `json:"cacheSize,omitempty" yaml:"cacheSize,omitempty"`
 }
 
-func (s *SystemFlag) CPUInfo() error {
+func (s *SystemFlag) CPUInfo() (any, error) {
 	info, err := cpu.Info()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.cpuResp = systemCPUInfoResponse{
+	cpuResp := systemCPUInfoResponse{
 		VendorID:  info[0].VendorID,
 		Cores:     fmt.Sprintf("%d", info[0].Cores),
 		ModelName: info[0].ModelName,
 		Mhz:       fmt.Sprintf("%d", int(info[0].Mhz)),
 		CacheSize: fmt.Sprintf("%d", info[0].CacheSize),
 	}
-	return err
+	return &cpuResp, err
 }
 
 type systemDiskUsageResponse struct {
