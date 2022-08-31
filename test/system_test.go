@@ -14,8 +14,6 @@ func TestBinarySystem(t *testing.T) {
 		{subCommand, "load"},
 		{subCommand, "memory"},
 		{subCommand, "network"},
-		{subCommand, "network", "-a"},
-		{subCommand, "network", "-i"},
 	}
 	for i := range args {
 		t.Run(args[i][1], func(t *testing.T) {
