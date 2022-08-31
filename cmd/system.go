@@ -69,13 +69,8 @@ var systemSubCmdDisk = &cobra.Command{
 var systemSubCmdHost = &cobra.Command{
 	Use:   CommandHost,
 	Short: "Display host informations",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := systemCmdGlobalVar.HostInfo(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		OutputDefaultJSON(systemCmdGlobalVar.hostResp)
-	},
+	RunE:  systemCmdGlobalVar.RunE,
+
 	DisableFlagsInUseLine: true,
 }
 
@@ -117,29 +112,29 @@ func init() {
 }
 
 type SystemFlag struct {
-	resp     any
 	cpuResp  systemCPUInfoResponse
 	diskResp systemDiskUsageResponse
-	hostResp systemHostInfoResponse
 }
 
 func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
 	var err error
+	var resp any
 	switch cmd.Name() {
 	case CommandCPU:
 	case CommandDisk:
 	case CommandHost:
+		resp, err = s.HostInfo()
 	case CommandLoad:
-		err = s.LoadAvg()
+		resp, err = s.LoadAvg()
 	case CommandMemory:
-		err = s.MemUsage()
+		resp, err = s.MemUsage()
 	case CommandNetwork:
-		err = s.NetInfo()
+		resp, err = s.NetInfo()
 	}
 	if err != nil {
 		return err
 	}
-	OutputDefaultJSON(s.resp)
+	OutputDefaultJSON(resp)
 	return err
 }
 
@@ -208,12 +203,12 @@ type systemHostInfoResponse struct {
 	HostID               string `json:"hostId,omitempty" yaml:"hostId,omitempty"`
 }
 
-func (s *SystemFlag) HostInfo() error {
+func (s *SystemFlag) HostInfo() (any, error) {
 	info, err := host.Info()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.hostResp = systemHostInfoResponse{
+	hostResp := systemHostInfoResponse{
 		Hostname:             info.Hostname,
 		Uptime:               (time.Second * time.Duration(info.Uptime)).String(),
 		BootTime:             (time.Second * time.Duration(info.BootTime)).String(),
@@ -228,7 +223,7 @@ func (s *SystemFlag) HostInfo() error {
 		VirtualizationRole:   info.VirtualizationRole,
 		HostID:               info.HostID,
 	}
-	return err
+	return &hostResp, err
 }
 
 type systemLoadAvgResponse struct {
@@ -237,18 +232,17 @@ type systemLoadAvgResponse struct {
 	Load15 string `json:"load15,omitempty" yaml:"load15,omitempty"`
 }
 
-func (s *SystemFlag) LoadAvg() error {
+func (s *SystemFlag) LoadAvg() (any, error) {
 	info, err := load.Avg()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	loadResp := systemLoadAvgResponse{
 		Load1:  fmt.Sprintf("%0.2f", info.Load1),
 		Load5:  fmt.Sprintf("%0.2f", info.Load5),
 		Load15: fmt.Sprintf("%0.2f", info.Load15),
 	}
-	s.resp = &loadResp
-	return err
+	return &loadResp, err
 }
 
 type systemMemInfoResponse struct {
@@ -260,10 +254,10 @@ type systemMemInfoResponse struct {
 	UsedPercent string `json:"usedPercent,omitempty" yaml:"usedPercent,omitempty"`
 }
 
-func (s *SystemFlag) MemUsage() error {
+func (s *SystemFlag) MemUsage() (any, error) {
 	info, err := mem.VirtualMemory()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	memResp := systemMemInfoResponse{
 		Total:       common.ByteSize(info.Total).String(),
@@ -272,8 +266,7 @@ func (s *SystemFlag) MemUsage() error {
 		Used:        common.ByteSize(info.Used).String(),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
-	s.resp = &memResp
-	return err
+	return &memResp, err
 }
 
 type systemNetIOResponse struct {
@@ -291,24 +284,23 @@ type systemNetIOResponse struct {
 	Interfaces net.InterfaceStatList `json:"interface,omitempty" yaml:"interface,omitempty"`
 }
 
-func (s *SystemFlag) NetInfo() error {
+func (s *SystemFlag) NetInfo() (any, error) {
 	info, err := net.IOCounters(false)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var netResp systemNetIOResponse
 	err = Encoder.JSONMarshaler(info[0], &netResp)
 	if err != nil {
-		return err
+		return &netResp, err
 	}
 	inet, err := net.Interfaces()
 	if err != nil {
-		return err
+		return &netResp, err
 	}
 	err = Encoder.JSONMarshaler(inet, &netResp.Interfaces)
 	if err != nil {
-		return err
+		return &netResp, err
 	}
-	s.resp = &netResp
-	return err
+	return &netResp, err
 }
