@@ -193,23 +193,16 @@ func (s *SystemFlag) HostInfo() (any, error) {
 	return &hostResp, err
 }
 
-type systemLoadAvgResponse struct {
-	Load1  string `json:"load1,omitempty" yaml:"load1,omitempty"`
-	Load5  string `json:"load5,omitempty" yaml:"load5,omitempty"`
-	Load15 string `json:"load15,omitempty" yaml:"load15,omitempty"`
-}
-
 func (s *SystemFlag) LoadAvg() (any, error) {
 	info, err := load.Avg()
 	if err != nil {
 		return nil, err
 	}
-	loadResp := systemLoadAvgResponse{
-		Load1:  fmt.Sprintf("%0.2f", info.Load1),
-		Load5:  fmt.Sprintf("%0.2f", info.Load5),
-		Load15: fmt.Sprintf("%0.2f", info.Load15),
-	}
-	return &loadResp, err
+	resp := make(map[string]string)
+	resp["load1"] = fmt.Sprintf("%0.2f", info.Load1)
+	resp["load5"] = fmt.Sprintf("%0.2f", info.Load5)
+	resp["load15"] = fmt.Sprintf("%0.2f", info.Load15)
+	return &resp, err
 }
 
 type systemMemInfoResponse struct {
