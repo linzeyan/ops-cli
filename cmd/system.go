@@ -108,13 +108,8 @@ var systemSubCmdMemory = &cobra.Command{
 var systemSubCmdNetwork = &cobra.Command{
 	Use:   CommandNetwork,
 	Short: "Display network informations",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := systemCmdGlobalVar.NetInfo(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		OutputDefaultJSON(systemCmdGlobalVar.netResp)
-	},
+	RunE:  systemCmdGlobalVar.RunE,
+
 	DisableFlagsInUseLine: true,
 }
 
@@ -132,12 +127,30 @@ func init() {
 }
 
 type SystemFlag struct {
+	resp     any
 	cpuResp  systemCPUInfoResponse
 	diskResp systemDiskUsageResponse
 	hostResp systemHostInfoResponse
 	loadResp systemLoadAvgResponse
 	memResp  systemMemInfoResponse
-	netResp  systemNetIOResponse
+}
+
+func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
+	var err error
+	switch cmd.Name() {
+	case CommandCPU:
+	case CommandDisk:
+	case CommandHost:
+	case CommandLoad:
+	case CommandMemory:
+	case CommandNetwork:
+		err = s.NetInfo()
+	}
+	if err != nil {
+		return err
+	}
+	OutputDefaultJSON(s.resp)
+	return err
 }
 
 type systemCPUInfoResponse struct {
@@ -291,7 +304,8 @@ func (s *SystemFlag) NetInfo() error {
 	if err != nil {
 		return err
 	}
-	err = Encoder.JSONMarshaler(info[0], &s.netResp)
+	var netResp systemNetIOResponse
+	err = Encoder.JSONMarshaler(info[0], &netResp)
 	if err != nil {
 		return err
 	}
@@ -299,5 +313,10 @@ func (s *SystemFlag) NetInfo() error {
 	if err != nil {
 		return err
 	}
-	return Encoder.JSONMarshaler(inet, &s.netResp.Interfaces)
+	err = Encoder.JSONMarshaler(inet, &netResp.Interfaces)
+	if err != nil {
+		return err
+	}
+	s.resp = &netResp
+	return err
 }
