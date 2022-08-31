@@ -37,11 +37,7 @@ var versionCmd = &cobra.Command{
 			Date:    appBuildTime,
 			Runtime: fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
 		}
-		if versionFull {
-			v.String()
-			return
-		}
-		OutputDefaultJSON(v)
+		OutputInterfaceString(v)
 	},
 }
 
@@ -50,12 +46,9 @@ var (
 	appBuildTime = "unknown"
 	appCommit    = "unknown"
 )
-var versionFull bool
 
 func init() {
 	rootCmd.AddCommand(versionCmd)
-
-	versionCmd.Flags().BoolVarP(&versionFull, "complete", "c", false, common.Usage("Print version information completely"))
 }
 
 type VersionOutput struct {
