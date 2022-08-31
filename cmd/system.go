@@ -205,28 +205,18 @@ func (s *SystemFlag) LoadAvg() (any, error) {
 	return &resp, err
 }
 
-type systemMemInfoResponse struct {
-	/* mem.VirtualMemory() */
-	Total       string `json:"total,omitempty" yaml:"total,omitempty"`
-	Available   string `json:"available,omitempty" yaml:"available,omitempty"`
-	Free        string `json:"free,omitempty" yaml:"free,omitempty"`
-	Used        string `json:"used,omitempty" yaml:"used,omitempty"`
-	UsedPercent string `json:"usedPercent,omitempty" yaml:"usedPercent,omitempty"`
-}
-
 func (s *SystemFlag) MemUsage() (any, error) {
 	info, err := mem.VirtualMemory()
 	if err != nil {
 		return nil, err
 	}
-	memResp := systemMemInfoResponse{
-		Total:       common.ByteSize(info.Total).String(),
-		Available:   common.ByteSize(info.Available).String(),
-		Free:        common.ByteSize(info.Free).String(),
-		Used:        common.ByteSize(info.Used).String(),
-		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
-	}
-	return &memResp, err
+	resp := make(map[string]string)
+	resp["total"] = common.ByteSize(info.Total).String()
+	resp["available"] = common.ByteSize(info.Available).String()
+	resp["free"] = common.ByteSize(info.Free).String()
+	resp["used"] = common.ByteSize(info.Used).String()
+	resp["usedPercent"] = fmt.Sprintf("%0.2f%%", info.UsedPercent)
+	return &resp, err
 }
 
 type systemNetIOResponse struct {
