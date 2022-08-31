@@ -125,28 +125,18 @@ func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
 	return err
 }
 
-type systemCPUInfoResponse struct {
-	/* cpu.Info() */
-	VendorID  string `json:"vendorId,omitempty" yaml:"vendorId,omitempty"`
-	Cores     string `json:"cores,omitempty" yaml:"cores,omitempty"`
-	ModelName string `json:"modelName,omitempty" yaml:"modelName,omitempty"`
-	Mhz       string `json:"mhz,omitempty" yaml:"mhz,omitempty"`
-	CacheSize string `json:"cacheSize,omitempty" yaml:"cacheSize,omitempty"`
-}
-
 func (s *SystemFlag) CPUInfo() (any, error) {
 	info, err := cpu.Info()
 	if err != nil {
 		return nil, err
 	}
-	cpuResp := systemCPUInfoResponse{
-		VendorID:  info[0].VendorID,
-		Cores:     fmt.Sprintf("%d", info[0].Cores),
-		ModelName: info[0].ModelName,
-		Mhz:       fmt.Sprintf("%d", int(info[0].Mhz)),
-		CacheSize: fmt.Sprintf("%d", info[0].CacheSize),
-	}
-	return &cpuResp, err
+	resp := make(map[string]string)
+	resp["vendorId"] = info[0].VendorID
+	resp["cores"] = fmt.Sprintf("%d", info[0].Cores)
+	resp["modelName"] = info[0].ModelName
+	resp["ghz"] = fmt.Sprintf("%.2f", info[0].Mhz/1000)
+	resp["cacheSize"] = fmt.Sprintf("%d", info[0].CacheSize)
+	return &resp, err
 }
 
 type systemDiskUsageResponse struct {
