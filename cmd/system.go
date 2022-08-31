@@ -82,13 +82,8 @@ var systemSubCmdHost = &cobra.Command{
 var systemSubCmdLoad = &cobra.Command{
 	Use:   CommandLoad,
 	Short: "Display load informations",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := systemCmdGlobalVar.LoadAvg(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		OutputDefaultJSON(systemCmdGlobalVar.loadResp)
-	},
+	RunE:  systemCmdGlobalVar.RunE,
+
 	DisableFlagsInUseLine: true,
 }
 
@@ -126,7 +121,6 @@ type SystemFlag struct {
 	cpuResp  systemCPUInfoResponse
 	diskResp systemDiskUsageResponse
 	hostResp systemHostInfoResponse
-	loadResp systemLoadAvgResponse
 }
 
 func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
@@ -136,6 +130,7 @@ func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
 	case CommandDisk:
 	case CommandHost:
 	case CommandLoad:
+		err = s.LoadAvg()
 	case CommandMemory:
 		err = s.MemUsage()
 	case CommandNetwork:
@@ -247,11 +242,12 @@ func (s *SystemFlag) LoadAvg() error {
 	if err != nil {
 		return err
 	}
-	s.loadResp = systemLoadAvgResponse{
+	loadResp := systemLoadAvgResponse{
 		Load1:  fmt.Sprintf("%0.2f", info.Load1),
 		Load5:  fmt.Sprintf("%0.2f", info.Load5),
 		Load15: fmt.Sprintf("%0.2f", info.Load15),
 	}
+	s.resp = &loadResp
 	return err
 }
 
