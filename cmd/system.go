@@ -56,13 +56,8 @@ var systemSubCmdCPU = &cobra.Command{
 var systemSubCmdDisk = &cobra.Command{
 	Use:   CommandDisk,
 	Short: "Display disk informations",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := systemCmdGlobalVar.DiskUsage(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		OutputDefaultJSON(systemCmdGlobalVar.diskResp)
-	},
+	RunE:  systemCmdGlobalVar.RunE,
+
 	DisableFlagsInUseLine: true,
 }
 
@@ -112,8 +107,7 @@ func init() {
 }
 
 type SystemFlag struct {
-	cpuResp  systemCPUInfoResponse
-	diskResp systemDiskUsageResponse
+	cpuResp systemCPUInfoResponse
 }
 
 func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
@@ -122,6 +116,7 @@ func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
 	switch cmd.Name() {
 	case CommandCPU:
 	case CommandDisk:
+		resp, err = s.DiskUsage()
 	case CommandHost:
 		resp, err = s.HostInfo()
 	case CommandLoad:
@@ -171,12 +166,12 @@ type systemDiskUsageResponse struct {
 	UsedPercent string `json:"usedPercent,omitempty" yaml:"usedPercent,omitempty"`
 }
 
-func (s *SystemFlag) DiskUsage() error {
+func (s *SystemFlag) DiskUsage() (any, error) {
 	info, err := disk.Usage("/")
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s.diskResp = systemDiskUsageResponse{
+	diskResp := systemDiskUsageResponse{
 		Path:        info.Path,
 		Fstype:      info.Fstype,
 		Total:       common.ByteSize(info.Total).String(),
@@ -184,7 +179,7 @@ func (s *SystemFlag) DiskUsage() error {
 		Used:        common.ByteSize(info.Used).String(),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
-	return err
+	return &diskResp, err
 }
 
 type systemHostInfoResponse struct {
