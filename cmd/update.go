@@ -64,6 +64,7 @@ func (u *updateFlag) RunE(_ *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
+	PrintString(fmt.Sprintf("Upgrading %s %s -> %s", common.RepoName, appVersion, updater.Repository.ReleaseTag))
 	PrintString(common.Usage("==> Cleanup..."))
 	err = updater.Rename()
 	if err != nil {
