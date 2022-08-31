@@ -31,83 +31,7 @@ var digCmd = &cobra.Command{
 	Use:   CommandDig + " [host] [@server] [type]",
 	Args:  cobra.MinimumNArgs(1),
 	Short: "Resolve domain name",
-	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		var argsWithoutDomain []string
-		var argsType []string
-		switch lens := len(args); {
-		case lens == 1:
-			digDomain = args[0]
-			if err = digOutput.Request(dns.TypeA); err != nil {
-				return err
-			}
-			if digOutput == nil {
-				return err
-			}
-			OutputInterfaceString(&digOutput)
-			return nil
-		case lens > 1:
-			/* Find which arg is domain. */
-			for i := range args {
-				if validator.ValidDomain(args[i]) || validator.ValidIP(args[i]) {
-					digDomain = args[i]
-					argsWithoutDomain = append(args[:i], args[i+1:]...)
-					break
-				}
-			}
-			switch lens {
-			/* Distinguish remain arg is NS Server or DNS Type */
-			case 2:
-				if strings.Contains(argsWithoutDomain[0], "@") {
-					digServer = strings.Replace(argsWithoutDomain[0], "@", "", 1)
-					argsType = append(argsType, "A")
-				} else {
-					argsType = append(argsType, argsWithoutDomain[0])
-				}
-			default:
-				for i := range argsWithoutDomain {
-					if strings.Contains(argsWithoutDomain[i], "@") {
-						digServer = strings.Replace(argsWithoutDomain[i], "@", "", 1)
-						/* Copy args and remove @x.x.x.x */
-						argsType = append(argsWithoutDomain[:i], argsWithoutDomain[i+1:]...)
-						break
-					}
-				}
-			}
-		}
-		switch strings.ToLower(argsType[0]) {
-		case "a":
-			err = digOutput.Request(dns.TypeA)
-		case "aaaa":
-			err = digOutput.Request(dns.TypeAAAA)
-		case "caa":
-			err = digOutput.Request(dns.TypeCAA)
-		case "cname":
-			err = digOutput.Request(dns.TypeCNAME)
-		case "mx":
-			err = digOutput.Request(dns.TypeMX)
-		case "ns":
-			err = digOutput.Request(dns.TypeNS)
-		case "ptr":
-			err = digOutput.Request(dns.TypePTR)
-		case "soa":
-			err = digOutput.Request(dns.TypeSOA)
-		case "srv":
-			err = digOutput.Request(dns.TypeSRV)
-		case "txt":
-			err = digOutput.Request(dns.TypeTXT)
-		case "any":
-			err = digOutput.Request(dns.TypeANY)
-		}
-		if err != nil {
-			return err
-		}
-		if digOutput == nil {
-			return err
-		}
-		OutputInterfaceString(&digOutput)
-		return err
-	},
+	RunE:  digCmdGlobalVar.RunE,
 	Example: common.Examples(`# Query A record
 google.com
 @1.1.1.1 google.com A
@@ -123,46 +47,99 @@ google.com ANY
 1.1.1.1 PTR`, CommandDig),
 }
 
-var digNetwork, digDomain, digServer string
-var digOutput digResponse
+var digCmdGlobalVar DigFlag
 
 func init() {
 	rootCmd.AddCommand(digCmd)
 
-	digCmd.Flags().StringVarP(&digNetwork, "net", "n", "tcp", common.Usage("udp/tcp"))
+	digCmd.Flags().StringVarP(&digCmdGlobalVar.network, "net", "n", "tcp", common.Usage("udp/tcp"))
 }
 
-type digResponseFormat struct {
-	NAME   string `json:"name" yaml:"name"`
-	TTL    string `json:"ttl" yaml:"ttl"`
-	CLASS  string `json:"class" yaml:"class"`
-	TYPE   string `json:"type" yaml:"type"`
-	RECORD string `json:"record" yaml:"record"`
+type DigFlag struct {
+	network string
+	domain  string
+	server  string
+	output  digResponse
 }
 
-type digResponse []digResponseFormat
+func (d *DigFlag) RunE(_ *cobra.Command, args []string) error {
+	var err error
+	var argsWithoutDomain []string
+	var argsType []string
+	switch lens := len(args); {
+	case lens == 1:
+		d.domain = args[0]
+		if err = d.Request(dns.TypeA); err != nil {
+			return err
+		}
+		if d.output == nil {
+			return err
+		}
+		OutputInterfaceString(&d.output)
+		return nil
+	case lens > 1:
+		/* Find which arg is domain. */
+		for i := range args {
+			if validator.ValidDomain(args[i]) || validator.ValidIP(args[i]) {
+				d.domain = args[i]
+				argsWithoutDomain = append(argsWithoutDomain, args[:i]...)
+				argsWithoutDomain = append(argsWithoutDomain, args[i+1:]...)
+				break
+			}
+		}
+		switch lens {
+		/* Distinguish remain arg is NS Server or DNS Type */
+		case 2:
+			if strings.Contains(argsWithoutDomain[0], "@") {
+				d.server = strings.Replace(argsWithoutDomain[0], "@", "", 1)
+				argsType = append(argsType, "A")
+			} else {
+				argsType = append(argsType, argsWithoutDomain[0])
+			}
+		default:
+			for i := range argsWithoutDomain {
+				if strings.Contains(argsWithoutDomain[i], "@") {
+					d.server = strings.Replace(argsWithoutDomain[i], "@", "", 1)
+					/* Copy args and remove @x.x.x.x */
+					argsType = append(argsType, argsWithoutDomain[:i]...)
+					argsType = append(argsType, argsWithoutDomain[i+1:]...)
+					break
+				}
+			}
+		}
+	}
+	err = d.Assertion(argsType[0])
+	if err != nil {
+		return err
+	}
+	if d.output == nil {
+		return err
+	}
+	OutputInterfaceString(&d.output)
+	return err
+}
 
-func (d digResponse) Request(digType uint16) error {
+func (d *DigFlag) Request(digType uint16) error {
 	var err error
 	/* If Query type is PTR, need to do reverse. */
 	if dns.TypeToString[digType] == "PTR" {
-		digDomain, err = dns.ReverseAddr(digDomain)
+		d.domain, err = dns.ReverseAddr(d.domain)
 		if err != nil {
 			return err
 		}
-		digDomain = strings.TrimRight(digDomain, ".")
+		d.domain = strings.TrimRight(d.domain, ".")
 	}
 
 	var message = dns.Msg{}
-	message.SetQuestion(digDomain+".", digType)
-	var client = &dns.Client{Net: digNetwork}
-	if digServer == "" {
-		digServer, err = d.GetLocalServer()
+	message.SetQuestion(d.domain+".", digType)
+	var client = &dns.Client{Net: d.network}
+	if d.server == "" {
+		d.server, err = d.GetLocalServer()
 		if err != nil {
 			return err
 		}
 	}
-	resp, _, err := client.Exchange(&message, digServer+":53")
+	resp, _, err := client.Exchange(&message, d.server+":53")
 	if err != nil {
 		return err
 	}
@@ -171,10 +148,10 @@ func (d digResponse) Request(digType uint16) error {
 	}
 
 	for i := range resp.Answer {
-		var d digResponseFormat
+		var out digResponseFormat
 		elements := strings.Fields(fmt.Sprintf("%s ", resp.Answer[i]))
 		if len(elements) == 5 {
-			d = digResponseFormat{
+			out = digResponseFormat{
 				NAME:   elements[0],
 				TTL:    elements[1],
 				CLASS:  elements[2],
@@ -188,7 +165,7 @@ func (d digResponse) Request(digType uint16) error {
 				remain = remain + " " + slice[i]
 			}
 
-			d = digResponseFormat{
+			out = digResponseFormat{
 				NAME:   elements[0],
 				TTL:    elements[1],
 				CLASS:  elements[2],
@@ -196,12 +173,12 @@ func (d digResponse) Request(digType uint16) error {
 				RECORD: remain,
 			}
 		}
-		digOutput = append(digOutput, d)
+		d.output = append(d.output, out)
 	}
 	return err
 }
 
-func (d digResponse) GetLocalServer() (string, error) {
+func (d *DigFlag) GetLocalServer() (string, error) {
 	if runtime.GOOS == "windows" {
 		return "1.1.1.1", nil
 	}
@@ -212,6 +189,45 @@ func (d digResponse) GetLocalServer() (string, error) {
 	}
 	return s.Servers[0], err
 }
+
+func (d *DigFlag) Assertion(arg string) error {
+	var err error
+	switch strings.ToLower(arg) {
+	case "a":
+		err = d.Request(dns.TypeA)
+	case "aaaa":
+		err = d.Request(dns.TypeAAAA)
+	case "caa":
+		err = d.Request(dns.TypeCAA)
+	case "cname":
+		err = d.Request(dns.TypeCNAME)
+	case "mx":
+		err = d.Request(dns.TypeMX)
+	case "ns":
+		err = d.Request(dns.TypeNS)
+	case "ptr":
+		err = d.Request(dns.TypePTR)
+	case "soa":
+		err = d.Request(dns.TypeSOA)
+	case "srv":
+		err = d.Request(dns.TypeSRV)
+	case "txt":
+		err = d.Request(dns.TypeTXT)
+	case "any":
+		err = d.Request(dns.TypeANY)
+	}
+	return err
+}
+
+type digResponseFormat struct {
+	NAME   string `json:"name" yaml:"name"`
+	TTL    string `json:"ttl" yaml:"ttl"`
+	CLASS  string `json:"class" yaml:"class"`
+	TYPE   string `json:"type" yaml:"type"`
+	RECORD string `json:"record" yaml:"record"`
+}
+
+type digResponse []digResponseFormat
 
 func (d digResponse) String() {
 	for i := range d {
