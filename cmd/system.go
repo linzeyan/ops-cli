@@ -283,17 +283,7 @@ type systemNetIOResponse struct {
 	Fifoin      uint64 `json:"fifoin,omitempty" yaml:"fifoin,omitempty"`
 	Fifoout     uint64 `json:"fifoout,omitempty" yaml:"fifoout,omitempty"`
 
-	Interfaces []systemNetInterfaceResponse `json:"interface,omitempty" yaml:"interface,omitempty"`
-}
-
-type systemNetInterfaceResponse struct {
-	Index        int      `json:"index,omitempty"`
-	MTU          int      `json:"mtu,omitempty"`
-	Name         string   `json:"name,omitempty"`
-	HardwareAddr string   `json:"hardwareAddr,omitempty"`
-	Flags        []string `json:"flags,omitempty"`
-
-	Addrs net.InterfaceAddrList `json:"addrs,omitempty"`
+	Interfaces net.InterfaceStatList `json:"interface,omitempty" yaml:"interface,omitempty"`
 }
 
 func (s *SystemFlag) NetInfo() error {
@@ -315,7 +305,7 @@ func (s *SystemFlag) NetInfo() error {
 
 	for i := range inet {
 		if s.aiface {
-			s.netResp.Interfaces = append(s.netResp.Interfaces, systemNetInterfaceResponse{
+			s.netResp.Interfaces = append(s.netResp.Interfaces, net.InterfaceStat{
 				Index:        inet[i].Index,
 				MTU:          inet[i].MTU,
 				Name:         inet[i].Name,
@@ -324,7 +314,7 @@ func (s *SystemFlag) NetInfo() error {
 				Addrs:        inet[i].Addrs,
 			})
 		} else if len(inet[i].Addrs) != 0 && inet[i].HardwareAddr != "" {
-			s.netResp.Interfaces = append(s.netResp.Interfaces, systemNetInterfaceResponse{
+			s.netResp.Interfaces = append(s.netResp.Interfaces, net.InterfaceStat{
 				Index:        inet[i].Index,
 				MTU:          inet[i].MTU,
 				Name:         inet[i].Name,
