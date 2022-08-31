@@ -7,7 +7,7 @@ import (
 
 func TestBinaryVersion(t *testing.T) {
 	const subCommand = "version"
-	args := []string{"-c", "-y", "-j"}
+	args := []string{"", "-y", "-j"}
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {
 			t.Error(err)
