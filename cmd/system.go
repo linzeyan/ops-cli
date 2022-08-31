@@ -95,13 +95,8 @@ var systemSubCmdLoad = &cobra.Command{
 var systemSubCmdMemory = &cobra.Command{
 	Use:   CommandMemory,
 	Short: "Display memory informations",
-	Run: func(_ *cobra.Command, _ []string) {
-		if err := systemCmdGlobalVar.MemUsage(); err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		OutputDefaultJSON(systemCmdGlobalVar.memResp)
-	},
+	RunE:  systemCmdGlobalVar.RunE,
+
 	DisableFlagsInUseLine: true,
 }
 
@@ -132,7 +127,6 @@ type SystemFlag struct {
 	diskResp systemDiskUsageResponse
 	hostResp systemHostInfoResponse
 	loadResp systemLoadAvgResponse
-	memResp  systemMemInfoResponse
 }
 
 func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
@@ -143,6 +137,7 @@ func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
 	case CommandHost:
 	case CommandLoad:
 	case CommandMemory:
+		err = s.MemUsage()
 	case CommandNetwork:
 		err = s.NetInfo()
 	}
@@ -274,13 +269,14 @@ func (s *SystemFlag) MemUsage() error {
 	if err != nil {
 		return err
 	}
-	s.memResp = systemMemInfoResponse{
+	memResp := systemMemInfoResponse{
 		Total:       common.ByteSize(info.Total).String(),
 		Available:   common.ByteSize(info.Available).String(),
 		Free:        common.ByteSize(info.Free).String(),
 		Used:        common.ByteSize(info.Used).String(),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
+	s.resp = &memResp
 	return err
 }
 
