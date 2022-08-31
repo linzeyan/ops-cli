@@ -50,6 +50,7 @@ var systemSubCmdCPU = &cobra.Command{
 		}
 		OutputDefaultJSON(systemCmdGlobalVar.cpuResp)
 	},
+	DisableFlagsInUseLine: true,
 }
 
 var systemSubCmdDisk = &cobra.Command{
@@ -62,6 +63,7 @@ var systemSubCmdDisk = &cobra.Command{
 		}
 		OutputDefaultJSON(systemCmdGlobalVar.diskResp)
 	},
+	DisableFlagsInUseLine: true,
 }
 
 var systemSubCmdHost = &cobra.Command{
@@ -74,6 +76,7 @@ var systemSubCmdHost = &cobra.Command{
 		}
 		OutputDefaultJSON(systemCmdGlobalVar.hostResp)
 	},
+	DisableFlagsInUseLine: true,
 }
 
 var systemSubCmdLoad = &cobra.Command{
@@ -86,6 +89,7 @@ var systemSubCmdLoad = &cobra.Command{
 		}
 		OutputDefaultJSON(systemCmdGlobalVar.loadResp)
 	},
+	DisableFlagsInUseLine: true,
 }
 
 var systemSubCmdMemory = &cobra.Command{
@@ -98,6 +102,7 @@ var systemSubCmdMemory = &cobra.Command{
 		}
 		OutputDefaultJSON(systemCmdGlobalVar.memResp)
 	},
+	DisableFlagsInUseLine: true,
 }
 
 var systemSubCmdNetwork = &cobra.Command{
@@ -110,6 +115,7 @@ var systemSubCmdNetwork = &cobra.Command{
 		}
 		OutputDefaultJSON(systemCmdGlobalVar.netResp)
 	},
+	DisableFlagsInUseLine: true,
 }
 
 var systemCmdGlobalVar SystemFlag
@@ -123,15 +129,9 @@ func init() {
 	systemCmd.AddCommand(systemSubCmdLoad)
 	systemCmd.AddCommand(systemSubCmdMemory)
 	systemCmd.AddCommand(systemSubCmdNetwork)
-
-	systemSubCmdNetwork.Flags().BoolVarP(&systemCmdGlobalVar.aiface, "all-interfaces", "a", false, common.Usage("Display all interfaces"))
-	systemSubCmdNetwork.Flags().BoolVarP(&systemCmdGlobalVar.iface, "interface", "i", false, common.Usage("Display interfaces"))
 }
 
 type SystemFlag struct {
-	aiface bool
-	iface  bool
-
 	cpuResp  systemCPUInfoResponse
 	diskResp systemDiskUsageResponse
 	hostResp systemHostInfoResponse
@@ -295,34 +295,9 @@ func (s *SystemFlag) NetInfo() error {
 	if err != nil {
 		return err
 	}
-	if !s.iface && !s.aiface {
-		return err
-	}
 	inet, err := net.Interfaces()
 	if err != nil {
 		return err
 	}
-
-	for i := range inet {
-		if s.aiface {
-			s.netResp.Interfaces = append(s.netResp.Interfaces, net.InterfaceStat{
-				Index:        inet[i].Index,
-				MTU:          inet[i].MTU,
-				Name:         inet[i].Name,
-				HardwareAddr: inet[i].HardwareAddr,
-				Flags:        inet[i].Flags,
-				Addrs:        inet[i].Addrs,
-			})
-		} else if len(inet[i].Addrs) != 0 && inet[i].HardwareAddr != "" {
-			s.netResp.Interfaces = append(s.netResp.Interfaces, net.InterfaceStat{
-				Index:        inet[i].Index,
-				MTU:          inet[i].MTU,
-				Name:         inet[i].Name,
-				HardwareAddr: inet[i].HardwareAddr,
-				Flags:        inet[i].Flags,
-				Addrs:        inet[i].Addrs,
-			})
-		}
-	}
-	return err
+	return Encoder.JSONMarshaler(inet, &s.netResp.Interfaces)
 }
