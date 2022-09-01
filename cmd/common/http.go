@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -32,6 +33,7 @@ type HTTPConfig struct {
 	Method  string
 	Body    string
 	Verbose bool
+	Headers string
 }
 
 /* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
@@ -55,6 +57,16 @@ func HTTPRequestContent(url string, config HTTPConfig) ([]byte, error) {
 	req, err := http.NewRequestWithContext(Context, config.Method, url, body)
 	if err != nil {
 		return nil, err
+	}
+	if config.Headers != "" {
+		header := make(map[string]string)
+		err = json.Unmarshal([]byte(config.Headers), &header)
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range header {
+			req.Header.Set(k, v)
+		}
 	}
 	resp, err := client.Do(req)
 	if resp != nil {

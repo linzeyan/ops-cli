@@ -46,6 +46,7 @@ func init() {
 	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.output, "output", "o", "", "Write to file")
 	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.method, "method", "m", "GET", "Request method")
 	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.data, "data", "d", "", "Request method")
+	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.headers, "headers", "H", "", "Headers")
 }
 
 type URLFlag struct {
@@ -54,6 +55,7 @@ type URLFlag struct {
 	output  string
 	method  string
 	data    string
+	headers string
 }
 
 func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
@@ -71,7 +73,13 @@ func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
 		PrintString(result)
 		return err
 	default:
-		result, err := common.HTTPRequestContent(url, common.HTTPConfig{Body: u.data, Method: u.method, Verbose: u.verbose})
+		body := common.HTTPConfig{
+			Body:    u.data,
+			Method:  u.method,
+			Verbose: u.verbose,
+			Headers: u.headers,
+		}
+		result, err := common.HTTPRequestContent(url, body)
 		if err != nil {
 			return err
 		}
