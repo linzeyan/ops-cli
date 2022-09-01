@@ -17,21 +17,27 @@ limitations under the License.
 package common
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"net/http"
+	"net/http/httputil"
+	"strings"
 	"time"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 )
 
+type HTTPConfig struct {
+	Method  string
+	Body    string
+	Verbose bool
+}
+
 /* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
-func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, error) {
-	var method string
-	if len(methods) == 0 {
-		method = http.MethodGet
-	} else {
-		method = methods[0]
+func HTTPRequestContent(url string, config HTTPConfig) ([]byte, error) {
+	if config.Method == "" {
+		config.Method = http.MethodGet
 	}
 	var client = &http.Client{
 		Timeout: 15 * time.Second,
@@ -45,7 +51,8 @@ func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, 
 			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
-	req, err := http.NewRequestWithContext(Context, method, url, body)
+	body := strings.NewReader(config.Body)
+	req, err := http.NewRequestWithContext(Context, config.Method, url, body)
 	if err != nil {
 		return nil, err
 	}
@@ -56,6 +63,19 @@ func HTTPRequestContent(url string, body io.Reader, methods ...string) ([]byte, 
 	if err != nil {
 		return nil, err
 	}
+	if config.Verbose {
+		reqDump, err := httputil.DumpRequestOut(req, true)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(string(reqDump))
+		respDump, err := httputil.DumpResponse(resp, true)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(string(respDump))
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, ErrStatusCode
 	}

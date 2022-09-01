@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"os"
-	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
@@ -43,16 +42,18 @@ var urlCmdGlobalVar URLFlag
 func init() {
 	rootCmd.AddCommand(urlCmd)
 	urlCmd.Flags().BoolVarP(&urlCmdGlobalVar.expand, "expand", "e", false, "Expand shorten url")
+	urlCmd.Flags().BoolVarP(&urlCmdGlobalVar.verbose, "verbose", "v", false, "Verbose output")
 	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.output, "output", "o", "", "Write to file")
 	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.method, "method", "m", "GET", "Request method")
 	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.data, "data", "d", "", "Request method")
 }
 
 type URLFlag struct {
-	expand bool
-	output string
-	method string
-	data   string
+	expand  bool
+	verbose bool
+	output  string
+	method  string
+	data    string
 }
 
 func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
@@ -69,21 +70,13 @@ func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
 		}
 		PrintString(result)
 		return err
-	case u.output != "":
-		body := strings.NewReader(u.data)
-		result, err := common.HTTPRequestContent(url, body, u.method)
-		if err != nil {
-			return err
-		}
-		err = os.WriteFile(u.output, result, common.FileModeRAll)
-		if err != nil {
-			return err
-		}
 	default:
-		body := strings.NewReader(u.data)
-		result, err := common.HTTPRequestContent(url, body, u.method)
+		result, err := common.HTTPRequestContent(url, common.HTTPConfig{Body: u.data, Method: u.method, Verbose: u.verbose})
 		if err != nil {
 			return err
+		}
+		if u.output != "" {
+			return os.WriteFile(u.output, result, common.FileModeRAll)
 		}
 		PrintString(result)
 	}
