@@ -27,6 +27,7 @@ import (
 
 var urlCmd = &cobra.Command{
 	Use:   CommandURL,
+	Args:  cobra.ExactArgs(1),
 	Short: "Get url content or expand shorten url or download",
 	RunE:  urlCmdGlobalVar.RunE,
 	Example: common.Examples(`# Get the file from URL
@@ -55,20 +56,22 @@ type URLFlag struct {
 }
 
 func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
-	if !validator.ValidURL(args[0]) {
+	url := args[0]
+	if !validator.ValidURL(url) {
 		return common.ErrInvalidURL
 	}
 	var err error
 	switch {
 	case u.expand:
-		result, err := common.HTTPRequestRedirectURL(args[0])
+		result, err := common.HTTPRequestRedirectURL(url)
 		if err != nil {
 			return err
 		}
 		PrintString(result)
 		return err
 	case u.output != "":
-		result, err := common.HTTPRequestContent(args[0], nil)
+		body := strings.NewReader(u.data)
+		result, err := common.HTTPRequestContent(url, body, u.method)
 		if err != nil {
 			return err
 		}
@@ -78,7 +81,7 @@ func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
 		}
 	default:
 		body := strings.NewReader(u.data)
-		result, err := common.HTTPRequestContent(args[0], body, u.method)
+		result, err := common.HTTPRequestContent(url, body, u.method)
 		if err != nil {
 			return err
 		}
