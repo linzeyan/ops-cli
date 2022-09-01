@@ -64,14 +64,13 @@ func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
 		return common.ErrInvalidURL
 	}
 	var err error
+	var result any
 	switch {
 	case u.expand:
-		result, err := common.HTTPRequestRedirectURL(url)
+		result, err = common.HTTPRequestRedirectURL(url)
 		if err != nil {
 			return err
 		}
-		PrintString(result)
-		return err
 	default:
 		body := common.HTTPConfig{
 			Body:    u.data,
@@ -79,14 +78,14 @@ func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
 			Verbose: u.verbose,
 			Headers: u.headers,
 		}
-		result, err := common.HTTPRequestContent(url, body)
+		result, err = common.HTTPRequestContent(url, body)
 		if err != nil {
 			return err
 		}
 		if u.output != "" {
-			return os.WriteFile(u.output, result, common.FileModeRAll)
+			return os.WriteFile(u.output, result.([]byte), common.FileModeRAll)
 		}
-		PrintString(result)
 	}
+	PrintString(result)
 	return err
 }
