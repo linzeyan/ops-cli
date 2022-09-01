@@ -34,10 +34,12 @@ var ipCmd = &cobra.Command{
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		iface, err := FetchInterfaces()
+
 		if err != nil {
 			return err
 		}
-		idx, out := ParseInterfaces(iface)
+		counters, err := FetchIOCounters()
+		idx, out := ParseInterfaces(iface, counters)
 		switch args[0] {
 		case "a", "all":
 			for i := 0; i <= len(out)+1; i++ {
@@ -64,19 +66,14 @@ func init() {
 }
 
 func FetchInterfaces() (net.InterfaceStatList, error) {
-	inet, err := net.Interfaces()
-	if err != nil {
-		return nil, err
-	}
-	var iface net.InterfaceStatList
-	err = Encoder.JSONMarshaler(inet, &iface)
-	if err != nil {
-		return nil, err
-	}
-	return iface, err
+	return net.Interfaces()
 }
 
-func ParseInterfaces(iface net.InterfaceStatList) (map[string]int, map[int]string) {
+func FetchIOCounters() ([]net.IOCountersStat, error) {
+	return net.IOCounters(true)
+}
+
+func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat) (map[string]int, map[int]string) {
 	// out := make(map[string]string)
 	idx := make(map[string]int)
 	out := make(map[int]string)
@@ -108,7 +105,18 @@ func ParseInterfaces(iface net.InterfaceStatList) (map[string]int, map[int]strin
 			}
 		}
 		idx[v.Name] = v.Index
-		out[v.Index] = fmt.Sprintf("%s: %s%s\n", v.Name, value, addr)
+		value = fmt.Sprintf("%s: %s%s", v.Name, value, addr)
+		// out[v.Index] = fmt.Sprintf("%s: %s%s\n", v.Name, value, addr)
+		for _, vv := range counters {
+			if v.Name == vv.Name {
+				value = fmt.Sprintf("%s\n\tRX packets %d  bytes %d (%s)\n\tRX errors %d  dropped %d",
+					value, vv.PacketsRecv, vv.BytesRecv, common.ByteSize(vv.BytesRecv).String(), vv.Errin, vv.Dropin)
+				value = fmt.Sprintf("%s\n\tTX packets %d  bytes %d (%s)\n\tTX errors %d  dropped %d",
+					value, vv.PacketsSent, vv.BytesSent, common.ByteSize(vv.BytesSent).String(), vv.Errout, vv.Dropout)
+				out[v.Index] = value
+				break
+			}
+		}
 	}
 	return idx, out
 }
