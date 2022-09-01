@@ -34,11 +34,13 @@ var ipCmd = &cobra.Command{
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		iface, err := FetchInterfaces()
-
 		if err != nil {
 			return err
 		}
 		counters, err := FetchIOCounters()
+		if err != nil {
+			return err
+		}
 		idx, out := ParseInterfaces(iface, counters)
 		switch args[0] {
 		case "a", "all":
@@ -108,15 +110,15 @@ func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat)
 		value = fmt.Sprintf("%s: %s%s", v.Name, value, addr)
 		// out[v.Index] = fmt.Sprintf("%s: %s%s\n", v.Name, value, addr)
 		for _, vv := range counters {
-			if v.Name == vv.Name {
+			if v.Name == vv.Name && len(v.Addrs) != 0 {
 				value = fmt.Sprintf("%s\n\tRX packets %d  bytes %d (%s)\n\tRX errors %d  dropped %d",
 					value, vv.PacketsRecv, vv.BytesRecv, common.ByteSize(vv.BytesRecv).String(), vv.Errin, vv.Dropin)
 				value = fmt.Sprintf("%s\n\tTX packets %d  bytes %d (%s)\n\tTX errors %d  dropped %d",
 					value, vv.PacketsSent, vv.BytesSent, common.ByteSize(vv.BytesSent).String(), vv.Errout, vv.Dropout)
-				out[v.Index] = value
 				break
 			}
 		}
+		out[v.Index] = value
 	}
 	return idx, out
 }
