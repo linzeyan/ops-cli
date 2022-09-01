@@ -37,16 +37,21 @@ var ipCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		out := ParseInterfaces(iface)
+		idx, out := ParseInterfaces(iface)
 		switch args[0] {
 		case "a", "all":
-			PrintString(out)
+			for i := 0; i <= len(out)+1; i++ {
+				v, ok := out[i]
+				if ok {
+					PrintString(fmt.Sprintf("%d: %s", i, v))
+				}
+			}
 		default:
-			v, ok := out[args[0]]
+			v, ok := idx[args[0]]
 			if !ok {
 				return common.ErrInvalidArg
 			}
-			PrintString(args[0] + ": " + v)
+			PrintString(fmt.Sprintf("%d: %s", v, out[v]))
 		}
 		return err
 	},
@@ -71,8 +76,10 @@ func FetchInterfaces() (net.InterfaceStatList, error) {
 	return iface, err
 }
 
-func ParseInterfaces(iface net.InterfaceStatList) map[string]string {
-	out := make(map[string]string)
+func ParseInterfaces(iface net.InterfaceStatList) (map[string]int, map[int]string) {
+	// out := make(map[string]string)
+	idx := make(map[string]int)
+	out := make(map[int]string)
 	for _, v := range iface {
 		var value string
 
@@ -100,7 +107,8 @@ func ParseInterfaces(iface net.InterfaceStatList) map[string]string {
 				addr += fmt.Sprintf("\n\tinet6 %s", a.Addr)
 			}
 		}
-		out[v.Name] = fmt.Sprintf("%s%s\n", value, addr)
+		idx[v.Name] = v.Index
+		out[v.Index] = fmt.Sprintf("%s: %s%s\n", v.Name, value, addr)
 	}
-	return out
+	return idx, out
 }
