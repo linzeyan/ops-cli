@@ -18,7 +18,7 @@ package cmd
 
 import (
 	"os"
-	"path/filepath"
+	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
@@ -27,67 +27,62 @@ import (
 
 var urlCmd = &cobra.Command{
 	Use:   CommandURL,
-	Short: "URL expand or download",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+	Short: "Get url content or expand shorten url or download",
+	RunE:  urlCmdGlobalVar.RunE,
+	Example: common.Examples(`# Get the file from URL
+https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.reference.yml -o config.yaml
 
-	DisableFlagsInUseLine: true,
-	DisableFlagParsing:    true,
+# Get the real URL from the shortened URL
+https://goo.gl/maps/b37Aq3Anc7taXQDd9 -e`,
+		CommandURL),
 }
 
-var urlSubCmdExpand = &cobra.Command{
-	Use:   CommandExpand + " url",
-	Args:  cobra.ExactArgs(1),
-	Short: "Expand shorten url",
-	RunE: func(_ *cobra.Command, args []string) error {
-		if !validator.ValidURL(args[0]) {
-			return common.ErrInvalidURL
-		}
+var urlCmdGlobalVar URLFlag
+
+func init() {
+	rootCmd.AddCommand(urlCmd)
+	urlCmd.Flags().BoolVarP(&urlCmdGlobalVar.expand, "expand", "e", false, "Expand shorten url")
+	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.output, "output", "o", "", "Write to file")
+	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.method, "method", "m", "GET", "Request method")
+	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.data, "data", "d", "", "Request method")
+}
+
+type URLFlag struct {
+	expand bool
+	output string
+	method string
+	data   string
+}
+
+func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
+	if !validator.ValidURL(args[0]) {
+		return common.ErrInvalidURL
+	}
+	var err error
+	switch {
+	case u.expand:
 		result, err := common.HTTPRequestRedirectURL(args[0])
 		if err != nil {
 			return err
 		}
 		PrintString(result)
 		return err
-	},
-	Example: common.Examples(`# Get the real URL from the shortened URL
-https://goo.gl/maps/b37Aq3Anc7taXQDd9`, CommandURL, CommandExpand),
-	DisableFlagsInUseLine: true,
-	DisableFlagParsing:    true,
-}
-
-var urlSubCmdGet = &cobra.Command{
-	Use:   CommandGet + " url [output]",
-	Args:  cobra.MinimumNArgs(1),
-	Short: "Get file from url",
-	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		if !validator.ValidURL(args[0]) {
-			return common.ErrInvalidURL
-		}
-		filename := filepath.Base(args[0])
-		if len(args) > 1 {
-			filename = args[1]
-		}
+	case u.output != "":
 		result, err := common.HTTPRequestContent(args[0], nil)
 		if err != nil {
 			return err
 		}
-		err = os.WriteFile(filename, result, common.FileModeRAll)
+		err = os.WriteFile(u.output, result, common.FileModeRAll)
 		if err != nil {
 			return err
 		}
-		return err
-	},
-	Example: common.Examples(`# Get the file from URL
-https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.reference.yml`,
-		CommandURL, CommandGet),
-	DisableFlagsInUseLine: true,
-	DisableFlagParsing:    true,
-}
-
-func init() {
-	rootCmd.AddCommand(urlCmd)
-
-	urlCmd.AddCommand(urlSubCmdExpand)
-	urlCmd.AddCommand(urlSubCmdGet)
+	default:
+		body := strings.NewReader(u.data)
+		result, err := common.HTTPRequestContent(args[0], body, u.method)
+		if err != nil {
+			return err
+		}
+		PrintString(result)
+	}
+	return err
 }
