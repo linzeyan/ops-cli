@@ -31,7 +31,6 @@ import (
 var dfCmd = &cobra.Command{
 	Use:   CommandDf,
 	Short: "Display free disk spaces",
-	Args:  cobra.MaximumNArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		partition, err := disk.Partitions(true)
@@ -39,9 +38,9 @@ var dfCmd = &cobra.Command{
 			return err
 		}
 		var d DfResponse
+		var data [][]string
 		switch {
 		case len(args) == 0:
-			var data [][]string
 			for _, v := range partition {
 				usage, err := disk.Usage(v.Mountpoint)
 				if err != nil {
@@ -50,15 +49,17 @@ var dfCmd = &cobra.Command{
 				d.ParseDevices(usage, partition)
 				data = append(data, d.OutputData())
 			}
-			d.String(data)
 		default:
-			usage, err := disk.Usage(args[0])
-			if err != nil {
-				return err
+			for _, v := range args {
+				usage, err := disk.Usage(v)
+				if err != nil {
+					return err
+				}
+				d.ParseDevices(usage, partition)
+				data = append(data, d.OutputData())
 			}
-			d.ParseDevices(usage, partition)
-			d.String(d.OutputData())
 		}
+		d.String(data)
 		return err
 	},
 }
