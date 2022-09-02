@@ -38,7 +38,7 @@ var geoipCmd = &cobra.Command{
 		switch len(args) {
 		case 0:
 			var resp []byte
-			resp, err = common.HTTPRequestContent("https://myexternalip.com/raw", common.HTTPConfig{})
+			resp, err = common.HTTPRequestContent("https://myexternalip.com/raw")
 			out = map[string]string{"ip": string(resp)}
 		case 1:
 			var r geoIPSingle
@@ -91,7 +91,7 @@ func (geoIPSingle) Request(geoipInput string) (*geoIPSingle, error) {
 	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
 
-	content, err := common.HTTPRequestContent(apiURL, common.HTTPConfig{})
+	content, err := common.HTTPRequestContent(apiURL)
 	if err != nil {
 		return nil, err
 	}

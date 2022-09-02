@@ -198,7 +198,7 @@ func (s *SlackFlag) localFile() (string, error) {
 }
 
 func (s *SlackFlag) remoteFile() (string, error) {
-	content, err := common.HTTPRequestContent(s.arg, common.HTTPConfig{})
+	content, err := common.HTTPRequestContent(s.arg)
 	if err != nil {
 		return "", err
 	}

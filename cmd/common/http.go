@@ -37,9 +37,18 @@ type HTTPConfig struct {
 }
 
 /* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
-func HTTPRequestContent(url string, config HTTPConfig) ([]byte, error) {
-	if config.Method == "" {
-		config.Method = http.MethodGet
+func HTTPRequestContent(url string, config ...HTTPConfig) ([]byte, error) {
+	var conf HTTPConfig
+	if len(config) == 0 {
+		conf.Method = http.MethodGet
+	}
+	if len(config) != 0 {
+		conf = HTTPConfig{
+			Method:  config[0].Method,
+			Body:    config[0].Body,
+			Verbose: config[0].Verbose,
+			Headers: config[0].Headers,
+		}
 	}
 	var client = &http.Client{
 		Timeout: 15 * time.Second,
@@ -53,14 +62,14 @@ func HTTPRequestContent(url string, config HTTPConfig) ([]byte, error) {
 			ExpectContinueTimeout: 1 * time.Second,
 		},
 	}
-	body := strings.NewReader(config.Body)
-	req, err := http.NewRequestWithContext(Context, config.Method, url, body)
+	body := strings.NewReader(conf.Body)
+	req, err := http.NewRequestWithContext(Context, conf.Method, url, body)
 	if err != nil {
 		return nil, err
 	}
-	if config.Headers != "" {
+	if conf.Headers != "" {
 		header := make(map[string]string)
-		err = json.Unmarshal([]byte(config.Headers), &header)
+		err = json.Unmarshal([]byte(conf.Headers), &header)
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +84,7 @@ func HTTPRequestContent(url string, config HTTPConfig) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if config.Verbose {
+	if conf.Verbose {
 		reqDump, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
 			return nil, err
@@ -86,10 +95,6 @@ func HTTPRequestContent(url string, config HTTPConfig) ([]byte, error) {
 			return nil, err
 		}
 		fmt.Println(string(respDump))
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, ErrStatusCode
 	}
 	return io.ReadAll(resp.Body)
 }

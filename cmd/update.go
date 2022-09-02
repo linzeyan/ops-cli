@@ -354,7 +354,7 @@ func (u *Updater) init() *Updater {
 /* Fetch the release file. */
 func (u *Updater) Download() error {
 	var err error
-	resp, err := common.HTTPRequestContent(u.Repository.DownloadLink, common.HTTPConfig{})
+	resp, err := common.HTTPRequestContent(u.Repository.DownloadLink)
 	if err != nil {
 		return err
 	}
