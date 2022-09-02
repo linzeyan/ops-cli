@@ -78,7 +78,7 @@ func (f *FreeFlag) Output() error {
 	var header = []string{"", "total", "used", "free", "available", "use%"}
 	var data [][]string
 	data = append(data, []string{
-		"Mem:",
+		"Mem: ",
 		common.ByteSize(memory.Total).String(),
 		common.ByteSize(memory.Used).String(),
 		common.ByteSize(memory.Free).String(),
@@ -103,7 +103,7 @@ func (FreeFlag) String(header []string, data [][]string) {
 	table.SetAutoWrapText(false)
 	table.SetAutoFormatHeaders(false)
 	table.SetHeaderAlignment(tablewriter.ALIGN_RIGHT)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_RIGHT)
 	table.SetCenterSeparator("")
 	table.SetColumnSeparator("")
 	table.SetRowSeparator("")
