@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -75,6 +76,12 @@ type DfResponse struct {
 	Avail       string `json:"Avail"`
 	UsedPercent string `json:"Use%"`
 	MountedOn   string `json:"Mounted on"`
+	Fstype      string `json:"FsType"`
+	// Opts        []string `json:"Opts"`
+	// InodesSize        uint64 `json:"iSize"`
+	InodesUsed        string `json:"iUsed"`
+	InodesFree        string `json:"iFree"`
+	InodesUsedPercent string `json:"iUse%"`
 }
 
 func (d *DfResponse) ParseDevices(usage *disk.UsageStat, partition []disk.PartitionStat) {
@@ -86,6 +93,12 @@ func (d *DfResponse) ParseDevices(usage *disk.UsageStat, partition []disk.Partit
 			d.Avail = common.ByteSize(usage.Free).String()
 			d.UsedPercent = fmt.Sprintf("%.2f%%", usage.UsedPercent)
 			d.MountedOn = v.Mountpoint
+			d.Fstype = v.Fstype
+			// d.Opts = v.Opts
+			// d.InodesSize = usage.InodesTotal
+			d.InodesUsed = strconv.Itoa(int(usage.InodesUsed))
+			d.InodesFree = strconv.Itoa(int(usage.InodesFree))
+			d.InodesUsedPercent = fmt.Sprintf("%.2f%%", usage.InodesUsedPercent)
 			break
 		}
 	}
