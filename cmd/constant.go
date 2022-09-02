@@ -34,6 +34,7 @@ const (
 	CommandCsv2Toml  = CommandCsv + "2" + CommandToml
 	CommandCsv2XML   = CommandCsv + "2" + CommandXML
 	CommandCsv2Yaml  = CommandCsv + "2" + CommandYaml
+	CommandDf        = "df"
 	CommandDig       = "dig"
 	CommandDiscord   = "Discord"
 	CommandDisk      = "disk"
