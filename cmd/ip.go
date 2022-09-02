@@ -33,11 +33,11 @@ var ipCmd = &cobra.Command{
 	Short: "View interfaces configuration",
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
-		iface, err := FetchInterfaces()
+		iface, err := net.Interfaces()
 		if err != nil {
 			return err
 		}
-		counters, err := FetchIOCounters()
+		counters, err := net.IOCounters(true)
 		if err != nil {
 			return err
 		}
@@ -65,14 +65,6 @@ var ipCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(ipCmd)
-}
-
-func FetchInterfaces() (net.InterfaceStatList, error) {
-	return net.Interfaces()
-}
-
-func FetchIOCounters() ([]net.IOCountersStat, error) {
-	return net.IOCounters(true)
 }
 
 func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat) (map[string]int, map[int]string) {
