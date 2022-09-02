@@ -18,12 +18,15 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"reflect"
 	"runtime"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/miekg/dns"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
@@ -230,7 +233,30 @@ type digResponseFormat struct {
 type digResponse []digResponseFormat
 
 func (d digResponse) String() {
-	for i := range d {
-		fmt.Printf("%-20s\t%s\t%s\t%s\t%s\n", d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD)
+	var header []string
+	var dd digResponseFormat
+	f := reflect.ValueOf(&dd).Elem()
+	t := f.Type()
+	for i := 0; i < f.NumField(); i++ {
+		header = append(header, t.Field(i).Name)
 	}
+	var data [][]string
+	for i := range d {
+		data = append(data, []string{d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD})
+	}
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(header)
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
+	table.SetAlignment(tablewriter.ALIGN_LEFT)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
+	table.SetBorder(false)
+	table.SetTablePadding("\t")
+	table.SetNoWhiteSpace(true)
+	table.AppendBulk(data)
+	table.Render()
 }
