@@ -43,6 +43,7 @@ const (
 	CommandEncode    = "encode"
 	CommandEncrypt   = "encrypt"
 	CommandFile      = "file"
+	CommandFree      = "free"
 	CommandGenerate  = "generate"
 	CommandGeoip     = "geoip"
 	CommandHash      = "hash"
