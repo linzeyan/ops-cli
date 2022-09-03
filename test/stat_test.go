@@ -8,6 +8,9 @@ import (
 )
 
 func TestStatBinary(t *testing.T) {
+	if isWindows() {
+		return
+	}
 	const subCommand = cmd.CommandStat
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {

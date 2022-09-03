@@ -8,12 +8,13 @@ import (
 )
 
 func TestDfBinary(t *testing.T) {
+	if isDarwin() {
+		return
+	}
 	const subCommand = cmd.CommandDf
 	t.Run(subCommand, func(t *testing.T) {
-		out, err := exec.Command(binaryCommand, subCommand).Output()
-		if err != nil {
-			t.Log(string(out))
-			t.Log(err)
+		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {
+			t.Error(err)
 		}
 	})
 }
