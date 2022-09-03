@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 		binaryCommand += ".exe"
 	}
 	cmd := exec.Command(mainCommand, "build", "-trimpath", "-ldflags", "-s -w", "-o", binaryCommand, mainGo)
-	cmd.Env = cmd.Environ()
+	cmd.Env = os.Environ()
 	cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 	if err := cmd.Run(); err != nil {
 		log.Println(err)
