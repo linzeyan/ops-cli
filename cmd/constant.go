@@ -73,6 +73,7 @@ const (
 	CommandReST      = "rest"
 	CommandSlack     = "Slack"
 	CommandSSH       = "ssh-keygen"
+	CommandStat      = "stat"
 	CommandString    = "string"
 	CommandSymbol    = "symbol"
 	CommandSystem    = "system"
