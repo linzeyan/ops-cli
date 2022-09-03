@@ -130,12 +130,15 @@ func (s *SystemFlag) CPUInfo() (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp := make(map[string]string)
-	resp["vendorId"] = info[0].VendorID
-	resp["cores"] = fmt.Sprintf("%d", info[0].Cores)
-	resp["modelName"] = info[0].ModelName
-	resp["ghz"] = fmt.Sprintf("%.2f", info[0].Mhz/1000)
-	resp["cacheSize"] = fmt.Sprintf("%d", info[0].CacheSize)
+	resp := struct {
+		VendorID, Cores, ModelName, GHz, CacheSize string
+	}{
+		VendorID:  info[0].VendorID,
+		Cores:     fmt.Sprintf("%d", info[0].Cores),
+		ModelName: info[0].ModelName,
+		GHz:       fmt.Sprintf("%.2f", info[0].Mhz/1000),
+		CacheSize: fmt.Sprintf("%d", info[0].CacheSize),
+	}
 	return &resp, err
 }
 
@@ -144,30 +147,17 @@ func (s *SystemFlag) DiskUsage() (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp := make(map[string]string)
-	resp["path"] = info.Path
-	resp["fstype"] = info.Fstype
-	resp["total"] = common.ByteSize(info.Total).String()
-	resp["free"] = common.ByteSize(info.Free).String()
-	resp["used"] = common.ByteSize(info.Used).String()
-	resp["usedPercent"] = fmt.Sprintf("%0.2f%%", info.UsedPercent)
+	resp := struct {
+		Path, FsType, Total, Free, Used, UsedPercent string
+	}{
+		Path:        info.Path,
+		FsType:      info.Fstype,
+		Total:       common.ByteSize(info.Total).String(),
+		Free:        common.ByteSize(info.Free).String(),
+		Used:        common.ByteSize(info.Used).String(),
+		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
+	}
 	return &resp, err
-}
-
-type systemHostInfoResponse struct {
-	Hostname             string `json:"hostname,omitempty" yaml:"hostname,omitempty"`
-	Uptime               string `json:"uptime,omitempty" yaml:"uptime,omitempty"`
-	BootTime             string `json:"bootTime,omitempty" yaml:"bootTime,omitempty"`
-	Procs                uint64 `json:"procs,omitempty" yaml:"procs,omitempty"`
-	OS                   string `json:"os,omitempty" yaml:"os,omitempty"`
-	Platform             string `json:"platform,omitempty" yaml:"platform,omitempty"`
-	PlatformFamily       string `json:"platformFamily,omitempty" yaml:"platformFamily,omitempty"`
-	PlatformVersion      string `json:"platformVersion,omitempty" yaml:"platformVersion,omitempty"`
-	KernelVersion        string `json:"kernelVersion,omitempty" yaml:"kernelVersion,omitempty"`
-	KernelArch           string `json:"kernelArch,omitempty" yaml:"kernelArch,omitempty"`
-	VirtualizationSystem string `json:"virtualizationSystem,omitempty" yaml:"virtualizationSystem,omitempty"`
-	VirtualizationRole   string `json:"virtualizationRole,omitempty" yaml:"virtualizationRole,omitempty"`
-	HostID               string `json:"hostId,omitempty" yaml:"hostId,omitempty"`
 }
 
 func (s *SystemFlag) HostInfo() (any, error) {
@@ -175,7 +165,13 @@ func (s *SystemFlag) HostInfo() (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	hostResp := systemHostInfoResponse{
+	resp := struct {
+		Hostname, HostID, Uptime, BootTime            string
+		OS, Platform, PlatformFamily, PlatformVersion string
+		KernelVersion, KernelArch                     string
+		VirtualizationSystem, VirtualizationRole      string
+		Procs                                         uint64
+	}{
 		Hostname:             info.Hostname,
 		Uptime:               (time.Second * time.Duration(info.Uptime)).String(),
 		BootTime:             (time.Second * time.Duration(info.BootTime)).String(),
@@ -190,7 +186,7 @@ func (s *SystemFlag) HostInfo() (any, error) {
 		VirtualizationRole:   info.VirtualizationRole,
 		HostID:               info.HostID,
 	}
-	return &hostResp, err
+	return &resp, err
 }
 
 func (s *SystemFlag) LoadAvg() (any, error) {
@@ -198,10 +194,13 @@ func (s *SystemFlag) LoadAvg() (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp := make(map[string]string)
-	resp["load1"] = fmt.Sprintf("%0.2f", info.Load1)
-	resp["load5"] = fmt.Sprintf("%0.2f", info.Load5)
-	resp["load15"] = fmt.Sprintf("%0.2f", info.Load15)
+	resp := struct {
+		Load1, Load5, Load15 string
+	}{
+		Load1:  fmt.Sprintf("%0.2f", info.Load1),
+		Load5:  fmt.Sprintf("%0.2f", info.Load5),
+		Load15: fmt.Sprintf("%0.2f", info.Load15),
+	}
 	return &resp, err
 }
 
@@ -210,34 +209,36 @@ func (s *SystemFlag) MemUsage() (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp := make(map[string]string)
-	resp["total"] = common.ByteSize(info.Total).String()
-	resp["available"] = common.ByteSize(info.Available).String()
-	resp["free"] = common.ByteSize(info.Free).String()
-	resp["used"] = common.ByteSize(info.Used).String()
-	resp["usedPercent"] = fmt.Sprintf("%0.2f%%", info.UsedPercent)
+	resp := struct {
+		Total, Available, Free, Used, UsedPercent string
+	}{
+		Total:       common.ByteSize(info.Total).String(),
+		Available:   common.ByteSize(info.Available).String(),
+		Free:        common.ByteSize(info.Free).String(),
+		Used:        common.ByteSize(info.Used).String(),
+		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
+	}
 	return &resp, err
-}
-
-type systemNetIOResponse struct {
-	BytesSent   uint64 `json:"bytesSent,omitempty" yaml:"bytesSent,omitempty"`
-	BytesRecv   uint64 `json:"bytesRecv,omitempty" yaml:"bytesRecv,omitempty"`
-	PacketsSent uint64 `json:"packetsSent,omitempty" yaml:"packetsSent,omitempty"`
-	PacketsRecv uint64 `json:"packetsRecv,omitempty" yaml:"packetsRecv,omitempty"`
-	Errin       uint64 `json:"errin,omitempty" yaml:"errin,omitempty"`
-	Errout      uint64 `json:"errout,omitempty" yaml:"errout,omitempty"`
-	Dropin      uint64 `json:"dropin,omitempty" yaml:"dropin,omitempty"`
-	Dropout     uint64 `json:"dropout,omitempty" yaml:"dropout,omitempty"`
-	Fifoin      uint64 `json:"fifoin,omitempty" yaml:"fifoin,omitempty"`
-	Fifoout     uint64 `json:"fifoout,omitempty" yaml:"fifoout,omitempty"`
-
-	Interfaces net.InterfaceStatList `json:"interface,omitempty" yaml:"interface,omitempty"`
 }
 
 func (s *SystemFlag) NetInfo() (any, error) {
 	info, err := net.IOCounters(false)
 	if err != nil {
 		return nil, err
+	}
+	type systemNetIOResponse struct {
+		BytesSent   uint64 `json:"bytesSent,omitempty" yaml:"bytesSent,omitempty"`
+		BytesRecv   uint64 `json:"bytesRecv,omitempty" yaml:"bytesRecv,omitempty"`
+		PacketsSent uint64 `json:"packetsSent,omitempty" yaml:"packetsSent,omitempty"`
+		PacketsRecv uint64 `json:"packetsRecv,omitempty" yaml:"packetsRecv,omitempty"`
+		Errin       uint64 `json:"errin,omitempty" yaml:"errin,omitempty"`
+		Errout      uint64 `json:"errout,omitempty" yaml:"errout,omitempty"`
+		Dropin      uint64 `json:"dropin,omitempty" yaml:"dropin,omitempty"`
+		Dropout     uint64 `json:"dropout,omitempty" yaml:"dropout,omitempty"`
+		Fifoin      uint64 `json:"fifoin,omitempty" yaml:"fifoin,omitempty"`
+		Fifoout     uint64 `json:"fifoout,omitempty" yaml:"fifoout,omitempty"`
+
+		Interfaces net.InterfaceStatList `json:"interface,omitempty" yaml:"interface,omitempty"`
 	}
 	var netResp systemNetIOResponse
 	err = Encoder.JSONMarshaler(info[0], &netResp)
