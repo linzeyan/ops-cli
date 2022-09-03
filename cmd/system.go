@@ -196,28 +196,12 @@ func (s *SystemFlag) LoadAvg() (any, error) {
 	if err != nil {
 		return nil, err
 	}
-	stat, err := cpu.Times(false)
-	if err != nil {
-		return nil, err
-	}
 	resp := struct {
 		Load1, Load5, Load15 string
-
-		User, System, Idle, Nice, Iowait, Irq, Softirq, Steal, Guest, GuestNice string
 	}{
-		Load1:     fmt.Sprintf("%0.2f", info.Load1),
-		Load5:     fmt.Sprintf("%0.2f", info.Load5),
-		Load15:    fmt.Sprintf("%0.2f", info.Load15),
-		User:      (time.Second * time.Duration(stat[0].User)).String(),
-		System:    (time.Second * time.Duration(stat[0].System)).String(),
-		Idle:      (time.Second * time.Duration(stat[0].Idle)).String(),
-		Nice:      (time.Second * time.Duration(stat[0].Nice)).String(),
-		Iowait:    (time.Second * time.Duration(stat[0].Iowait)).String(),
-		Irq:       (time.Second * time.Duration(stat[0].Irq)).String(),
-		Softirq:   (time.Second * time.Duration(stat[0].Softirq)).String(),
-		Steal:     (time.Second * time.Duration(stat[0].Steal)).String(),
-		Guest:     (time.Second * time.Duration(stat[0].Guest)).String(),
-		GuestNice: (time.Second * time.Duration(stat[0].GuestNice)).String(),
+		Load1:  fmt.Sprintf("%0.2f", info.Load1),
+		Load5:  fmt.Sprintf("%0.2f", info.Load5),
+		Load15: fmt.Sprintf("%0.2f", info.Load15),
 	}
 	return &resp, err
 }
