@@ -43,8 +43,6 @@ func TestDig(t *testing.T) {
 func TestBinaryDig(t *testing.T) {
 	const subCommand = cmd.CommandDig
 	servers := []string{"@1.1.1.1", "@8.8.8.8"}
-	args := []string{"A", "AAAA", "CNAME", "NS", "ANY", "-j", "-y"}
-
 	for _, server := range servers {
 		t.Run(server, func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, testHost, server).Run(); err != nil {
@@ -53,6 +51,7 @@ func TestBinaryDig(t *testing.T) {
 		})
 	}
 
+	args := []string{"A", "AAAA", "CNAME", "NS", "ANY", "-j", "-y"}
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, testHost, "@8.8.8.8", args[i]).Run(); err != nil {

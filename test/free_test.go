@@ -7,17 +7,21 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-func TestBinaryVersion(t *testing.T) {
-	const subCommand = cmd.CommandVersion
+func TestBinaryFree(t *testing.T) {
+	const subCommand = cmd.CommandFree
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {
 			t.Error(err)
 		}
 	})
-	args := []string{"", "-y", "-j"}
+
+	args := [][]string{
+		{subCommand, "-c", "3"},
+		{subCommand, "-s", "1", "-c", "5"},
+	}
 	for i := range args {
-		t.Run(args[i], func(t *testing.T) {
-			if err := exec.Command(binaryCommand, subCommand, args[i]).Run(); err != nil {
+		t.Run(args[i][1], func(t *testing.T) {
+			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
 				t.Error(args[i], err)
 			}
 		})

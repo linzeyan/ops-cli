@@ -26,6 +26,7 @@ func TestEncryptAes(t *testing.T) {
 		t.Error(err)
 	}
 	assert.Equal(t, expected, got)
+	_ = os.Remove(mainGo + ".temp")
 }
 
 func TestEncrypt(t *testing.T) {

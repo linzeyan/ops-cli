@@ -34,14 +34,13 @@ func TestCert(t *testing.T) {
 
 func TestBinaryCert(t *testing.T) {
 	const subCommand = cmd.CommandCert
-	args := []string{"--days", "--dns", "--expiry", "--ip", "--issuer", "-j", "-y"}
-
 	t.Run(testHost, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand, testHost).Run(); err != nil {
 			t.Error(err)
 		}
 	})
 
+	args := []string{"--days", "--dns", "--expiry", "--ip", "--issuer", "-j", "-y"}
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, testHost, args[i]).Run(); err != nil {

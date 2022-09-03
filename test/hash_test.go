@@ -1,6 +1,7 @@
 package test_test
 
 import (
+	"os/exec"
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd"
@@ -127,6 +128,24 @@ func TestSha512(t *testing.T) {
 				t.Error(testCase.input, err)
 			}
 			assert.Equal(t, testCase.expected, got)
+		})
+	}
+}
+
+func TestBinaryHash(t *testing.T) {
+	const subCommand = cmd.CommandHash
+	args := [][]string{
+		{subCommand, "-l", subCommand},
+		{subCommand, common.HashMd5, binaryCommand},
+		{subCommand, common.HashSha1, binaryCommand},
+		{subCommand, common.HashSha256, binaryCommand},
+		{subCommand, common.HashSha512, binaryCommand},
+	}
+	for i := range args {
+		t.Run(args[i][1], func(t *testing.T) {
+			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
+				t.Error(args[i], err)
+			}
 		})
 	}
 }

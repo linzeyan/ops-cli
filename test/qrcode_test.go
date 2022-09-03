@@ -9,15 +9,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var files = []string{"text.png", "wifi.png", "otp.png"}
+
 func TestQrcode(t *testing.T) {
 	const subCommand = cmd.CommandQrcode
 	testCases := []struct {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandOtp, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", "otp.png"}, "otp.png"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandWiFi, "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", "wifi.png", "-s", "500"}, "wifi.png"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandText, "https://www.google.com", "-o", "text.png"}, "text.png"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandOtp, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", files[2]}, files[2]},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandWiFi, "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", files[1], "-s", "500"}, files[1]},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandText, "https://www.google.com", "-o", files[0]}, files[0]},
 	}
 
 	for i := range testCases {
@@ -38,8 +40,8 @@ func TestQrcodeRead(t *testing.T) {
 		expected string
 	}{
 		{[]string{runCommand, mainGo, subCommand, "read", "assets/example.png"}, "WIFI:S:your_wifi_ssid;T:WPA;P:your_password;;\n"},
-		{[]string{runCommand, mainGo, subCommand, "read", "otp.png"}, "otpauth://totp/aws:my@gmail.com?secret=fqowefilkjfoqwie&issuer=aws\n"},
-		{[]string{runCommand, mainGo, subCommand, "read", "text.png"}, "https://www.google.com\n"},
+		{[]string{runCommand, mainGo, subCommand, "read", files[2]}, "otpauth://totp/aws:my@gmail.com?secret=fqowefilkjfoqwie&issuer=aws\n"},
+		{[]string{runCommand, mainGo, subCommand, "read", files[0]}, "https://www.google.com\n"},
 	}
 
 	for i := range testCases {
@@ -56,16 +58,16 @@ func TestQrcodeRead(t *testing.T) {
 
 func TestBinaryQrcode(t *testing.T) {
 	const subCommand = cmd.CommandQrcode
-	args := [][]string{
-		{subCommand, cmd.CommandOtp, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", "otp.png"},
-		{subCommand, cmd.CommandWiFi, "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", "wifi.png", "-s", "500"},
-		{subCommand, cmd.CommandText, "https://www.google.com", "-o", "text.png"},
-	}
 	t.Run("read", func(t *testing.T) {
 		if err := exec.Command(binaryCommand, []string{subCommand, "read", "assets/example.png"}...).Run(); err != nil {
 			t.Error(err)
 		}
 	})
+	args := [][]string{
+		{subCommand, cmd.CommandOtp, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", files[2]},
+		{subCommand, cmd.CommandWiFi, "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", files[1], "-s", "500"},
+		{subCommand, cmd.CommandText, "https://www.google.com", "-o", files[0]},
+	}
 	for i := range args {
 		t.Run(args[i][1], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, args[i]...).Run(); err != nil {
@@ -73,7 +75,7 @@ func TestBinaryQrcode(t *testing.T) {
 			}
 		})
 	}
-	_ = os.Remove("text.png")
-	_ = os.Remove("wifi.png")
-	_ = os.Remove("otp.png")
+	for _, v := range files {
+		_ = os.Remove(v)
+	}
 }
