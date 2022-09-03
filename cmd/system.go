@@ -131,13 +131,15 @@ func (s *SystemFlag) CPUInfo() (any, error) {
 		return nil, err
 	}
 	resp := struct {
-		VendorID, Cores, ModelName, GHz, CacheSize string
+		VendorID, ModelName string
+		Cores, CacheSize    int32
+		GHz                 float64
 	}{
 		VendorID:  info[0].VendorID,
-		Cores:     fmt.Sprintf("%d", info[0].Cores),
+		Cores:     info[0].Cores,
 		ModelName: info[0].ModelName,
-		GHz:       fmt.Sprintf("%.2f", info[0].Mhz/1000),
-		CacheSize: fmt.Sprintf("%d", info[0].CacheSize),
+		GHz:       info[0].Mhz / 1000,
+		CacheSize: info[0].CacheSize,
 	}
 	return &resp, err
 }
@@ -173,9 +175,9 @@ func (s *SystemFlag) HostInfo() (any, error) {
 		Procs                                         uint64
 	}{
 		Hostname:             info.Hostname,
+		HostID:               info.HostID,
 		Uptime:               (time.Second * time.Duration(info.Uptime)).String(),
 		BootTime:             (time.Second * time.Duration(info.BootTime)).String(),
-		Procs:                info.Procs,
 		OS:                   info.OS,
 		Platform:             info.Platform,
 		PlatformFamily:       info.PlatformFamily,
@@ -184,7 +186,7 @@ func (s *SystemFlag) HostInfo() (any, error) {
 		KernelArch:           info.KernelArch,
 		VirtualizationSystem: info.VirtualizationSystem,
 		VirtualizationRole:   info.VirtualizationRole,
-		HostID:               info.HostID,
+		Procs:                info.Procs,
 	}
 	return &resp, err
 }
@@ -194,12 +196,28 @@ func (s *SystemFlag) LoadAvg() (any, error) {
 	if err != nil {
 		return nil, err
 	}
+	stat, err := cpu.Times(false)
+	if err != nil {
+		return nil, err
+	}
 	resp := struct {
 		Load1, Load5, Load15 string
+
+		User, System, Idle, Nice, Iowait, Irq, Softirq, Steal, Guest, GuestNice string
 	}{
-		Load1:  fmt.Sprintf("%0.2f", info.Load1),
-		Load5:  fmt.Sprintf("%0.2f", info.Load5),
-		Load15: fmt.Sprintf("%0.2f", info.Load15),
+		Load1:     fmt.Sprintf("%0.2f", info.Load1),
+		Load5:     fmt.Sprintf("%0.2f", info.Load5),
+		Load15:    fmt.Sprintf("%0.2f", info.Load15),
+		User:      (time.Second * time.Duration(stat[0].User)).String(),
+		System:    (time.Second * time.Duration(stat[0].System)).String(),
+		Idle:      (time.Second * time.Duration(stat[0].Idle)).String(),
+		Nice:      (time.Second * time.Duration(stat[0].Nice)).String(),
+		Iowait:    (time.Second * time.Duration(stat[0].Iowait)).String(),
+		Irq:       (time.Second * time.Duration(stat[0].Irq)).String(),
+		Softirq:   (time.Second * time.Duration(stat[0].Softirq)).String(),
+		Steal:     (time.Second * time.Duration(stat[0].Steal)).String(),
+		Guest:     (time.Second * time.Duration(stat[0].Guest)).String(),
+		GuestNice: (time.Second * time.Duration(stat[0].GuestNice)).String(),
 	}
 	return &resp, err
 }
