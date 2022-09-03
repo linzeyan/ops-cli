@@ -12,9 +12,8 @@ func TestDfBinary(t *testing.T) {
 	t.Run(subCommand, func(t *testing.T) {
 		out, err := exec.Command(binaryCommand, subCommand).Output()
 		if err != nil {
+			t.Log(string(out))
 			t.Log(err)
-			t.Error(string(out))
-			t.Error(err)
 		}
 	})
 }

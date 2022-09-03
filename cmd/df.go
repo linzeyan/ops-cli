@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 	"strconv"
@@ -37,7 +36,6 @@ var dfCmd = &cobra.Command{
 		var err error
 		partition, err := disk.Partitions(true)
 		if err != nil {
-			log.Println(err)
 			return err
 		}
 		var d DfResponse
@@ -47,7 +45,6 @@ var dfCmd = &cobra.Command{
 			for _, v := range partition {
 				usage, err := disk.Usage(v.Mountpoint)
 				if err != nil {
-					log.Println(err)
 					return err
 				}
 				d.ParseDevices(usage, partition)
@@ -57,7 +54,6 @@ var dfCmd = &cobra.Command{
 			for _, v := range args {
 				usage, err := disk.Usage(v)
 				if err != nil {
-					log.Println(err)
 					return err
 				}
 				d.ParseDevices(usage, partition)
