@@ -132,7 +132,7 @@ func TestSha512(t *testing.T) {
 	}
 }
 
-func TestBinaryHash(t *testing.T) {
+func TestHashBinary(t *testing.T) {
 	const subCommand = cmd.CommandHash
 	args := [][]string{
 		{subCommand, "-l", subCommand},

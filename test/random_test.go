@@ -60,7 +60,7 @@ func TestRandom(t *testing.T) {
 	}
 }
 
-func TestBinaryRandom(t *testing.T) {
+func TestRandomBinary(t *testing.T) {
 	const subCommand = cmd.CommandRandom
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand).Run(); err != nil {

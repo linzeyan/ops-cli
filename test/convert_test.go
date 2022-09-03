@@ -53,7 +53,7 @@ func TestConvert(t *testing.T) {
 	}
 }
 
-func TestBinaryConvert(t *testing.T) {
+func TestConvertBinary(t *testing.T) {
 	const subCommand = cmd.CommandConvert
 	testCommand := []string{
 		cmd.CommandJSON2Csv,

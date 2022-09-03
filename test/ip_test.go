@@ -7,7 +7,7 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-func TestBinaryIP(t *testing.T) {
+func TestIPBinary(t *testing.T) {
 	const subCommand = cmd.CommandIP
 	args := []string{"a"}
 	for i := range args {

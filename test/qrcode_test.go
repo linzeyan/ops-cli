@@ -56,7 +56,7 @@ func TestQrcodeRead(t *testing.T) {
 	}
 }
 
-func TestBinaryQrcode(t *testing.T) {
+func TestQrcodeBinary(t *testing.T) {
 	const subCommand = cmd.CommandQrcode
 	t.Run("read", func(t *testing.T) {
 		if err := exec.Command(binaryCommand, []string{subCommand, "read", "assets/example.png"}...).Run(); err != nil {

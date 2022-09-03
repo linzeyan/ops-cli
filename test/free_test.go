@@ -7,7 +7,7 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-func TestBinaryFree(t *testing.T) {
+func TestFreeBinary(t *testing.T) {
 	const subCommand = cmd.CommandFree
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {

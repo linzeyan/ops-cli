@@ -7,7 +7,7 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-func TestBinaryDf(t *testing.T) {
+func TestDfBinary(t *testing.T) {
 	const subCommand = cmd.CommandDf
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {

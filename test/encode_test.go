@@ -115,7 +115,7 @@ func TestEncode(t *testing.T) {
 	}
 }
 
-func TestBinaryEncode(t *testing.T) {
+func TestEncodeBinary(t *testing.T) {
 	const subCommand = cmd.CommandEncode
 	args := [][]string{
 		{subCommand, cmd.CommandBase32Hex, testHost},

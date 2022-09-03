@@ -40,7 +40,7 @@ func TestDig(t *testing.T) {
 	}
 }
 
-func TestBinaryDig(t *testing.T) {
+func TestDigBinary(t *testing.T) {
 	const subCommand = cmd.CommandDig
 	servers := []string{"@1.1.1.1", "@8.8.8.8"}
 	for _, server := range servers {

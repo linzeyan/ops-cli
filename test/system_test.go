@@ -7,7 +7,7 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-func TestBinarySystem(t *testing.T) {
+func TestSystemBinary(t *testing.T) {
 	const subCommand = cmd.CommandSystem
 	args := [][]string{
 		{subCommand, cmd.CommandCPU},

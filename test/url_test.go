@@ -59,7 +59,7 @@ func TestURL(t *testing.T) {
 	}
 }
 
-func TestBinaryURL(t *testing.T) {
+func TestURLBinary(t *testing.T) {
 	const subCommand = cmd.CommandURL
 	args := [][]string{
 		{subCommand, "-e", "https://goo.gl/maps/b37Aq3Anc7taXQDd9"},

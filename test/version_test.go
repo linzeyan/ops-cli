@@ -7,7 +7,7 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-func TestBinaryVersion(t *testing.T) {
+func TestVersionBinary(t *testing.T) {
 	const subCommand = cmd.CommandVersion
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {

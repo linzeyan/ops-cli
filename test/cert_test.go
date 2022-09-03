@@ -32,7 +32,7 @@ func TestCert(t *testing.T) {
 	}
 }
 
-func TestBinaryCert(t *testing.T) {
+func TestCertBinary(t *testing.T) {
 	const subCommand = cmd.CommandCert
 	t.Run(testHost, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand, testHost).Run(); err != nil {

@@ -92,7 +92,7 @@ func TestGeoip(t *testing.T) {
 	}
 }
 
-func TestBinaryGeoip(t *testing.T) {
+func TestGeoipBinary(t *testing.T) {
 	const subCommand = cmd.CommandGeoip
 	t.Run("batch", func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand, "1.2.3.4", "1.1.1.1", "8.8.4.4").Run(); err != nil {

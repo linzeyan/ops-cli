@@ -73,7 +73,7 @@ func TestWhoisRegistrar(t *testing.T) {
 	}
 }
 
-func TestBinaryWhois(t *testing.T) {
+func TestWhoisBinary(t *testing.T) {
 	const subCommand = cmd.CommandWhois
 	args := []string{"-d", "-e", "-n", "-r", "-j", "-y"}
 

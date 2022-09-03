@@ -50,7 +50,7 @@ func TestEncrypt(t *testing.T) {
 	}
 }
 
-func TestBinaryEncrypt(t *testing.T) {
+func TestEncryptBinary(t *testing.T) {
 	const subCommand = cmd.CommandEncrypt
 	args := [][]string{
 		{subCommand, cmd.CommandFile, "../.gitignore", "-k", "32449939618748684094059431382108"},

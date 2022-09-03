@@ -7,7 +7,7 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-func TestBinaryOtp(t *testing.T) {
+func TestOtpBinary(t *testing.T) {
 	const subCommand = cmd.CommandOtp
 	calculateArgs := [][]string{
 		{subCommand, cmd.CommandCalculate, "6BDR", "T7AT", "RRCZ", "V5IS", " FLOH", "AHQL", "YF4Z", " ORG7", "-p", "15", "-d", "7"},

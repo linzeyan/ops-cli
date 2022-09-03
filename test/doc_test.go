@@ -33,7 +33,7 @@ func TestDoc(t *testing.T) {
 	_ = os.RemoveAll("doc")
 }
 
-func TestBinaryDoc(t *testing.T) {
+func TestDocBinary(t *testing.T) {
 	const subCommand = cmd.CommandDoc
 	args := []string{cmd.CommandMan, cmd.CommandMarkdown, cmd.CommandReST, cmd.CommandYaml}
 

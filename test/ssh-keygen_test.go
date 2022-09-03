@@ -8,7 +8,7 @@ import (
 	"github.com/linzeyan/ops-cli/cmd"
 )
 
-func TestBinarySSHKeygen(t *testing.T) {
+func TestSSHKeygenBinary(t *testing.T) {
 	const subCommand = cmd.CommandSSH
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {
