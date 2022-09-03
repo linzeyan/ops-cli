@@ -61,6 +61,9 @@ func (f *FreeFlag) RunE(_ *cobra.Command, _ []string) error {
 		if f.count > 0 && f.count == counter {
 			return err
 		}
+		if f.second == 0 {
+			f.second = 2
+		}
 		time.Sleep(time.Second * time.Duration(f.second))
 	}
 }
