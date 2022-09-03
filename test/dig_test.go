@@ -5,11 +5,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDig(t *testing.T) {
-	const subCommand = "dig"
+	const subCommand = cmd.CommandDig
 	testCases := []struct {
 		input    []string
 		expected any
@@ -40,7 +41,7 @@ func TestDig(t *testing.T) {
 }
 
 func TestBinaryDig(t *testing.T) {
-	const subCommand = "dig"
+	const subCommand = cmd.CommandDig
 	servers := []string{"@1.1.1.1", "@8.8.8.8"}
 	args := []string{"A", "AAAA", "CNAME", "NS", "ANY", "-j", "-y"}
 

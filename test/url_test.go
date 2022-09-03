@@ -4,11 +4,12 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestURL(t *testing.T) {
-	const subCommand = "url"
+	const subCommand = cmd.CommandURL
 	testCases := []struct {
 		input    []string
 		expected string
@@ -59,7 +60,7 @@ func TestURL(t *testing.T) {
 }
 
 func TestBinaryURL(t *testing.T) {
-	const subCommand = "url"
+	const subCommand = cmd.CommandURL
 	args := [][]string{
 		{subCommand, "-e", "https://goo.gl/maps/b37Aq3Anc7taXQDd9"},
 		{subCommand, "-e", "https://reurl.cc/7peeZl"},

@@ -29,13 +29,13 @@ func TestEncryptAes(t *testing.T) {
 }
 
 func TestEncrypt(t *testing.T) {
-	const subCommand = "encrypt"
+	const subCommand = cmd.CommandEncrypt
 	testCases := []struct {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, "file", "../.gitignore", "-k", "32449939618748684094059431382108"}, "../.gitignore"},
-		{[]string{runCommand, mainGo, subCommand, "file", "../.gitignore", "-k", "32449939618748684094059431382108", "-d"}, "../.gitignore"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandFile, "../.gitignore", "-k", "32449939618748684094059431382108"}, "../.gitignore"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandFile, "../.gitignore", "-k", "32449939618748684094059431382108", "-d"}, "../.gitignore"},
 	}
 
 	for i := range testCases {
@@ -50,10 +50,10 @@ func TestEncrypt(t *testing.T) {
 }
 
 func TestBinaryEncrypt(t *testing.T) {
-	const subCommand = "encrypt"
+	const subCommand = cmd.CommandEncrypt
 	args := [][]string{
-		{subCommand, "file", "../.gitignore", "-k", "32449939618748684094059431382108"},
-		{subCommand, "file", "../.gitignore", "-k", "32449939618748684094059431382108", "-d"},
+		{subCommand, cmd.CommandFile, "../.gitignore", "-k", "32449939618748684094059431382108"},
+		{subCommand, cmd.CommandFile, "../.gitignore", "-k", "32449939618748684094059431382108", "-d"},
 	}
 
 	for i := range args {

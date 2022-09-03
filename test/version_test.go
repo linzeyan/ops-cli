@@ -3,10 +3,12 @@ package test_test
 import (
 	"os/exec"
 	"testing"
+
+	"github.com/linzeyan/ops-cli/cmd"
 )
 
 func TestBinaryVersion(t *testing.T) {
-	const subCommand = "version"
+	const subCommand = cmd.CommandVersion
 	args := []string{"", "-y", "-j"}
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {

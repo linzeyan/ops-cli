@@ -10,34 +10,34 @@ import (
 )
 
 func TestRandom(t *testing.T) {
-	const subCommand = "random"
+	const subCommand = cmd.CommandRandom
 	testCases := []struct {
 		input          []string
 		unexpectedText []cmd.RandomCharacter
 		expectedLength int
 	}{
 		{
-			[]string{runCommand, mainGo, subCommand, "number"},
+			[]string{runCommand, mainGo, subCommand, cmd.CommandNumber},
 			[]cmd.RandomCharacter{cmd.LowercaseLetters, cmd.UppercaseLetters, cmd.Symbols},
 			24,
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "number", "-l", "64"},
+			[]string{runCommand, mainGo, subCommand, cmd.CommandNumber, "-l", "64"},
 			[]cmd.RandomCharacter{cmd.LowercaseLetters, cmd.UppercaseLetters, cmd.Symbols},
 			64,
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "symbol"},
+			[]string{runCommand, mainGo, subCommand, cmd.CommandSymbol},
 			[]cmd.RandomCharacter{cmd.LowercaseLetters, cmd.UppercaseLetters, cmd.Numbers},
 			24,
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "lowercase"},
+			[]string{runCommand, mainGo, subCommand, cmd.CommandLowercase},
 			[]cmd.RandomCharacter{cmd.Numbers, cmd.UppercaseLetters, cmd.Symbols},
 			24,
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "uppercase", "-l", "200"},
+			[]string{runCommand, mainGo, subCommand, cmd.CommandUppercase, "-l", "200"},
 			[]cmd.RandomCharacter{cmd.Numbers, cmd.LowercaseLetters, cmd.Symbols},
 			200,
 		},
@@ -61,13 +61,13 @@ func TestRandom(t *testing.T) {
 }
 
 func TestBinaryRandom(t *testing.T) {
-	const subCommand = "random"
+	const subCommand = cmd.CommandRandom
 	args := [][]string{
-		{subCommand, "lowercase", "-l", "30"},
-		{subCommand, "uppercase", "-l", "40"},
-		{subCommand, "number", "-l", "50"},
-		{subCommand, "symbol", "-l", "60"},
-		{subCommand, "bootstrap-token", "-l", "60"},
+		{subCommand, cmd.CommandLowercase, "-l", "30"},
+		{subCommand, cmd.CommandUppercase, "-l", "40"},
+		{subCommand, cmd.CommandNumber, "-l", "50"},
+		{subCommand, cmd.CommandSymbol, "-l", "60"},
+		{subCommand, cmd.CommandBootstrap, "-l", "60"},
 		{subCommand, cmd.CommandBase64, "-l", "100"},
 		{subCommand, cmd.CommandHex, "-l", "10"},
 		{subCommand, "-l", "70"},

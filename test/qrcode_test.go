@@ -5,18 +5,19 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestQrcode(t *testing.T) {
-	const subCommand = "qrcode"
+	const subCommand = cmd.CommandQrcode
 	testCases := []struct {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, "otp", "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", "otp.png"}, "otp.png"},
-		{[]string{runCommand, mainGo, subCommand, "wifi", "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", "wifi.png", "-s", "500"}, "wifi.png"},
-		{[]string{runCommand, mainGo, subCommand, "text", "https://www.google.com", "-o", "text.png"}, "text.png"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandOtp, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", "otp.png"}, "otp.png"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandWiFi, "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", "wifi.png", "-s", "500"}, "wifi.png"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandText, "https://www.google.com", "-o", "text.png"}, "text.png"},
 	}
 
 	for i := range testCases {
@@ -31,7 +32,7 @@ func TestQrcode(t *testing.T) {
 }
 
 func TestQrcodeRead(t *testing.T) {
-	const subCommand = "qrcode"
+	const subCommand = cmd.CommandQrcode
 	testCases := []struct {
 		input    []string
 		expected string
@@ -54,11 +55,11 @@ func TestQrcodeRead(t *testing.T) {
 }
 
 func TestBinaryQrcode(t *testing.T) {
-	const subCommand = "qrcode"
+	const subCommand = cmd.CommandQrcode
 	args := [][]string{
-		{subCommand, "otp", "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", "otp.png"},
-		{subCommand, "wifi", "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", "wifi.png", "-s", "500"},
-		{subCommand, "text", "https://www.google.com", "-o", "text.png"},
+		{subCommand, cmd.CommandOtp, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", "otp.png"},
+		{subCommand, cmd.CommandWiFi, "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", "wifi.png", "-s", "500"},
+		{subCommand, cmd.CommandText, "https://www.google.com", "-o", "text.png"},
 	}
 	t.Run("read", func(t *testing.T) {
 		if err := exec.Command(binaryCommand, []string{subCommand, "read", "assets/example.png"}...).Run(); err != nil {

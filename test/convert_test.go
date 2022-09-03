@@ -7,19 +7,20 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestConvert(t *testing.T) {
-	const subCommand = "convert"
+	const subCommand = cmd.CommandConvert
 	testCases := []struct {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, "yaml2json", "-i", "assets/proxy.yaml", "-o", "testy.json"}, "assets/proxy.json"},
-		{[]string{runCommand, mainGo, subCommand, "yaml2toml", "-i", "assets/proxy.yaml", "-o", "testy.toml"}, "assets/proxy.toml"},
-		{[]string{runCommand, mainGo, subCommand, "toml2json", "-i", "assets/proxy.toml", "-o", "testt.json"}, "assets/proxy.json"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandYaml2JSON, "-i", "assets/proxy.yaml", "-o", "testy.json"}, "assets/proxy.json"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandYaml2Toml, "-i", "assets/proxy.yaml", "-o", "testy.toml"}, "assets/proxy.toml"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandToml2JSON, "-i", "assets/proxy.toml", "-o", "testt.json"}, "assets/proxy.json"},
 	}
 	if isWindows() {
 		if err := common.Dos2Unix("assets/proxy.json"); err != nil {
@@ -53,8 +54,15 @@ func TestConvert(t *testing.T) {
 }
 
 func TestBinaryConvert(t *testing.T) {
-	const subCommand = "convert"
-	testCommand := []string{"json2csv", "json2toml", "json2yaml", "yaml2json", "yaml2toml", "yaml2csv"}
+	const subCommand = cmd.CommandConvert
+	testCommand := []string{
+		cmd.CommandJSON2Csv,
+		cmd.CommandJSON2Toml,
+		cmd.CommandJSON2Yaml,
+		cmd.CommandYaml2JSON,
+		cmd.CommandYaml2Toml,
+		cmd.CommandYaml2Csv,
+	}
 
 	for _, cmd := range testCommand {
 		slice := strings.Split(cmd, "2")

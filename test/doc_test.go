@@ -5,19 +5,20 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDoc(t *testing.T) {
-	const subCommand = "doc"
+	const subCommand = cmd.CommandDoc
 	testCases := []struct {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, "man", "-d", "doc"}, "doc/ops-cli.3"},
-		{[]string{runCommand, mainGo, subCommand, "markdown", "-d", "doc"}, "doc/ops-cli.md"},
-		{[]string{runCommand, mainGo, subCommand, "rest", "-d", "doc"}, "doc/ops-cli.rst"},
-		{[]string{runCommand, mainGo, subCommand, "yaml", "-d", "doc"}, "doc/ops-cli.yaml"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandMan, "-d", "doc"}, "doc/ops-cli.3"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandMarkdown, "-d", "doc"}, "doc/ops-cli.md"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandReST, "-d", "doc"}, "doc/ops-cli.rst"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandYaml, "-d", "doc"}, "doc/ops-cli.yaml"},
 	}
 
 	for i := range testCases {
@@ -33,8 +34,8 @@ func TestDoc(t *testing.T) {
 }
 
 func TestBinaryDoc(t *testing.T) {
-	const subCommand = "doc"
-	args := []string{"man", "markdown", "rest", "yaml"}
+	const subCommand = cmd.CommandDoc
+	args := []string{cmd.CommandMan, cmd.CommandMarkdown, cmd.CommandReST, cmd.CommandYaml}
 
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {

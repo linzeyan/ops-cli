@@ -4,11 +4,12 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCert(t *testing.T) {
-	const subCommand = "cert"
+	const subCommand = cmd.CommandCert
 	testCases := []struct {
 		input    []string
 		expected any
@@ -32,7 +33,7 @@ func TestCert(t *testing.T) {
 }
 
 func TestBinaryCert(t *testing.T) {
-	const subCommand = "cert"
+	const subCommand = cmd.CommandCert
 	args := []string{"--days", "--dns", "--expiry", "--ip", "--issuer", "-j", "-y"}
 
 	t.Run(testHost, func(t *testing.T) {

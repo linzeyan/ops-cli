@@ -4,6 +4,7 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -70,7 +71,7 @@ const geoipBatch = `[
 `
 
 func TestGeoip(t *testing.T) {
-	const subCommand = "geoip"
+	const subCommand = cmd.CommandGeoip
 	testCases := []struct {
 		input    []string
 		expected string
@@ -92,7 +93,7 @@ func TestGeoip(t *testing.T) {
 }
 
 func TestBinaryGeoip(t *testing.T) {
-	const subCommand = "geoip"
+	const subCommand = cmd.CommandGeoip
 	host := "8.8.8.8"
 	args := []string{"-j", "-y"}
 

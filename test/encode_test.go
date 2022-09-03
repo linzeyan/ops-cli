@@ -87,7 +87,7 @@ func TestPem(t *testing.T) {
 }
 
 func TestEncode(t *testing.T) {
-	const subCommand = "encode"
+	const subCommand = cmd.CommandEncode
 	testCases := []struct {
 		input    []string
 		expected string
@@ -116,7 +116,7 @@ func TestEncode(t *testing.T) {
 }
 
 func TestBinaryEncode(t *testing.T) {
-	const subCommand = "encode"
+	const subCommand = cmd.CommandEncode
 	args := [][]string{
 		{subCommand, cmd.CommandBase32Hex, testHost},
 		{subCommand, cmd.CommandBase32Std, testHost},

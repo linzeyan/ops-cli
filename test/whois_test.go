@@ -5,11 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestWhois(t *testing.T) {
-	const subCommand = "whois"
+	const subCommand = cmd.CommandWhois
 	testCases := []struct {
 		input    []string
 		expected string
@@ -46,7 +47,7 @@ func TestWhois(t *testing.T) {
 }
 
 func TestWhoisRegistrar(t *testing.T) {
-	const subCommand = "whois"
+	const subCommand = cmd.CommandWhois
 	testCases := []struct {
 		input    []string
 		expected string
@@ -73,7 +74,7 @@ func TestWhoisRegistrar(t *testing.T) {
 }
 
 func TestBinaryWhois(t *testing.T) {
-	const subCommand = "whois"
+	const subCommand = cmd.CommandWhois
 	args := []string{"-d", "-e", "-n", "-r", "-j", "-y"}
 
 	for i := range args {
