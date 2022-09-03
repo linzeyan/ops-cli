@@ -68,7 +68,6 @@ func init() {
 }
 
 func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat) (map[string]int, map[int]string) {
-	// out := make(map[string]string)
 	idx := make(map[string]int)
 	out := make(map[int]string)
 	for _, v := range iface {
@@ -100,7 +99,6 @@ func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat)
 		}
 		idx[v.Name] = v.Index
 		value = fmt.Sprintf("%s: %s%s", v.Name, value, addr)
-		// out[v.Index] = fmt.Sprintf("%s: %s%s\n", v.Name, value, addr)
 		for _, vv := range counters {
 			if v.Name == vv.Name && len(v.Addrs) != 0 {
 				value = fmt.Sprintf("%s\n\tRX packets %d  bytes %d (%s)\n\tRX errors %d  dropped %d",
