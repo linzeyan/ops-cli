@@ -35,7 +35,6 @@ var dos2unixCmd = &cobra.Command{
 		}
 	},
 	DisableFlagsInUseLine: true,
-	DisableFlagParsing:    true,
 }
 
 func init() {
