@@ -86,7 +86,7 @@ func TestGeoip(t *testing.T) {
 			if err != nil {
 				t.Error(testCases[i].input, err)
 			}
-			assert.Equal(t, testCases[i].expected, string(got))
+			assert.JSONEq(t, testCases[i].expected, string(got))
 		})
 	}
 }
