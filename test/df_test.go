@@ -1,7 +1,6 @@
 package test_test
 
 import (
-	"log"
 	"os/exec"
 	"testing"
 
@@ -13,7 +12,7 @@ func TestDfBinary(t *testing.T) {
 	t.Run(subCommand, func(t *testing.T) {
 		out, err := exec.Command(binaryCommand, subCommand).Output()
 		if err != nil {
-			log.Println(string(out))
+			t.Error(string(out))
 			t.Error(err)
 		}
 	})
