@@ -38,24 +38,16 @@ var statCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			stat, err := os.Lstat(f)
-			if err != nil {
-				return err
-			}
 			var s FileStat
-			return s.String(f, stat)
+			return s.String(f)
 		}
 		for _, v := range args {
 			f, err := filepath.Abs(v)
 			if err != nil {
 				return err
 			}
-			stat, err := os.Lstat(f)
-			if err != nil {
-				return err
-			}
 			var s FileStat
-			err = s.String(v, stat)
+			err = s.String(f)
 			if err != nil {
 				return err
 			}
@@ -63,7 +55,6 @@ var statCmd = &cobra.Command{
 		return err
 	},
 	DisableFlagsInUseLine: true,
-	DisableFlagParsing:    true,
 }
 
 func init() {
@@ -92,8 +83,12 @@ type FileStat struct {
 	Qspare        [2]int64 `json:"Qspare"`
 }
 
-func (f *FileStat) String(path string, stat fs.FileInfo) error {
+func (f *FileStat) String(path string) error {
 	var err error
+	stat, err := os.Lstat(path)
+	if err != nil {
+		return err
+	}
 	err = Encoder.JSONMarshaler(stat.Sys(), f)
 	if err != nil {
 		return err
@@ -101,18 +96,18 @@ func (f *FileStat) String(path string, stat fs.FileInfo) error {
 	var out string
 	out = fmt.Sprintf(`  File: "%s"`, path)
 	out += fmt.Sprintf("\n  Size: %s", common.ByteSize(f.Size).String())
-	out += fmt.Sprintf("\t\tFileType: %d", stat.Mode())
-	out += fmt.Sprintf("\n  Mode: (%04o/%s)", stat.Mode().Perm(), stat.Mode().String())
+	out += fmt.Sprintf("\t\tFileType: %s", f.FileType(stat))
+	out += fmt.Sprintf("\n  Mode: (%04o/%s)", stat.Mode().Perm(), stat.Mode())
 	uid, err := user.LookupId(fmt.Sprintf(`%d`, f.UID))
 	if err != nil {
 		return err
 	}
-	out += fmt.Sprintf("\tUid: (%d/%s)", f.UID, uid.Username)
+	out += fmt.Sprintf("\tUid: (%5d/%8s)", f.UID, uid.Username)
 	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, f.GID))
 	if err != nil {
 		return err
 	}
-	out += fmt.Sprintf("\tGid: (%d/%s)", f.GID, gid.Name)
+	out += fmt.Sprintf("\tGid: (%5d/%8s)", f.GID, gid.Name)
 	out += fmt.Sprintf("\nBlocks: %d", f.Blocks)
 	out += fmt.Sprintf("\tBlock Size: %d", f.Blksize)
 	// out += fmt.Sprintf("\nDevice: %d,%s", f.Rdev, f.Rdev)
@@ -124,6 +119,41 @@ func (f *FileStat) String(path string, stat fs.FileInfo) error {
 	out += fmt.Sprintf("\n Birth: %s", time.Unix(f.Birthtimespec.SEC, f.Birthtimespec.Nsec).Local().Format(time.ANSIC))
 	PrintString(out)
 	return err
+}
+
+func (f *FileStat) FileType(stat fs.FileInfo) string {
+	switch stat.Mode() & fs.ModeType {
+	case fs.ModeDir: // d
+		return "Directory"
+	case fs.ModeAppend: // a
+		return "append-only"
+	case fs.ModeExclusive: // l
+		return "exclusive use"
+	case fs.ModeTemporary: // T
+		return "temporary file"
+	case fs.ModeSymlink: // L
+		return "Symbolic Link"
+	case fs.ModeDevice: // D
+		return "Block Device"
+	case fs.ModeNamedPipe: // p
+		return "named pipe"
+	case fs.ModeSocket: // S
+		return "Socket"
+	case fs.ModeSetuid: // u
+		return "setuid"
+	case fs.ModeSetgid: // g
+		return "setgid"
+	case fs.ModeCharDevice, fs.ModeCharDevice | fs.ModeDevice: // c, Dc
+		return "Character Device"
+	case fs.ModeSticky: // t
+		return "sticky"
+	case fs.ModeIrregular: // ?
+		return "Non-regular file"
+	case fs.ModePerm, fs.ModeType:
+		return "unknown"
+	default:
+		return "Regular File"
+	}
 }
 
 type Timespec struct {
