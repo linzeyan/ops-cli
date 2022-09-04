@@ -85,6 +85,9 @@ func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
 		if u.output != "" {
 			return os.WriteFile(u.output, result.([]byte), common.FileModeRAll)
 		}
+		if u.verbose {
+			return err
+		}
 	}
 	PrintString(result)
 	return err
