@@ -28,9 +28,11 @@ import (
 )
 
 var ipCmd = &cobra.Command{
-	Use:   CommandIP + " {all|interface}",
-	Args:  cobra.ExactArgs(1),
-	Short: "View interfaces configuration",
+	Use:        CommandIP + " {all|interface}",
+	Args:       cobra.ExactArgs(1),
+	ValidArgs:  ipCmdValidArgs(),
+	ArgAliases: []string{"a"},
+	Short:      "View interfaces configuration",
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		iface, err := net.Interfaces()
@@ -65,6 +67,18 @@ var ipCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(ipCmd)
+}
+
+func ipCmdValidArgs() []string {
+	iface, err := net.Interfaces()
+	if err != nil {
+		return nil
+	}
+	var out []string
+	for _, v := range iface {
+		out = append(out, v.Name)
+	}
+	return append(out, "all")
 }
 
 func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat) (map[string]int, map[int]string) {
