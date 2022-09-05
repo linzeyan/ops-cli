@@ -28,11 +28,10 @@ import (
 )
 
 var ipCmd = &cobra.Command{
-	Use:        CommandIP + " {all|interface}",
-	Args:       cobra.ExactArgs(1),
-	ValidArgs:  ipCmdValidArgs(),
-	ArgAliases: []string{"a"},
-	Short:      "View interfaces configuration",
+	Use:       CommandIP + " {all|interface}",
+	Args:      cobra.OnlyValidArgs,
+	ValidArgs: ipCmdValidArgs(),
+	Short:     "View interfaces configuration",
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		iface, err := net.Interfaces()
@@ -53,11 +52,9 @@ var ipCmd = &cobra.Command{
 				}
 			}
 		default:
-			v, ok := idx[args[0]]
-			if !ok {
-				return common.ErrInvalidArg
+			for _, value := range args {
+				PrintString(fmt.Sprintf("%d: %s", idx[value], out[idx[value]]))
 			}
-			PrintString(fmt.Sprintf("%d: %s", v, out[v]))
 		}
 		return err
 	},
