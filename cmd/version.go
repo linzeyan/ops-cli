@@ -27,20 +27,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var versionCmd = &cobra.Command{
-	Use:   CommandVersion,
-	Short: "Print version information",
-	Run: func(_ *cobra.Command, _ []string) {
-		var v = VersionOutput{
-			Version: appVersion,
-			Commit:  appCommit,
-			Date:    appBuildTime,
-			Runtime: fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
-		}
-		OutputInterfaceString(v)
-	},
-}
-
 var (
 	appVersion   = "dev"
 	appBuildTime = "unknown"
@@ -48,6 +34,19 @@ var (
 )
 
 func init() {
+	var versionCmd = &cobra.Command{
+		Use:   CommandVersion,
+		Short: "Print version information",
+		Run: func(_ *cobra.Command, _ []string) {
+			var v = VersionOutput{
+				Version: appVersion,
+				Commit:  appCommit,
+				Date:    appBuildTime,
+				Runtime: fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
+			}
+			OutputInterfaceString(v)
+		},
+	}
 	rootCmd.AddCommand(versionCmd)
 }
 
