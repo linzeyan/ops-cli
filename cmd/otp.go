@@ -33,32 +33,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var otpCmd = &cobra.Command{
-	Use:   CommandOtp,
-	Short: "Calculate passcode or generate secret",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+func init() {
+	var otpFlag OtpFlag
+	var otpCmd = &cobra.Command{
+		Use:   CommandOtp,
+		Short: "Calculate passcode or generate secret",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
-	DisableFlagsInUseLine: true,
-}
+		DisableFlagsInUseLine: true,
+	}
 
-var otpSubCmdCalculate = &cobra.Command{
-	Use:   CommandCalculate,
-	Args:  cobra.MinimumNArgs(1),
-	Short: "Calculate passcode",
-	Run:   otpCmdGlobalVar.Run,
-	Example: common.Examples(`# Calculate the passcode for the specified secret
+	var otpSubCmdCalculate = &cobra.Command{
+		Use:   CommandCalculate,
+		Args:  cobra.MinimumNArgs(1),
+		Short: "Calculate passcode",
+		Run:   otpFlag.Run,
+		Example: common.Examples(`# Calculate the passcode for the specified secret
 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
 
 # Calculate the passcode of the specified secret, the period is 15 seconds, and the number of digits is 7
 T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
-}
+	}
 
-var otpSubCmdGenerate = &cobra.Command{
-	Use:   CommandGenerate,
-	Short: "Generate otp secret",
-	Run:   otpCmdGlobalVar.Run,
-	Example: common.Examples(`# Generate OTP and specify a period of 15 seconds
+	var otpSubCmdGenerate = &cobra.Command{
+		Use:   CommandGenerate,
+		Short: "Generate otp secret",
+		Run:   otpFlag.Run,
+		Example: common.Examples(`# Generate OTP and specify a period of 15 seconds
 -p 15
 
 # Generate OTP and specify SHA256 algorithm
@@ -66,16 +68,12 @@ var otpSubCmdGenerate = &cobra.Command{
 
 # Generate OTP and specify SHA512 algorithm, the period is 15 seconds
 -a sha512 -p 15`, CommandOtp, CommandGenerate),
-}
-
-var otpCmdGlobalVar OtpFlag
-
-func init() {
+	}
 	rootCmd.AddCommand(otpCmd)
 
-	otpCmd.PersistentFlags().StringVarP(&otpCmdGlobalVar.alg, "algorithm", "a", "SHA1", common.Usage("The hash algorithm used by the credential(SHA1/SHA256/SHA512)"))
-	otpCmd.PersistentFlags().Int8VarP(&otpCmdGlobalVar.period, "period", "p", 30, common.Usage("The period parameter defines a validity period in seconds for the TOTP code(15/30/60)"))
-	otpCmd.PersistentFlags().Int8VarP(&otpCmdGlobalVar.digit, "digits", "d", 6, common.Usage("The number of digits in a one-time password(6/7/8)"))
+	otpCmd.PersistentFlags().StringVarP(&otpFlag.alg, "algorithm", "a", "SHA1", common.Usage("The hash algorithm used by the credential(SHA1/SHA256/SHA512)"))
+	otpCmd.PersistentFlags().Int8VarP(&otpFlag.period, "period", "p", 30, common.Usage("The period parameter defines a validity period in seconds for the TOTP code(15/30/60)"))
+	otpCmd.PersistentFlags().Int8VarP(&otpFlag.digit, "digits", "d", 6, common.Usage("The number of digits in a one-time password(6/7/8)"))
 
 	otpCmd.AddCommand(otpSubCmdCalculate, otpSubCmdGenerate)
 }
