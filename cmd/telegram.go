@@ -25,81 +25,79 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var telegramCmd = &cobra.Command{
-	Use:   CommandTelegram,
-	Short: "Send message to Telegram",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+func init() {
+	var telegramFlag TelegramFlag
+	var telegramCmd = &cobra.Command{
+		Use:   CommandTelegram,
+		Short: "Send message to Telegram",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
-	DisableFlagsInUseLine: true,
-}
+		DisableFlagsInUseLine: true,
+	}
 
-var telegramSubCmdAudio = &cobra.Command{
-	Use:   CommandAudio,
-	Short: "Send audio file to Telegram",
-	RunE:  telegramCmdGlobalVar.RunE,
-}
+	var telegramSubCmdAudio = &cobra.Command{
+		Use:   CommandAudio,
+		Short: "Send audio file to Telegram",
+		RunE:  telegramFlag.RunE,
+	}
 
-var telegramSubCmdFile = &cobra.Command{
-	Use:   CommandFile,
-	Short: "Send file to Telegram",
-	RunE:  telegramCmdGlobalVar.RunE,
-	Example: common.Examples(`# Send file
+	var telegramSubCmdFile = &cobra.Command{
+		Use:   CommandFile,
+		Short: "Send file to Telegram",
+		RunE:  telegramFlag.RunE,
+		Example: common.Examples(`# Send file
 -t bot_token -c chat_id -a '~/readme.md'`, CommandTelegram, CommandFile),
-}
+	}
 
-var telegramSubCmdID = &cobra.Command{
-	Use:   CommandID,
-	Short: "Get chat ID",
-	RunE: func(_ *cobra.Command, _ []string) error {
-		var err error
-		if err = telegramCmdGlobalVar.Init(); err != nil {
+	var telegramSubCmdID = &cobra.Command{
+		Use:   CommandID,
+		Short: "Get chat ID",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			var err error
+			if err = telegramFlag.Init(); err != nil {
+				return err
+			}
+			telegramFlag.GetUpdate()
 			return err
-		}
-		telegramCmdGlobalVar.GetUpdate()
-		return err
-	},
-	Example: common.Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
+		},
+		Example: common.Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
 --config ~/.config.toml`, CommandTelegram, CommandID),
-}
+	}
 
-var telegramSubCmdText = &cobra.Command{
-	Use:   CommandText,
-	Short: "Send text to Telegram",
-	RunE:  telegramCmdGlobalVar.RunE,
-	Example: common.Examples(`# Send message
+	var telegramSubCmdText = &cobra.Command{
+		Use:   CommandText,
+		Short: "Send text to Telegram",
+		RunE:  telegramFlag.RunE,
+		Example: common.Examples(`# Send message
 -t bot_token -c chat_id -a 'Hello word'`, CommandTelegram, CommandText),
-}
+	}
 
-var telegramSubCmdPhoto = &cobra.Command{
-	Use:   CommandPhoto,
-	Short: "Send photo to Telegram",
-	RunE:  telegramCmdGlobalVar.RunE,
-	Example: common.Examples(`# Send photo
+	var telegramSubCmdPhoto = &cobra.Command{
+		Use:   CommandPhoto,
+		Short: "Send photo to Telegram",
+		RunE:  telegramFlag.RunE,
+		Example: common.Examples(`# Send photo
 -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
 -t bot_token -c chat_id -a '~/photo/cat.png'`, CommandTelegram, CommandPhoto),
-}
+	}
 
-var telegramSubCmdVideo = &cobra.Command{
-	Use:   CommandVideo,
-	Short: "Send video file to Telegram",
-	RunE:  telegramCmdGlobalVar.RunE,
-}
+	var telegramSubCmdVideo = &cobra.Command{
+		Use:   CommandVideo,
+		Short: "Send video file to Telegram",
+		RunE:  telegramFlag.RunE,
+	}
 
-var telegramSubCmdVoice = &cobra.Command{
-	Use:   CommandVoice,
-	Short: "Send voice file to Telegram",
-	RunE:  telegramCmdGlobalVar.RunE,
-}
-
-var telegramCmdGlobalVar TelegramFlag
-
-func init() {
+	var telegramSubCmdVoice = &cobra.Command{
+		Use:   CommandVoice,
+		Short: "Send voice file to Telegram",
+		RunE:  telegramFlag.RunE,
+	}
 	rootCmd.AddCommand(telegramCmd)
 
-	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.Token, "token", "t", "", common.Usage("Bot token (required)"))
-	telegramCmd.PersistentFlags().Int64VarP(&telegramCmdGlobalVar.Chat, "chat-id", "c", 0, common.Usage("Chat ID"))
-	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.arg, "arg", "a", "", common.Usage("Input argument"))
-	telegramCmd.PersistentFlags().StringVarP(&telegramCmdGlobalVar.caption, "caption", "", "", common.Usage("Add caption for file"))
+	telegramCmd.PersistentFlags().StringVarP(&telegramFlag.Token, "token", "t", "", common.Usage("Bot token (required)"))
+	telegramCmd.PersistentFlags().Int64VarP(&telegramFlag.Chat, "chat-id", "c", 0, common.Usage("Chat ID"))
+	telegramCmd.PersistentFlags().StringVarP(&telegramFlag.arg, "arg", "a", "", common.Usage("Input argument"))
+	telegramCmd.PersistentFlags().StringVarP(&telegramFlag.caption, "caption", "", "", common.Usage("Add caption for file"))
 
 	telegramCmd.AddCommand(telegramSubCmdAudio)
 	telegramCmd.AddCommand(telegramSubCmdFile)
