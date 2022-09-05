@@ -29,12 +29,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var certCmd = &cobra.Command{
-	Use:   CommandCert + " [host|file]",
-	Args:  cobra.ExactArgs(1),
-	Short: "Check tls cert expiry time",
-	RunE:  certCmdGlobalVar.RunE,
-	Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
+func init() {
+	var certCmdFlag CertFlag
+
+	var certCmd = &cobra.Command{
+		Use:   CommandCert + " [host|file]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Check tls cert expiry time",
+		RunE:  certCmdFlag.RunE,
+		Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
 www.google.com
 
 # Only print certificate expiration time
@@ -45,19 +48,15 @@ www.google.com --dns
 
 # Print certificate expiration time, DNS and issuer
 example.com.crt`, CommandCert),
-}
-
-var certCmdGlobalVar CertFlag
-
-func init() {
+	}
 	rootCmd.AddCommand(certCmd)
 
-	certCmd.Flags().StringVarP(&certCmdGlobalVar.port, "port", "p", "443", common.Usage("Specify host port"))
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.ip, "ip", false, common.Usage("Only print IP"))
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.expiry, "expiry", false, common.Usage("Only print expiry time"))
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.dns, "dns", false, common.Usage("Only print DNS names"))
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.issuer, "issuer", false, common.Usage("Only print issuer"))
-	certCmd.Flags().BoolVar(&certCmdGlobalVar.days, "days", false, common.Usage("Only print the remaining days"))
+	certCmd.Flags().StringVarP(&certCmdFlag.port, "port", "p", "443", common.Usage("Specify host port"))
+	certCmd.Flags().BoolVar(&certCmdFlag.ip, "ip", false, common.Usage("Only print IP"))
+	certCmd.Flags().BoolVar(&certCmdFlag.expiry, "expiry", false, common.Usage("Only print expiry time"))
+	certCmd.Flags().BoolVar(&certCmdFlag.dns, "dns", false, common.Usage("Only print DNS names"))
+	certCmd.Flags().BoolVar(&certCmdFlag.issuer, "issuer", false, common.Usage("Only print issuer"))
+	certCmd.Flags().BoolVar(&certCmdFlag.days, "days", false, common.Usage("Only print the remaining days"))
 }
 
 type CertFlag struct {
