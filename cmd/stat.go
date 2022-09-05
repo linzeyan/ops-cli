@@ -21,7 +21,6 @@ import (
 	"io/fs"
 	"os"
 	"os/user"
-	"path/filepath"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -29,25 +28,14 @@ import (
 )
 
 var statCmd = &cobra.Command{
-	Use:   CommandStat + " file...",
+	Use:   CommandStat + " path...",
 	Short: "Display file informations",
+	Args:  cobra.MinimumNArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
-		if len(args) == 0 {
-			f, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-			var s FileStat
-			return s.String(f)
-		}
 		for _, v := range args {
-			f, err := filepath.Abs(v)
-			if err != nil {
-				return err
-			}
 			var s FileStat
-			err = s.String(f)
+			err = s.String(v)
 			if err != nil {
 				return err
 			}
@@ -96,8 +84,10 @@ func (f *FileStat) String(path string) error {
 	var out string
 	out = fmt.Sprintf(`  File: "%s"`, path)
 	out += fmt.Sprintf("\n  Size: %s", common.ByteSize(f.Size).String())
-	out += fmt.Sprintf("\t\tFileType: %s", f.FileType(stat))
-	out += fmt.Sprintf("\n  Mode: (%04o/%s)", stat.Mode().Perm(), stat.Mode())
+	out += fmt.Sprintf("\t\tBlocks: %d", f.Blocks)
+	out += fmt.Sprintf("\tIO Block: %d", f.Blksize)
+	out += fmt.Sprintf("\tFileType: %s", f.FileType(stat))
+	out += fmt.Sprintf("\n  Mode: (%#o/%s)", stat.Mode().Perm(), stat.Mode())
 	uid, err := user.LookupId(fmt.Sprintf(`%d`, f.UID))
 	if err != nil {
 		return err
@@ -108,9 +98,7 @@ func (f *FileStat) String(path string) error {
 		return err
 	}
 	out += fmt.Sprintf("\tGid: (%5d/%8s)", f.GID, gid.Name)
-	out += fmt.Sprintf("\nBlocks: %d", f.Blocks)
-	out += fmt.Sprintf("\tBlock Size: %d", f.Blksize)
-	// out += fmt.Sprintf("\nDevice: %d,%s", f.Rdev, f.Rdev)
+	out += fmt.Sprintf("\nDevice: %d", f.Dev)
 	out += fmt.Sprintf("\tInode: %d", f.Ino)
 	out += fmt.Sprintf("\tLinks: %d", f.Nlink)
 	out += fmt.Sprintf("\nAccess: %s", time.Unix(f.Atimespec.SEC, f.Atimespec.Nsec).Local().Format(time.ANSIC))
