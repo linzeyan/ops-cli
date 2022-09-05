@@ -29,20 +29,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var encryptCmd = &cobra.Command{
-	Use:   CommandEncrypt,
-	Short: "Encrypt or decrypt",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+var Encryptor EncrytpFlag
 
-	DisableFlagsInUseLine: true,
-}
+func init() {
+	var encryptFlag EncrytpFlag
+	var encryptCmd = &cobra.Command{
+		Use:   CommandEncrypt,
+		Short: "Encrypt or decrypt",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
-var encryptSubCmdFile = &cobra.Command{
-	Use:   CommandFile,
-	Args:  cobra.ExactArgs(1),
-	Short: "Encrypt or decrypt file",
-	RunE:  Encryptor.FileRunE,
-	Example: common.Examples(`# Encrypt file
+		DisableFlagsInUseLine: true,
+	}
+
+	var encryptSubCmdFile = &cobra.Command{
+		Use:   CommandFile,
+		Args:  cobra.ExactArgs(1),
+		Short: "Encrypt or decrypt file",
+		RunE:  encryptFlag.FileRunE,
+		Example: common.Examples(`# Encrypt file
 ~/README.md
 ~/README.md --config ~/config.toml
 ~/README.md -k '45984614e8f7d6c5'
@@ -53,14 +57,14 @@ var encryptSubCmdFile = &cobra.Command{
 ~/README.md -d --config ~/config.toml
 ~/README.md -k '45984614e8f7d6c5' -d
 ~/README.md -k key.txt -d`, CommandEncrypt, CommandFile),
-}
+	}
 
-var encryptSubCmdString = &cobra.Command{
-	Use:   CommandString,
-	Args:  cobra.ExactArgs(1),
-	Short: "Encrypt or decrypt string",
-	RunE:  Encryptor.StringRunE,
-	Example: common.Examples(`# Encrypt string
+	var encryptSubCmdString = &cobra.Command{
+		Use:   CommandString,
+		Args:  cobra.ExactArgs(1),
+		Short: "Encrypt or decrypt string",
+		RunE:  encryptFlag.StringRunE,
+		Example: common.Examples(`# Encrypt string
 "Hello World!" --config ~/config.toml
 "Hello World!" -k '45984614e8f7d6c5'
 "Hello World!" -k key.txt
@@ -69,16 +73,12 @@ var encryptSubCmdString = &cobra.Command{
 "Hello World!" -d --config ~/config.toml
 "Hello World!" -k '45984614e8f7d6c5' -d
 "Hello World!" -k key.txt -d`, CommandEncrypt, CommandString),
-}
-
-var Encryptor EncrytpFlag
-
-func init() {
+	}
 	rootCmd.AddCommand(encryptCmd)
 
-	encryptCmd.PersistentFlags().BoolVarP(&Encryptor.decrypt, "decrypt", "d", false, common.Usage("Decrypt"))
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.mode, "mode", "m", "CTR", common.Usage("Encrypt mode(CFB/OFB/CTR/GCM)"))
-	encryptCmd.PersistentFlags().StringVarP(&Encryptor.Key, "key", "k", "", common.Usage("Specify the encrypt key text or key file"))
+	encryptCmd.PersistentFlags().BoolVarP(&encryptFlag.decrypt, "decrypt", "d", false, common.Usage("Decrypt"))
+	encryptCmd.PersistentFlags().StringVarP(&encryptFlag.mode, "mode", "m", "CTR", common.Usage("Encrypt mode(CFB/OFB/CTR/GCM)"))
+	encryptCmd.PersistentFlags().StringVarP(&encryptFlag.Key, "key", "k", "", common.Usage("Specify the encrypt key text or key file"))
 
 	encryptCmd.AddCommand(encryptSubCmdFile)
 	encryptCmd.AddCommand(encryptSubCmdString)
