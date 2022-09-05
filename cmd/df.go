@@ -30,8 +30,10 @@ import (
 )
 
 var dfCmd = &cobra.Command{
-	Use:   CommandDf,
-	Short: "Display free disk spaces",
+	Use:       CommandDf,
+	Short:     "Display free disk spaces",
+	ValidArgs: dfCmdValidArgs(),
+	Args:      cobra.OnlyValidArgs,
 	RunE: func(_ *cobra.Command, args []string) error {
 		var err error
 		partition, err := disk.Partitions(true)
@@ -67,6 +69,18 @@ var dfCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(dfCmd)
+}
+
+func dfCmdValidArgs() []string {
+	partition, err := disk.Partitions(true)
+	if err != nil {
+		return nil
+	}
+	var out []string
+	for _, v := range partition {
+		out = append(out, v.Mountpoint)
+	}
+	return out
 }
 
 type DfResponse struct {
