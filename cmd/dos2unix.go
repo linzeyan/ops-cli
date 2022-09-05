@@ -23,20 +23,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var dos2unixCmd = &cobra.Command{
-	Use:   CommandDos2Unix + " file...",
-	Args:  cobra.MinimumNArgs(1),
-	Short: "Convert file eol to unix style",
-	Run: func(_ *cobra.Command, args []string) {
-		for _, f := range args {
-			if err := common.Dos2Unix(f); err != nil {
-				log.Printf("%s: %v\n", f, err)
-			}
-		}
-	},
-	DisableFlagsInUseLine: true,
-}
-
 func init() {
+	var dos2unixCmd = &cobra.Command{
+		Use:   CommandDos2Unix + " file...",
+		Args:  cobra.MinimumNArgs(1),
+		Short: "Convert file eol to unix style",
+		Run: func(_ *cobra.Command, args []string) {
+			for _, f := range args {
+				if err := common.Dos2Unix(f); err != nil {
+					log.Printf("%s: %v\n", f, err)
+				}
+			}
+		},
+		DisableFlagsInUseLine: true,
+	}
 	rootCmd.AddCommand(dos2unixCmd)
 }
