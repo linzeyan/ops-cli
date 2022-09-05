@@ -28,75 +28,59 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var lineCmd = &cobra.Command{
-	Use:   CommandLINE,
-	Short: "Send message to LINE",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+func init() {
+	var lineFlag LineFlag
+	var lineCmd = &cobra.Command{
+		Use:   CommandLINE,
+		Short: "Send message to LINE",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
-	DisableFlagsInUseLine: true,
-}
+		DisableFlagsInUseLine: true,
+	}
 
-var lineSubCmdText = &cobra.Command{
-	Use:   CommandText,
-	Short: "Send message to LINE",
-	Example: common.Examples(`# Send text to LINE chat
+	var lineSubCmdText = &cobra.Command{
+		Use:   CommandText,
+		Short: "Send message to LINE",
+		Example: common.Examples(`# Send text to LINE chat
 -s secret -t token --id GroupID -a 'Hello LINE'`, CommandLINE, CommandText),
-	RunE: lineCmdGlobalVar.RunE,
-}
+		RunE: lineFlag.RunE,
+	}
 
-var lineSubCmdID = &cobra.Command{
-	Use:   CommandID,
-	Args:  cobra.ExactArgs(1),
-	Short: "Get chat ID from LINE",
-	Example: common.Examples(`# Get chat ID from LINE,
+	var lineSubCmdID = &cobra.Command{
+		Use:   CommandID,
+		Args:  cobra.ExactArgs(1),
+		Short: "Get chat ID from LINE",
+		Example: common.Examples(`# Get chat ID from LINE,
 # execute this command will listen on 80 port,
 # type and sent 'id' in the chat,
 # then console will print ID.
 https://callback_url`, CommandLINE, CommandID),
-	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		if err = lineCmdGlobalVar.Init(); err != nil {
-			return err
-		}
-		lineCmdGlobalVar.resp, err = lineCmdGlobalVar.api.SetWebhookEndpointURL(args[0]).Do()
-		if err != nil {
-			return err
-		}
-		lineCmdGlobalVar.GetID()
-		return err
-	},
-}
+		RunE: lineFlag.RunE,
+	}
 
-var lineSubCmdPhoto = &cobra.Command{
-	Use:   CommandPhoto,
-	Short: "Send photo to LINE",
-	Example: common.Examples(`# Send photo to LINE chat
+	var lineSubCmdPhoto = &cobra.Command{
+		Use:   CommandPhoto,
+		Short: "Send photo to LINE",
+		Example: common.Examples(`# Send photo to LINE chat
 -s secret -t token --id GroupID -a https://img.url`, CommandLINE, CommandPhoto),
-	RunE: lineCmdGlobalVar.RunE,
-}
+		RunE: lineFlag.RunE,
+	}
 
-var lineSubCmdVideo = &cobra.Command{
-	Use:   CommandVideo,
-	Short: "Send video to LINE",
-	Example: common.Examples(`# Send video to LINE chat
+	var lineSubCmdVideo = &cobra.Command{
+		Use:   CommandVideo,
+		Short: "Send video to LINE",
+		Example: common.Examples(`# Send video to LINE chat
 -s secret -t token --id GroupID -a https://video.url`, CommandLINE, CommandVideo),
-	RunE: lineCmdGlobalVar.RunE,
-}
-
-var lineCmdGlobalVar LineFlag
-
-func init() {
+		RunE: lineFlag.RunE,
+	}
 	rootCmd.AddCommand(lineCmd)
 
-	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.Secret, "secret", "s", "", common.Usage("Channel Secret"))
-	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.Token, "token", "t", "", common.Usage("Channel Access Token"))
-	lineCmd.PersistentFlags().StringVarP(&lineCmdGlobalVar.arg, "arg", "a", "", common.Usage("Function Argument"))
-	lineCmd.PersistentFlags().StringVar(&lineCmdGlobalVar.ID, "id", "", common.Usage("UserID/GroupID/RoomID"))
+	lineCmd.PersistentFlags().StringVarP(&lineFlag.Secret, "secret", "s", "", common.Usage("Channel Secret"))
+	lineCmd.PersistentFlags().StringVarP(&lineFlag.Token, "token", "t", "", common.Usage("Channel Access Token"))
+	lineCmd.PersistentFlags().StringVarP(&lineFlag.arg, "arg", "a", "", common.Usage("Function Argument"))
+	lineCmd.PersistentFlags().StringVar(&lineFlag.ID, "id", "", common.Usage("UserID/GroupID/RoomID"))
 
-	lineCmd.AddCommand(lineSubCmdID)
-	lineCmd.AddCommand(lineSubCmdPhoto)
-	lineCmd.AddCommand(lineSubCmdText)
-	lineCmd.AddCommand(lineSubCmdVideo)
+	lineCmd.AddCommand(lineSubCmdID, lineSubCmdPhoto, lineSubCmdText, lineSubCmdVideo)
 }
 
 type LineFlag struct {
@@ -169,7 +153,7 @@ func (l *LineFlag) GetID() {
 	}
 }
 
-func (l *LineFlag) RunE(cmd *cobra.Command, _ []string) error {
+func (l *LineFlag) RunE(cmd *cobra.Command, args []string) error {
 	if l.arg == "" {
 		return common.ErrInvalidFlag
 	}
@@ -178,6 +162,13 @@ func (l *LineFlag) RunE(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	switch cmd.Name() {
+	case CommandID:
+		l.resp, err = l.api.SetWebhookEndpointURL(args[0]).Do()
+		if err != nil {
+			return err
+		}
+		l.GetID()
+		return err
 	case CommandText:
 		input := linebot.NewTextMessage(l.arg)
 		l.resp, err = l.api.PushMessage(l.ID, input).Do()
