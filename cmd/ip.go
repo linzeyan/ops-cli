@@ -27,55 +27,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ipCmd = &cobra.Command{
-	Use:       CommandIP + " {all|interface}",
-	Args:      cobra.OnlyValidArgs,
-	ValidArgs: ipCmdValidArgs(),
-	Short:     "View interfaces configuration",
-	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		iface, err := net.Interfaces()
-		if err != nil {
-			return err
-		}
-		counters, err := net.IOCounters(true)
-		if err != nil {
-			return err
-		}
-		idx, out := ParseInterfaces(iface, counters)
-		switch args[0] {
-		case "all":
-			for i := 0; i <= len(out)+1; i++ {
-				v, ok := out[i]
-				if ok {
-					PrintString(fmt.Sprintf("%d: %s", i, v))
-				}
-			}
-		default:
-			for _, value := range args {
-				PrintString(fmt.Sprintf("%d: %s", idx[value], out[idx[value]]))
-			}
-		}
-		return err
-	},
-	DisableFlagsInUseLine: true,
-	DisableFlagParsing:    true,
-}
-
 func init() {
-	rootCmd.AddCommand(ipCmd)
-}
-
-func ipCmdValidArgs() []string {
 	iface, err := net.Interfaces()
 	if err != nil {
-		return nil
+		return
 	}
-	var out []string
+	var validArgs []string
 	for _, v := range iface {
-		out = append(out, v.Name)
+		validArgs = append(validArgs, v.Name)
 	}
-	return append(out, "all")
+	validArgs = append(validArgs, "all")
+
+	var ipCmd = &cobra.Command{
+		Use:       CommandIP + " {all|interface}",
+		Args:      cobra.OnlyValidArgs,
+		ValidArgs: validArgs,
+		Short:     "View interfaces configuration",
+		RunE: func(_ *cobra.Command, args []string) error {
+			var err error
+			counters, err := net.IOCounters(true)
+			if err != nil {
+				return err
+			}
+			idx, out := ParseInterfaces(iface, counters)
+			switch args[0] {
+			case "all":
+				for i := 0; i <= len(out)+1; i++ {
+					v, ok := out[i]
+					if ok {
+						PrintString(fmt.Sprintf("%d: %s", i, v))
+					}
+				}
+			default:
+				for _, value := range args {
+					PrintString(fmt.Sprintf("%d: %s", idx[value], out[idx[value]]))
+				}
+			}
+			return err
+		},
+		DisableFlagsInUseLine: true,
+		DisableFlagParsing:    true,
+	}
+	rootCmd.AddCommand(ipCmd)
 }
 
 func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat) (map[string]int, map[int]string) {
