@@ -60,7 +60,7 @@ type DigFlag struct {
 	network string
 	domain  string
 	server  string
-	output  digResponse
+	output  DigResponseList
 }
 
 func (d *DigFlag) RunE(_ *cobra.Command, args []string) error {
@@ -149,10 +149,10 @@ func (d *DigFlag) Request(digType uint16) error {
 	}
 
 	for i := range resp.Answer {
-		var out digResponseFormat
+		var out DigResponseFormat
 		elements := strings.Fields(fmt.Sprintf("%s ", resp.Answer[i]))
 		if len(elements) == 5 {
-			out = digResponseFormat{
+			out = DigResponseFormat{
 				NAME:   elements[0],
 				TTL:    elements[1],
 				CLASS:  elements[2],
@@ -166,7 +166,7 @@ func (d *DigFlag) Request(digType uint16) error {
 				remain = remain + " " + slice[i]
 			}
 
-			out = digResponseFormat{
+			out = DigResponseFormat{
 				NAME:   elements[0],
 				TTL:    elements[1],
 				CLASS:  elements[2],
@@ -220,7 +220,7 @@ func (d *DigFlag) Assertion(arg string) error {
 	return err
 }
 
-type digResponseFormat struct {
+type DigResponseFormat struct {
 	NAME   string `json:"name" yaml:"name"`
 	TTL    string `json:"ttl" yaml:"ttl"`
 	CLASS  string `json:"class" yaml:"class"`
@@ -228,11 +228,11 @@ type digResponseFormat struct {
 	RECORD string `json:"record" yaml:"record"`
 }
 
-type digResponse []digResponseFormat
+type DigResponseList []DigResponseFormat
 
-func (d digResponse) String() {
+func (d DigResponseList) String() {
 	var header []string
-	var dd digResponseFormat
+	var dd DigResponseFormat
 	f := reflect.ValueOf(&dd).Elem()
 	t := f.Type()
 	for i := 0; i < f.NumField(); i++ {
