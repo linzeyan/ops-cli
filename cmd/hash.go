@@ -29,68 +29,68 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var hashCmd = &cobra.Command{
-	Use:   CommandHash + " [-c check|-l list] [checksums.txt|string or file]",
-	Args:  cobra.ExactArgs(1),
-	Short: "Hash string or file",
-	Run: func(cmd *cobra.Command, args []string) {
-		switch {
-		case Hasher.check:
-			Hasher.CheckFile(args[0])
-			return
-		case Hasher.list:
-			Hasher.ListAll(args[0])
-			return
-		default:
-			_ = cmd.Help()
-		}
-	},
-	DisableFlagsInUseLine: true,
-}
-
-var hashSubCmdMd5 = &cobra.Command{
-	Use:   common.HashMd5 + " [string|file]",
-	Args:  cobra.ExactArgs(1),
-	Short: "Print MD5 Checksums",
-	Run:   Hasher.Run,
-
-	DisableFlagsInUseLine: true,
-}
-
-var hashSubCmdSha1 = &cobra.Command{
-	Use:   common.HashSha1 + " [string|file]",
-	Args:  cobra.ExactArgs(1),
-	Short: "Print SHA-1 Checksums",
-	Run:   Hasher.Run,
-
-	DisableFlagsInUseLine: true,
-}
-
-var hashSubCmdSha256 = &cobra.Command{
-	Use:   common.HashSha256 + " [string|file]",
-	Args:  cobra.ExactArgs(1),
-	Short: "Print SHA-256 Checksums",
-	Run:   Hasher.Run,
-
-	DisableFlagsInUseLine: true,
-}
-
-var hashSubCmdSha512 = &cobra.Command{
-	Use:   common.HashSha512 + " [string|file]",
-	Args:  cobra.ExactArgs(1),
-	Short: "Print SHA-512 Checksums",
-	Run:   Hasher.Run,
-
-	DisableFlagsInUseLine: true,
-}
-
 var Hasher HashFlag
 
 func init() {
+	var hashFlag HashFlag
+	var hashCmd = &cobra.Command{
+		Use:   CommandHash + " [-c check|-l list] [checksums.txt|string or file]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Hash string or file",
+		Run: func(cmd *cobra.Command, args []string) {
+			switch {
+			case hashFlag.check:
+				hashFlag.CheckFile(args[0])
+				return
+			case hashFlag.list:
+				hashFlag.ListAll(args[0])
+				return
+			default:
+				_ = cmd.Help()
+			}
+		},
+		DisableFlagsInUseLine: true,
+	}
+
+	var hashSubCmdMd5 = &cobra.Command{
+		Use:   common.HashMd5 + " [string|file]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Print MD5 Checksums",
+		Run:   hashFlag.Run,
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var hashSubCmdSha1 = &cobra.Command{
+		Use:   common.HashSha1 + " [string|file]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Print SHA-1 Checksums",
+		Run:   hashFlag.Run,
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var hashSubCmdSha256 = &cobra.Command{
+		Use:   common.HashSha256 + " [string|file]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Print SHA-256 Checksums",
+		Run:   hashFlag.Run,
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var hashSubCmdSha512 = &cobra.Command{
+		Use:   common.HashSha512 + " [string|file]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Print SHA-512 Checksums",
+		Run:   hashFlag.Run,
+
+		DisableFlagsInUseLine: true,
+	}
 	rootCmd.AddCommand(hashCmd)
 
-	hashCmd.Flags().BoolVarP(&Hasher.check, "check", "c", false, common.Usage("Read SHA sums from the file and check them"))
-	hashCmd.Flags().BoolVarP(&Hasher.list, "list", "l", false, common.Usage("List multiple SHA sums for the specify input"))
+	hashCmd.Flags().BoolVarP(&hashFlag.check, "check", "c", false, common.Usage("Read SHA sums from the file and check them"))
+	hashCmd.Flags().BoolVarP(&hashFlag.list, "list", "l", false, common.Usage("List multiple SHA sums for the specify input"))
 	hashCmd.AddCommand(hashSubCmdMd5, hashSubCmdSha1, hashSubCmdSha256, hashSubCmdSha512)
 }
 
