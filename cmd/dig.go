@@ -30,12 +30,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var digCmd = &cobra.Command{
-	Use:   CommandDig + " [host] [@server] [type]",
-	Args:  cobra.MinimumNArgs(1),
-	Short: "Resolve domain name",
-	RunE:  digCmdGlobalVar.RunE,
-	Example: common.Examples(`# Query A record
+func init() {
+	var digCmdFlag DigFlag
+	var digCmd = &cobra.Command{
+		Use:   CommandDig + " [host] [@server] [type]",
+		Args:  cobra.MinimumNArgs(1),
+		Short: "Resolve domain name",
+		RunE:  digCmdFlag.RunE,
+		Example: common.Examples(`# Query A record
 google.com
 @1.1.1.1 google.com A
 @8.8.8.8 google.com AAAA
@@ -48,14 +50,10 @@ google.com ANY
 
 # Query PTR record
 1.1.1.1 PTR`, CommandDig),
-}
-
-var digCmdGlobalVar DigFlag
-
-func init() {
+	}
 	rootCmd.AddCommand(digCmd)
 
-	digCmd.Flags().StringVarP(&digCmdGlobalVar.network, "net", "n", "tcp", common.Usage("udp/tcp"))
+	digCmd.Flags().StringVarP(&digCmdFlag.network, "net", "n", "tcp", common.Usage("udp/tcp"))
 }
 
 type DigFlag struct {
