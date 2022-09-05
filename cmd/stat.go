@@ -27,25 +27,24 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var statCmd = &cobra.Command{
-	Use:   CommandStat + " path...",
-	Short: "Display file informations",
-	Args:  cobra.MinimumNArgs(1),
-	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		for _, v := range args {
-			var s FileStat
-			err = s.String(v)
-			if err != nil {
-				return err
-			}
-		}
-		return err
-	},
-	DisableFlagsInUseLine: true,
-}
-
 func init() {
+	var statCmd = &cobra.Command{
+		Use:   CommandStat + " path...",
+		Short: "Display file informations",
+		Args:  cobra.MinimumNArgs(1),
+		RunE: func(_ *cobra.Command, args []string) error {
+			var err error
+			for _, v := range args {
+				var s FileStat
+				err = s.String(v)
+				if err != nil {
+					return err
+				}
+			}
+			return err
+		},
+		DisableFlagsInUseLine: true,
+	}
 	rootCmd.AddCommand(statCmd)
 }
 
