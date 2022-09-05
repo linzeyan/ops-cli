@@ -33,55 +33,55 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var encodeCmd = &cobra.Command{
-	Use:   CommandEncode,
-	Short: "Encode and decode string or file",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
-
-	DisableFlagsInUseLine: true,
-}
-
-var encodeSubCmdBase32Hex = &cobra.Command{
-	Use:   CommandBase32Hex,
-	Args:  cobra.ExactArgs(1),
-	Short: "Base32 hex encoding or decoding",
-	RunE:  Encoder.RunE,
-}
-
-var encodeSubCmdBase32Std = &cobra.Command{
-	Use:   CommandBase32Std,
-	Args:  cobra.ExactArgs(1),
-	Short: "Base32 standard encoding or decoding",
-	RunE:  Encoder.RunE,
-}
-
-var encodeSubCmdBase64Std = &cobra.Command{
-	Use:   CommandBase64Std,
-	Args:  cobra.ExactArgs(1),
-	Short: "Base64 standard encoding or decoding",
-	RunE:  Encoder.RunE,
-}
-
-var encodeSubCmdBase64URL = &cobra.Command{
-	Use:   CommandBase64URL,
-	Args:  cobra.ExactArgs(1),
-	Short: "Base64 url encoding or decoding",
-	RunE:  Encoder.RunE,
-}
-
-var encodeSubCmdHex = &cobra.Command{
-	Use:   CommandHex,
-	Args:  cobra.ExactArgs(1),
-	Short: "Hexadecimal encoding or decoding",
-	RunE:  Encoder.RunE,
-}
-
 var Encoder EncodeFlag
 
 func init() {
+	var encodeFlag EncodeFlag
+	var encodeCmd = &cobra.Command{
+		Use:   CommandEncode,
+		Short: "Encode and decode string or file",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var encodeSubCmdBase32Hex = &cobra.Command{
+		Use:   CommandBase32Hex,
+		Args:  cobra.ExactArgs(1),
+		Short: "Base32 hex encoding or decoding",
+		RunE:  encodeFlag.RunE,
+	}
+
+	var encodeSubCmdBase32Std = &cobra.Command{
+		Use:   CommandBase32Std,
+		Args:  cobra.ExactArgs(1),
+		Short: "Base32 standard encoding or decoding",
+		RunE:  encodeFlag.RunE,
+	}
+
+	var encodeSubCmdBase64Std = &cobra.Command{
+		Use:   CommandBase64Std,
+		Args:  cobra.ExactArgs(1),
+		Short: "Base64 standard encoding or decoding",
+		RunE:  encodeFlag.RunE,
+	}
+
+	var encodeSubCmdBase64URL = &cobra.Command{
+		Use:   CommandBase64URL,
+		Args:  cobra.ExactArgs(1),
+		Short: "Base64 url encoding or decoding",
+		RunE:  encodeFlag.RunE,
+	}
+
+	var encodeSubCmdHex = &cobra.Command{
+		Use:   CommandHex,
+		Args:  cobra.ExactArgs(1),
+		Short: "Hexadecimal encoding or decoding",
+		RunE:  encodeFlag.RunE,
+	}
 	rootCmd.AddCommand(encodeCmd)
 
-	encodeCmd.PersistentFlags().BoolVarP(&Encoder.decode, "decode", "d", false, common.Usage("Decodes input"))
+	encodeCmd.PersistentFlags().BoolVarP(&encodeFlag.decode, "decode", "d", false, common.Usage("Decodes input"))
 	encodeCmd.AddCommand(encodeSubCmdBase32Hex, encodeSubCmdBase32Std)
 	encodeCmd.AddCommand(encodeSubCmdBase64Std, encodeSubCmdBase64URL)
 	encodeCmd.AddCommand(encodeSubCmdHex)
