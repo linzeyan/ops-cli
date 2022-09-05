@@ -32,46 +32,44 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var slackCmd = &cobra.Command{
-	Use:   CommandSlack,
-	Short: "Send message to Slack",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
-
-	DisableFlagsInUseLine: true,
-}
-
-var slackSubCmdFile = &cobra.Command{
-	Use:   CommandFile,
-	Short: "Send file to Slack",
-	RunE:  slackCmdGlobalVar.RunE,
-	Example: common.Examples(`# Send file
--a "/tmp/a.txt" --config ~/.config.toml`, CommandSlack, CommandFile),
-}
-
-var slackSubCmdText = &cobra.Command{
-	Use:   CommandText,
-	Short: "Send text to Slack",
-	RunE:  slackCmdGlobalVar.RunE,
-	Example: common.Examples(`# Send text
--a "Hello World!"`, CommandSlack, CommandText),
-}
-
-var slackSubCmdPhoto = &cobra.Command{
-	Use:   CommandPhoto,
-	Short: "Send photo to Slack",
-	RunE:  slackCmdGlobalVar.RunE,
-	Example: common.Examples(`# Send photo
--a "~/robot.png"`, CommandSlack, CommandPhoto),
-}
-
-var slackCmdGlobalVar SlackFlag
-
 func init() {
+	var slackFlag SlackFlag
+	var slackCmd = &cobra.Command{
+		Use:   CommandSlack,
+		Short: "Send message to Slack",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var slackSubCmdFile = &cobra.Command{
+		Use:   CommandFile,
+		Short: "Send file to Slack",
+		RunE:  slackFlag.RunE,
+		Example: common.Examples(`# Send file
+-a "/tmp/a.txt" --config ~/.config.toml`, CommandSlack, CommandFile),
+	}
+
+	var slackSubCmdText = &cobra.Command{
+		Use:   CommandText,
+		Short: "Send text to Slack",
+		RunE:  slackFlag.RunE,
+		Example: common.Examples(`# Send text
+-a "Hello World!"`, CommandSlack, CommandText),
+	}
+
+	var slackSubCmdPhoto = &cobra.Command{
+		Use:   CommandPhoto,
+		Short: "Send photo to Slack",
+		RunE:  slackFlag.RunE,
+		Example: common.Examples(`# Send photo
+-a "~/robot.png"`, CommandSlack, CommandPhoto),
+	}
 	rootCmd.AddCommand(slackCmd)
 
-	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.Token, "token", "t", "", common.Usage("Bot token (required)"))
-	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.Channel, "channel", "c", "", common.Usage("Channel ID"))
-	slackCmd.PersistentFlags().StringVarP(&slackCmdGlobalVar.arg, "arg", "a", "", common.Usage("Input argument"))
+	slackCmd.PersistentFlags().StringVarP(&slackFlag.Token, "token", "t", "", common.Usage("Bot token (required)"))
+	slackCmd.PersistentFlags().StringVarP(&slackFlag.Channel, "channel", "c", "", common.Usage("Channel ID"))
+	slackCmd.PersistentFlags().StringVarP(&slackFlag.arg, "arg", "a", "", common.Usage("Input argument"))
 
 	slackCmd.AddCommand(slackSubCmdFile)
 	slackCmd.AddCommand(slackSubCmdText)
