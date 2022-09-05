@@ -27,18 +27,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var freeCmd = &cobra.Command{
-	Use:   CommandFree,
-	Short: "Display free memory spaces",
-	RunE:  freeCmdGlobalVar.RunE,
-}
-
-var freeCmdGlobalVar FreeFlag
-
 func init() {
+	var freeFlag FreeFlag
+	var freeCmd = &cobra.Command{
+		Use:   CommandFree,
+		Short: "Display free memory spaces",
+		RunE:  freeFlag.RunE,
+	}
 	rootCmd.AddCommand(freeCmd)
-	freeCmd.Flags().UintVarP(&freeCmdGlobalVar.count, "count", "c", 0, "Repeat printing times")
-	freeCmd.Flags().UintVarP(&freeCmdGlobalVar.second, "seconds", "s", 0, "Seconds between each repeat printing")
+	freeCmd.Flags().UintVarP(&freeFlag.count, "count", "c", 0, "Repeat printing times")
+	freeCmd.Flags().UintVarP(&freeFlag.second, "seconds", "s", 0, "Seconds between each repeat printing")
 }
 
 type FreeFlag struct {
