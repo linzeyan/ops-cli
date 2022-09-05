@@ -24,29 +24,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var urlCmd = &cobra.Command{
-	Use:   CommandURL,
-	Args:  cobra.ExactArgs(1),
-	Short: "Get url content or expand shorten url or download",
-	RunE:  urlCmdGlobalVar.RunE,
-	Example: common.Examples(`# Get the file from URL
+func init() {
+	var urlFlag URLFlag
+	var urlCmd = &cobra.Command{
+		Use:   CommandURL,
+		Args:  cobra.ExactArgs(1),
+		Short: "Get url content or expand shorten url or download",
+		RunE:  urlFlag.RunE,
+		Example: common.Examples(`# Get the file from URL
 https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.reference.yml -o config.yaml
 
 # Get the real URL from the shortened URL
 https://goo.gl/maps/b37Aq3Anc7taXQDd9 -e`,
-		CommandURL),
-}
-
-var urlCmdGlobalVar URLFlag
-
-func init() {
+			CommandURL),
+	}
 	rootCmd.AddCommand(urlCmd)
-	urlCmd.Flags().BoolVarP(&urlCmdGlobalVar.expand, "expand", "e", false, "Expand shorten url")
-	urlCmd.Flags().BoolVarP(&urlCmdGlobalVar.verbose, "verbose", "v", false, "Verbose output")
-	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.output, "output", "o", "", "Write to file")
-	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.method, "method", "m", "GET", "Request method")
-	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.data, "data", "d", "", "Request method")
-	urlCmd.Flags().StringVarP(&urlCmdGlobalVar.headers, "headers", "H", "", "Headers")
+	urlCmd.Flags().BoolVarP(&urlFlag.expand, "expand", "e", false, "Expand shorten url")
+	urlCmd.Flags().BoolVarP(&urlFlag.verbose, "verbose", "v", false, "Verbose output")
+	urlCmd.Flags().StringVarP(&urlFlag.output, "output", "o", "", "Write to file")
+	urlCmd.Flags().StringVarP(&urlFlag.method, "method", "m", "GET", "Request method")
+	urlCmd.Flags().StringVarP(&urlFlag.data, "data", "d", "", "Request method")
+	urlCmd.Flags().StringVarP(&urlFlag.headers, "headers", "H", "", "Headers")
 }
 
 type URLFlag struct {
