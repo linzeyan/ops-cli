@@ -15,12 +15,6 @@ Try to collect useful tools for ops.
 go install github.com/linzeyan/ops-cli@latest
 ```
 
-### Go Build
-
-```bash
-go build -trimpath -ldflags='-s -w' .
-```
-
 ### Homebrew
 
 ```bash
@@ -47,22 +41,26 @@ Available Commands:
   cert        Check tls cert expiry time
   completion  Generate the autocompletion script for the specified shell
   convert     Convert data format
+  df          Display free disk spaces
   dig         Resolve domain name
   doc         Generate documentation
   dos2unix    Convert file eol to unix style
   encode      Encode and decode string or file
   encrypt     Encrypt or decrypt
+  free        Display free memory spaces
   geoip       Print IP geographic information
   hash        Hash string or file
   help        Help about any command
   icp         Check ICP status
+  ip          View interfaces configuration
   otp         Calculate passcode or generate secret
   qrcode      Read or generate QR Code
   random      Generate random string
   ssh-keygen  Generate SSH keypair
+  stat        Display file informations
   system      Display system informations
   update      Update ops-cli to the latest release
-  url         URL expand or download
+  url         Get url content or expand shorten url or download
   version     Print version information
   whois       List domain name information
 
