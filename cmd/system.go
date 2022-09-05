@@ -30,65 +30,63 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var systemCmd = &cobra.Command{
-	Use:   CommandSystem,
-	Short: "Display system informations",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
-
-	DisableFlagsInUseLine: true,
-}
-
-var systemSubCmdCPU = &cobra.Command{
-	Use:   CommandCPU,
-	Short: "Display cpu informations",
-	RunE:  systemCmdGlobalVar.RunE,
-
-	DisableFlagsInUseLine: true,
-}
-
-var systemSubCmdDisk = &cobra.Command{
-	Use:   CommandDisk,
-	Short: "Display disk informations",
-	RunE:  systemCmdGlobalVar.RunE,
-
-	DisableFlagsInUseLine: true,
-}
-
-var systemSubCmdHost = &cobra.Command{
-	Use:   CommandHost,
-	Short: "Display host informations",
-	RunE:  systemCmdGlobalVar.RunE,
-
-	DisableFlagsInUseLine: true,
-}
-
-var systemSubCmdLoad = &cobra.Command{
-	Use:   CommandLoad,
-	Short: "Display load informations",
-	RunE:  systemCmdGlobalVar.RunE,
-
-	DisableFlagsInUseLine: true,
-}
-
-var systemSubCmdMemory = &cobra.Command{
-	Use:   CommandMemory,
-	Short: "Display memory informations",
-	RunE:  systemCmdGlobalVar.RunE,
-
-	DisableFlagsInUseLine: true,
-}
-
-var systemSubCmdNetwork = &cobra.Command{
-	Use:   CommandNetwork,
-	Short: "Display network informations",
-	RunE:  systemCmdGlobalVar.RunE,
-
-	DisableFlagsInUseLine: true,
-}
-
-var systemCmdGlobalVar SystemFlag
-
 func init() {
+	var systemFlag SystemFlag
+	var systemCmd = &cobra.Command{
+		Use:   CommandSystem,
+		Short: "Display system informations",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var systemSubCmdCPU = &cobra.Command{
+		Use:   CommandCPU,
+		Short: "Display cpu informations",
+		RunE:  systemFlag.RunE,
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var systemSubCmdDisk = &cobra.Command{
+		Use:   CommandDisk,
+		Short: "Display disk informations",
+		RunE:  systemFlag.RunE,
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var systemSubCmdHost = &cobra.Command{
+		Use:   CommandHost,
+		Short: "Display host informations",
+		RunE:  systemFlag.RunE,
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var systemSubCmdLoad = &cobra.Command{
+		Use:   CommandLoad,
+		Short: "Display load informations",
+		RunE:  systemFlag.RunE,
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var systemSubCmdMemory = &cobra.Command{
+		Use:   CommandMemory,
+		Short: "Display memory informations",
+		RunE:  systemFlag.RunE,
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var systemSubCmdNetwork = &cobra.Command{
+		Use:   CommandNetwork,
+		Short: "Display network informations",
+		RunE:  systemFlag.RunE,
+
+		DisableFlagsInUseLine: true,
+	}
 	rootCmd.AddCommand(systemCmd)
 
 	systemCmd.AddCommand(systemSubCmdCPU)
