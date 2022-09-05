@@ -29,58 +29,50 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var dfCmd = &cobra.Command{
-	Use:       CommandDf,
-	Short:     "Display free disk spaces",
-	ValidArgs: dfCmdValidArgs(),
-	Args:      cobra.OnlyValidArgs,
-	RunE: func(_ *cobra.Command, args []string) error {
-		var err error
-		partition, err := disk.Partitions(true)
-		if err != nil {
-			return err
-		}
-		var d DfResponse
-		var data [][]string
-		switch {
-		case len(args) == 0:
-			for _, v := range partition {
-				usage, err := disk.Usage(v.Mountpoint)
-				if err != nil {
-					return err
-				}
-				d.ParseDevices(usage, partition)
-				data = append(data, d.OutputData())
-			}
-		default:
-			for _, v := range args {
-				usage, err := disk.Usage(v)
-				if err != nil {
-					return err
-				}
-				d.ParseDevices(usage, partition)
-				data = append(data, d.OutputData())
-			}
-		}
-		d.String(data)
-		return err
-	},
-}
-
 func init() {
-	rootCmd.AddCommand(dfCmd)
-}
-
-func dfCmdValidArgs() []string {
 	partition, err := disk.Partitions(true)
 	if err != nil {
-		return nil
+		return
 	}
-	var out []string
+	var validArgs []string
 	for _, v := range partition {
-		out = append(out, v.Mountpoint)
+		validArgs = append(validArgs, v.Mountpoint)
 	}
-	return out
+
+	var dfCmd = &cobra.Command{
+		Use:       CommandDf,
+		Short:     "Display free disk spaces",
+		ValidArgs: validArgs,
+		Args:      cobra.OnlyValidArgs,
+		RunE: func(_ *cobra.Command, args []string) error {
+			var err error
+			var d DfResponse
+			var data [][]string
+			switch {
+			case len(args) == 0:
+				for _, v := range partition {
+					usage, err := disk.Usage(v.Mountpoint)
+					if err != nil {
+						return err
+					}
+					d.ParseDevices(usage, partition)
+					data = append(data, d.OutputData())
+				}
+			default:
+				for _, v := range args {
+					usage, err := disk.Usage(v)
+					if err != nil {
+						return err
+					}
+					d.ParseDevices(usage, partition)
+					data = append(data, d.OutputData())
+				}
+			}
+			d.String(data)
+			return err
+		},
+	}
+	rootCmd.AddCommand(dfCmd)
 }
 
 type DfResponse struct {
