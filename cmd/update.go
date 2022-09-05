@@ -35,23 +35,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var updateCmd = &cobra.Command{
-	Use:   CommandUpdate,
-	Short: fmt.Sprintf("Update %s to the latest release", common.RepoName),
-	RunE:  updateCmdGlobalVar.RunE,
-
-	DisableFlagsInUseLine: true,
-}
-
-var updateCmdGlobalVar updateFlag
-
 func init() {
+	var updateFlag UpdateFlag
+	var updateCmd = &cobra.Command{
+		Use:   CommandUpdate,
+		Short: fmt.Sprintf("Update %s to the latest release", common.RepoName),
+		RunE:  updateFlag.RunE,
+
+		DisableFlagsInUseLine: true,
+	}
 	rootCmd.AddCommand(updateCmd)
 }
 
-type updateFlag struct{}
+type UpdateFlag struct{}
 
-func (u *updateFlag) RunE(_ *cobra.Command, _ []string) error {
+func (u *UpdateFlag) RunE(_ *cobra.Command, _ []string) error {
 	var err error
 	updater := NewUpdater(common.RepoOwner, common.RepoName)
 	if !updater.Upgrade {
