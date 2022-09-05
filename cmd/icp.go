@@ -26,39 +26,37 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var icpCmd = &cobra.Command{
-	Use:   CommandIcp + " domain",
-	Args:  cobra.ExactArgs(1),
-	Short: "Check ICP status",
-	RunE: func(_ *cobra.Command, args []string) error {
-		if (icpCmdGlobalVar.flags.Account == "" || icpCmdGlobalVar.flags.Key == "") && rootConfig != "" {
-			v := common.Config(rootConfig, common.ICP)
-			err := Encoder.JSONMarshaler(v, &icpCmdGlobalVar.flags)
-			if err != nil {
+func init() {
+	var icpFlag ICPResponse
+	var icpCmd = &cobra.Command{
+		Use:   CommandIcp + " domain",
+		Args:  cobra.ExactArgs(1),
+		Short: "Check ICP status",
+		RunE: func(_ *cobra.Command, args []string) error {
+			if (icpFlag.flags.Account == "" || icpFlag.flags.Key == "") && rootConfig != "" {
+				v := common.Config(rootConfig, common.ICP)
+				err := Encoder.JSONMarshaler(v, &icpFlag.flags)
+				if err != nil {
+					return err
+				}
+			}
+			if icpFlag.flags.Account == "" || icpFlag.flags.Key == "" {
+				return common.ErrInvalidToken
+			}
+			icpFlag.flags.domain = args[0]
+			if err := icpFlag.Request(); err != nil {
 				return err
 			}
-		}
-		if icpCmdGlobalVar.flags.Account == "" || icpCmdGlobalVar.flags.Key == "" {
-			return common.ErrInvalidToken
-		}
-		icpCmdGlobalVar.flags.domain = args[0]
-		if err := icpCmdGlobalVar.Request(); err != nil {
-			return err
-		}
-		OutputDefaultYAML(icpCmdGlobalVar)
-		return nil
-	},
-	Example: common.Examples(`# Print the ICP status
+			OutputDefaultYAML(icpFlag)
+			return nil
+		},
+		Example: common.Examples(`# Print the ICP status
 -a account -k api_key google.com`, CommandIcp),
-}
-
-var icpCmdGlobalVar ICPResponse
-
-func init() {
+	}
 	rootCmd.AddCommand(icpCmd)
 
-	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))
-	icpCmd.Flags().StringVarP(&icpCmdGlobalVar.flags.Key, "key", "k", "", common.Usage("Enter the WEST api key"))
+	icpCmd.Flags().StringVarP(&icpFlag.flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))
+	icpCmd.Flags().StringVarP(&icpFlag.flags.Key, "key", "k", "", common.Usage("Enter the WEST api key"))
 	icpCmd.MarkFlagsRequiredTogether("account", "key")
 }
 
