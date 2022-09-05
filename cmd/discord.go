@@ -25,40 +25,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var discordCmd = &cobra.Command{
-	Use:   CommandDiscord,
-	Short: "Send message to Discord",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
-
-	DisableFlagsInUseLine: true,
-}
-
-var discordSubCmdFile = &cobra.Command{
-	Use:   CommandFile,
-	Short: "Send file to Discord",
-	RunE:  discordCmdGlobalVar.RunE,
-}
-
-var discordSubCmdText = &cobra.Command{
-	Use:   CommandText,
-	Short: "Send text to Discord",
-	RunE:  discordCmdGlobalVar.RunE,
-}
-
-var discordSubCmdTextTS = &cobra.Command{
-	Use:   CommandText + "TS",
-	Short: "Send text to speech to Discord",
-	RunE:  discordCmdGlobalVar.RunE,
-}
-
-var discordCmdGlobalVar DiscordFlag
-
 func init() {
+	var discordFlag DiscordFlag
+	var discordCmd = &cobra.Command{
+		Use:   CommandDiscord,
+		Short: "Send message to Discord",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+
+		DisableFlagsInUseLine: true,
+	}
+
+	var discordSubCmdFile = &cobra.Command{
+		Use:   CommandFile,
+		Short: "Send file to Discord",
+		RunE:  discordFlag.RunE,
+	}
+
+	var discordSubCmdText = &cobra.Command{
+		Use:   CommandText,
+		Short: "Send text to Discord",
+		RunE:  discordFlag.RunE,
+	}
+
+	var discordSubCmdTextTS = &cobra.Command{
+		Use:   CommandText + "TS",
+		Short: "Send text to speech to Discord",
+		RunE:  discordFlag.RunE,
+	}
 	rootCmd.AddCommand(discordCmd)
 
-	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.Token, "token", "t", "", common.Usage("Token"))
-	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.Channel, "channel-id", "c", "", common.Usage("Channel ID"))
-	discordCmd.PersistentFlags().StringVarP(&discordCmdGlobalVar.arg, "arg", "a", "", common.Usage("Input argument"))
+	discordCmd.PersistentFlags().StringVarP(&discordFlag.Token, "token", "t", "", common.Usage("Token"))
+	discordCmd.PersistentFlags().StringVarP(&discordFlag.Channel, "channel-id", "c", "", common.Usage("Channel ID"))
+	discordCmd.PersistentFlags().StringVarP(&discordFlag.arg, "arg", "a", "", common.Usage("Input argument"))
 
 	discordCmd.AddCommand(discordSubCmdFile, discordSubCmdText, discordSubCmdTextTS)
 }
