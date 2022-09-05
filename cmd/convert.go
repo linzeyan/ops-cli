@@ -28,7 +28,7 @@ import (
 )
 
 func init() {
-	var convertCmdFlag ConvertFlag
+	var convertFlag ConvertFlag
 
 	var convertCmd = &cobra.Command{
 		Use:  CommandConvert,
@@ -40,15 +40,15 @@ func init() {
 			CommandYaml2Csv, CommandYaml2JSON, CommandYaml2Toml, CommandYaml2XML,
 		},
 		Short: "Convert data format",
-		RunE:  convertCmdFlag.RunE,
+		RunE:  convertFlag.RunE,
 		Example: common.Examples(`# Convert yaml to json
 -i input.yaml -o output.json`, CommandConvert, CommandYaml2JSON),
 	}
 
 	rootCmd.AddCommand(convertCmd)
 
-	convertCmd.Flags().StringVarP(&convertCmdFlag.inFile, "in", "i", "", common.Usage("Input file (required)"))
-	convertCmd.Flags().StringVarP(&convertCmdFlag.outFile, "out", "o", "", common.Usage("Output file"))
+	convertCmd.Flags().StringVarP(&convertFlag.inFile, "in", "i", "", common.Usage("Input file (required)"))
+	convertCmd.Flags().StringVarP(&convertFlag.outFile, "out", "o", "", common.Usage("Output file"))
 }
 
 type ConvertFlag struct {

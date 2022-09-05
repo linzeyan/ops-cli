@@ -31,12 +31,12 @@ import (
 )
 
 func init() {
-	var digCmdFlag DigFlag
+	var digFlag DigFlag
 	var digCmd = &cobra.Command{
 		Use:   CommandDig + " [host] [@server] [type]",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "Resolve domain name",
-		RunE:  digCmdFlag.RunE,
+		RunE:  digFlag.RunE,
 		Example: common.Examples(`# Query A record
 google.com
 @1.1.1.1 google.com A
@@ -53,7 +53,7 @@ google.com ANY
 	}
 	rootCmd.AddCommand(digCmd)
 
-	digCmd.Flags().StringVarP(&digCmdFlag.network, "net", "n", "tcp", common.Usage("udp/tcp"))
+	digCmd.Flags().StringVarP(&digFlag.network, "net", "n", "tcp", common.Usage("udp/tcp"))
 }
 
 type DigFlag struct {

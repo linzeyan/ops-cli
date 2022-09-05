@@ -30,13 +30,13 @@ import (
 )
 
 func init() {
-	var certCmdFlag CertFlag
+	var certFlag CertFlag
 
 	var certCmd = &cobra.Command{
 		Use:   CommandCert + " [host|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Check tls cert expiry time",
-		RunE:  certCmdFlag.RunE,
+		RunE:  certFlag.RunE,
 		Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
 www.google.com
 
@@ -51,12 +51,12 @@ example.com.crt`, CommandCert),
 	}
 	rootCmd.AddCommand(certCmd)
 
-	certCmd.Flags().StringVarP(&certCmdFlag.port, "port", "p", "443", common.Usage("Specify host port"))
-	certCmd.Flags().BoolVar(&certCmdFlag.ip, "ip", false, common.Usage("Only print IP"))
-	certCmd.Flags().BoolVar(&certCmdFlag.expiry, "expiry", false, common.Usage("Only print expiry time"))
-	certCmd.Flags().BoolVar(&certCmdFlag.dns, "dns", false, common.Usage("Only print DNS names"))
-	certCmd.Flags().BoolVar(&certCmdFlag.issuer, "issuer", false, common.Usage("Only print issuer"))
-	certCmd.Flags().BoolVar(&certCmdFlag.days, "days", false, common.Usage("Only print the remaining days"))
+	certCmd.Flags().StringVarP(&certFlag.port, "port", "p", "443", common.Usage("Specify host port"))
+	certCmd.Flags().BoolVar(&certFlag.ip, "ip", false, common.Usage("Only print IP"))
+	certCmd.Flags().BoolVar(&certFlag.expiry, "expiry", false, common.Usage("Only print expiry time"))
+	certCmd.Flags().BoolVar(&certFlag.dns, "dns", false, common.Usage("Only print DNS names"))
+	certCmd.Flags().BoolVar(&certFlag.issuer, "issuer", false, common.Usage("Only print issuer"))
+	certCmd.Flags().BoolVar(&certFlag.days, "days", false, common.Usage("Only print the remaining days"))
 }
 
 type CertFlag struct {
