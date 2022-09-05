@@ -44,7 +44,7 @@ var ipCmd = &cobra.Command{
 		}
 		idx, out := ParseInterfaces(iface, counters)
 		switch args[0] {
-		case "a", "all":
+		case "all":
 			for i := 0; i <= len(out)+1; i++ {
 				v, ok := out[i]
 				if ok {
@@ -82,13 +82,14 @@ func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat)
 	idx := make(map[string]int)
 	out := make(map[int]string)
 	for _, v := range iface {
-		var value string
-
+		idx[v.Name] = v.Index
 		var flag string
 		for _, f := range v.Flags {
 			flag = flag + strings.ToUpper(f) + ","
 		}
 		flag = strings.TrimRight(flag, ",")
+
+		var value string
 		if flag != "" {
 			value = fmt.Sprintf("<%s>", flag)
 		}
@@ -108,8 +109,8 @@ func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat)
 				addr += fmt.Sprintf("\n\tinet6 %s", a.Addr)
 			}
 		}
-		idx[v.Name] = v.Index
 		value = fmt.Sprintf("%s: %s%s", v.Name, value, addr)
+
 		for _, vv := range counters {
 			if v.Name == vv.Name && len(v.Addrs) != 0 {
 				value = fmt.Sprintf("%s\n\tRX packets %d  bytes %d (%s)\n\tRX errors %d  dropped %d",
