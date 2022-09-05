@@ -9,7 +9,7 @@ import (
 
 func TestIPBinary(t *testing.T) {
 	const subCommand = cmd.CommandIP
-	args := []string{"a"}
+	args := []string{"all"}
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, args[i]).Run(); err != nil {

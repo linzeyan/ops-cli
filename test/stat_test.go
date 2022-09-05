@@ -13,7 +13,7 @@ func TestStatBinary(t *testing.T) {
 	}
 	const subCommand = cmd.CommandStat
 	t.Run(subCommand, func(t *testing.T) {
-		if err := exec.Command(binaryCommand, subCommand).Run(); err != nil {
+		if err := exec.Command(binaryCommand, subCommand, ".").Run(); err != nil {
 			t.Error(err)
 		}
 	})
