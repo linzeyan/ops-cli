@@ -24,42 +24,40 @@ import (
 	"github.com/spf13/cobra/doc"
 )
 
-var docCmd = &cobra.Command{
-	Use:   CommandDoc,
-	Short: "Generate documentation",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
-}
-
-var docSubCmdMan = &cobra.Command{
-	Use:   CommandMan,
-	Short: "Generate man page documentation",
-	RunE:  docCmdGlobalVar.RunE,
-}
-
-var docSubCmdMarkdown = &cobra.Command{
-	Use:   CommandMarkdown,
-	Short: "Generate markdown documentation",
-	RunE:  docCmdGlobalVar.RunE,
-}
-
-var docSubCmdRest = &cobra.Command{
-	Use:   CommandReST,
-	Short: "Generate rest documentation",
-	RunE:  docCmdGlobalVar.RunE,
-}
-
-var docSubCmdYaml = &cobra.Command{
-	Use:   CommandYaml,
-	Short: "Generate yaml documentation",
-	RunE:  docCmdGlobalVar.RunE,
-}
-
-var docCmdGlobalVar DocFlag
-
 func init() {
+	var docFlag DocFlag
+	var docCmd = &cobra.Command{
+		Use:   CommandDoc,
+		Short: "Generate documentation",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+	}
+
+	var docSubCmdMan = &cobra.Command{
+		Use:   CommandMan,
+		Short: "Generate man page documentation",
+		RunE:  docFlag.RunE,
+	}
+
+	var docSubCmdMarkdown = &cobra.Command{
+		Use:   CommandMarkdown,
+		Short: "Generate markdown documentation",
+		RunE:  docFlag.RunE,
+	}
+
+	var docSubCmdRest = &cobra.Command{
+		Use:   CommandReST,
+		Short: "Generate rest documentation",
+		RunE:  docFlag.RunE,
+	}
+
+	var docSubCmdYaml = &cobra.Command{
+		Use:   CommandYaml,
+		Short: "Generate yaml documentation",
+		RunE:  docFlag.RunE,
+	}
 	rootCmd.AddCommand(docCmd)
 
-	docCmd.PersistentFlags().StringVarP(&docCmdGlobalVar.dir, "dir", "d", "doc", common.Usage("Specify the path to generate documentation"))
+	docCmd.PersistentFlags().StringVarP(&docFlag.dir, "dir", "d", "doc", common.Usage("Specify the path to generate documentation"))
 	docCmd.AddCommand(docSubCmdMan)
 	docCmd.AddCommand(docSubCmdMarkdown)
 	docCmd.AddCommand(docSubCmdRest)
