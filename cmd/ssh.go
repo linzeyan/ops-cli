@@ -30,28 +30,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var sshCmd = &cobra.Command{
-	Use:   CommandSSH,
-	Short: "Generate SSH keypair",
-	RunE:  sshCmdGlobalVar.RunE,
-}
-
-var sshCmdGlobalVar sshFlag
-
 func init() {
-	rootCmd.AddCommand(sshCmd)
+	var sshkeygenFlag SSHKeygenFlag
+	var sshkeygenCmd = &cobra.Command{
+		Use:   CommandSSH,
+		Short: "Generate SSH keypair",
+		RunE:  sshkeygenFlag.RunE,
+	}
 
-	sshCmd.Flags().IntVarP(&sshCmdGlobalVar.bit, "bits", "b", 4096, common.Usage("Specifies the number of bits in the key to create"))
-	sshCmd.Flags().StringVarP(&sshCmdGlobalVar.path, "file", "f", "id_rsa", common.Usage("Specify the file path to generate"))
+	rootCmd.AddCommand(sshkeygenCmd)
+
+	sshkeygenCmd.Flags().IntVarP(&sshkeygenFlag.bit, "bits", "b", 4096, common.Usage("Specifies the number of bits in the key to create"))
+	sshkeygenCmd.Flags().StringVarP(&sshkeygenFlag.path, "file", "f", "id_rsa", common.Usage("Specify the file path to generate"))
 }
 
-type sshFlag struct {
+type SSHKeygenFlag struct {
 	bit  int
 	path string
 }
 
 /* Init checks bit and file exist or not, and return files name. */
-func (r *sshFlag) Init() (string, string) {
+func (r *SSHKeygenFlag) Init() (string, string) {
 	if r.bit < 4096 {
 		r.bit = 4096
 	}
@@ -65,7 +64,7 @@ func (r *sshFlag) Init() (string, string) {
 	return privateKeyFile, publicKeyFile
 }
 
-func (r *sshFlag) RunE(_ *cobra.Command, _ []string) error {
+func (r *SSHKeygenFlag) RunE(_ *cobra.Command, _ []string) error {
 	rsaFile, pubFile := r.Init()
 	/* Generate rsa keypair. */
 	key, err := rsa.GenerateKey(rand.Reader, r.bit)
