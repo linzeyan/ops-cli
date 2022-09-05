@@ -29,39 +29,38 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var geoipCmd = &cobra.Command{
-	Use:   CommandGeoip + " IP...",
-	Short: "Print IP geographic information",
-	Run: func(_ *cobra.Command, args []string) {
-		var out any
-		var err error
-		switch len(args) {
-		case 0:
-			var resp []byte
-			resp, err = common.HTTPRequestContent("https://myexternalip.com/raw")
-			out = map[string]string{"ip": string(resp)}
-		case 1:
-			var r geoIPSingle
-			out, err = r.Request(args[0])
-		default:
-			var r geoIPBatch
-			out, err = r.Request(args)
-		}
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-		OutputDefaultJSON(out)
-	},
-	Example: common.Examples(`# Print IP geographic information
+func init() {
+	var geoipCmd = &cobra.Command{
+		Use:   CommandGeoip + " IP...",
+		Short: "Print IP geographic information",
+		Run: func(_ *cobra.Command, args []string) {
+			var out any
+			var err error
+			switch len(args) {
+			case 0:
+				var resp []byte
+				resp, err = common.HTTPRequestContent("https://myexternalip.com/raw")
+				out = map[string]string{"ip": string(resp)}
+			case 1:
+				var r geoIPSingle
+				out, err = r.Request(args[0])
+			default:
+				var r geoIPBatch
+				out, err = r.Request(args)
+			}
+			if err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
+			OutputDefaultJSON(out)
+		},
+		Example: common.Examples(`# Print IP geographic information
 1.1.1.1
 
 # Print multiple IP geographic informations
 1.1.1.1 8.8.8.8`, CommandGeoip),
-	DisableFlagsInUseLine: true,
-}
-
-func init() {
+		DisableFlagsInUseLine: true,
+	}
 	rootCmd.AddCommand(geoipCmd)
 }
 
