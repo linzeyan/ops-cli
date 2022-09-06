@@ -19,6 +19,8 @@ package common
 import (
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -34,8 +36,6 @@ func (c ConfigBlock) String() string {
 type readConfig struct {
 	/* Specify the config path. */
 	path string
-	/* Specify the config type. */
-	format string
 	/* Specify the config field. */
 	table ConfigBlock
 	/* Return the key/value to mapping. */
@@ -43,8 +43,20 @@ type readConfig struct {
 }
 
 func (r *readConfig) get() (map[string]any, error) {
+	typ := []string{"json", "toml", "yaml"}
+	ext := strings.Replace(filepath.Ext(r.path), ".", "", 1)
+	log.Println(filepath.Ext(r.path))
+	log.Println(ext)
+	for _, v := range typ {
+		if ext == v {
+			viper.SetConfigType(ext)
+			break
+		}
+	}
+	if ext != typ[0] && ext != typ[1] && ext != typ[2] {
+		viper.SetConfigType(typ[1])
+	}
 	viper.SetConfigFile(r.path)
-	viper.SetConfigType(r.format)
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
 	}
@@ -62,7 +74,7 @@ func (r *readConfig) get() (map[string]any, error) {
 
 /* Get secret token and other settings from config. */
 func Config(path string, table ConfigBlock) map[string]any {
-	r := &readConfig{path: path, format: "toml", table: table}
+	r := &readConfig{path: path, table: table}
 	v, err := r.get()
 	if err != nil {
 		log.Println(err)
