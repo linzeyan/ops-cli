@@ -25,9 +25,9 @@ func TestDateBinary(t *testing.T) {
 		{subCommand, "milli", "-s"},
 		{subCommand, "micro", "-s"},
 		{subCommand, "nano", "-s"},
-		{subCommand, "2006", "-f"},
-		{subCommand, "01", "-f"},
-		{subCommand, "02", "-f"},
+		{subCommand, "-f", "2006"},
+		{subCommand, "-f", "01"},
+		{subCommand, "-f", "02"},
 	}
 	for i := range args {
 		t.Run(args[i][1], func(t *testing.T) {
