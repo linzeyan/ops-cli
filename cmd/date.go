@@ -54,23 +54,11 @@ Time zone:
 				dateFlag.PrintUnixTime(args)
 				return
 			}
-			if dateFlag.date {
-				PrintString(dateFlag.Now().Format("2006-01-02"))
-				return
-			}
-			if dateFlag.time {
-				PrintString(dateFlag.Now().Format("15:04:05"))
-				return
-			}
-			if dateFlag.format {
-				dateFlag.PrintFormat(args)
-				return
-			}
-			PrintString(dateFlag.Now().Format(time.RFC3339))
+			dateFlag.PrintFormat()
 		},
 	}
 	rootCmd.AddCommand(dateCmd)
-	dateCmd.Flags().BoolVarP(&dateFlag.format, "format", "f", false, common.Usage("Print date using specific format"))
+	dateCmd.Flags().StringVarP(&dateFlag.format, "format", "f", "", common.Usage("Print date using specific format"))
 	dateCmd.Flags().BoolVarP(&dateFlag.seconds, "seconds", "s", false, common.Usage("Print Unix time"))
 	dateCmd.Flags().BoolVarP(&dateFlag.utc, "utc", "u", false, common.Usage("Print date using UTC time"))
 	dateCmd.Flags().BoolVarP(&dateFlag.date, "date", "D", false, common.Usage(`Print date using '2006-01-02' format`))
@@ -80,7 +68,7 @@ Time zone:
 type DateFlag struct {
 	utc     bool
 	seconds bool
-	format  bool
+	format  string
 	date    bool
 	time    bool
 }
@@ -92,12 +80,19 @@ func (d *DateFlag) Now() time.Time {
 	return common.TimeNow
 }
 
-func (d *DateFlag) PrintFormat(args []string) {
-	if len(args) == 0 {
+func (d *DateFlag) PrintFormat() {
+	if d.date {
+		PrintString(d.Now().Format("2006-01-02"))
+		return
+	}
+	if d.time {
+		PrintString(d.Now().Format("15:04:05"))
+	}
+	if d.format == "" {
 		PrintString(d.Now().Format(time.RFC3339))
 		return
 	}
-	PrintString(d.Now().Format(args[0]))
+	PrintString(d.Now().Format(d.format))
 }
 
 func (d *DateFlag) PrintUnixTime(args []string) {
