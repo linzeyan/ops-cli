@@ -25,9 +25,11 @@ import (
 
 func init() {
 	var dateFlag DateFlag
+	validArgs := []string{"milli", "micro", "nano"}
 	var dateCmd = &cobra.Command{
 		Use:       CommandDate,
-		ValidArgs: []string{"milli", "micro", "nano"},
+		ValidArgs: validArgs,
+		Args:      cobra.OnlyValidArgs,
 		Short: "Print date time" + common.Usage(`
 
 # Specific format use Golang time format
@@ -51,7 +53,7 @@ Time zone:
 "Z07:00:00" "-07:00:00" Z or ±hh:mm:ss`),
 		Run: func(_ *cobra.Command, args []string) {
 			if dateFlag.seconds {
-				dateFlag.PrintUnixTime(args)
+				dateFlag.PrintUnixTime(validArgs, args)
 				return
 			}
 			dateFlag.PrintFormat()
@@ -81,38 +83,28 @@ func (d *DateFlag) Now() time.Time {
 }
 
 func (d *DateFlag) PrintFormat() {
-	if d.date {
-		PrintString(d.Now().Format("2006-01-02"))
-		return
+	t := d.Now()
+	switch {
+	case d.date:
+		PrintString(t.Format("2006-01-02"))
+	case d.time:
+		PrintString(t.Format("15:04:05"))
+	case d.format == "":
+		PrintString(t.Format(time.RFC3339))
+	case d.format != "":
+		PrintString(t.Format(d.format))
 	}
-	if d.time {
-		PrintString(d.Now().Format("15:04:05"))
-	}
-	if d.format == "" {
-		PrintString(d.Now().Format(time.RFC3339))
-		return
-	}
-	PrintString(d.Now().Format(d.format))
 }
 
-func (d *DateFlag) PrintUnixTime(args []string) {
-	var s = map[string]string{
-		"milli": time.StampMilli,
-		"micro": time.StampMicro,
-		"nano":  time.StampNano,
-	}
-	if len(args) == 0 {
+func (d *DateFlag) PrintUnixTime(valid, args []string) {
+	switch {
+	case len(args) == 0:
 		PrintString(common.TimeNow.Unix())
-		return
-	}
-	switch s[args[0]] {
-	default:
-		PrintString(common.TimeNow.Unix())
-	case time.StampMilli:
+	case args[0] == valid[0]:
 		PrintString(common.TimeNow.UnixMilli())
-	case time.StampMicro:
+	case args[0] == valid[1]:
 		PrintString(common.TimeNow.UnixMicro())
-	case time.StampNano:
+	case args[0] == valid[2]:
 		PrintString(common.TimeNow.UnixNano())
 	}
 }
