@@ -28,7 +28,27 @@ func init() {
 	var dateCmd = &cobra.Command{
 		Use:       CommandDate,
 		ValidArgs: []string{"milli", "micro", "nano"},
-		Short:     "Print date time",
+		Short: "Print date time" + common.Usage(`
+
+# Specific format use Golang time format
+Year: "2006" "06"
+Month: "Jan" "January" "01" "1"
+Day of the week: "Mon" "Monday"
+Day of the month: "2" "_2" "02"
+Day of the year: "__2" "002"
+Hour: "15" "3" "03" (PM or AM)
+Minute: "4" "04"
+Second: "5" "05"
+Milli Second: ".000" ".999"
+Micro Second: ".000000" ".999999"
+Nano Second: ".000000000" ".999999999"
+AM/PM mark: "PM"
+Time zone:
+"Z0700" "-0700"         Z or ±hhmm
+"Z07:00" "-07:00"       Z or ±hh:mm
+"Z07" "-07"             Z or ±hh
+"Z070000" "-070000"     Z or ±hhmmss
+"Z07:00:00" "-07:00:00" Z or ±hh:mm:ss`),
 		Run: func(_ *cobra.Command, args []string) {
 			if dateFlag.seconds {
 				dateFlag.PrintUnixTime(args)
