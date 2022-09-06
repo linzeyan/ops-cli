@@ -35,8 +35,8 @@ func init() {
 		RunE:  freeFlag.RunE,
 	}
 	rootCmd.AddCommand(freeCmd)
-	freeCmd.Flags().UintVarP(&freeFlag.count, "count", "c", 0, "Repeat printing times")
-	freeCmd.Flags().UintVarP(&freeFlag.second, "seconds", "s", 0, "Seconds between each repeat printing")
+	freeCmd.Flags().UintVarP(&freeFlag.count, "count", "c", 0, common.Usage("Repeat printing times"))
+	freeCmd.Flags().UintVarP(&freeFlag.second, "seconds", "s", 0, common.Usage("Seconds between each repeat printing"))
 }
 
 type FreeFlag struct {
