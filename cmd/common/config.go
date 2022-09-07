@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-/* Read config.toml. */
+/* Read config. */
 type ConfigBlock string
 
 func (c ConfigBlock) String() string {
@@ -45,15 +45,11 @@ type readConfig struct {
 func (r *readConfig) get() (map[string]any, error) {
 	typ := []string{"json", "toml", "yaml"}
 	ext := strings.Replace(filepath.Ext(r.path), ".", "", 1)
-	log.Println(filepath.Ext(r.path))
-	log.Println(ext)
 	for _, v := range typ {
 		if ext == v {
 			viper.SetConfigType(ext)
 			break
 		}
-	}
-	if ext != typ[0] && ext != typ[1] && ext != typ[2] {
 		viper.SetConfigType(typ[1])
 	}
 	viper.SetConfigFile(r.path)

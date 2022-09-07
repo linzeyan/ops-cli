@@ -51,7 +51,7 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, common.Usage("Output JSON format"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, common.Usage("Output YAML format"))
-	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path (toml)"))
+	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
 }
 
 type OutputFormat interface {
