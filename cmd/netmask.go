@@ -31,7 +31,7 @@ func init() {
 	var netmaskFlag NetmaskFlag
 	var netmaskCmd = &cobra.Command{
 		Use:   CommandNetmask,
-		Short: "Netmask",
+		Short: "Print IP/Mask pair, list address ranges",
 		Run: func(_ *cobra.Command, args []string) {
 			if netmaskFlag.ranges {
 				for _, v := range args {
@@ -42,9 +42,17 @@ func init() {
 				}
 				return
 			}
-			err := netmaskFlag.Address(args)
-			if err != nil {
-				log.Println(err)
+			if netmaskFlag.binary ||
+				netmaskFlag.octal ||
+				netmaskFlag.decimal ||
+				netmaskFlag.hex ||
+				netmaskFlag.cisco {
+				for _, v := range args {
+					err := netmaskFlag.Address(v)
+					if err != nil {
+						log.Println(err)
+					}
+				}
 				return
 			}
 		},
@@ -71,7 +79,7 @@ type NetmaskFlag struct {
 	cidr    bool
 }
 
-func (n *NetmaskFlag) Range(arg string) error {
+func (*NetmaskFlag) Range(arg string) error {
 	_, ipnet, err := net.ParseCIDR(arg)
 	if err != nil {
 		return err
@@ -89,52 +97,50 @@ func (n *NetmaskFlag) Range(arg string) error {
 	return err
 }
 
-func (n *NetmaskFlag) Address(args []string) error {
+func (n *NetmaskFlag) Address(arg string) error {
 	var err error
-	for _, v := range args {
-		ipnet := new(net.IPNet)
-		switch {
-		case !validator.ValidIP(v) && validator.ValidIPCIDR(v):
-			_, ipnet, err = net.ParseCIDR(v)
-		case validator.ValidIP(v) && !validator.ValidIPCIDR(v):
-			if validator.ValidIPv4(v) {
-				_, ipnet, err = net.ParseCIDR(v + "/32")
-			} else if validator.ValidIPv6(v) {
-				_, ipnet, err = net.ParseCIDR(v + "/64")
-			}
-		default:
-			return common.ErrInvalidArg
+	ipnet := new(net.IPNet)
+	switch {
+	case !validator.ValidIP(arg) && validator.ValidIPCIDR(arg):
+		_, ipnet, err = net.ParseCIDR(arg)
+	case validator.ValidIP(arg) && !validator.ValidIPCIDR(arg):
+		if validator.ValidIPv4(arg) {
+			_, ipnet, err = net.ParseCIDR(arg + "/32")
+		} else if validator.ValidIPv6(arg) {
+			_, ipnet, err = net.ParseCIDR(arg + "/64")
 		}
-		if err != nil {
-			return err
-		}
+	default:
+		return common.ErrInvalidArg
+	}
+	if err != nil {
+		return err
+	}
 
-		var ip, mask string
-		for i := 0; i < len(ipnet.IP); i++ {
-			switch {
-			case n.binary:
-				ip += fmt.Sprintf("%08b ", ipnet.IP[i])
-				mask += fmt.Sprintf("%08b ", ipnet.Mask[i])
-			case n.octal:
-				ip += fmt.Sprintf("%o ", ipnet.IP[i])
-				mask += fmt.Sprintf("%o ", ipnet.Mask[i])
-			case n.decimal:
-				ip += fmt.Sprintf("%d.", ipnet.IP[i])
-				mask += fmt.Sprintf("%d.", ipnet.Mask[i])
-			case n.hex:
-				ip += fmt.Sprintf("%x ", ipnet.IP[i])
-				mask += fmt.Sprintf("%x ", ipnet.Mask[i])
-			case n.cisco:
-				ip += fmt.Sprintf("%d.", ipnet.IP[i])
-				mask += fmt.Sprintf("%d.", 1<<8-1-ipnet.Mask[i])
-			}
-		}
+	var ip, mask string
+	for i := 0; i < len(ipnet.IP); i++ {
 		switch {
-		case n.binary, n.octal, n.hex:
-			PrintString(fmt.Sprintf("%s / %s", strings.TrimRight(ip, " "), strings.TrimRight(mask, " ")))
-		case n.decimal, n.cisco:
-			PrintString(fmt.Sprintf("%s / %s", strings.TrimRight(ip, "."), strings.TrimRight(mask, ".")))
+		case n.binary:
+			ip += fmt.Sprintf("%08b ", ipnet.IP[i])
+			mask += fmt.Sprintf("%08b ", ipnet.Mask[i])
+		case n.octal:
+			ip += fmt.Sprintf("%o ", ipnet.IP[i])
+			mask += fmt.Sprintf("%o ", ipnet.Mask[i])
+		case n.decimal:
+			ip += fmt.Sprintf("%d.", ipnet.IP[i])
+			mask += fmt.Sprintf("%d.", ipnet.Mask[i])
+		case n.hex:
+			ip += fmt.Sprintf("%x ", ipnet.IP[i])
+			mask += fmt.Sprintf("%x ", ipnet.Mask[i])
+		case n.cisco:
+			ip += fmt.Sprintf("%d.", ipnet.IP[i])
+			mask += fmt.Sprintf("%d.", 1<<8-1-ipnet.Mask[i])
 		}
+	}
+	switch {
+	case n.binary, n.octal, n.hex:
+		PrintString(fmt.Sprintf("%s / %s", strings.TrimRight(ip, " "), strings.TrimRight(mask, " ")))
+	case n.decimal, n.cisco:
+		PrintString(fmt.Sprintf("%s / %s", strings.TrimRight(ip, "."), strings.TrimRight(mask, ".")))
 	}
 	return err
 }
