@@ -76,19 +76,15 @@ func (n *NetmaskFlag) Range(arg string) error {
 	if err != nil {
 		return err
 	}
-	ip := ipnet.IP
-	mask := ipnet.Mask
-	first := make(net.IP, len(ip))
-	first[0] = ip[0] & mask[0]
-	first[1] = ip[1] & mask[1]
-	first[2] = ip[2] & mask[2]
-	first[3] = ip[3] & mask[3]
-	last := make(net.IP, len(ip))
-	last[0] = first[0] + (255 - mask[0])
-	last[1] = first[1] + (255 - mask[1])
-	last[2] = first[2] + (255 - mask[2])
-	last[3] = first[3] + (255 - mask[3])
-	sum := (256 - int(mask[0])) * (256 - int(mask[1])) * (256 - int(mask[2])) * (256 - int(mask[3]))
+	l := len(ipnet.IP)
+	first := make(net.IP, l)
+	last := make(net.IP, l)
+	sum := 1
+	for i := 0; i < l; i++ {
+		first[i] = ipnet.IP[i] & ipnet.Mask[i]
+		last[i] = first[i] + (1<<8 - 1 - ipnet.Mask[i])
+		sum *= (1<<8 - int(ipnet.Mask[i]))
+	}
 	PrintString(fmt.Sprintf("%v -> %v (%d)", first, last, sum))
 	return err
 }
@@ -130,7 +126,7 @@ func (n *NetmaskFlag) Address(args []string) error {
 				mask += fmt.Sprintf("%x ", ipnet.Mask[i])
 			case n.cisco:
 				ip += fmt.Sprintf("%d.", ipnet.IP[i])
-				mask += fmt.Sprintf("%d.", 255-ipnet.Mask[i])
+				mask += fmt.Sprintf("%d.", 1<<8-1-ipnet.Mask[i])
 			}
 		}
 		switch {
