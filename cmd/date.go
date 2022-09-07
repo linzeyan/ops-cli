@@ -30,7 +30,8 @@ func init() {
 		Use:       CommandDate,
 		ValidArgs: validArgs,
 		Args:      cobra.OnlyValidArgs,
-		Short: "Print date time" + common.Usage(`
+		Short:     "Print date time",
+		Long: "Print date time" + common.Usage(`
 
 # Specific format use Golang time format
 Year: "2006" "06"
