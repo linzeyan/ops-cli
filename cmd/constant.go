@@ -64,6 +64,7 @@ const (
 	CommandMan       = "man"
 	CommandMarkdown  = "markdown"
 	CommandMemory    = "memory"
+	CommandNetmask   = "netmask"
 	CommandNetwork   = "network"
 	CommandNumber    = "number"
 	CommandOtp       = "otp"
