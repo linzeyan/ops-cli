@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"math/big"
 	"net"
 	"strings"
 
@@ -97,30 +98,11 @@ func (n *NetmaskFlag) Range(arg string) error {
 		first[i] = ipnet.IP[i] & ipnet.Mask[i]
 		last[i] = first[i] + (1<<8 - 1 - ipnet.Mask[i])
 	}
-	out := fmt.Sprintf("%v -> %v ", first, last)
-	if l == net.IPv4len {
-		out += n.ipv4(ipnet.Mask, l)
-	} else if l == net.IPv6len {
-		out += n.ipv6(ipnet.Mask, l)
-	}
+	ones, bits := ipnet.Mask.Size()
+	out := fmt.Sprintf("%v -> %v (%d)", first, last,
+		big.NewInt(0).Lsh(big.NewInt(1), uint(bits-ones)))
 	PrintString(out)
 	return err
-}
-
-func (*NetmaskFlag) ipv4(mask net.IPMask, l int) string {
-	var sum uint = 1
-	for i := 0; i < l; i++ {
-		sum *= 1<<8 - uint(mask[i])
-	}
-	return fmt.Sprintf("(%d)", sum)
-}
-
-func (*NetmaskFlag) ipv6(mask net.IPMask, l int) string {
-	var sum float64 = 1
-	for i := 0; i < l; i++ {
-		sum *= 1<<8 - float64(mask[i])
-	}
-	return fmt.Sprintf("(%e)", sum)
 }
 
 func (n *NetmaskFlag) Address(arg string) error {
