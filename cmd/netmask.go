@@ -126,23 +126,23 @@ func (n *NetmaskFlag) Address(arg string) error {
 
 	var ip, mask string
 	for i := 0; i < len(ipnet.IP); i++ {
+		var f string
 		switch {
 		case n.binary:
-			ip += fmt.Sprintf("%08b ", ipnet.IP[i])
-			mask += fmt.Sprintf("%08b ", ipnet.Mask[i])
+			f = "%08b "
 		case n.octal:
-			ip += fmt.Sprintf("%o ", ipnet.IP[i])
-			mask += fmt.Sprintf("%o ", ipnet.Mask[i])
+			f = "%o "
 		case n.decimal:
-			ip += fmt.Sprintf("%d.", ipnet.IP[i])
-			mask += fmt.Sprintf("%d.", ipnet.Mask[i])
+			f = "%d."
 		case n.hex:
-			ip += fmt.Sprintf("%x ", ipnet.IP[i])
-			mask += fmt.Sprintf("%x ", ipnet.Mask[i])
+			f = "%x "
 		case n.cisco:
 			ip += fmt.Sprintf("%d.", ipnet.IP[i])
 			mask += fmt.Sprintf("%d.", 1<<8-1-ipnet.Mask[i])
+			continue
 		}
+		ip += fmt.Sprintf(f, ipnet.IP[i])
+		mask += fmt.Sprintf(f, ipnet.Mask[i])
 	}
 	switch {
 	case n.binary, n.octal, n.hex:
