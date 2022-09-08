@@ -35,8 +35,7 @@ func init() {
 		Run: func(_ *cobra.Command, args []string) {
 			if netmaskFlag.ranges {
 				for _, v := range args {
-					err := netmaskFlag.Range(v)
-					if err != nil {
+					if err := netmaskFlag.Range(v); err != nil {
 						log.Println(err)
 					}
 				}
@@ -46,10 +45,17 @@ func init() {
 				netmaskFlag.octal ||
 				netmaskFlag.decimal ||
 				netmaskFlag.hex ||
-				netmaskFlag.cisco {
+				netmaskFlag.cisco ||
+				netmaskFlag.cidr {
 				for _, v := range args {
-					err := netmaskFlag.Address(v)
-					if err != nil {
+					slice := strings.Split(v, "-")
+					if len(slice) == 2 {
+						if err := netmaskFlag.CIDR(slice[0], slice[1]); err != nil {
+							log.Println(err)
+						}
+						continue
+					}
+					if err := netmaskFlag.Address(v); err != nil {
 						log.Println(err)
 					}
 				}
@@ -165,5 +171,15 @@ func (n *NetmaskFlag) Address(arg string) error {
 		mask = strings.TrimRight(mask, ".")
 	}
 	PrintString(fmt.Sprintf("%s / %s", ip, mask))
+	return err
+}
+
+func (n *NetmaskFlag) CIDR(a, b string) error {
+	var err error
+	if (!validator.ValidIPv4(a) && !validator.ValidIPv4(b)) &&
+		(!validator.ValidIPv6(a) && !validator.ValidIPv6(b)) {
+		return common.ErrInvalidArg
+	}
+
 	return err
 }
