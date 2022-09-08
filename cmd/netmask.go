@@ -158,9 +158,12 @@ func (n *NetmaskFlag) Address(arg string) error {
 	}
 	switch {
 	case n.binary, n.octal, n.hex:
-		PrintString(fmt.Sprintf("%s / %s", strings.TrimRight(ip, " "), strings.TrimRight(mask, " ")))
+		ip = strings.TrimRight(ip, " ")
+		mask = strings.TrimRight(mask, " ")
 	case n.decimal, n.cisco:
-		PrintString(fmt.Sprintf("%s / %s", strings.TrimRight(ip, "."), strings.TrimRight(mask, ".")))
+		ip = strings.TrimRight(ip, ".")
+		mask = strings.TrimRight(mask, ".")
 	}
+	PrintString(fmt.Sprintf("%s / %s", ip, mask))
 	return err
 }
