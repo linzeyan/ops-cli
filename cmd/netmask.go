@@ -212,23 +212,21 @@ func (n *NetmaskFlag) CIDR(a, b string) error {
 func (n *NetmaskFlag) calculate(ipa, ipb netip.Addr) (string, string) {
 	temp := ipa
 	for i := temp.BitLen(); i >= 0; i-- {
-		ipnet := netip.MustParsePrefix(fmt.Sprintf("%s/%d", ipa.String(), i))
-		// if !ipnet.Contains(temp) {
-		// 	return temp.String(), fmt.Sprintf("%s/%d", ipa.String(), i+1)
-		// }
-		if temp.Compare(ipb) == 0 && !ipnet.Contains(ipb.Next()) {
-			return "0", ipnet.String()
-		}
 		if temp.Compare(ipb) == 1 {
 			break
 		}
-		if ipnet.Contains(ipb.Next()) {
+		ipnet := netip.MustParsePrefix(fmt.Sprintf("%s/%d", ipa.String(), i))
+		if ipnet.Contains(ipb) && !ipnet.Contains(ipb.Next()) {
+			return "0", ipnet.String()
+		}
+
+		if ipnet.Contains(ipb) && ipnet.Contains(ipb.Next()) {
 			return temp.String(), fmt.Sprintf("%s/%d", ipa.String(), i+1)
 		}
+		// log.Printf("i: %d\n", i)
+		// log.Printf("ipnet: %v\n", ipnet)
+		// log.Printf("temp: %v\n", temp)
 		temp = temp.Next()
-		log.Printf("i: %d\n", i)
-		log.Printf("ipnet: %v\n", ipnet)
-		log.Printf("temp: %v\n", temp)
 	}
 	return "", ""
 }
