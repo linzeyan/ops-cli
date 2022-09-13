@@ -21,6 +21,7 @@ import (
 	"log"
 	"math/big"
 	"net"
+	"net/netip"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -163,5 +164,71 @@ func (n *NetmaskFlag) CIDR(a, b string) error {
 		return common.ErrInvalidArg
 	}
 
+	ipa, err := netip.ParseAddr(a)
+	if err != nil {
+		return err
+	}
+	ipb, err := netip.ParseAddr(b)
+	if err != nil {
+		return err
+	}
+
+	var out []string
+	var next, prefix string
+	switch ipa.Compare(ipb) {
+	case -1:
+		for next != "0" {
+			log.Printf("next: %s\n", next)
+			next, prefix = n.calculate(ipa, ipb)
+			if next == "" {
+				continue
+			}
+			if next == "0" {
+				break
+			}
+			ipa = netip.MustParseAddr(next)
+			nextPrefix := netip.MustParsePrefix(prefix)
+			for nextPrefix.Contains(ipa) && ipa.Compare(ipb) != 0 {
+				ipa = ipa.Next()
+			}
+			if ipa.Compare(ipb) >= 0 && nextPrefix.Contains(ipb) {
+				break
+			}
+			out = append(out, prefix)
+		}
+		out = append(out, prefix)
+	case 1:
+		n.calculate(ipb, ipa)
+	case 0:
+		out = append(out, fmt.Sprintf("%s/%d", ipa.String(), ipa.BitLen()))
+	}
+
+	for _, v := range out {
+		PrintString(v)
+	}
 	return err
+}
+
+func (n *NetmaskFlag) calculate(ipa, ipb netip.Addr) (string, string) {
+	temp := ipa
+	for i := temp.BitLen(); i >= 0; i-- {
+		ipnet := netip.MustParsePrefix(fmt.Sprintf("%s/%d", ipa.String(), i))
+		// if !ipnet.Contains(temp) {
+		// 	return temp.String(), fmt.Sprintf("%s/%d", ipa.String(), i+1)
+		// }
+		if temp.Compare(ipb) == 0 && !ipnet.Contains(ipb.Next()) {
+			return "0", ipnet.String()
+		}
+		if temp.Compare(ipb) == 1 {
+			break
+		}
+		if ipnet.Contains(ipb.Next()) {
+			return temp.String(), fmt.Sprintf("%s/%d", ipa.String(), i+1)
+		}
+		temp = temp.Next()
+		log.Printf("i: %d\n", i)
+		log.Printf("ipnet: %v\n", ipnet)
+		log.Printf("temp: %v\n", temp)
+	}
+	return "", ""
 }
