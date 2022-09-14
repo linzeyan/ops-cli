@@ -21,6 +21,7 @@ import (
 	"log"
 	"math/big"
 	"net"
+	"net/netip"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -87,10 +88,10 @@ type NetmaskFlag struct {
 }
 
 /* ipRange parse string and return CIDR, first IP and last IP. */
-func (*NetmaskFlag) ipRange(arg string) (*net.IPNet, net.IP, net.IP) {
+func (*NetmaskFlag) ipRange(arg string) (*net.IPNet, netip.Addr, netip.Addr) {
 	_, ipnet, err := net.ParseCIDR(arg)
 	if err != nil {
-		return nil, nil, nil
+		return nil, netip.Addr{}, netip.Addr{}
 	}
 	l := len(ipnet.IP)
 	first := make(net.IP, l)
@@ -99,7 +100,7 @@ func (*NetmaskFlag) ipRange(arg string) (*net.IPNet, net.IP, net.IP) {
 		first[i] = ipnet.IP[i] & ipnet.Mask[i]
 		last[i] = first[i] | (ipnet.Mask[i] ^ 0xff)
 	}
-	return ipnet, first, last
+	return ipnet, netip.MustParseAddr(first.String()), netip.MustParseAddr(last.String())
 }
 
 func (n *NetmaskFlag) Range(arg string) error {
@@ -165,6 +166,22 @@ func (n *NetmaskFlag) Address(arg string) error {
 	return err
 }
 
+func (n *NetmaskFlag) iterate(ipa, ipb netip.Addr) (string, string) {
+	for i := ipa.BitLen(); i >= 0; i-- {
+		p := fmt.Sprintf("%s/%d", ipa.String(), i)
+		ipnet, first, last := n.ipRange(p)
+		if first.Compare(ipa) == -1 || last.Compare(ipb) == 1 {
+			p = fmt.Sprintf("%s/%d", ipa.String(), i+1)
+			ipnet, _, last = n.ipRange(p)
+			return last.Next().String(), ipnet.String()
+		}
+		if last.Compare(ipb) == 0 {
+			return "0", ipnet.String()
+		}
+	}
+	return "", ""
+}
+
 func (n *NetmaskFlag) CIDR(a, b string) error {
 	var err error
 	if (!validator.ValidIPv4(a) && !validator.ValidIPv4(b)) &&
@@ -172,9 +189,44 @@ func (n *NetmaskFlag) CIDR(a, b string) error {
 		return common.ErrInvalidArg
 	}
 
+	ipa := netip.MustParseAddr(a)
+	ipb := netip.MustParseAddr(b)
+
 	var out []string
+	var next, prefix string
+	switch ipa.Compare(ipb) {
+	case -1:
+		for next != "0" {
+			next, prefix = n.iterate(ipa, ipb)
+			if next == "0" || next == "" {
+				break
+			}
+			ipa = netip.MustParseAddr(next)
+			out = append(out, prefix)
+		}
+		out = append(out, prefix)
+	case 1:
+		for next != "0" {
+			next, prefix = n.iterate(ipb, ipa)
+			if next == "0" || next == "" {
+				break
+			}
+			ipb = netip.MustParseAddr(next)
+			out = append(out, prefix)
+		}
+		out = append(out, prefix)
+	case 0:
+		out = append(out, fmt.Sprintf("%s/%d", ipa.String(), ipa.BitLen()))
+	}
+
 	for _, v := range out {
-		PrintString(v)
+		if n.cisco {
+			if err = n.Address(v); err != nil {
+				return err
+			}
+		} else {
+			PrintString(v)
+		}
 	}
 	return err
 }
