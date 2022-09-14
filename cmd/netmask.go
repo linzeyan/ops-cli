@@ -125,7 +125,7 @@ func (n *NetmaskFlag) Address(arg string) error {
 		if validator.ValidIPv4(arg) {
 			_, ipnet, err = net.ParseCIDR(arg + "/32")
 		} else if validator.ValidIPv6(arg) {
-			_, ipnet, err = net.ParseCIDR(arg + "/64")
+			_, ipnet, err = net.ParseCIDR(arg + "/128")
 		}
 	default:
 		return common.ErrInvalidArg
