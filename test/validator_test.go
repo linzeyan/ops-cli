@@ -68,6 +68,27 @@ func TestValidatorIP(t *testing.T) {
 	}
 }
 
+func TestValidatorIPCIDR(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected bool
+	}{
+		{"1.1.1.1/32", true},
+		{"999.1.1.1", false},
+		{"260.2.3.4/24", false},
+		{"example.com/8", false},
+		{"2404:6800:4008:c01::65/32", true},
+		{"fe80::aede:48ff:fe00:1122/64", true},
+	}
+	for i := range testCases {
+		t.Run(testCases[i].input, func(t *testing.T) {
+			if got := validator.ValidIPCIDR(testCases[i].input); got != testCases[i].expected {
+				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
+			}
+		})
+	}
+}
+
 func TestValidatorIPv4(t *testing.T) {
 	testCases := []struct {
 		input    string
@@ -88,6 +109,27 @@ func TestValidatorIPv4(t *testing.T) {
 	}
 }
 
+func TestValidatorIPv4CIDR(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected bool
+	}{
+		{"1.1.1.1/24", true},
+		{"999.1.1.1/8", false},
+		{"260.2.3.4/12", false},
+		{"1.2.3.4/10", true},
+		{"example.com/22", false},
+		{"2404:6800:4008:c01::65/64", false},
+	}
+	for i := range testCases {
+		t.Run(testCases[i].input, func(t *testing.T) {
+			if got := validator.ValidIPv4CIDR(testCases[i].input); got != testCases[i].expected {
+				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
+			}
+		})
+	}
+}
+
 func TestValidatorIPv6(t *testing.T) {
 	testCases := []struct {
 		input    string
@@ -102,6 +144,26 @@ func TestValidatorIPv6(t *testing.T) {
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
 			if got := validator.ValidIPv6(testCases[i].input); got != testCases[i].expected {
+				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
+			}
+		})
+	}
+}
+
+func TestValidatorIPv6CIDR(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected bool
+	}{
+		{"1.1.1.1/3", false},
+		{"999.1.1.1/4", false},
+		{"260.2.3.4/5", false},
+		{"example.com/7", false},
+		{"2404:6800:4008:c01::65/10", true},
+	}
+	for i := range testCases {
+		t.Run(testCases[i].input, func(t *testing.T) {
+			if got := validator.ValidIPv6CIDR(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
