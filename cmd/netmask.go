@@ -87,10 +87,11 @@ type NetmaskFlag struct {
 	cidr    bool
 }
 
-func (n *NetmaskFlag) Range(arg string) error {
+/* ipRange parse string and return CIDR, first IP and last IP. */
+func (*NetmaskFlag) ipRange(arg string) (*net.IPNet, net.IP, net.IP) {
 	_, ipnet, err := net.ParseCIDR(arg)
 	if err != nil {
-		return err
+		return nil, nil, nil
 	}
 	l := len(ipnet.IP)
 	first := make(net.IP, l)
@@ -99,11 +100,19 @@ func (n *NetmaskFlag) Range(arg string) error {
 		first[i] = ipnet.IP[i] & ipnet.Mask[i]
 		last[i] = first[i] + (1<<8 - 1 - ipnet.Mask[i])
 	}
+	return ipnet, first, last
+}
+
+func (n *NetmaskFlag) Range(arg string) error {
+	ipnet, first, last := n.ipRange(arg)
+	if ipnet == nil {
+		return common.ErrInvalidArg
+	}
 	ones, bits := ipnet.Mask.Size()
 	out := fmt.Sprintf("%v -> %v (%d)", first, last,
 		big.NewInt(0).Lsh(big.NewInt(1), uint(bits-ones)))
 	PrintString(out)
-	return err
+	return nil
 }
 
 func (n *NetmaskFlag) Address(arg string) error {
