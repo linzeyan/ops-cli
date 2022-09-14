@@ -17,7 +17,7 @@ limitations under the License.
 package validator
 
 import (
-	"net"
+	"net/netip"
 	"net/url"
 	"os"
 	"strconv"
@@ -53,41 +53,53 @@ func ValidFile(f string) bool {
 
 /* If i is a ipv address return true. */
 func ValidIP(i string) bool {
-	return net.ParseIP(i) != nil
-}
-
-func ValidIPCIDR(i string) bool {
-	ip, _, err := net.ParseCIDR(i)
+	ip, err := netip.ParseAddr(i)
 	if err != nil {
 		return false
 	}
-	return ValidIP(ip.String())
+	return ip.IsValid()
+}
+
+func ValidIPCIDR(i string) bool {
+	ip, err := netip.ParsePrefix(i)
+	if err != nil {
+		return false
+	}
+	return ip.IsValid()
 }
 
 /* If i is a ipv4 address return true. */
 func ValidIPv4(i string) bool {
-	return net.ParseIP(i).To4() != nil
-}
-
-func ValidIPv4CIDR(i string) bool {
-	ip, _, err := net.ParseCIDR(i)
+	ip, err := netip.ParseAddr(i)
 	if err != nil {
 		return false
 	}
-	return ValidIPv4(ip.String())
+	return ip.Is4()
+}
+
+func ValidIPv4CIDR(i string) bool {
+	ip, err := netip.ParsePrefix(i)
+	if err != nil {
+		return false
+	}
+	return ip.IsValid() && ip.Addr().Is4()
 }
 
 /* If i is a ipv6 address return true. */
 func ValidIPv6(i string) bool {
-	return net.ParseIP(i).To4() == nil && net.ParseIP(i).To16() != nil
-}
-
-func ValidIPv6CIDR(i string) bool {
-	ip, _, err := net.ParseCIDR(i)
+	ip, err := netip.ParseAddr(i)
 	if err != nil {
 		return false
 	}
-	return ValidIPv6(ip.String())
+	return ip.Is6()
+}
+
+func ValidIPv6CIDR(i string) bool {
+	ip, err := netip.ParsePrefix(i)
+	if err != nil {
+		return false
+	}
+	return ip.IsValid() && ip.Addr().Is6()
 }
 
 /* If u is a valid url return true. */
