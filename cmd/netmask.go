@@ -110,12 +110,17 @@ func (n *NetmaskFlag) Range(arg string) error {
 	}
 	ones, bits := ipnet.Mask.Size()
 	out := fmt.Sprintf("%v -> %v (%d)", first, last,
+		/* IP counts. */
 		big.NewInt(0).Lsh(big.NewInt(1), uint(bits-ones)))
 	PrintString(out)
 	return nil
 }
 
 func (n *NetmaskFlag) Address(arg string) error {
+	var (
+		ipv4Len = fmt.Sprintf("/%d", net.IPv4len*8)
+		ipv6Len = fmt.Sprintf("/%d", net.IPv6len*8)
+	)
 	var err error
 	ipnet := new(net.IPNet)
 	switch {
@@ -123,9 +128,9 @@ func (n *NetmaskFlag) Address(arg string) error {
 		_, ipnet, err = net.ParseCIDR(arg)
 	case validator.ValidIP(arg) && !validator.ValidIPCIDR(arg):
 		if validator.ValidIPv4(arg) {
-			_, ipnet, err = net.ParseCIDR(arg + "/32")
+			_, ipnet, err = net.ParseCIDR(arg + ipv4Len)
 		} else if validator.ValidIPv6(arg) {
-			_, ipnet, err = net.ParseCIDR(arg + "/128")
+			_, ipnet, err = net.ParseCIDR(arg + ipv6Len)
 		}
 	default:
 		return common.ErrInvalidArg
@@ -166,6 +171,7 @@ func (n *NetmaskFlag) Address(arg string) error {
 	return err
 }
 
+/* iterate if not iterate over return next IP and prefix, else return "0" and prefix. */
 func (n *NetmaskFlag) iterate(ipa, ipb netip.Addr) (string, string) {
 	for i := ipa.BitLen(); i >= 0; i-- {
 		p := fmt.Sprintf("%s/%d", ipa.String(), i)
