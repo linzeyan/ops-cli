@@ -40,7 +40,7 @@ func init() {
 
 	var ipCmd = &cobra.Command{
 		Use:       CommandIP + " {all|interface}",
-		Args:      cobra.OnlyValidArgs,
+		Args:      cobra.MinimumNArgs(1),
 		ValidArgs: validArgs,
 		Short:     "View interfaces configuration",
 		RunE: func(_ *cobra.Command, args []string) error {
