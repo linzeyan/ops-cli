@@ -43,6 +43,7 @@ func TestWhois(t *testing.T) {
 			}
 			assert.JSONEq(t, testCases[i].expected, string(got))
 		})
+		time.Sleep(time.Second * 2)
 	}
 }
 
@@ -70,6 +71,7 @@ func TestWhoisRegistrar(t *testing.T) {
 			}
 			assert.Equal(t, testCases[i].expected, string(got))
 		})
+		time.Sleep(time.Second * 2)
 	}
 }
 
