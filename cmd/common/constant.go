@@ -35,6 +35,7 @@ const (
 	Encrypt  ConfigBlock = "encrypt"
 	ICP      ConfigBlock = "west"
 	LINE     ConfigBlock = "line"
+	Redis    ConfigBlock = "redis"
 	Slack    ConfigBlock = "slack"
 	Telegram ConfigBlock = "telegram"
 )

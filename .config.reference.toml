@@ -10,6 +10,13 @@ access_token = "Channel Access Token"
 id = ""
 secret = "Channel Secret"
 
+[redis]
+auth = "007008009"
+db = 0
+host = "127.0.0.1"
+port = "6379"
+user = "redis"
+
 [slack]
 channel_id = "CHANNEL"
 token = "token"
