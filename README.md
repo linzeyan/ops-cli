@@ -7,6 +7,18 @@
 
 Try to collect useful tools for ops.
 
+## Table of contents
+
+=================
+
+- [Installation](#Installation)
+  - [Go Install](#Go-Install)
+  - [Homebrew](#Homebrew)
+- [Upgrade](#Upgrade)
+  - [Brew](#Brew)
+  - [Others](#Others)
+- [Usage](#Usage)
+
 ## Installation
 
 ### Go Install
@@ -20,6 +32,20 @@ go install github.com/linzeyan/ops-cli@latest
 ```bash
 brew tap linzeyan/tools
 brew install ops-cli
+```
+
+## Upgrade
+
+### Brew
+
+```bash
+brew upgrade ops-cli
+```
+
+### Others
+
+```bash
+ops-cli update
 ```
 
 ### [Download Page](https://github.com/linzeyan/ops-cli/releases/latest)
@@ -41,6 +67,7 @@ Available Commands:
   cert        Check tls cert expiry time
   completion  Generate the autocompletion script for the specified shell
   convert     Convert data format
+  date        Print date time
   df          Display free disk spaces
   dig         Resolve domain name
   doc         Generate documentation
@@ -53,9 +80,11 @@ Available Commands:
   help        Help about any command
   icp         Check ICP status
   ip          View interfaces configuration
+  netmask     Print IP/Mask pair, list address ranges
   otp         Calculate passcode or generate secret
   qrcode      Read or generate QR Code
   random      Generate random string
+  redis       Opens a connection to a Redis server
   ssh-keygen  Generate SSH keypair
   stat        Display file informations
   system      Display system informations
@@ -65,7 +94,7 @@ Available Commands:
   whois       List domain name information
 
 Flags:
-      --config string   Specify config path (toml)
+      --config string   Specify config path
   -h, --help            help for ops-cli
   -j, --json            Output JSON format
   -y, --yaml            Output YAML format
@@ -109,6 +138,21 @@ telegram:
 west:
   account: account
   api_key: apikey
+```
+
+### `date`
+
+```bash
+→ ops-cli date -s
+1663222044
+
+→ ops-cli date -s micro
+1663222047193376
+```
+
+```bash
+→ ops-cli date --format '01-02-2006'
+09-15-2022
 ```
 
 ### `df`
@@ -195,6 +239,11 @@ SHA256: 74d680e9a561929551611bcecf9fc1704c75a8491e9aec00065adbfaefa36905
 SHA512: 9aa41fc10c66de39e30dcf7e35be7c15878322df8e318922dc8623f140464c51b964953d950d8dc1ef4b0d4b614f01c065ef50d0c0e686cdd21ff4580fec3ce7
 ```
 
+```bash
+→ ops-cli hash sha512 'This is a string.'
+0145c77435b886e43fcfa5b8a6e2c5a9f1c216f694a65e75354f9679174551b7a0151b72f5497d58845bc5033f39f3249ee087cdb602680edc3fdeda8a18ff9b
+```
+
 ### `icp`
 
 ```bash
@@ -218,6 +267,52 @@ icpstatus: 已备案
         TX errors 0  dropped 15935
 ```
 
+### `netmask`
+
+```bash
+→ ops-cli netmask -b 192.168.0.0/16
+11000000 10101000 00000000 00000000 / 11111111 11111111 00000000 00000000
+```
+
+```bash
+→ ops-cli netmask -r 172.16.0.0/12
+172.16.0.0 -> 172.31.255.255 (1048576)
+```
+
+```bash
+→ ops-cli netmask -c 172.16.9.1-192.168.3.1
+172.16.9.1/32
+172.16.9.2/31
+172.16.9.4/30
+172.16.9.8/29
+172.16.9.16/28
+172.16.9.32/27
+172.16.9.64/26
+172.16.9.128/25
+172.16.10.0/23
+172.16.12.0/22
+172.16.16.0/20
+172.16.32.0/19
+172.16.64.0/18
+172.16.128.0/17
+172.17.0.0/16
+172.18.0.0/15
+172.20.0.0/14
+172.24.0.0/13
+172.32.0.0/11
+172.64.0.0/10
+172.128.0.0/9
+173.0.0.0/8
+174.0.0.0/7
+176.0.0.0/4
+192.0.0.0/9
+192.128.0.0/11
+192.160.0.0/13
+192.168.0.0/23
+192.168.2.0/24
+192.168.3.0/31
+```
+
 ### `otp`
 
 ```bash
@@ -237,6 +332,21 @@ HTTPS://MAGICLEN.ORG
 ```bash
 → ops-cli random bootstrap-token
 7fa086.d40039e9efc249ec
+```
+
+```bash
+→ ops-cli random base64 -l 500
+TKxrKqeIoY/FrGI4h2vNnalc0Ga0h3CoKtWVBluWF+Lu4CSF078oUPstVF0CTzBD
+OQdtIGSNUEepInGU0vH4BWw9yo2iHJib9Ti9EAOGJs/caiy7QSQhJ2c5oamHyFu9
+a0Li9ULAm+IsaY0od1xN0QDn3uwnGST/1x2dzDPzaHpU53P7IEWtb1Zioirk8VQZ
+ZBHd3e/VNye93i0p0FpVxCi1Q+MhdBJzjx8F9f0arT4brHi0TruAgXd3TlYjjl7A
+6F7iL9AfsUshtL2tKCF3EcmPv1UtCm8S7Hh6lYltzXrmCTCqBKI+doNp2/yPioHQ
+IrpMxjepApa4IxMFapm5LSCBI8UrF4avpTi2cnD8wJfj/RAUlf/8VtbirUh8rtot
+tdR715KHaNRXHpMRwmkDWHTpOtlCotBmKUEkQXJ5ZZyWkp7kkC6F6ADIrtcoa/7h
+fR/ivHlj+PtIyB4em5y0Nq2nTuajHRjZbZTC7akTKx070UWH4uNajkP/Eq82E6Kn
+QbqZnLicRpJj60TUiAFuA3ohjqFynoozRUWjmI8ZmBD6J4o+2viDUHTLRCdIuVeV
+Garvm8Mi95i4Zt8ZMjOhcI6W9zzuMb9bJZqBVsl8GYANHo35X2sfR6burD94We7O
+JkiKqH3a33NP9AA2xpVGrcQrBdo=
 ```
 
 ### `stat`
@@ -290,4 +400,9 @@ https://zh.wikipedia.org/zh-tw/%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86#:~:text=%E5%
     "D.NS.APPLE.COM"
   ]
 }
+```
+
+```bash
+→ ops-cli whois google.com --expiry
+2028-09-14T12:00:00+08:00
 ```

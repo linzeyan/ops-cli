@@ -9,3 +9,4 @@ MD013:
   headers: true
   strict: false
   stern: false
+MD051: false # link-fragments Link fragments should be valid
