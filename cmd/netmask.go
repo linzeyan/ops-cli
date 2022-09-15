@@ -64,14 +64,26 @@ func init() {
 				return
 			}
 		},
+		Example: common.Examples(`# Print IP address and mask in different format
+-b 1.2.3.4/32
+-o 2.4.6.8/24
+-d 192.168.0.0/16
+-x 224.0.0.0/24
+
+# Print IP address ranges
+-r 100.90.1.9/17
+
+# Print address lists
+-c 1.1.1.1-2.2.2.2
+-i 10.0.0.0-10.122.10.0`, CommandNetmask),
 	}
 
 	rootCmd.AddCommand(netmaskCmd)
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.ranges, "ranges", "r", false, "Print ip address ranges")
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.binary, "binary", "b", false, "Print ip address in binary")
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.octal, "octal", "o", false, "Print ip address in octal")
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.decimal, "decimal", "d", false, "Print ip address in decimal")
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.hex, "hex", "x", false, "Print ip address in hex")
+	netmaskCmd.Flags().BoolVarP(&netmaskFlag.ranges, "ranges", "r", false, "Print IP address ranges")
+	netmaskCmd.Flags().BoolVarP(&netmaskFlag.binary, "binary", "b", false, "Print IP address and mask in binary")
+	netmaskCmd.Flags().BoolVarP(&netmaskFlag.octal, "octal", "o", false, "Print IP address and mask in octal")
+	netmaskCmd.Flags().BoolVarP(&netmaskFlag.decimal, "decimal", "d", false, "Print IP address and mask in decimal")
+	netmaskCmd.Flags().BoolVarP(&netmaskFlag.hex, "hex", "x", false, "Print IP address and mask in hex")
 	netmaskCmd.Flags().BoolVarP(&netmaskFlag.cisco, "cisco", "i", false, "Print Cisco style address lists")
 	netmaskCmd.Flags().BoolVarP(&netmaskFlag.cidr, "cidr", "c", false, "Print CIDR format address lists")
 }
