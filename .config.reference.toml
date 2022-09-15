@@ -1,3 +1,4 @@
+# https://discord.com/
 [discord]
 channel_id = "channelID"
 token = "token"
@@ -5,6 +6,12 @@ token = "token"
 [encrypt]
 key = ""
 
+# https://www.west.cn/
+[icp]
+account = "account"
+api_key = "apikey"
+
+# https://developers.line.biz/
 [line]
 access_token = "Channel Access Token"
 id = ""
@@ -17,14 +24,12 @@ host = "127.0.0.1"
 port = "6379"
 user = "redis"
 
+# https://slack.com
 [slack]
 channel_id = "CHANNEL"
 token = "token"
 
+# https://telegram.org/
 [telegram]
 chat_id = "12345678"
 token = "token:token"
-
-[icp]
-account = "account"
-api_key = "apikey"
