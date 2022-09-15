@@ -176,6 +176,14 @@ NAME            TTL     CLASS   TYPE    RECORD
 tw.yahoo.com.   20      IN      CNAME   fp-ycpi.g03.yahoodns.net.
 ```
 
+### `dos2unix`
+
+```bash
+→ ops-cli dos2unix /tmp/abc.com/*
+Converting file /tmp/abc.com/abc.com.crt to Unix format...
+Converting file /tmp/abc.com/abc.com.key to Unix format...
+```
+
 ### `encode`
 
 ```bash
