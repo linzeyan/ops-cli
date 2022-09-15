@@ -19,15 +19,15 @@ package common
 import "os"
 
 const (
-	_           = iota
-	KB ByteSize = 1 << (10 * iota)
-	MB
-	GB
-	TB
-	PB
-	EB
-	ZB
-	YB
+	_            = iota
+	KiB ByteSize = 1 << (10 * iota)
+	MiB
+	GiB
+	TiB
+	PiB
+	EiB
+	ZiB
+	YiB
 )
 
 const (

@@ -22,22 +22,22 @@ type ByteSize float64
 
 func (b ByteSize) String() string {
 	switch {
-	case b >= YB:
-		return fmt.Sprintf("%.2fYB", b/YB)
-	case b >= ZB:
-		return fmt.Sprintf("%.2fZB", b/ZB)
-	case b >= EB:
-		return fmt.Sprintf("%.2fEB", b/EB)
-	case b >= PB:
-		return fmt.Sprintf("%.2fPB", b/PB)
-	case b >= TB:
-		return fmt.Sprintf("%.2fTB", b/TB)
-	case b >= GB:
-		return fmt.Sprintf("%.2fGB", b/GB)
-	case b >= MB:
-		return fmt.Sprintf("%.2fMB", b/MB)
-	case b >= KB:
-		return fmt.Sprintf("%.2fKB", b/KB)
+	case b >= YiB:
+		return fmt.Sprintf("%.2fYiB", b/YiB)
+	case b >= ZiB:
+		return fmt.Sprintf("%.2fZiB", b/ZiB)
+	case b >= EiB:
+		return fmt.Sprintf("%.2fEiB", b/EiB)
+	case b >= PiB:
+		return fmt.Sprintf("%.2fPiB", b/PiB)
+	case b >= TiB:
+		return fmt.Sprintf("%.2fTiB", b/TiB)
+	case b >= GiB:
+		return fmt.Sprintf("%.2fGiB", b/GiB)
+	case b >= MiB:
+		return fmt.Sprintf("%.2fMiB", b/MiB)
+	case b >= KiB:
+		return fmt.Sprintf("%.2fKiB", b/KiB)
 	}
 	return fmt.Sprintf("%.2fB", b)
 }
