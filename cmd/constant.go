@@ -72,6 +72,7 @@ const (
 	CommandQrcode    = "qrcode"
 	CommandRandom    = "random"
 	CommandRead      = "read"
+	CommandRedis     = "redis"
 	CommandReST      = "rest"
 	CommandSlack     = "Slack"
 	CommandSSH       = "ssh-keygen"
