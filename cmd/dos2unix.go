@@ -17,7 +17,7 @@ limitations under the License.
 package cmd
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
@@ -31,8 +31,9 @@ func init() {
 		Run: func(_ *cobra.Command, args []string) {
 			for _, f := range args {
 				if err := common.Dos2Unix(f); err != nil {
-					log.Printf("%s: %v\n", f, err)
+					PrintString(fmt.Sprintf("%s: %v\n", f, err))
 				}
+				PrintString(fmt.Sprintf("Converting file %s to Unix format...", f))
 			}
 		},
 		DisableFlagsInUseLine: true,
