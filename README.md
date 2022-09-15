@@ -9,8 +9,6 @@ Try to collect useful tools for ops.
 
 ## Table of contents
 
-=================
-
 - [Installation](#Installation)
   - [Go Install](#Go-Install)
   - [Homebrew](#Homebrew)
