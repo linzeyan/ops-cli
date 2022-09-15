@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -118,7 +117,7 @@ func (l *LineFlag) GetID() {
 	http.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
 		events, err := l.api.ParseRequest(r)
 		if err != nil {
-			log.Println(err)
+			PrintString(err)
 			os.Exit(1)
 		}
 		for i := range events {
@@ -149,7 +148,7 @@ func (l *LineFlag) GetID() {
 
 	err = server.ListenAndServe()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Printf("error starting server: %s\n", err)
+		PrintString("error starting server: " + err.Error())
 		os.Exit(1)
 	}
 }

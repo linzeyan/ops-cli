@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"hash"
 	"io"
-	"log"
 	"os"
 	"strings"
 
@@ -56,7 +55,7 @@ func init() {
 		Use:   common.HashMd5 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print MD5 Checksums",
-		Run:   hashFlag.Run,
+		RunE:  hashFlag.RunE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -65,7 +64,7 @@ func init() {
 		Use:   common.HashSha1 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-1 Checksums",
-		Run:   hashFlag.Run,
+		RunE:  hashFlag.RunE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -74,7 +73,7 @@ func init() {
 		Use:   common.HashSha256 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-256 Checksums",
-		Run:   hashFlag.Run,
+		RunE:  hashFlag.RunE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -83,7 +82,7 @@ func init() {
 		Use:   common.HashSha512 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-512 Checksums",
-		Run:   hashFlag.Run,
+		RunE:  hashFlag.RunE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -99,14 +98,15 @@ type HashFlag struct {
 	list  bool
 }
 
-func (h *HashFlag) Run(cmd *cobra.Command, args []string) {
+func (h *HashFlag) RunE(cmd *cobra.Command, args []string) error {
+	var err error
 	hasher := common.HashAlgorithm(cmd.Name())
 	out, err := h.Hash(hasher, args[0])
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	PrintString(out)
+	return err
 }
 
 func (h *HashFlag) Hash(hasher hash.Hash, i any) (string, error) {
@@ -144,7 +144,7 @@ func (h *HashFlag) WriteFile(hasher hash.Hash, filename string) (string, error) 
 func (h *HashFlag) CheckFile(filename string) {
 	f, err := os.Open(filename)
 	if err != nil {
-		log.Println(err)
+		PrintString(err)
 		os.Exit(1)
 	}
 	defer f.Close()

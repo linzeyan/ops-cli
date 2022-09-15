@@ -24,8 +24,6 @@ import (
 	"crypto/sha512"
 	"encoding/binary"
 	"hash"
-	"log"
-	"os"
 	"strconv"
 	"strings"
 
@@ -47,7 +45,7 @@ func init() {
 		Use:   CommandCalculate,
 		Args:  cobra.MinimumNArgs(1),
 		Short: "Calculate passcode",
-		Run:   otpFlag.Run,
+		RunE:  otpFlag.RunE,
 		Example: common.Examples(`# Calculate the passcode for the specified secret
 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
@@ -59,7 +57,7 @@ T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
 	var otpSubCmdGenerate = &cobra.Command{
 		Use:   CommandGenerate,
 		Short: "Generate otp secret",
-		Run:   otpFlag.Run,
+		RunE:  otpFlag.RunE,
 		Example: common.Examples(`# Generate OTP and specify a period of 15 seconds
 -p 15
 
@@ -181,7 +179,7 @@ func (o OtpFlag) RemoveSpaces(s string) string {
 	return s
 }
 
-func (o *OtpFlag) Run(cmd *cobra.Command, args []string) {
+func (o *OtpFlag) RunE(cmd *cobra.Command, args []string) error {
 	var result string
 	var err error
 	switch cmd.Name() {
@@ -201,8 +199,8 @@ func (o *OtpFlag) Run(cmd *cobra.Command, args []string) {
 		result, err = o.GenSecret()
 	}
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		return err
 	}
 	PrintString(result)
+	return err
 }

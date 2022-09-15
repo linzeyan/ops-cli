@@ -18,10 +18,8 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -33,7 +31,7 @@ func init() {
 	var geoipCmd = &cobra.Command{
 		Use:   CommandGeoip + " IP...",
 		Short: "Print IP geographic information",
-		Run: func(_ *cobra.Command, args []string) {
+		RunE: func(_ *cobra.Command, args []string) error {
 			var out any
 			var err error
 			switch len(args) {
@@ -49,10 +47,10 @@ func init() {
 				out, err = r.Request(args)
 			}
 			if err != nil {
-				log.Println(err)
-				os.Exit(1)
+				return err
 			}
 			OutputDefaultJSON(out)
+			return err
 		},
 		Example: common.Examples(`# Print IP geographic information
 1.1.1.1

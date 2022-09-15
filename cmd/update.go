@@ -23,7 +23,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -94,17 +93,17 @@ func (*Version) Split(tag string) *Version {
 
 	major, err := strconv.Atoi(s[0])
 	if err != nil {
-		log.Println(err)
+		PrintString(err)
 		os.Exit(1)
 	}
 	minor, err := strconv.Atoi(s[1])
 	if err != nil {
-		log.Println(err)
+		PrintString(err)
 		os.Exit(1)
 	}
 	patch, err := strconv.Atoi(s[2])
 	if err != nil {
-		log.Println(err)
+		PrintString(err)
 		os.Exit(1)
 	}
 	return &Version{
@@ -337,12 +336,12 @@ func (u *Updater) init() *Updater {
 		/* Get executable path. */
 		execute, err := os.Executable()
 		if err != nil {
-			log.Println(err)
+			PrintString(err)
 		}
 		/* Get the real path. */
 		realPath, err := filepath.EvalSymlinks(execute)
 		if err != nil {
-			log.Println(err)
+			PrintString(err)
 		}
 		u.ExecutablePath = realPath
 	}

@@ -19,7 +19,6 @@ package cmd
 import (
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"reflect"
 	"strings"
@@ -116,10 +115,10 @@ func (w *WhoisFlag) Request(domain string) error {
 			ns = append(ns, v[1])
 		}
 		if err != nil {
-			log.Println(err)
+			PrintString(err)
 		}
 		if calErr != nil {
-			log.Println(calErr)
+			PrintString(calErr)
 			err = calErr
 		}
 	}

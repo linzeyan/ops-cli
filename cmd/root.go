@@ -19,7 +19,6 @@ package cmd
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -107,7 +106,7 @@ func OutputDefaultYAML(i any) {
 func PrintJSON(i any) {
 	out, err := Encoder.JSONEncode(i)
 	if err != nil {
-		log.Println(err)
+		PrintString(err)
 		os.Exit(1)
 	}
 	PrintString(out)
@@ -116,7 +115,7 @@ func PrintJSON(i any) {
 func PrintYAML(i any) {
 	out, err := Encoder.YamlEncode(i)
 	if err != nil {
-		log.Println(err)
+		PrintString(err)
 		os.Exit(1)
 	}
 	PrintString(out)

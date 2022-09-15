@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"runtime"
 	"strings"
@@ -63,12 +62,8 @@ func (r VersionOutput) String() {
 	t := f.Type()
 	ver.WriteString(fmt.Sprintf("%-10s\t%v\n", "App", common.RepoName))
 	for i := 0; i < f.NumField(); i++ {
-		_, err := ver.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
+		_, _ = ver.WriteString(fmt.Sprintf("%-10s\t%v\n", t.Field(i).Name, f.Field(i).Interface()))
 		// f.Field(i).Type()
-		if err != nil {
-			log.Println(err)
-			return
-		}
 	}
 	ver.WriteString("Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>\n")
 	ver.WriteString(fmt.Sprintf("Source available at https://github.com/%s/%s", common.RepoOwner, common.RepoName))
