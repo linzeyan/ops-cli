@@ -25,6 +25,6 @@ token = "token"
 chat_id = "12345678"
 token = "token:token"
 
-[west]
+[icp]
 account = "account"
 api_key = "apikey"

@@ -19,6 +19,7 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -96,7 +97,7 @@ func (d *DiscordFlag) RunE(cmd *cobra.Command, args []string) error {
 func (d *DiscordFlag) Init() error {
 	var err error
 	if d.Token == "" && rootConfig != "" {
-		v := common.Config(rootConfig, common.Discord)
+		v := common.Config(rootConfig, strings.ToLower(CommandDiscord))
 		err = Encoder.JSONMarshaler(v, d)
 		if err != nil {
 			return err

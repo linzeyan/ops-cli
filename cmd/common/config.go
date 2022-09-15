@@ -25,19 +25,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-/* Read config. */
-type ConfigBlock string
-
-func (c ConfigBlock) String() string {
-	return string(c)
-}
-
 /* Read config by Viper and return key/value to map struct. */
 type readConfig struct {
 	/* Specify the config path. */
 	path string
 	/* Specify the config field. */
-	table ConfigBlock
+	table string
 	/* Return the key/value to mapping. */
 	value map[string]any
 }
@@ -57,7 +50,7 @@ func (r *readConfig) get() (map[string]any, error) {
 		return nil, err
 	}
 	all := viper.AllSettings()
-	values, ok := all[r.table.String()]
+	values, ok := all[r.table]
 	if !ok {
 		return nil, ErrConfigTable
 	}
@@ -69,7 +62,7 @@ func (r *readConfig) get() (map[string]any, error) {
 }
 
 /* Get secret token and other settings from config. */
-func Config(path string, table ConfigBlock) map[string]any {
+func Config(path, table string) map[string]any {
 	r := &readConfig{path: path, table: table}
 	v, err := r.get()
 	if err != nil {

@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"strconv"
+	"strings"
 
 	tgBot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -123,7 +124,7 @@ type TelegramFlag struct {
 func (t *TelegramFlag) Init() error {
 	var err error
 	if t.Token == "" && rootConfig != "" {
-		v := common.Config(rootConfig, common.Telegram)
+		v := common.Config(rootConfig, strings.ToLower(CommandTelegram))
 		err = Encoder.JSONMarshaler(v, t)
 		if err != nil {
 			return err

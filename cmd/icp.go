@@ -34,7 +34,7 @@ func init() {
 		Short: "Check ICP status",
 		RunE: func(_ *cobra.Command, args []string) error {
 			if (icpFlag.flags.Account == "" || icpFlag.flags.Key == "") && rootConfig != "" {
-				v := common.Config(rootConfig, common.ICP)
+				v := common.Config(rootConfig, CommandIcp)
 				err := Encoder.JSONMarshaler(v, &icpFlag.flags)
 				if err != nil {
 					return err
