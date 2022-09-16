@@ -124,7 +124,7 @@ func (e *EncrytpFlag) findKey(secret string) []byte {
 		return byteKey
 	}
 	/* Read key in the config. */
-	if secret == "" && rootConfig != "" {
+	if rootConfig != "" {
 		v := common.Config(rootConfig, CommandEncrypt)
 		if err := Encoder.JSONMarshaler(v, e); err != nil {
 			return nil

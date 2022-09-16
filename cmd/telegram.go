@@ -123,7 +123,7 @@ type TelegramFlag struct {
 
 func (t *TelegramFlag) Init() error {
 	var err error
-	if t.Token == "" && rootConfig != "" {
+	if rootConfig != "" {
 		v := common.Config(rootConfig, strings.ToLower(CommandTelegram))
 		err = Encoder.JSONMarshaler(v, t)
 		if err != nil {

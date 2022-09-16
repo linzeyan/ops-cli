@@ -96,7 +96,7 @@ func (d *DiscordFlag) RunE(cmd *cobra.Command, args []string) error {
 
 func (d *DiscordFlag) Init() error {
 	var err error
-	if d.Token == "" && rootConfig != "" {
+	if rootConfig != "" {
 		v := common.Config(rootConfig, strings.ToLower(CommandDiscord))
 		err = Encoder.JSONMarshaler(v, d)
 		if err != nil {

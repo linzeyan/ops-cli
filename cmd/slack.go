@@ -106,7 +106,7 @@ func (s *SlackFlag) RunE(cmd *cobra.Command, _ []string) error {
 
 func (s *SlackFlag) Init() error {
 	var err error
-	if s.Token == "" && rootConfig != "" {
+	if rootConfig != "" {
 		v := common.Config(rootConfig, strings.ToLower(CommandSlack))
 		err = Encoder.JSONMarshaler(v, s)
 		if err != nil {
