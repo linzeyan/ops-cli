@@ -38,10 +38,8 @@ type HTTPConfig struct {
 
 /* HttpRequestContent make a simple request to url, and return response body, default request method is get. */
 func HTTPRequestContent(url string, config ...HTTPConfig) ([]byte, error) {
-	if config == nil {
-		config = []HTTPConfig{
-			0: {Method: http.MethodGet},
-		}
+	if len(config) == 0 {
+		config = append(config, HTTPConfig{Method: http.MethodGet})
 	}
 
 	var client = &http.Client{
