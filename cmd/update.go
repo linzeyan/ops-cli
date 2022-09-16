@@ -355,11 +355,7 @@ func (u *Updater) Download() error {
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(u.Repository.DownloadPath, resp, common.FileModeRAll)
-	if err != nil {
-		return err
-	}
-	return err
+	return os.WriteFile(u.Repository.DownloadPath, resp, common.FileModeRAll)
 }
 
 /* Decompress, replace original file, and remove compress files ...etc. */
