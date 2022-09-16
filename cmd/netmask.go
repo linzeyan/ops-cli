@@ -220,7 +220,7 @@ func (n *NetmaskFlag) CIDR(a, b string) error {
 	var out []string
 	var next, prefix string
 	switch ipa.Compare(ipb) {
-	case -1:
+	default:
 		for next != "0" {
 			next, prefix = n.iterate(ipa, ipb)
 			if next == "0" || next == "" {
@@ -229,7 +229,6 @@ func (n *NetmaskFlag) CIDR(a, b string) error {
 			ipa = netip.MustParseAddr(next)
 			out = append(out, prefix)
 		}
-		out = append(out, prefix)
 	case 1:
 		for next != "0" {
 			next, prefix = n.iterate(ipb, ipa)
@@ -239,10 +238,8 @@ func (n *NetmaskFlag) CIDR(a, b string) error {
 			ipb = netip.MustParseAddr(next)
 			out = append(out, prefix)
 		}
-		out = append(out, prefix)
-	case 0:
-		out = append(out, fmt.Sprintf("%s/%d", ipa.String(), ipa.BitLen()))
 	}
+	out = append(out, prefix)
 
 	for _, v := range out {
 		if n.cisco {
