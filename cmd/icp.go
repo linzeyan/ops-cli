@@ -33,12 +33,8 @@ func init() {
 		Args:  cobra.ExactArgs(1),
 		Short: "Check ICP status",
 		RunE: func(_ *cobra.Command, args []string) error {
-			if rootConfig != "" {
-				v := common.Config(rootConfig, CommandIcp)
-				err := Encoder.JSONMarshaler(v, &icpFlag.flags)
-				if err != nil {
-					return err
-				}
+			if err := ReadConfig(CommandIcp, &icpFlag.flags); err != nil {
+				return err
 			}
 			if icpFlag.flags.Account == "" || icpFlag.flags.Key == "" {
 				return common.ErrInvalidToken

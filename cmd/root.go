@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
@@ -142,4 +143,12 @@ func PrintString(i any) {
 	default:
 		fmt.Printf("%v\n", data)
 	}
+}
+
+func ReadConfig(block string, flag any) error {
+	if rootConfig != "" {
+		v := common.Config(rootConfig, strings.ToLower(block))
+		return Encoder.JSONMarshaler(v, flag)
+	}
+	return nil
 }

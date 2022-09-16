@@ -19,7 +19,6 @@ package cmd
 import (
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -96,17 +95,12 @@ func (d *DiscordFlag) RunE(cmd *cobra.Command, args []string) error {
 
 func (d *DiscordFlag) Init() error {
 	var err error
-	if rootConfig != "" {
-		v := common.Config(rootConfig, strings.ToLower(CommandDiscord))
-		err = Encoder.JSONMarshaler(v, d)
-		if err != nil {
-			return err
-		}
+	if err = ReadConfig(CommandDiscord, d); err != nil {
+		return err
 	}
 	if d.Token == "" {
 		return common.ErrInvalidToken
 	}
-
 	d.api, err = discordgo.New("Bot " + d.Token)
 	if d.api == nil {
 		return common.ErrFailedInitial

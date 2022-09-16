@@ -25,7 +25,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
@@ -106,12 +105,8 @@ func (s *SlackFlag) RunE(cmd *cobra.Command, _ []string) error {
 
 func (s *SlackFlag) Init() error {
 	var err error
-	if rootConfig != "" {
-		v := common.Config(rootConfig, strings.ToLower(CommandSlack))
-		err = Encoder.JSONMarshaler(v, s)
-		if err != nil {
-			return err
-		}
+	if err = ReadConfig(CommandSlack, s); err != nil {
+		return err
 	}
 	if s.Token == "" {
 		return common.ErrInvalidToken

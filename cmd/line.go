@@ -20,7 +20,6 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -95,12 +94,8 @@ type LineFlag struct {
 
 func (l *LineFlag) Init() error {
 	var err error
-	if rootConfig != "" {
-		v := common.Config(rootConfig, strings.ToLower(CommandLINE))
-		err = Encoder.JSONMarshaler(v, l)
-		if err != nil {
-			return err
-		}
+	if err = ReadConfig(CommandLINE, l); err != nil {
+		return err
 	}
 	if l.Secret == "" || l.Token == "" {
 		return common.ErrInvalidToken
