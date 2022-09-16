@@ -67,9 +67,8 @@ func (r *RedisFlag) Connection() *redis.Client {
 }
 
 func (r *RedisFlag) Do(commands []string) error {
-	var err error
 	if len(commands) == 0 {
-		return err
+		return nil
 	}
 	var args []string
 	if len(commands) == 1 {
@@ -77,10 +76,12 @@ func (r *RedisFlag) Do(commands []string) error {
 	} else {
 		args = commands
 	}
+
 	var arg []any
 	for _, v := range args {
 		arg = append(arg, v)
 	}
+
 	rdb := r.Connection()
 	if rdb == nil {
 		return common.ErrInvalidArg
