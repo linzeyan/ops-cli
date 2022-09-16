@@ -250,8 +250,5 @@ func (s *SystemFlag) NetInfo() (any, error) {
 		return &netResp, err
 	}
 	err = Encoder.JSONMarshaler(inet, &netResp.Interfaces)
-	if err != nil {
-		return &netResp, err
-	}
 	return &netResp, err
 }
