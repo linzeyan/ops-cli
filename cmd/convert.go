@@ -39,7 +39,7 @@ func init() {
 			CommandToml2Csv, CommandToml2JSON, CommandToml2XML, CommandToml2Yaml,
 			CommandYaml2Csv, CommandYaml2JSON, CommandYaml2Toml, CommandYaml2XML,
 		},
-		Short: "Convert data format",
+		Short: "Convert data format, support csv, json, toml, xml, yaml",
 		RunE:  convertFlag.RunE,
 		Example: common.Examples(`# Convert yaml to json
 -i input.yaml -o output.json`, CommandConvert, CommandYaml2JSON),
