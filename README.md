@@ -9,13 +9,13 @@ Try to collect useful tools for ops.
 
 ## Table of contents
 
-- [Installation](#Installation)
-  - [Go Install](#Go-Install)
-  - [Homebrew](#Homebrew)
-- [Upgrade](#Upgrade)
-  - [Brew](#Brew)
-  - [Others](#Others)
-- [Usage](#Usage)
+- [Installation](#installation)
+  - [Go Install](#go-install)
+  - [Homebrew](#homebrew)
+- [Upgrade](#upgrade)
+  - [Brew](#brew)
+  - [Others](#others)
+- [Usage](#usage)
 
 ## Installation
 
