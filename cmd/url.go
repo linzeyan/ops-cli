@@ -77,14 +77,11 @@ func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
 			Headers: u.headers,
 		}
 		result, err = common.HTTPRequestContent(url, body)
-		if err != nil {
+		if err != nil || u.verbose {
 			return err
 		}
 		if u.output != "" {
 			return os.WriteFile(u.output, result.([]byte), common.FileModeRAll)
-		}
-		if u.verbose {
-			return err
 		}
 	}
 	PrintString(result)
