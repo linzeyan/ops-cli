@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -99,19 +98,5 @@ func (f *FreeFlag) Output() error {
 }
 
 func (FreeFlag) String(header []string, data [][]string) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(false)
-	table.SetHeaderAlignment(tablewriter.ALIGN_RIGHT)
-	table.SetAlignment(tablewriter.ALIGN_RIGHT)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-	table.SetBorder(false)
-	table.SetTablePadding("\t ")
-	table.SetNoWhiteSpace(true)
-	table.AppendBulk(data)
-	table.Render()
+	PrintTable(header, data, tablewriter.ALIGN_RIGHT, "\t ", false)
 }
