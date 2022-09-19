@@ -80,6 +80,7 @@ const (
 	CommandString    = "string"
 	CommandSymbol    = "symbol"
 	CommandSystem    = "system"
+	CommandTcping    = "tcping"
 	CommandTelegram  = "Telegram"
 	CommandText      = "text"
 	CommandToml      = "toml"
