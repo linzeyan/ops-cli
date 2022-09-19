@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
 	"github.com/go-redis/redis/v8"
@@ -60,10 +61,11 @@ func (r *RedisFlag) Connection() *redis.Client {
 		return redis.NewClient(&redis.Options{
 			Username: r.Username,
 			Password: r.Password,
-			Addr:     r.Host + ":" + r.Port,
+			Addr:     net.JoinHostPort(r.Host, r.Port),
 			DB:       r.DB,
 		})
 	}
+
 	return nil
 }
 

@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"net"
 	"reflect"
 	"runtime"
 	"strings"
@@ -139,7 +140,7 @@ func (d *DigFlag) Request(digType uint16) error {
 			return err
 		}
 	}
-	resp, _, err := client.Exchange(&message, d.server+":53")
+	resp, _, err := client.Exchange(&message, net.JoinHostPort(d.server, "53"))
 	if err != nil {
 		return err
 	}

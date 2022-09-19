@@ -21,6 +21,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"io"
+	"net"
 	"os"
 	"time"
 
@@ -74,7 +75,7 @@ func (cf *CertFlag) RunE(cmd *cobra.Command, args []string) error {
 	case validator.ValidFile(input):
 		cf.resp, err = cf.resp.CheckFile(input)
 	case validator.ValidDomain(input) || validator.ValidIPv4(input):
-		cf.resp, err = cf.resp.CheckHost(input + ":" + cf.port)
+		cf.resp, err = cf.resp.CheckHost(net.JoinHostPort(input, cf.port))
 	default:
 		return common.ErrInvalidArg
 	}

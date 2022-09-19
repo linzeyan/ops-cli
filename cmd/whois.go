@@ -73,7 +73,7 @@ type WhoisFlag struct {
 }
 
 func (w *WhoisFlag) Request(domain string) error {
-	conn, err := net.Dial("tcp", "whois.verisign-grs.com:43")
+	conn, err := net.Dial("tcp", net.JoinHostPort("whois.verisign-grs.com", "43"))
 	if err != nil {
 		return err
 	}
