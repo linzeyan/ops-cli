@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/go-redis/redis/v8"
@@ -91,6 +92,15 @@ func (r *RedisFlag) Do(commands []string) error {
 	if err != nil {
 		return err
 	}
-	PrintJSON(out)
+
+	switch data := out.(type) {
+	case []any:
+		for i := 0; i < len(data); i++ {
+			p := fmt.Sprintf("%d) %s", i+1, data[i])
+			PrintString(p)
+		}
+	default:
+		PrintJSON(out)
+	}
 	return err
 }
