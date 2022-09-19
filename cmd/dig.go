@@ -241,5 +241,5 @@ func (d DigResponseList) String() {
 	for i := range d {
 		data = append(data, []string{d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD})
 	}
-	PrintTable(header, data, tablewriter.ALIGN_LEFT, "\t")
+	PrintTable(header, data, tablewriter.ALIGN_LEFT, "\t", true)
 }

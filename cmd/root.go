@@ -146,11 +146,11 @@ func PrintString(i any) {
 	}
 }
 
-func PrintTable(header []string, data [][]string, align int, padding string) {
+func PrintTable(header []string, data [][]string, align int, padding string, format bool) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
 	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(true)
+	table.SetAutoFormatHeaders(format)
 	table.SetHeaderAlignment(align)
 	table.SetAlignment(align)
 	table.SetCenterSeparator("")
