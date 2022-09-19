@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
@@ -143,6 +144,24 @@ func PrintString(i any) {
 	default:
 		fmt.Printf("%v\n", data)
 	}
+}
+
+func PrintTable(header []string, data [][]string, align int, padding string) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader(header)
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(true)
+	table.SetHeaderAlignment(align)
+	table.SetAlignment(align)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("")
+	table.SetHeaderLine(false)
+	table.SetBorder(false)
+	table.SetTablePadding(padding)
+	table.SetNoWhiteSpace(true)
+	table.AppendBulk(data)
+	table.Render()
 }
 
 func ReadConfig(block string, flag any) error {

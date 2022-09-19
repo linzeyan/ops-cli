@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"runtime"
 	"strings"
@@ -242,19 +241,5 @@ func (d DigResponseList) String() {
 	for i := range d {
 		data = append(data, []string{d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD})
 	}
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(true)
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetAlignment(tablewriter.ALIGN_LEFT)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-	table.SetBorder(false)
-	table.SetTablePadding("\t")
-	table.SetNoWhiteSpace(true)
-	table.AppendBulk(data)
-	table.Render()
+	PrintTable(header, data, tablewriter.ALIGN_LEFT, "\t")
 }
