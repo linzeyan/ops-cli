@@ -29,6 +29,7 @@ func init() {
 	var tcpingFlag TcpingFlag
 	var tcpingCmd = &cobra.Command{
 		Use:   CommandTcping + " [host] [port]",
+		Args:  cobra.ExactArgs(2),
 		Short: "Connect to a port of a host",
 		Run:   tcpingFlag.Run,
 	}
@@ -45,10 +46,6 @@ type TcpingFlag struct {
 }
 
 func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
-	if len(args) != 2 {
-		_ = cmd.Help()
-		return
-	}
 	var counter int
 	if !t.continues {
 		t.Connect(counter, args)
