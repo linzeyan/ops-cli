@@ -51,6 +51,9 @@ func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
 		if err := t.Connect(i, args); err != nil {
 			PrintString(err)
 		}
+		if i == t.count {
+			break
+		}
 		time.Sleep(time.Second)
 	}
 }
