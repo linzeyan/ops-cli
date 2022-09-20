@@ -57,6 +57,7 @@ func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
 }
 
 func (t *TcpingFlag) Connect(counter int, args []string) error {
+	startTime := time.Now()
 	conn, err := net.DialTimeout(t.protocol, net.JoinHostPort(args[0], args[1]), t.timeout)
 	if err != nil {
 		return err
@@ -65,10 +66,15 @@ func (t *TcpingFlag) Connect(counter int, args []string) error {
 	var p string
 	if conn != nil {
 		defer conn.Close()
+		duration := time.Since(startTime)
+		ip, port, err := net.SplitHostPort(conn.RemoteAddr().String())
+		if err != nil {
+			return err
+		}
 		if t.count != 1 {
-			p = fmt.Sprintf("seq=%d %s port %s open.", counter, args[0], args[1])
+			p = fmt.Sprintf("seq %d: %s response from %s (%s) port %s [open] %v", counter, t.protocol, args[0], ip, port, duration)
 		} else {
-			p = fmt.Sprintf("%s port %s open.", args[0], args[1])
+			p = fmt.Sprintf("%s response from %s (%s) port %s [open] %v", t.protocol, args[0], ip, port, duration)
 		}
 		PrintString(p)
 		return err
