@@ -38,7 +38,6 @@ func init() {
 	}
 	rootCmd.AddCommand(pingCmd)
 	pingCmd.Flags().IntVarP(&pingFlag.count, "count", "c", -1, common.Usage("Specify ping counts"))
-	pingCmd.Flags().BoolVarP(&pingFlag.icmp, "icmp", "", false, common.Usage("Use ICMP procotol (default: udp)"))
 	pingCmd.Flags().IntVarP(&pingFlag.size, "size", "s", 24, common.Usage("Specify packet size"))
 	pingCmd.Flags().IntVarP(&pingFlag.ttl, "ttl", "", 64, common.Usage("Specify packet ttl"))
 	pingCmd.Flags().DurationVarP(&pingFlag.interval, "interval", "i", time.Second, common.Usage("Specify interval"))
@@ -46,7 +45,6 @@ func init() {
 }
 
 type PingFlag struct {
-	icmp             bool
 	count, size, ttl int
 	interval         time.Duration
 	timeout          time.Duration
@@ -68,10 +66,6 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 }
 
 func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
-	// var network = "udp4"
-	// if p.icmp {
-	// 	network = "ip4:icmp"
-	// }
 	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
 	if err != nil {
 		return err
@@ -79,16 +73,17 @@ func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
 	if conn != nil {
 		defer conn.Close()
 	}
-	// if err = conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL, true); err != nil {
-	// 	return err
-	// }
-	// if err = conn.IPv4PacketConn().SetTTL(p.ttl); err != nil {
-	// 	return err
-	// }
+	if err = conn.IPv4PacketConn().SetTTL(p.ttl); err != nil {
+		return err
+	}
+	if err = conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL, true); err != nil {
+		return err
+	}
 	ip, err := net.ResolveIPAddr("ip4", host)
 	if err != nil {
 		return err
 	}
+
 	data := icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
 		Code: 0,
@@ -115,16 +110,12 @@ func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
 	if err = conn.SetReadDeadline(time.Now().Add(p.timeout)); err != nil {
 		return err
 	}
-	n, peer, err := conn.ReadFrom(reply)
+	n, cm, peer, err := conn.IPv4PacketConn().ReadFrom(reply)
 	if err != nil {
 		e := fmt.Sprintf("Request timeout for icmp_seq %d", counter)
 		return errors.New(e)
 	}
 	duration := time.Since(startTime)
-	// header, err := ipv4.ParseHeader(reply)
-	// if err != nil {
-	// 	return err
-	// }
 
 	result, err := icmp.ParseMessage(1, reply[:n])
 	if err != nil {
@@ -133,7 +124,7 @@ func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
 	var out string
 	switch result.Type {
 	case ipv4.ICMPTypeEchoReply:
-		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v", len(b), peer, counter, uint(reply[8]), duration)
+		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v", len(b), peer, counter, cm.TTL, duration)
 	case ipv4.ICMPTypeDestinationUnreachable:
 		out = fmt.Sprintf("%v Destination Unreachable", peer)
 	}
