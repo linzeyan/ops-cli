@@ -19,6 +19,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"math"
 	"net"
 	"time"
 
@@ -54,8 +55,9 @@ type PingFlag struct {
 
 	lost bool
 	sta  struct {
-		send, loss, receive   int
-		min, avg, max, stddev time.Duration
+		send, loss, receive int
+		min, avg, max       time.Duration
+		stddevRaw           []time.Duration
 	}
 }
 
@@ -121,6 +123,7 @@ func (p *PingFlag) statistics(duration time.Duration) {
 	}
 	p.sta.avg += duration
 	p.sta.send++
+	p.sta.stddevRaw = append(p.sta.stddevRaw, duration)
 
 	if duration < p.sta.min {
 		p.sta.min = duration
@@ -253,7 +256,12 @@ func (p *PingFlag) output(host string) {
 
 	out += "\n"
 	avg := p.sta.avg / time.Duration(p.sta.send)
+	var temp float64
+	for _, v := range p.sta.stddevRaw {
+		temp += math.Pow(float64(v-avg), 2)
+	}
+	variance := temp / float64(len(p.sta.stddevRaw))
 	out += fmt.Sprintf("round-trip min/avg/max/stddev = %v/%v/%v/%v",
-		p.sta.min, avg, p.sta.max, p.sta.stddev)
+		p.sta.min, avg, p.sta.max, time.Duration(math.Sqrt(variance)))
 	PrintString(out)
 }
