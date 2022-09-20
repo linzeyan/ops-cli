@@ -67,11 +67,9 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 	var data RandomString
 	data = data.GenerateString(p.size, LowercaseLetters)
 
-	var network string
+	network := "ip4"
 	if p.ipv6 {
 		network = "ip6"
-	} else {
-		network = "ip4"
 	}
 	ip, err := net.ResolveIPAddr(network, host)
 	if err != nil {
@@ -95,23 +93,23 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 
 func (p *PingFlag) listen() (*icmp.PacketConn, error) {
 	if p.ipv6 {
-		return icmp.ListenPacket("ip6:ipv6-icmp", "::")
-	}
-	return icmp.ListenPacket("ip4:icmp", "0.0.0.0")
-}
-
-func (p *PingFlag) setTTL(conn *icmp.PacketConn) error {
-	var err error
-	if p.ipv6 {
-		if err = conn.IPv6PacketConn().SetHopLimit(p.ttl); err != nil {
-			return err
+		conn, err := icmp.ListenPacket("ip6:ipv6-icmp", "::")
+		if err != nil {
+			return nil, err
 		}
-		return conn.IPv6PacketConn().SetControlMessage(ipv6.FlagHopLimit, true)
+		if err = conn.IPv6PacketConn().SetHopLimit(p.ttl); err != nil {
+			return nil, err
+		}
+		return conn, conn.IPv6PacketConn().SetControlMessage(ipv6.FlagHopLimit, true)
+	}
+	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
+	if err != nil {
+		return nil, err
 	}
 	if err = conn.IPv4PacketConn().SetTTL(p.ttl); err != nil {
-		return err
+		return nil, err
 	}
-	return conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL, true)
+	return conn, conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL, true)
 }
 
 func (p *PingFlag) statistics(duration time.Duration) {
@@ -190,10 +188,6 @@ func (p *PingFlag) Connect(counter int, addr *net.IPAddr, icmpData []byte) error
 		defer conn.Close()
 	}
 
-	if err = p.setTTL(conn); err != nil {
-		return err
-	}
-
 	data := icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
 		Code: 0,
@@ -255,7 +249,7 @@ func (p *PingFlag) output(host string) {
 	}
 
 	out += "\n"
-	avg := p.sta.avg / time.Duration(p.sta.send)
+	avg := p.sta.avg / time.Duration(p.sta.receive)
 	var temp float64
 	for _, v := range p.sta.stddevRaw {
 		temp += math.Pow(float64(v-avg), 2)
