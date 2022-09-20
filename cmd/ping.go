@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"os"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -93,7 +92,7 @@ func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
 		Type: ipv4.ICMPTypeEcho,
 		Code: 0,
 		Body: &icmp.Echo{
-			ID:   os.Getpid() & 0xffff,
+			ID:   counter,
 			Seq:  counter,
 			Data: icmpData,
 		},
@@ -121,7 +120,10 @@ func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
 		return errors.New(e)
 	}
 	duration := time.Since(startTime)
-	ttl := reply[8]
+	// header, err := ipv4.ParseHeader(reply)
+	// if err != nil {
+	// 	return err
+	// }
 
 	result, err := icmp.ParseMessage(1, reply[:n])
 	if err != nil {
@@ -130,7 +132,7 @@ func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
 	var out string
 	switch result.Type {
 	case ipv4.ICMPTypeEchoReply:
-		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v", len(b), peer, counter, ttl, duration)
+		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v", len(b), peer, counter, uint(reply[8]), duration)
 	case ipv4.ICMPTypeDestinationUnreachable:
 		out = fmt.Sprintf("%v Destination Unreachable", peer)
 	}
