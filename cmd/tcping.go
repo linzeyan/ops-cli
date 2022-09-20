@@ -34,27 +34,22 @@ func init() {
 		Run:   tcpingFlag.Run,
 	}
 	rootCmd.AddCommand(tcpingCmd)
-	tcpingCmd.Flags().BoolVarP(&tcpingFlag.continues, "continues", "c", false, common.Usage("Specify continues connect"))
+	tcpingCmd.Flags().IntVarP(&tcpingFlag.count, "count", "c", 1, common.Usage("Specify tcping counts"))
 	tcpingCmd.Flags().StringVarP(&tcpingFlag.protocol, "protocol", "p", "tcp", common.Usage("Specify protocol"))
 	tcpingCmd.Flags().DurationVarP(&tcpingFlag.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
 }
 
 type TcpingFlag struct {
-	continues bool
-	protocol  string
-	timeout   time.Duration
+	count    int
+	protocol string
+	timeout  time.Duration
 }
 
 func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
-	var counter int
-	if !t.continues {
-		t.Connect(counter, args)
-		return
-	}
-	for {
-		t.Connect(counter, args)
+	var i int
+	for ; i != t.count; i++ {
+		t.Connect(i, args)
 		time.Sleep(time.Second)
-		counter++
 	}
 }
 
@@ -64,14 +59,15 @@ func (t *TcpingFlag) Connect(counter int, args []string) {
 		PrintString(err)
 		return
 	}
+
+	var p string
 	if conn != nil {
 		defer conn.Close()
-		var p string
-		if t.continues {
+		if t.count != 1 {
 			p = fmt.Sprintf("seq=%d %s port %s open.", counter, args[0], args[1])
 		} else {
 			p = fmt.Sprintf("%s port %s open.", args[0], args[1])
 		}
-		PrintString(p)
 	}
+	PrintString(p)
 }

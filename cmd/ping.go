@@ -32,7 +32,7 @@ import (
 func init() {
 	var pingFlag PingFlag
 	var pingCmd = &cobra.Command{
-		Use:   "ping [host]",
+		Use:   CommandPing + " [host]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Send ICMP ECHO_REQUEST packets to network hosts.",
 		Run:   pingFlag.Run,
@@ -55,19 +55,19 @@ type PingFlag struct {
 
 func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 	host := args[0]
-
-	header := fmt.Sprintf("PING %s (%s):", host, host)
+	data := []byte("ping-echo-request-data01")
+	header := fmt.Sprintf("PING %s (%s): %d data bytes", host, host, len(data))
 	PrintString(header)
 
 	for i := 0; i != p.count; i++ {
-		if err := p.Connect(i, host); err != nil {
+		if err := p.Connect(i, host, data); err != nil {
 			PrintString(err)
 		}
 		time.Sleep(p.interval)
 	}
 }
 
-func (p *PingFlag) Connect(counter int, host string) error {
+func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
 	// var network = "udp4"
 	// if p.icmp {
 	// 	network = "ip4:icmp"
@@ -89,7 +89,6 @@ func (p *PingFlag) Connect(counter int, host string) error {
 	if err != nil {
 		return err
 	}
-	icmpData := []byte("abcdefghijklmnopqrstuvwx")
 	data := icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
 		Code: 0,

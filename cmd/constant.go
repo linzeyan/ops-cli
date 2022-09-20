@@ -69,6 +69,7 @@ const (
 	CommandNumber    = "number"
 	CommandOtp       = "otp"
 	CommandPhoto     = "photo"
+	CommandPing      = "ping"
 	CommandQrcode    = "qrcode"
 	CommandRandom    = "random"
 	CommandRead      = "read"
