@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"time"
@@ -48,16 +49,17 @@ type TcpingFlag struct {
 func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
 	var i int
 	for ; i != t.count; i++ {
-		t.Connect(i, args)
+		if err := t.Connect(i, args); err != nil {
+			PrintString(err)
+		}
 		time.Sleep(time.Second)
 	}
 }
 
-func (t *TcpingFlag) Connect(counter int, args []string) {
+func (t *TcpingFlag) Connect(counter int, args []string) error {
 	conn, err := net.DialTimeout(t.protocol, net.JoinHostPort(args[0], args[1]), t.timeout)
 	if err != nil {
-		PrintString(err)
-		return
+		return err
 	}
 
 	var p string
@@ -68,6 +70,9 @@ func (t *TcpingFlag) Connect(counter int, args []string) {
 		} else {
 			p = fmt.Sprintf("%s port %s open.", args[0], args[1])
 		}
+		PrintString(p)
+		return err
 	}
-	PrintString(p)
+	p = fmt.Sprintf("Connect error for seq %d", counter)
+	return errors.New(p)
 }
