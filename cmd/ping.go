@@ -42,7 +42,7 @@ func init() {
 	pingCmd.Flags().IntVarP(&pingFlag.size, "size", "s", 24, common.Usage("Specify packet size"))
 	pingCmd.Flags().IntVarP(&pingFlag.ttl, "ttl", "", 64, common.Usage("Specify packet ttl"))
 	pingCmd.Flags().DurationVarP(&pingFlag.interval, "interval", "i", time.Second, common.Usage("Specify interval"))
-	pingCmd.Flags().DurationVarP(&pingFlag.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
+	pingCmd.Flags().DurationVarP(&pingFlag.timeout, "timeout", "t", 5*time.Second, common.Usage("Specify timeout"))
 }
 
 type PingFlag struct {
@@ -54,7 +54,8 @@ type PingFlag struct {
 
 func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 	host := args[0]
-	data := []byte("ping-echo-request-data01")
+	var data RandomString
+	data = data.GenerateString(p.size, LowercaseLetters)
 	header := fmt.Sprintf("PING %s (%s): %d data bytes", host, host, len(data))
 	PrintString(header)
 
@@ -111,7 +112,7 @@ func (p *PingFlag) Connect(counter int, host string, icmpData []byte) error {
 
 	/* Wait receiving. */
 	reply := make([]byte, 1500)
-	if err = conn.SetReadDeadline(time.Now().Add(5 * time.Second)); err != nil {
+	if err = conn.SetReadDeadline(time.Now().Add(p.timeout)); err != nil {
 		return err
 	}
 	n, peer, err := conn.ReadFrom(reply)
