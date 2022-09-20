@@ -47,10 +47,11 @@ type TcpingFlag struct {
 }
 
 func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
-	for i := 0; i != t.count; i++ {
+	for i := 0; i != t.count; {
 		if err := t.Connect(i, args); err != nil {
 			PrintString(err)
 		}
+		i++
 		if i == t.count {
 			break
 		}
