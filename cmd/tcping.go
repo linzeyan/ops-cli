@@ -47,8 +47,7 @@ type TcpingFlag struct {
 }
 
 func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
-	var i int
-	for ; i != t.count; i++ {
+	for i := 0; i != t.count; i++ {
 		if err := t.Connect(i, args); err != nil {
 			PrintString(err)
 		}
@@ -57,16 +56,17 @@ func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
 }
 
 func (t *TcpingFlag) Connect(counter int, args []string) error {
+	var p string
 	startTime := time.Now()
 	conn, err := net.DialTimeout(t.protocol, net.JoinHostPort(args[0], args[1]), t.timeout)
 	if err != nil {
-		return err
+		p = fmt.Sprintf("Connect error: %s", err.Error())
+		return errors.New(p)
 	}
 
-	var p string
 	if conn != nil {
-		defer conn.Close()
 		duration := time.Since(startTime)
+		defer conn.Close()
 		ip, port, err := net.SplitHostPort(conn.RemoteAddr().String())
 		if err != nil {
 			return err
