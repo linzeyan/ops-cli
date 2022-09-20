@@ -79,7 +79,7 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 
 	header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
 	PrintString(header)
-	for i := 0; i != p.count; {
+	for i := 0; ; {
 		if err := p.Connect(i, ip, data); err != nil {
 			PrintString(err)
 		}
