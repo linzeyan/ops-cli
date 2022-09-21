@@ -37,7 +37,7 @@ func init() {
 	var pingCmd = &cobra.Command{
 		Use:   CommandPing + " [host]",
 		Args:  cobra.ExactArgs(1),
-		Short: "Send ICMP ECHO_REQUEST packets to network hosts.",
+		Short: "Send ICMP ECHO_REQUEST packets to network hosts",
 		Run:   pingFlag.Run,
 	}
 	rootCmd.AddCommand(pingCmd)
