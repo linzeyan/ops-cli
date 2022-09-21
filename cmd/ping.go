@@ -78,6 +78,9 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 		PrintString(err)
 		return
 	}
+	if p.interval < 50*time.Millisecond {
+		p.interval = 50 * time.Millisecond
+	}
 
 	header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
 	PrintString(header)
