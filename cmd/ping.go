@@ -59,7 +59,7 @@ type PingFlag struct {
 	sta  struct {
 		send, loss, receive int
 		min, avg, max       time.Duration
-		stddevRaw           []time.Duration
+		rtts                []time.Duration
 	}
 }
 
@@ -145,7 +145,13 @@ func (p *PingFlag) statistics(duration time.Duration) {
 	}
 	p.sta.avg += duration
 	p.sta.send++
-	p.sta.stddevRaw = append(p.sta.stddevRaw, duration)
+	p.sta.rtts = append(p.sta.rtts, duration)
+	if p.lost {
+		p.sta.loss++
+		p.lost = false
+	} else {
+		p.sta.receive++
+	}
 
 	if duration < p.sta.min {
 		p.sta.min = duration
@@ -153,27 +159,18 @@ func (p *PingFlag) statistics(duration time.Duration) {
 	if duration > p.sta.max {
 		p.sta.max = duration
 	}
-	if p.lost {
-		p.sta.loss++
-		p.lost = false
-	} else {
-		p.sta.receive++
-	}
 }
 
 func (p *PingFlag) readReply(conn *icmp.PacketConn, reply []byte, counter int) (int, any, net.Addr, error) {
+	var n int
+	var cm any
+	var peer net.Addr
 	var err error
 	if p.ipv6 {
-		n, cm, peer, err := conn.IPv6PacketConn().ReadFrom(reply)
-		if err != nil {
-			p.lost = true
-			p.statistics(0)
-			e := fmt.Sprintf("Request timeout for icmp_seq %d", counter)
-			return 0, nil, nil, errors.New(e)
-		}
-		return n, cm, peer, err
+		n, cm, peer, err = conn.IPv6PacketConn().ReadFrom(reply)
+	} else {
+		n, cm, peer, err = conn.IPv4PacketConn().ReadFrom(reply)
 	}
-	n, cm, peer, err := conn.IPv4PacketConn().ReadFrom(reply)
 	if err != nil {
 		p.lost = true
 		p.statistics(0)
@@ -243,22 +240,21 @@ func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr,
 	if err != nil {
 		return err
 	}
-	size := len(b)
-	out := p.printMsg(result, duration, peer, counter, size, cm)
+	out := p.printMsg(result, duration, peer, counter, len(b), cm)
 	PrintString(out)
 
 	return err
 }
 
 func (p *PingFlag) output(host string) {
-	out := "\n"
-	out += fmt.Sprintf("--- %s ping statistics ---\n", host)
-
 	if p.sta.send == 0 {
 		return
 	}
 
-	out += fmt.Sprintf("%d packets transmitted, %d packets received, %.2f%% packet loss", p.sta.send, p.sta.receive, float64(p.sta.loss*100/p.sta.send))
+	out := "\n"
+	out += fmt.Sprintf("--- %s ping statistics ---\n", host)
+	out += fmt.Sprintf("%d packets transmitted, %d packets received, %.1f%% packet loss",
+		p.sta.send, p.sta.receive, float64(p.sta.loss*100)/float64(p.sta.send))
 	if p.sta.send == p.sta.loss {
 		PrintString(out)
 		return
@@ -267,10 +263,10 @@ func (p *PingFlag) output(host string) {
 	out += "\n"
 	avg := p.sta.avg / time.Duration(p.sta.receive)
 	var temp float64
-	for _, v := range p.sta.stddevRaw {
+	for _, v := range p.sta.rtts {
 		temp += math.Pow(float64(v-avg), 2)
 	}
-	variance := temp / float64(len(p.sta.stddevRaw))
+	variance := temp / float64(len(p.sta.rtts))
 	out += fmt.Sprintf("round-trip min/avg/max/stddev = %v/%v/%v/%v",
 		p.sta.min, avg, p.sta.max, time.Duration(math.Sqrt(variance)))
 	PrintString(out)
