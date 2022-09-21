@@ -105,8 +105,10 @@ func (s *SlackFlag) RunE(cmd *cobra.Command, _ []string) error {
 
 func (s *SlackFlag) Init() error {
 	var err error
-	if err = ReadConfig(CommandSlack, s); err != nil {
-		return err
+	if rootConfig != "" {
+		if err = ReadConfig(CommandSlack, s); err != nil {
+			return err
+		}
 	}
 	if s.Token == "" {
 		return common.ErrInvalidToken

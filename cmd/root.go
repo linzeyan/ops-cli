@@ -165,9 +165,6 @@ func PrintTable(header []string, data [][]string, align int, padding string, for
 }
 
 func ReadConfig(block string, flag any) error {
-	if rootConfig != "" {
-		v := common.Config(rootConfig, strings.ToLower(block))
-		return Encoder.JSONMarshaler(v, flag)
-	}
-	return nil
+	v := common.Config(rootConfig, strings.ToLower(block))
+	return Encoder.JSONMarshaler(v, flag)
 }

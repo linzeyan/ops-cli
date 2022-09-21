@@ -33,8 +33,10 @@ func init() {
 		Use:   CommandRedis,
 		Short: "Opens a connection to a Redis server",
 		RunE: func(_ *cobra.Command, args []string) error {
-			if err := ReadConfig(CommandRedis, &redisFlag); err != nil {
-				return err
+			if rootConfig != "" {
+				if err := ReadConfig(CommandRedis, &redisFlag); err != nil {
+					return err
+				}
 			}
 			return redisFlag.Do(args)
 		},

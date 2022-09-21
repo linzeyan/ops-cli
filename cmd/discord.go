@@ -95,8 +95,10 @@ func (d *DiscordFlag) RunE(cmd *cobra.Command, args []string) error {
 
 func (d *DiscordFlag) Init() error {
 	var err error
-	if err = ReadConfig(CommandDiscord, d); err != nil {
-		return err
+	if rootConfig != "" {
+		if err = ReadConfig(CommandDiscord, d); err != nil {
+			return err
+		}
 	}
 	if d.Token == "" {
 		return common.ErrInvalidToken

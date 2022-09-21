@@ -94,8 +94,10 @@ type LineFlag struct {
 
 func (l *LineFlag) Init() error {
 	var err error
-	if err = ReadConfig(CommandLINE, l); err != nil {
-		return err
+	if rootConfig != "" {
+		if err = ReadConfig(CommandLINE, l); err != nil {
+			return err
+		}
 	}
 	if l.Secret == "" || l.Token == "" {
 		return common.ErrInvalidToken
