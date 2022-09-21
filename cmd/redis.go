@@ -89,7 +89,7 @@ func (r *RedisFlag) Do(commands []string) error {
 
 	rdb := r.Connection()
 	if rdb == nil {
-		return common.ErrInvalidArg
+		return common.ErrFailedInitial
 	}
 	cmd := rdb.Do(common.Context, arg...)
 	out, err := cmd.Result()
