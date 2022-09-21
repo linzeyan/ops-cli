@@ -207,7 +207,7 @@ func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr,
 	data := icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
 		Code: 0,
-		Body: &icmp.Echo{ID: counter, Seq: counter, Data: icmpData},
+		Body: &icmp.Echo{ID: counter & 0xffff, Seq: counter & 0xffff, Data: icmpData},
 	}
 	if p.ipv6 {
 		data.Type = ipv6.ICMPTypeEchoRequest
