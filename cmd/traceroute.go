@@ -121,6 +121,7 @@ func (t *TracerouteFlag) Connect(addr *net.IPAddr, icmpData []byte) error {
 func (t *TracerouteFlag) sendPacket(hop int, conn *icmp.PacketConn, addr *net.IPAddr, b, reply []byte) (string, error) {
 	var err error
 	var ip string
+	var rtt []string
 	for i := 1; i <= t.retry; i++ {
 		/* Send packet. */
 		startTime := time.Now()
@@ -132,16 +133,9 @@ func (t *TracerouteFlag) sendPacket(hop int, conn *icmp.PacketConn, addr *net.IP
 		if err = conn.SetReadDeadline(time.Now().Add(t.timeout)); err != nil {
 			return "", err
 		}
-		n, cm, peer, err := conn.IPv4PacketConn().ReadFrom(reply)
+		n, _, peer, err := conn.IPv4PacketConn().ReadFrom(reply)
 		if err != nil {
-			if i == 1 {
-				fmt.Printf("%-4d%s*", hop, common.IndentTwoSpaces)
-			} else {
-				fmt.Printf("%s*", common.IndentTwoSpaces)
-			}
-			if i == t.retry {
-				fmt.Print("\n")
-			}
+			rtt = append(rtt, "*")
 			continue
 		}
 		duration := time.Since(startTime)
@@ -149,27 +143,21 @@ func (t *TracerouteFlag) sendPacket(hop int, conn *icmp.PacketConn, addr *net.IP
 		if err != nil {
 			return peer.String(), err
 		}
-		var out string
 		switch result.Type {
 		case ipv4.ICMPTypeEchoReply, ipv4.ICMPTypeTimeExceeded:
-			if i == 1 {
-				out = fmt.Sprintf("%-4d  %-16v\t%v", hop, cm.Src, duration)
-			} else {
-				out = fmt.Sprintf("\t%v", duration)
-			}
+			rtt = append(rtt, duration.String())
 		case ipv4.ICMPTypeDestinationUnreachable:
-			if i == 1 {
-				out = fmt.Sprintf("%-4d%s*", hop, common.IndentTwoSpaces)
-			} else {
-				out = fmt.Sprintf("%s*", common.IndentTwoSpaces)
-			}
+			rtt = append(rtt, "*")
 		}
-		fmt.Print(out)
+		if peer.String() != "" {
+			ip = peer.String()
+		}
 		if i == t.retry {
-			fmt.Print("\n")
+			break
 		}
-		ip = peer.String()
 		time.Sleep(t.interval)
 	}
+	out := fmt.Sprintf("%-4d  %-16v\t%-10s\t%-10s\t%-10s", hop, ip, rtt[0], rtt[1], rtt[2])
+	PrintString(out)
 	return ip, err
 }
