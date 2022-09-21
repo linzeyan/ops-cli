@@ -80,7 +80,7 @@ Available Commands:
   ip          View interfaces configuration
   netmask     Print IP/Mask pair, list address ranges
   otp         Calculate passcode or generate secret
-  ping        Send ICMP ECHO_REQUEST packets to network hosts.
+  ping        Send ICMP ECHO_REQUEST packets to network hosts
   qrcode      Read or generate QR Code
   random      Generate random string
   redis       Opens a connection to a Redis server
@@ -88,6 +88,7 @@ Available Commands:
   stat        Display file informations
   system      Display system informations
   tcping      Connect to a port of a host
+  traceroute  Print the route packets trace to network host
   update      Update ops-cli to the latest release
   url         Get url content or expand shorten url or download
   version     Print version information
@@ -444,6 +445,21 @@ tcp response from 1.1.1.1 (1.1.1.1) port 80 [open] 5.311941ms
 
 ```bash
 ops-cli Telegram text 'hello' --config ~/.config/.myconfig
+```
+
+### `traceroute`
+
+```bash
+→ sudo ops-cli traceroute 1.1.1.1
+traceroute to 1.1.1.1 (1.1.1.1), 64 hops max, 24 byte packets
+1     192.168.181.1    4.951536ms 2.309237ms 3.206471ms
+2     61.220.168.254   11.807506ms 3.370591ms 15.020509ms
+3     168.95.83.214    10.43289ms 9.700833ms 9.874369ms
+4     220.128.27.94    9.995535ms 4.686122ms 9.784072ms
+5     220.128.25.181   11.213021ms 7.17189ms 11.335182ms
+6     220.128.4.77     9.642501ms 7.084146ms 5.372547ms
+7     210.242.214.45   8.191182ms 4.458661ms 11.622122ms
+8     1.1.1.1          11.124769ms 10.348664ms 3.23984ms
 ```
 
 ### `update`
