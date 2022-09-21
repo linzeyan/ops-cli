@@ -82,14 +82,24 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 		p.interval = 50 * time.Millisecond
 	}
 
+	conn, err := p.listen()
+	if err != nil {
+		PrintString(err)
+		return
+	}
+	if conn != nil {
+		defer conn.Close()
+	}
+
 	header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
 	PrintString(header)
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	for i := 0; ; {
 		select {
 		default:
-			if err := p.Connect(i, ip, data); err != nil {
+			if err := p.Connect(conn, i, ip, data); err != nil {
 				PrintString(err)
 			}
 			i++
@@ -193,15 +203,7 @@ func (p *PingFlag) printMsg(result *icmp.Message, duration time.Duration, peer n
 	return out
 }
 
-func (p *PingFlag) Connect(counter int, addr *net.IPAddr, icmpData []byte) error {
-	conn, err := p.listen()
-	if err != nil {
-		return err
-	}
-	if conn != nil {
-		defer conn.Close()
-	}
-
+func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr, icmpData []byte) error {
 	data := icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
 		Code: 0,
