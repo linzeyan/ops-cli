@@ -64,7 +64,7 @@ Available Commands:
   Telegram    Send message to Telegram
   cert        Check tls cert expiry time
   completion  Generate the autocompletion script for the specified shell
-  convert     Convert data format
+  convert     Convert data format, support csv, json, toml, xml, yaml
   date        Print date time
   df          Display free disk spaces
   dig         Resolve domain name
@@ -80,12 +80,14 @@ Available Commands:
   ip          View interfaces configuration
   netmask     Print IP/Mask pair, list address ranges
   otp         Calculate passcode or generate secret
+  ping        Send ICMP ECHO_REQUEST packets to network hosts.
   qrcode      Read or generate QR Code
   random      Generate random string
   redis       Opens a connection to a Redis server
   ssh-keygen  Generate SSH keypair
   stat        Display file informations
   system      Display system informations
+  tcping      Connect to a port of a host
   update      Update ops-cli to the latest release
   url         Get url content or expand shorten url or download
   version     Print version information
@@ -174,6 +176,12 @@ map auto_home   0.00B     0.00B     0.00B     0.00%    /System/Volumes/Data/home
 → ops-cli dig @1.1.1.1 tw.yahoo.com CNAME
 NAME            TTL     CLASS   TYPE    RECORD
 tw.yahoo.com.   20      IN      CNAME   fp-ycpi.g03.yahoodns.net.
+```
+
+### `Discord`
+
+```bash
+ops-cli Discord text 'hello' --config ~/.config/.myconfig
 ```
 
 ### `dos2unix`
@@ -273,6 +281,12 @@ icpstatus: 已备案
         TX errors 0  dropped 15935
 ```
 
+### `LINE`
+
+```bash
+ops-cli LINE text 'hello' --config ~/.config/.myconfig
+```
+
 ### `netmask`
 
 ```bash
@@ -326,6 +340,20 @@ icpstatus: 已备案
 631843
 ```
 
+### `ping`
+
+```bash
+→ sudo ops-cli ping www.google.com -c 2
+Password:
+PING www.google.com (172.217.163.36): 24 data bytes
+32 bytes from 172.217.163.36: icmp_seq=0 ttl=57 time=3.417797ms
+32 bytes from 172.217.163.36: icmp_seq=1 ttl=57 time=4.2143ms
+
+--- www.google.com ping statistics ---
+2 packets transmitted, 2 packets received, 0.00% packet loss
+round-trip min/avg/max/stddev = 3.417797ms/3.816048ms/4.2143ms/398.251µs
+```
+
 ### `qrcode`
 
 ```bash
@@ -355,6 +383,29 @@ Garvm8Mi95i4Zt8ZMjOhcI6W9zzuMb9bJZqBVsl8GYANHo35X2sfR6burD94We7O
 JkiKqH3a33NP9AA2xpVGrcQrBdo=
 ```
 
+### `redis`
+
+```bash
+→ ops-cli redis 'set name Joe'
+"OK"
+→ ops-cli redis 'get name'
+"Joe"
+```
+
+### `Slack`
+
+```bash
+ops-cli Slack text 'hello' --config ~/.config/.myconfig
+```
+
+### `ssh-keygen`
+
+```bash
+→ ops-cli ssh-keygen --bits 4096 -f /tmp/rsa
+/tmp/rsa generated
+/tmp/rsa.pub generated
+```
+
 ### `stat`
 
 ```bash
@@ -382,11 +433,50 @@ Change: Wed Aug 10 13:25:51 2022
 }
 ```
 
+### `tcping`
+
+```bash
+→ ops-cli tcping 1.1.1.1 80
+tcp response from 1.1.1.1 (1.1.1.1) port 80 [open] 5.311941ms
+```
+
+### `Telegram`
+
+```bash
+ops-cli Telegram text 'hello' --config ~/.config/.myconfig
+```
+
+### `update`
+
+```bash
+ops-cli update
+```
+
 ### `url`
 
 ```bash
 → ops-cli url -e https://bit.ly/3gk7w5x
 https://zh.wikipedia.org/zh-tw/%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86#:~:text=%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E5%9C%A8%E9%9B%BB%E8%85%A6,%E4%BC%BA%E6%9C%8D%E5%99%A8%E5%8F%A2%E9%9B%86%E7%9A%84%E5%AD%98%E5%9C%A8%E3%80%82
+```
+
+### `version`
+
+```bash
+→ ops-cli version
+App        ops-cli
+Version    v0.8.4
+Commit     e4b96dfeb732a81440969877a6bb5fdef17d5d09
+Date       2022-09-21T01:40:44Z
+Runtime    go1.18.5 darwin/amd64
+Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>
+Source available at https://github.com/linzeyan/ops-cli
+→ ops-cli version -j
+{
+  "version": "v0.8.4",
+  "commit": "e4b96dfeb732a81440969877a6bb5fdef17d5d09",
+  "date": "2022-09-21T01:40:44Z",
+  "runtime": "go1.18.5 darwin/amd64"
+}
 ```
 
 ### `whois`
