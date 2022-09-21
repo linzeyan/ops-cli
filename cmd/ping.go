@@ -46,7 +46,7 @@ func init() {
 	pingCmd.Flags().IntVarP(&pingFlag.size, "size", "s", 24, common.Usage("Specify packet size"))
 	pingCmd.Flags().IntVarP(&pingFlag.ttl, "ttl", "", 64, common.Usage("Specify packet ttl"))
 	pingCmd.Flags().DurationVarP(&pingFlag.interval, "interval", "i", time.Second, common.Usage("Specify interval"))
-	pingCmd.Flags().DurationVarP(&pingFlag.timeout, "timeout", "t", 5*time.Second, common.Usage("Specify timeout"))
+	pingCmd.Flags().DurationVarP(&pingFlag.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
 }
 
 type PingFlag struct {
