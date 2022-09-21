@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -79,17 +81,25 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 
 	header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
 	PrintString(header)
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
 	for i := 0; ; {
-		if err := p.Connect(i, ip, data); err != nil {
-			PrintString(err)
+		select {
+		default:
+			if err := p.Connect(i, ip, data); err != nil {
+				PrintString(err)
+			}
+			i++
+			if i == p.count {
+				p.output(host)
+				return
+			}
+			time.Sleep(p.interval)
+		case <-quit:
+			p.output(host)
+			return
 		}
-		i++
-		if i == p.count {
-			break
-		}
-		time.Sleep(p.interval)
 	}
-	p.output(host)
 }
 
 func (p *PingFlag) listen() (*icmp.PacketConn, error) {
