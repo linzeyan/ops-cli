@@ -38,14 +38,16 @@ func init() {
 }
 
 const (
+	// lastDirPrefix = "    ".
 	layerPrefix = "│   "
 	filePrefix  = "├── "
 	endPrefix   = "└── "
 )
 
 type TreeFlag struct {
-	limit       int
 	dirN, fileN int
+	dirName     string
+	limit       int
 }
 
 func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
@@ -58,6 +60,7 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 		return
 	}
 	for _, v := range args {
+		t.dirName = v
 		PrintString(v)
 		err := t.iterate(v)
 		if err != nil {
@@ -77,15 +80,12 @@ func (t *TreeFlag) iterate(arg string) error {
 	for i := 0; i < n; i++ {
 		f := files[i]
 		fullpath := filepath.Join(arg, f.Name())
-		layer := strings.Count(fullpath, string(filepath.Separator)) + 1
+		layer := strings.Count(fullpath, string(filepath.Separator))
+		if t.dirName == "." {
+			layer++
+		}
 		if layer > t.limit {
 			continue
-		}
-
-		if f.IsDir() {
-			t.dirN++
-		} else {
-			t.fileN++
 		}
 
 		var prefix string
@@ -100,10 +100,13 @@ func (t *TreeFlag) iterate(arg string) error {
 		PrintString(prefix + f.Name())
 
 		if f.IsDir() {
+			t.dirN++
 			err = t.iterate(fullpath)
 			if err != nil {
 				return err
 			}
+		} else {
+			t.fileN++
 		}
 	}
 	return err
