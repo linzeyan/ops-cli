@@ -34,6 +34,7 @@ func init() {
 		Run:   treeFlag.Run,
 	}
 	rootCmd.AddCommand(treeCmd)
+	treeCmd.Flags().BoolVarP(&treeFlag.all, "all", "a", false, "List all files")
 	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 5, "Specify directories deep")
 }
 
@@ -45,9 +46,11 @@ const (
 )
 
 type TreeFlag struct {
+	all   bool
+	limit int
+
 	dirN, fileN int
 	dirName     string
-	limit       int
 }
 
 func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
@@ -79,6 +82,11 @@ func (t *TreeFlag) iterate(arg string) error {
 	n := len(files)
 	for i := 0; i < n; i++ {
 		f := files[i]
+		if !t.all {
+			if strings.HasPrefix(f.Name(), ".") {
+				continue
+			}
+		}
 		fullpath := filepath.Join(arg, f.Name())
 		layer := strings.Count(fullpath, string(filepath.Separator))
 		if t.dirName == "." {
