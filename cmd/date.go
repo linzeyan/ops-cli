@@ -58,43 +58,58 @@ Time zone:
 	}
 	rootCmd.AddCommand(dateCmd)
 	dateCmd.Flags().StringVarP(&dateFlag.format, "format", "f", "", common.Usage("Print date using specific format"))
+	dateCmd.Flags().StringVarP(&dateFlag.timezone, "timezone", "z", "", common.Usage("Specify timezone"))
 	dateCmd.Flags().BoolVarP(&dateFlag.seconds, "seconds", "s", false, common.Usage("Print Unix time"))
+	dateCmd.Flags().BoolVarP(&dateFlag.milliseconds, "milliseconds", "m", false, common.Usage("Print Unix time in milliseconds"))
+	dateCmd.Flags().BoolVarP(&dateFlag.microseconds, "microseconds", "M", false, common.Usage("Print Unix time in microseconds"))
+	dateCmd.Flags().BoolVarP(&dateFlag.nanoseconds, "nanoseconds", "n", false, common.Usage("Print Unix time in nanoseconds"))
 	dateCmd.Flags().BoolVarP(&dateFlag.utc, "utc", "u", false, common.Usage("Print date using UTC time"))
 	dateCmd.Flags().BoolVarP(&dateFlag.date, "date", "D", false, common.Usage(`Print date using '2006-01-02' format`))
 	dateCmd.Flags().BoolVarP(&dateFlag.time, "time", "T", false, common.Usage("Print time using '15:04:05' format"))
 }
 
 type DateFlag struct {
-	utc     bool
-	seconds bool
-	format  string
-	date    bool
-	time    bool
+	utc          bool
+	seconds      bool
+	milliseconds bool
+	microseconds bool
+	nanoseconds  bool
+	format       string
+	timezone     string
+	date         bool
+	time         bool
 }
 
 func (d *DateFlag) Output(valid, args []string) {
+	/* Set timezone. */
 	t := common.TimeNow
-	if d.utc {
+	switch {
+	case d.utc:
 		t = common.TimeNow.UTC()
+	case d.timezone != "":
+		z, err := time.LoadLocation(d.timezone)
+		if err != nil {
+			PrintString(err)
+			return
+		}
+		t = common.TimeNow.In(z)
 	}
+	/* Print format. */
 	switch {
 	case d.date:
 		PrintString(t.Format("2006-01-02"))
 	case d.time:
 		PrintString(t.Format("15:04:05"))
 	case d.seconds:
-		switch {
-		case len(args) == 0:
-			PrintString(t.Unix())
-		case args[0] == valid[0]:
-			PrintString(t.UnixMilli())
-		case args[0] == valid[1]:
-			PrintString(t.UnixMicro())
-		case args[0] == valid[2]:
-			PrintString(t.UnixNano())
-		}
+		PrintString(t.Unix())
+	case d.milliseconds:
+		PrintString(t.UnixMilli())
+	case d.microseconds:
+		PrintString(t.UnixMicro())
+	case d.nanoseconds:
+		PrintString(t.UnixNano())
 	case d.format == "":
-		PrintString(t.Format(time.RFC3339))
+		PrintString(t.Format("2006-01-02T15:04:05-07:00"))
 	case d.format != "":
 		PrintString(t.Format(d.format))
 	}
