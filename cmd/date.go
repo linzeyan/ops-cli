@@ -25,12 +25,9 @@ import (
 
 func init() {
 	var dateFlag DateFlag
-	validArgs := []string{"milli", "micro", "nano"}
 	var dateCmd = &cobra.Command{
-		Use:       CommandDate,
-		ValidArgs: validArgs,
-		Args:      cobra.OnlyValidArgs,
-		Short:     "Print date time",
+		Use:   CommandDate,
+		Short: "Print date time",
 		Long: "Print date time" + common.Usage(`
 
 # Specific format use Golang time format
@@ -52,8 +49,8 @@ Time zone:
 "Z07" "-07"             Z or ±hh
 "Z070000" "-070000"     Z or ±hhmmss
 "Z07:00:00" "-07:00:00" Z or ±hh:mm:ss`),
-		Run: func(_ *cobra.Command, args []string) {
-			dateFlag.Output(validArgs, args)
+		Run: func(_ *cobra.Command, _ []string) {
+			dateFlag.Output()
 		},
 	}
 	rootCmd.AddCommand(dateCmd)
@@ -80,7 +77,7 @@ type DateFlag struct {
 	time         bool
 }
 
-func (d *DateFlag) Output(valid, args []string) {
+func (d *DateFlag) Output() {
 	/* Set timezone. */
 	t := common.TimeNow
 	switch {
