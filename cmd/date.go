@@ -53,11 +53,7 @@ Time zone:
 "Z070000" "-070000"     Z or ±hhmmss
 "Z07:00:00" "-07:00:00" Z or ±hh:mm:ss`),
 		Run: func(_ *cobra.Command, args []string) {
-			if dateFlag.seconds {
-				dateFlag.PrintUnixTime(validArgs, args)
-				return
-			}
-			dateFlag.PrintFormat()
+			dateFlag.Output(validArgs, args)
 		},
 	}
 	rootCmd.AddCommand(dateCmd)
@@ -76,36 +72,30 @@ type DateFlag struct {
 	time    bool
 }
 
-func (d *DateFlag) Now() time.Time {
+func (d *DateFlag) Output(valid, args []string) {
+	t := common.TimeNow
 	if d.utc {
-		return common.TimeNow.UTC()
+		t = common.TimeNow.UTC()
 	}
-	return common.TimeNow
-}
-
-func (d *DateFlag) PrintFormat() {
-	t := d.Now()
 	switch {
 	case d.date:
 		PrintString(t.Format("2006-01-02"))
 	case d.time:
 		PrintString(t.Format("15:04:05"))
+	case d.seconds:
+		switch {
+		case len(args) == 0:
+			PrintString(t.Unix())
+		case args[0] == valid[0]:
+			PrintString(t.UnixMilli())
+		case args[0] == valid[1]:
+			PrintString(t.UnixMicro())
+		case args[0] == valid[2]:
+			PrintString(t.UnixNano())
+		}
 	case d.format == "":
 		PrintString(t.Format(time.RFC3339))
 	case d.format != "":
 		PrintString(t.Format(d.format))
-	}
-}
-
-func (d *DateFlag) PrintUnixTime(valid, args []string) {
-	switch {
-	case len(args) == 0:
-		PrintString(common.TimeNow.Unix())
-	case args[0] == valid[0]:
-		PrintString(common.TimeNow.UnixMilli())
-	case args[0] == valid[1]:
-		PrintString(common.TimeNow.UnixMicro())
-	case args[0] == valid[2]:
-		PrintString(common.TimeNow.UnixNano())
 	}
 }
