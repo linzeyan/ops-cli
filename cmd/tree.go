@@ -18,10 +18,11 @@ package cmd
 
 import (
 	"fmt"
-	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
@@ -33,58 +34,95 @@ func init() {
 		Run:   treeFlag.Run,
 	}
 	rootCmd.AddCommand(treeCmd)
+	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 5, "Specify directories deep")
 }
 
-type TreeFlag struct{}
+const (
+	layerPrefix = "│   "
+	filePrefix  = "├── "
+	endPrefix   = "└── "
+)
+
+type TreeFlag struct {
+	limit       int
+	dirN, fileN int
+}
 
 func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
-	const (
-		layerPrefix = "│   "
-		filePrefix  = "├── "
-		endPrefix   = "└── "
-	)
-	var arg string
 	if len(args) == 0 {
-		arg = "."
-	} else {
-		arg = args[0]
+		args = append(args, ".")
 	}
 
-	var dirN, fileN int
-	err := filepath.WalkDir(arg, func(path string, d fs.DirEntry, err error) error {
-		dir, file := filepath.Split(path)
-		layer := strings.Count(dir, string(filepath.Separator))
+	if t.limit < 1 {
+		PrintString(common.ErrInvalidArg)
+		return
+	}
+	for _, v := range args {
+		PrintString(v)
+		err := t.iterate(v)
+		if err != nil {
+			PrintString(err)
+			return
+		}
+		t.output()
+	}
+}
+
+func (t *TreeFlag) iterate(arg string) error {
+	files, err := os.ReadDir(arg)
+	if err != nil {
+		return err
+	}
+	n := len(files)
+	for i := 0; i < n; i++ {
+		f := files[i]
+		layer := strings.Count(filepath.Join(arg, f.Name()), string(filepath.Separator))
+		if layer > t.limit {
+			continue
+		}
+
+		if f.IsDir() {
+			t.dirN++
+		} else {
+			t.fileN++
+		}
+
 		var prefix string
 		for i := 1; i < layer; i++ {
 			prefix += layerPrefix
 		}
-		if layer != 0 {
-			prefix += filePrefix
-			if d.IsDir() {
-				dirN++
-			} else {
-				fileN++
+		if i == n-1 {
+			prefix += endPrefix
+			PrintString(prefix + f.Name())
+			continue
+		}
+		prefix += filePrefix
+		PrintString(prefix + f.Name())
+
+		if f.IsDir() {
+			err = t.iterate(filepath.Join(arg, f.Name()))
+			if err != nil {
+				return err
 			}
 		}
-
-		fmt.Println(prefix + file)
-		return err
-	})
-	if err != nil {
-		return
 	}
+	return err
+}
+
+func (t *TreeFlag) output() {
 	out := "\n%d "
 	switch {
 	default:
 		out += "directories"
-	case dirN == 1:
+	case t.dirN == 1:
 		out += "directory"
 	}
 	switch {
 	default:
 		out += ", %d files\n"
-	case fileN == 1:
+	case t.fileN == 1:
 		out += ", %d file\n"
 	}
-	fmt.Printf(out, dirN, fileN)
+	PrintString(fmt.Sprintf(out, t.dirN, t.fileN))
+	t.dirN, t.fileN = 0, 0
 }
