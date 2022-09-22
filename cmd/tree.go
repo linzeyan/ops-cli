@@ -76,7 +76,8 @@ func (t *TreeFlag) iterate(arg string) error {
 	n := len(files)
 	for i := 0; i < n; i++ {
 		f := files[i]
-		layer := strings.Count(filepath.Join(arg, f.Name()), string(filepath.Separator))
+		fullpath := filepath.Join(arg, f.Name())
+		layer := strings.Count(fullpath, string(filepath.Separator)) + 1
 		if layer > t.limit {
 			continue
 		}
@@ -88,19 +89,18 @@ func (t *TreeFlag) iterate(arg string) error {
 		}
 
 		var prefix string
-		for i := 1; i < layer; i++ {
+		for j := 1; j < layer; j++ {
 			prefix += layerPrefix
 		}
 		if i == n-1 {
 			prefix += endPrefix
-			PrintString(prefix + f.Name())
-			continue
+		} else {
+			prefix += filePrefix
 		}
-		prefix += filePrefix
 		PrintString(prefix + f.Name())
 
 		if f.IsDir() {
-			err = t.iterate(filepath.Join(arg, f.Name()))
+			err = t.iterate(fullpath)
 			if err != nil {
 				return err
 			}
