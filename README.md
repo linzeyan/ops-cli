@@ -89,6 +89,7 @@ Available Commands:
   system      Display system informations
   tcping      Connect to a port of a host
   traceroute  Print the route packets trace to network host
+  tree        Show the contents of the giving directory as a tree
   update      Update ops-cli to the latest release
   url         Get url content or expand shorten url or download
   version     Print version information
@@ -147,8 +148,8 @@ west:
 → ops-cli date -s
 1663222044
 
-→ ops-cli date -s micro
-1663222047193376
+→ ops-cli date -M
+1663822818051885
 ```
 
 ```bash
@@ -460,6 +461,16 @@ traceroute to 1.1.1.1 (1.1.1.1), 64 hops max, 24 byte packets
 6     220.128.4.77     9.642501ms 7.084146ms 5.372547ms
 7     210.242.214.45   8.191182ms 4.458661ms 11.622122ms
 8     1.1.1.1          11.124769ms 10.348664ms 3.23984ms
+```
+
+### `tree`
+
+```bash
+→ ops-cli tree scripts
+scripts
+└── generate.bash
+
+0 directories, 1 file
 ```
 
 ### `update`
