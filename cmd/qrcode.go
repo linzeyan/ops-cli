@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
@@ -100,6 +101,9 @@ https://www.google.com -o out.png -s 500`, CommandQrcode, CommandText),
 	qrcodeSubCmdOtp.Flags().StringVarP(&qrcodeFlag.otpAccount, "otp-account", "", "", common.Usage("Specify account"))
 	qrcodeSubCmdOtp.Flags().StringVarP(&qrcodeFlag.otpIssuer, "otp-issuer", "", "", common.Usage("Specify issuer"))
 	qrcodeSubCmdOtp.Flags().StringVarP(&qrcodeFlag.otpSecret, "otp-secret", "", "", common.Usage("Specify secret"))
+	qrcodeSubCmdOtp.Flags().StringVarP(&qrcodeFlag.otpAlgorithm, "otp-algorithm", "", "SHA1", common.Usage("Specify algorithm"))
+	qrcodeSubCmdOtp.Flags().IntVarP(&qrcodeFlag.otpDigits, "otp-digits", "", 6, common.Usage("Specify digits"))
+	qrcodeSubCmdOtp.Flags().IntVarP(&qrcodeFlag.otpPeriod, "otp-period", "", 30, common.Usage("Specify period"))
 	qrcodeSubCmdOtp.MarkFlagsRequiredTogether("otp-account", "otp-issuer", "otp-secret")
 }
 
@@ -114,31 +118,45 @@ type QrcodeFlag struct {
 	/* WiFi */
 	wifiType, wifiPass, wifiSsid string
 	/* OTP */
-	otpAccount, otpSecret, otpIssuer string
+	otpAccount, otpSecret, otpIssuer, otpAlgorithm string
+	otpPeriod, otpDigits                           int
 }
 
 func (qr *QrcodeFlag) GenerateRunE(cmd *cobra.Command, args []string) error {
-	var err error
 	switch cmd.Name() {
 	case CommandText:
 		for i := range args {
 			qr.text += args[i]
 		}
-		err = common.GenerateQRCode(qr.text, qr.size, qr.output)
+		return common.GenerateQRCode(qr.text, qr.size, qr.output)
 	case CommandOtp:
 		if qr.otpSecret == "" {
 			return common.ErrInvalidArg
 		}
-		qr.text = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s`,
-			qr.otpIssuer, qr.otpAccount, qr.otpSecret, qr.otpIssuer)
-		err = common.GenerateQRCode(qr.text, qr.size, qr.output)
+		switch qr.otpDigits {
+		case 6, 7, 8:
+		default:
+			return common.ErrInvalidArg
+		}
+		alg := strings.ToUpper(qr.otpAlgorithm)
+		if common.HashAlgorithm(alg) == nil {
+			return common.ErrInvalidArg
+		}
+		switch qr.otpPeriod {
+		case 15, 30, 60:
+		default:
+			return common.ErrInvalidArg
+		}
+		qr.text = fmt.Sprintf(`otpauth://totp/%s:%s?secret=%s&issuer=%s&period=%d&algorithm=%s&digits=%d`,
+			qr.otpIssuer, qr.otpAccount, qr.otpSecret, qr.otpIssuer, qr.otpPeriod, alg, qr.otpDigits)
+		return common.GenerateQRCode(qr.text, qr.size, qr.output)
 	case CommandWiFi:
 		if qr.wifiSsid == "" {
 			return common.ErrInvalidArg
 		}
 		qr.text = fmt.Sprintf(`WIFI:S:%s;T:%s;P:%s;;`,
 			qr.wifiSsid, qr.wifiType, qr.wifiPass)
-		err = common.GenerateQRCode(qr.text, qr.size, qr.output)
+		return common.GenerateQRCode(qr.text, qr.size, qr.output)
 	}
-	return err
+	return common.ErrInvalidArg
 }
