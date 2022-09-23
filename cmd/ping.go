@@ -43,7 +43,7 @@ func init() {
 	rootCmd.AddCommand(pingCmd)
 	pingCmd.Flags().IntVarP(&pingFlag.count, "count", "c", -1, common.Usage("Specify ping counts"))
 	pingCmd.Flags().BoolVarP(&pingFlag.ipv6, "ipv6", "6", false, common.Usage("Use ICMPv6"))
-	pingCmd.Flags().IntVarP(&pingFlag.size, "size", "s", 24, common.Usage("Specify packet size"))
+	pingCmd.Flags().IntVarP(&pingFlag.size, "size", "s", 56, common.Usage("Specify packet size"))
 	pingCmd.Flags().IntVarP(&pingFlag.ttl, "ttl", "", 64, common.Usage("Specify packet ttl"))
 	pingCmd.Flags().DurationVarP(&pingFlag.interval, "interval", "i", time.Second, common.Usage("Specify interval"))
 	pingCmd.Flags().DurationVarP(&pingFlag.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
@@ -97,6 +97,7 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
+	startTime := time.Now()
 	for i := 0; ; i++ {
 		if i == 0 {
 			header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
@@ -106,14 +107,14 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 			PrintString(err)
 		}
 		if i == p.count-1 {
-			p.output(host)
+			p.output(host, time.Since(startTime))
 			return
 		}
 		time.Sleep(p.interval)
 		select {
 		default:
 		case <-quit:
-			p.output(host)
+			p.output(host, time.Since(startTime))
 			return
 		}
 	}
@@ -250,15 +251,15 @@ func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr,
 	return err
 }
 
-func (p *PingFlag) output(host string) {
+func (p *PingFlag) output(host string, t time.Duration) {
 	if p.sta.send == 0 {
 		return
 	}
 
 	out := "\n"
 	out += fmt.Sprintf("--- %s ping statistics ---\n", host)
-	out += fmt.Sprintf("%d packets transmitted, %d packets received, %.1f%% packet loss",
-		p.sta.send, p.sta.receive, float64(p.sta.loss*100)/float64(p.sta.send))
+	out += fmt.Sprintf("%d packets transmitted, %d received, %.1f%% packet loss, time %vms",
+		p.sta.send, p.sta.receive, float64(p.sta.loss*100)/float64(p.sta.send), t.Milliseconds())
 	if p.sta.send == p.sta.loss {
 		PrintString(out)
 		return
@@ -271,7 +272,7 @@ func (p *PingFlag) output(host string) {
 		temp += math.Pow(float64(v-avg), 2)
 	}
 	variance := temp / float64(len(p.sta.rtts))
-	out += fmt.Sprintf("round-trip min/avg/max/stddev = %v/%v/%v/%v",
+	out += fmt.Sprintf("round-trip min/avg/max/mdev = %v/%v/%v/%v",
 		p.sta.min, avg, p.sta.max, time.Duration(math.Sqrt(variance)))
 	PrintString(out)
 }
