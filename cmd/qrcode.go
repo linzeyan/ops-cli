@@ -143,7 +143,9 @@ func (qr *QrcodeFlag) GenerateRunE(cmd *cobra.Command, args []string) error {
 			return common.ErrInvalidArg
 		}
 		alg := strings.ToUpper(qr.otpAlgorithm)
-		if common.HashAlgorithm(alg) == nil {
+		switch alg {
+		case "SHA1", "SHA256", "SHA512":
+		default:
 			return common.ErrInvalidArg
 		}
 
