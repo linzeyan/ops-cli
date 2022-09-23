@@ -40,9 +40,7 @@ func Dos2Unix(filename string) error {
 /* Print string with color. */
 func Examples(example string, cmdName ...string) string {
 	var prefix = " "
-	for _, v := range cmdName {
-		prefix = prefix + v + " "
-	}
+	prefix += SliceStringToString(cmdName, " ")
 	prefix = RepoName + prefix
 
 	re := regexp.MustCompile(`(?P<command>.*)`)
