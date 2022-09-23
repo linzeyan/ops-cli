@@ -50,6 +50,13 @@ type TracerouteFlag struct {
 }
 
 func (t *TracerouteFlag) Run(cmd *cobra.Command, args []string) {
+	if t.size <= 0 || t.maxTTL <= 0 {
+		return
+	}
+	t.retry = 3
+	if t.interval < 50*time.Millisecond {
+		t.interval = 50 * time.Millisecond
+	}
 	host := args[0]
 
 	var data RandomString
@@ -60,14 +67,24 @@ func (t *TracerouteFlag) Run(cmd *cobra.Command, args []string) {
 		PrintString(err)
 		return
 	}
-	t.retry = 3
-	if t.interval < 50*time.Millisecond {
-		t.interval = 50 * time.Millisecond
+
+	conn, err := t.listen()
+	if err != nil {
+		PrintString(err)
+		return
+	}
+	if conn != nil {
+		defer conn.Close()
 	}
 
+	icmpData := icmp.Message{
+		Type: ipv4.ICMPTypeEcho,
+		Code: 0,
+		Body: &icmp.Echo{ID: os.Getpid() & 0xffff, Data: data},
+	}
 	header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, ip, t.maxTTL, len(data))
 	PrintString(header)
-	if err = t.Connect(ip, data); err != nil {
+	if err = t.Connect(conn, ip, icmpData); err != nil {
 		PrintString(err)
 		return
 	}
@@ -81,21 +98,8 @@ func (t *TracerouteFlag) listen() (*icmp.PacketConn, error) {
 	return conn, conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL|ipv4.FlagDst|ipv4.FlagInterface|ipv4.FlagSrc, true)
 }
 
-func (t *TracerouteFlag) Connect(addr *net.IPAddr, icmpData []byte) error {
-	conn, err := t.listen()
-	if err != nil {
-		return err
-	}
-	if conn != nil {
-		defer conn.Close()
-	}
-
-	data := icmp.Message{
-		Type: ipv4.ICMPTypeEcho,
-		Code: 0,
-		Body: &icmp.Echo{ID: os.Getpid() & 0xffff, Data: icmpData},
-	}
-
+func (t *TracerouteFlag) Connect(conn *icmp.PacketConn, addr *net.IPAddr, data icmp.Message) error {
+	var err error
 	reply := make([]byte, 1500)
 	for i := 1; i <= t.maxTTL; i++ {
 		data.Body.(*icmp.Echo).Seq = i
