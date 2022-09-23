@@ -66,3 +66,11 @@ func Usage(s string) string {
 	c := color.New(color.FgGreen)
 	return c.Sprintf(`%s`, s)
 }
+
+func SliceStringToInterface(s []string) []any {
+	var i []any
+	for _, v := range s {
+		i = append(i, v)
+	}
+	return i
+}

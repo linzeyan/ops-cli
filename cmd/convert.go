@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -29,20 +30,25 @@ import (
 
 func init() {
 	var convertFlag ConvertFlag
+	validArg := []string{
+		CommandCsv2JSON, CommandCsv2Toml, CommandCsv2XML, CommandCsv2Yaml,
+		CommandJSON2Csv, CommandJSON2Toml, CommandJSON2XML, CommandJSON2Yaml,
+		CommandToml2Csv, CommandToml2JSON, CommandToml2XML, CommandToml2Yaml,
+		CommandYaml2Csv, CommandYaml2JSON, CommandYaml2Toml, CommandYaml2XML,
+	}
 
 	var convertCmd = &cobra.Command{
-		Use:  CommandConvert,
-		Args: cobra.OnlyValidArgs,
-		ValidArgs: []string{
-			CommandCsv2JSON, CommandCsv2Toml, CommandCsv2XML, CommandCsv2Yaml,
-			CommandJSON2Csv, CommandJSON2Toml, CommandJSON2XML, CommandJSON2Yaml,
-			CommandToml2Csv, CommandToml2JSON, CommandToml2XML, CommandToml2Yaml,
-			CommandYaml2Csv, CommandYaml2JSON, CommandYaml2Toml, CommandYaml2XML,
-		},
-		Short: "Convert data format, support csv, json, toml, xml, yaml",
-		RunE:  convertFlag.RunE,
+		Use:       CommandConvert,
+		Args:      cobra.OnlyValidArgs,
+		ValidArgs: validArg,
+		Short:     "Convert data format, support csv, json, toml, xml, yaml",
+		RunE:      convertFlag.RunE,
 		Example: common.Examples(`# Convert yaml to json
--i input.yaml -o output.json`, CommandConvert, CommandYaml2JSON),
+-i input.yaml -o output.json`, CommandConvert, CommandYaml2JSON) + `
+
+Available Commands:
+` + fmt.Sprintf("  %-10s %-10s %-10s %-10s\n  %-10s %-10s %-10s %-10s\n  %-10s %-10s %-10s %-10s\n  %-10s %-10s %-10s %-10s",
+			common.SliceStringToInterface(validArg)...),
 	}
 
 	rootCmd.AddCommand(convertCmd)
