@@ -91,23 +91,24 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 		defer conn.Close()
 	}
 
-	header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
-	PrintString(header)
-
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	for i := 0; ; {
+		if i == 0 {
+			header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
+			PrintString(header)
+		}
+		if err := p.Connect(conn, i, ip, data); err != nil {
+			PrintString(err)
+		}
+		i++
+		if i == p.count {
+			p.output(host)
+			return
+		}
+		time.Sleep(p.interval)
 		select {
 		default:
-			if err := p.Connect(conn, i, ip, data); err != nil {
-				PrintString(err)
-			}
-			i++
-			if i == p.count {
-				p.output(host)
-				return
-			}
-			time.Sleep(p.interval)
 		case <-quit:
 			p.output(host)
 			return
