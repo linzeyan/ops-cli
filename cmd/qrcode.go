@@ -126,6 +126,7 @@ func (qr *QrcodeFlag) GenerateRunE(cmd *cobra.Command, args []string) error {
 	switch cmd.Name() {
 	case CommandText:
 		qr.text = common.SliceStringToString(args, " ")
+		qr.text = strings.TrimRight(qr.text, " ")
 	case CommandOtp:
 		if qr.otpSecret == "" {
 			return common.ErrInvalidArg
