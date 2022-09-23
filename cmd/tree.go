@@ -31,11 +31,14 @@ func init() {
 	var treeCmd = &cobra.Command{
 		Use:   "tree",
 		Short: "Show the contents of the giving directory as a tree",
-		Run:   treeFlag.Run,
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveFilterDirs
+		},
+		Run: treeFlag.Run,
 	}
 	rootCmd.AddCommand(treeCmd)
 	treeCmd.Flags().BoolVarP(&treeFlag.all, "all", "a", false, "List all files")
-	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 5, "Specify directories deep")
+	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 30, "Specify directories depth")
 }
 
 const (
@@ -54,14 +57,15 @@ type TreeFlag struct {
 }
 
 func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
-	if len(args) == 0 {
-		args = append(args, ".")
-	}
-
 	if t.limit < 1 {
 		PrintString(common.ErrInvalidArg)
 		return
 	}
+
+	if len(args) == 0 {
+		args = append(args, ".")
+	}
+
 	for _, v := range args {
 		t.dirName = v
 		PrintString(v)
