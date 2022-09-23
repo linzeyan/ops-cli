@@ -56,20 +56,25 @@ apple.com`, CommandWhois),
 	whoisCmd.Flags().BoolVarP(&whoisFlag.days, "days", "d", false, common.Usage("Only print the remaining days"))
 }
 
-type WhoisResponse struct {
+// type WhoisResponse struct {
+// 	Registrar   string   `json:"registrar" yaml:"registrar"`
+// 	CreatedDate string   `json:"createdDate" yaml:"createdDate"`
+// 	ExpiresDate string   `json:"expiresDate" yaml:"expiresDate"`
+// 	UpdatedDate string   `json:"updatedDate" yaml:"updatedDate"`
+// 	RemainDays  int      `json:"remainDays" yaml:"remainDays"`
+// 	NameServers []string `json:"nameServers" yaml:"nameServers"`
+// }
+
+type WhoisFlag struct {
+	/* Bind flags */
+	ns, expiry, registrar, days bool
+
 	Registrar   string   `json:"registrar" yaml:"registrar"`
 	CreatedDate string   `json:"createdDate" yaml:"createdDate"`
 	ExpiresDate string   `json:"expiresDate" yaml:"expiresDate"`
 	UpdatedDate string   `json:"updatedDate" yaml:"updatedDate"`
 	RemainDays  int      `json:"remainDays" yaml:"remainDays"`
 	NameServers []string `json:"nameServers" yaml:"nameServers"`
-}
-
-type WhoisFlag struct {
-	/* Bind flags */
-	ns, expiry, registrar, days bool
-
-	output WhoisResponse
 }
 
 func (w *WhoisFlag) Request(domain string) error {
@@ -97,18 +102,18 @@ func (w *WhoisFlag) Request(domain string) error {
 	for i := range split {
 		v := strings.Split(split[i], ";")
 		if strings.Contains(split[i], "Updated Date") {
-			w.output.UpdatedDate, err = w.ParseTime(v[1])
+			w.UpdatedDate, err = w.ParseTime(v[1])
 		}
 		if strings.Contains(split[i], "Creation Date") {
-			w.output.CreatedDate, err = w.ParseTime(v[1])
+			w.CreatedDate, err = w.ParseTime(v[1])
 		}
 		if strings.Contains(split[i], "Registry Expiry Date") {
-			w.output.ExpiresDate, err = w.ParseTime(v[1])
-			w.output.RemainDays, calErr = w.CalculateDays(v[1])
+			w.ExpiresDate, err = w.ParseTime(v[1])
+			w.RemainDays, calErr = w.CalculateDays(v[1])
 		}
 		if strings.Contains(split[i], "Registrar") {
 			if strings.TrimSpace(v[0]) == "Registrar" {
-				w.output.Registrar = v[1]
+				w.Registrar = v[1]
 			}
 		}
 		if strings.Contains(split[i], "Name Server") {
@@ -122,7 +127,7 @@ func (w *WhoisFlag) Request(domain string) error {
 			err = calErr
 		}
 	}
-	w.output.NameServers = ns
+	w.NameServers = ns
 	return err
 }
 
@@ -146,7 +151,7 @@ func (w *WhoisFlag) CalculateDays(t string) (int, error) {
 }
 
 func (w *WhoisFlag) empty() bool {
-	if w.output.CreatedDate != w.output.ExpiresDate || w.output.UpdatedDate != w.output.Registrar {
+	if w.CreatedDate != w.ExpiresDate || w.UpdatedDate != w.Registrar {
 		return false
 	}
 	return true
@@ -154,24 +159,32 @@ func (w *WhoisFlag) empty() bool {
 
 func (w WhoisFlag) String() {
 	if w.expiry {
-		PrintString(w.output.ExpiresDate)
+		PrintString(w.ExpiresDate)
 		return
 	}
 	if w.ns {
-		PrintJSON(w.output.NameServers)
+		PrintJSON(w.NameServers)
 		return
 	}
 	if w.registrar {
-		PrintString(w.output.Registrar)
+		PrintString(w.Registrar)
 		return
 	}
 	if w.days {
-		PrintString(w.output.RemainDays)
+		PrintString(w.RemainDays)
 		return
 	}
-	f := reflect.ValueOf(&w.output).Elem()
-	t := f.Type()
-	for i := 0; i < f.NumField(); i++ {
-		fmt.Printf("%s\t%v\n", t.Field(i).Name, f.Field(i).Interface())
+
+	var name []string
+	rt := reflect.TypeOf(w)
+	for _, f := range reflect.VisibleFields(rt) {
+		if f.IsExported() {
+			name = append(name, f.Name)
+		}
+	}
+
+	f := reflect.ValueOf(&w).Elem()
+	for _, v := range name {
+		fmt.Printf("%s\t%v\n", v, f.FieldByName(v).Interface())
 	}
 }
