@@ -58,6 +58,14 @@ jobs:
       - name: Login to Docker Hub
         run: docker login -u zeyanlin -p ${{ secrets.DOCKERHUB }}
 
+      - name: Set output
+        id: vars
+        run: |
+          d=$(date '+%Y-%m-%dT%H:%M:%SZ')
+          echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+          echo ::set-output name=commit::${GITHUB_SHA}
+          echo ::set-output name=date::${d}
+
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -66,9 +74,9 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: true
           build-args: |
-            Tag=${GITHUB_REF#refs/tags/}
-            Commit=${GITHUB_SHA}
-            Date=$(date '+%Y-%m-%dT%H:%M:%SZ')
+            Tag=${{ steps.vars.outputs.tag }}
+            Commit=${{ steps.vars.outputs.commit }}
+            Date=${{ steps.vars.outputs.date }}
           tags: |
             zeyanlin/ops-cli:latest
-            zeyanlin/ops-cli:${GITHUB_REF#refs/tags/}
+            zeyanlin/ops-cli:${{ steps.vars.outputs.tag }}
