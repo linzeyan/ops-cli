@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -52,11 +53,13 @@ func init() {
 			idx, out := ParseInterfaces(iface, counters)
 			switch args[0] {
 			case "all":
-				for i := 0; i <= len(out)+1; i++ {
-					v, ok := out[i]
-					if ok {
-						PrintString(fmt.Sprintf("%d: %s", i, v))
-					}
+				keys := make([]int, 0, len(out))
+				for k := range out {
+					keys = append(keys, k)
+				}
+				sort.Ints(keys)
+				for _, i := range keys {
+					PrintString(fmt.Sprintf("%d: %s", i, out[i]))
 				}
 			default:
 				for _, value := range args {
