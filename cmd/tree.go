@@ -100,7 +100,7 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			return
 		}
 		// PrintJSON(output)
-		t.output()
+		t.summary()
 	}
 }
 
@@ -164,7 +164,7 @@ func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
 	return err
 }
 
-func (t *TreeFlag) output() {
+func (t *TreeFlag) summary() {
 	out := "\n%d "
 	switch {
 	default:

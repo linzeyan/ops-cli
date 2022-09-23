@@ -107,14 +107,14 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 			PrintString(err)
 		}
 		if i == p.count-1 {
-			p.output(host, time.Since(startTime))
+			p.summary(host, time.Since(startTime))
 			return
 		}
 		time.Sleep(p.interval)
 		select {
 		default:
 		case <-quit:
-			p.output(host, time.Since(startTime))
+			p.summary(host, time.Since(startTime))
 			return
 		}
 	}
@@ -251,7 +251,7 @@ func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr,
 	return err
 }
 
-func (p *PingFlag) output(host string, t time.Duration) {
+func (p *PingFlag) summary(host string, t time.Duration) {
 	if p.sta.send == 0 {
 		return
 	}
