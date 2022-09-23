@@ -125,9 +125,7 @@ type QrcodeFlag struct {
 func (qr *QrcodeFlag) GenerateRunE(cmd *cobra.Command, args []string) error {
 	switch cmd.Name() {
 	case CommandText:
-		for _, v := range args {
-			qr.text += v
-		}
+		qr.text = common.SliceStringToString(args, " ")
 	case CommandOtp:
 		if qr.otpSecret == "" {
 			return common.ErrInvalidArg

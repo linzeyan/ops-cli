@@ -82,10 +82,7 @@ func (r *RedisFlag) Do(commands []string) error {
 		args = commands
 	}
 
-	var arg []any
-	for _, v := range args {
-		arg = append(arg, v)
-	}
+	arg := common.SliceStringToInterface(args)
 
 	rdb := r.Connection()
 	if rdb == nil {
