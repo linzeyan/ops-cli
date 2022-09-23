@@ -48,12 +48,22 @@ const (
 	endPrefix   = "└── "
 )
 
+type TreeFormat struct {
+	Type     string        `json:"type"`
+	Name     string        `json:"name"`
+	Contents *[]TreeFormat `json:"contents"`
+
+	layers int
+	prefix string
+}
+
 type TreeFlag struct {
 	all   bool
 	limit int
 
 	dirN, fileN int
 	dirName     string
+	stat        FileStat
 }
 
 func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
@@ -67,18 +77,34 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 	}
 
 	for _, v := range args {
-		t.dirName = v
-		PrintString(v)
-		err := t.iterate(v)
+		dirName, err := filepath.Abs(v)
 		if err != nil {
 			PrintString(err)
 			return
 		}
+		f, err := os.Lstat(dirName)
+		if err != nil {
+			PrintString(err)
+			return
+		}
+		t.dirName = v
+		output := TreeFormat{
+			Type:     t.stat.FileType(f),
+			Name:     v,
+			Contents: new([]TreeFormat),
+		}
+		// PrintString(v)
+		err = t.iterate(v, output.Contents)
+		if err != nil {
+			PrintString(err)
+			return
+		}
+		// PrintJSON(output)
 		t.output()
 	}
 }
 
-func (t *TreeFlag) iterate(arg string) error {
+func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
 	files, err := os.ReadDir(arg)
 	if err != nil {
 		return err
@@ -92,6 +118,7 @@ func (t *TreeFlag) iterate(arg string) error {
 			}
 		}
 		fullpath := filepath.Join(arg, f.Name())
+		// need modify
 		layer := strings.Count(fullpath, string(filepath.Separator))
 		if t.dirName == "." {
 			layer++
@@ -99,7 +126,7 @@ func (t *TreeFlag) iterate(arg string) error {
 		if layer > t.limit {
 			continue
 		}
-
+		// maybe use []string will better
 		var prefix string
 		for j := 1; j < layer; j++ {
 			prefix += layerPrefix
@@ -109,16 +136,29 @@ func (t *TreeFlag) iterate(arg string) error {
 		} else {
 			prefix += filePrefix
 		}
+		// PrintString(prefix + f.Name())
+		fInfo, err := f.Info()
+		if err != nil {
+			return err
+		}
+		temp := &TreeFormat{
+			Type:     t.stat.FileType(fInfo),
+			Name:     f.Name(),
+			Contents: &[]TreeFormat{},
+			prefix:   prefix,
+			layers:   layer,
+		}
 		PrintString(prefix + f.Name())
-
 		if f.IsDir() {
 			t.dirN++
-			err = t.iterate(fullpath)
+			err = t.iterate(fullpath, temp.Contents)
+			*contents = append(*contents, *temp)
 			if err != nil {
 				return err
 			}
 		} else {
 			t.fileN++
+			*contents = append(*contents, *temp)
 		}
 	}
 	return err
