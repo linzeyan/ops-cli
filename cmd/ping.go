@@ -64,6 +64,13 @@ type PingFlag struct {
 }
 
 func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
+	if p.count == 0 || p.ttl <= 0 || p.size <= 0 {
+		return
+	}
+	if p.interval < 50*time.Millisecond {
+		p.interval = 50 * time.Millisecond
+	}
+
 	host := args[0]
 
 	var data RandomString
@@ -78,9 +85,6 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 		PrintString(err)
 		return
 	}
-	if p.interval < 50*time.Millisecond {
-		p.interval = 50 * time.Millisecond
-	}
 
 	conn, err := p.listen()
 	if err != nil {
@@ -93,7 +97,7 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
-	for i := 0; ; {
+	for i := 0; ; i++ {
 		if i == 0 {
 			header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
 			PrintString(header)
@@ -101,8 +105,7 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 		if err := p.Connect(conn, i, ip, data); err != nil {
 			PrintString(err)
 		}
-		i++
-		if i == p.count {
+		if i == p.count-1 {
 			p.output(host)
 			return
 		}
