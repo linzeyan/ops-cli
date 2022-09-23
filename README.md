@@ -19,6 +19,12 @@ Try to collect useful tools for ops.
 
 ## Installation
 
+### Docker
+
+```bash
+docker pull zeyanlin/ops-cli
+```
+
 ### Go Install
 
 ```bash
