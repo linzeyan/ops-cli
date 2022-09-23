@@ -269,9 +269,7 @@ func (e *EncodeFlag) PemEncode(i any, t ...string) (string, error) {
 	var err error
 	var block = &pem.Block{Type: ""}
 	if len(t) != 0 {
-		for _, arg := range t {
-			block.Type += arg
-		}
+		block.Type += common.SliceStringToString(t)
 	}
 	switch data := i.(type) {
 	case string:

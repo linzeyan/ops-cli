@@ -74,3 +74,11 @@ func SliceStringToInterface(s []string) []any {
 	}
 	return i
 }
+
+func SliceStringToString(s []string) string {
+	var o string
+	for _, v := range s {
+		o += v
+	}
+	return o
+}
