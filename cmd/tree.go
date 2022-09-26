@@ -42,10 +42,10 @@ func init() {
 }
 
 const (
-	// lastDirPrefix = "    ".
-	layerPrefix = "│   "
-	filePrefix  = "├── "
-	endPrefix   = "└── "
+	lastDirPrefix = "    "
+	layerPrefix   = "│   "
+	filePrefix    = "├── "
+	endPrefix     = "└── "
 )
 
 type TreeFormat struct {
@@ -54,7 +54,7 @@ type TreeFormat struct {
 	Contents *[]TreeFormat `json:"contents"`
 
 	layers int
-	prefix string
+	prefix []string
 }
 
 type TreeFlag struct {
@@ -93,12 +93,13 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			Name:     v,
 			Contents: new([]TreeFormat),
 		}
-		// PrintString(v)
+
 		err = t.iterate(v, output.Contents)
 		if err != nil {
 			PrintString(err)
 			return
 		}
+		t.Print(output)
 		// PrintJSON(output)
 		t.summary()
 	}
@@ -126,17 +127,17 @@ func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
 		if layer > t.limit {
 			continue
 		}
-		// maybe use []string will better
-		var prefix string
+
+		var prefix []string
 		for j := 1; j < layer; j++ {
-			prefix += layerPrefix
+			prefix = append(prefix, layerPrefix)
 		}
 		if i == n-1 {
-			prefix += endPrefix
+			prefix = append(prefix, endPrefix)
 		} else {
-			prefix += filePrefix
+			prefix = append(prefix, filePrefix)
 		}
-		// PrintString(prefix + f.Name())
+
 		fInfo, err := f.Info()
 		if err != nil {
 			return err
@@ -148,11 +149,11 @@ func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
 			prefix:   prefix,
 			layers:   layer,
 		}
-		PrintString(prefix + f.Name())
+
 		if f.IsDir() {
 			t.dirN++
-			err = t.iterate(fullpath, temp.Contents)
 			*contents = append(*contents, *temp)
+			err = t.iterate(fullpath, temp.Contents)
 			if err != nil {
 				return err
 			}
@@ -162,6 +163,21 @@ func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
 		}
 	}
 	return err
+}
+
+func (t *TreeFlag) Print(output TreeFormat) {
+	if output.Type == "Directory" {
+		for i := 0; i < output.layers-1; i++ {
+			if output.prefix[i] == layerPrefix {
+				output.prefix[i] = lastDirPrefix
+			}
+		}
+	}
+	PrintString(common.SliceStringToString(output.prefix) + output.Name)
+
+	for _, v := range *output.Contents {
+		t.Print(v)
+	}
 }
 
 func (t *TreeFlag) summary() {
