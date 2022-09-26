@@ -50,6 +50,7 @@ const (
 
 type TreeFormat struct {
 	Type     string        `json:"type"`
+	Path     string        `json:"path"`
 	Name     string        `json:"name"`
 	Contents *[]TreeFormat `json:"contents"`
 
@@ -61,7 +62,6 @@ type TreeFlag struct {
 	limit int
 
 	dirN, fileN int
-	dirName     string
 	stat        FileStat
 }
 
@@ -86,14 +86,16 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			PrintString(err)
 			return
 		}
-		t.dirName = v
+
 		output := TreeFormat{
 			Type:     t.stat.FileType(f),
+			Path:     dirName,
 			Name:     v,
 			Contents: new([]TreeFormat),
+			layers:   1,
 		}
 
-		err = t.iterate(v, output.Contents)
+		err = t.iterate(&output)
 		if err != nil {
 			PrintString(err)
 			return
@@ -104,50 +106,44 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
-	files, err := os.ReadDir(arg)
+func (t *TreeFlag) iterate(trees *TreeFormat) error {
+	files, err := os.ReadDir(trees.Path)
 	if err != nil {
 		return err
 	}
-	n := len(files)
-	for i := 0; i < n; i++ {
-		f := files[i]
+
+	for _, f := range files {
 		if !t.all {
 			if strings.HasPrefix(f.Name(), ".") {
 				continue
 			}
 		}
-		fullpath := filepath.Join(arg, f.Name())
-		// need modify
-		layer := strings.Count(fullpath, string(filepath.Separator))
-		if t.dirName == "." {
-			layer++
-		}
-		if layer > t.limit {
-			continue
-		}
-
-		fInfo, err := f.Info()
+		fi, err := f.Info()
 		if err != nil {
 			return err
 		}
 		temp := &TreeFormat{
-			Type:     t.stat.FileType(fInfo),
+			Type:     t.stat.FileType(fi),
+			Path:     filepath.Join(trees.Name, f.Name()),
 			Name:     f.Name(),
 			Contents: &[]TreeFormat{},
-			layers:   layer,
+			layers:   trees.layers + 1,
+		}
+
+		if trees.layers > t.limit {
+			continue
 		}
 
 		if f.IsDir() {
 			t.dirN++
-			*contents = append(*contents, *temp)
-			err = t.iterate(fullpath, temp.Contents)
+			*trees.Contents = append(*trees.Contents, *temp)
+			err = t.iterate(temp)
 			if err != nil {
 				return err
 			}
 		} else {
 			t.fileN++
-			*contents = append(*contents, *temp)
+			*trees.Contents = append(*trees.Contents, *temp)
 		}
 	}
 	return err
