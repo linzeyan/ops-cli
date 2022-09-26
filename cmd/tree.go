@@ -38,6 +38,8 @@ func init() {
 	}
 	rootCmd.AddCommand(treeCmd)
 	treeCmd.Flags().BoolVarP(&treeFlag.all, "all", "a", false, "List all files")
+	treeCmd.Flags().BoolVarP(&treeFlag.dirs, "dirs", "d", false, "List only directories")
+	treeCmd.Flags().BoolVarP(&treeFlag.full, "full", "f", false, "Print full path for each file")
 	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 30, "Specify directories depth")
 }
 
@@ -52,6 +54,8 @@ type TreeFormat struct {
 	Type     string        `json:"type"`
 	Path     string        `json:"path"`
 	Name     string        `json:"name"`
+	Perm     string        `json:"perm"`
+	Mode     string        `json:"mode"`
 	Contents *[]TreeFormat `json:"contents"`
 
 	layers int
@@ -59,6 +63,8 @@ type TreeFormat struct {
 
 type TreeFlag struct {
 	all   bool
+	dirs  bool
+	full  bool
 	limit int
 
 	dirN, fileN int
@@ -100,8 +106,14 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			PrintString(err)
 			return
 		}
-		t.Print("", output)
-		// PrintJSON(output)
+		switch {
+		default:
+			t.Print("", output)
+		case rootOutputJSON:
+			PrintJSON(output)
+		case rootOutputYAML:
+			PrintYAML(output)
+		}
 		t.summary()
 	}
 }
@@ -118,14 +130,21 @@ func (t *TreeFlag) iterate(trees *TreeFormat) error {
 				continue
 			}
 		}
+		if t.dirs {
+			if !f.IsDir() {
+				continue
+			}
+		}
 		fi, err := f.Info()
 		if err != nil {
 			return err
 		}
 		temp := &TreeFormat{
 			Type:     t.stat.FileType(fi),
-			Path:     filepath.Join(trees.Name, f.Name()),
+			Path:     filepath.Join(trees.Path, f.Name()),
 			Name:     f.Name(),
+			Perm:     fmt.Sprintf("%#o", fi.Mode().Perm()),
+			Mode:     fi.Mode().String(),
 			Contents: &[]TreeFormat{},
 			layers:   trees.layers + 1,
 		}
@@ -150,7 +169,11 @@ func (t *TreeFlag) iterate(trees *TreeFormat) error {
 }
 
 func (t *TreeFlag) Print(prefix string, output TreeFormat) {
-	PrintString(output.Name)
+	if t.full {
+		PrintString(output.Path)
+	} else {
+		PrintString(output.Name)
+	}
 
 	for i, v := range *output.Contents {
 		if i == len(*output.Contents)-1 {
