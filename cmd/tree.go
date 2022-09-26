@@ -54,7 +54,6 @@ type TreeFormat struct {
 	Contents *[]TreeFormat `json:"contents"`
 
 	layers int
-	prefix []string
 }
 
 type TreeFlag struct {
@@ -99,7 +98,7 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			PrintString(err)
 			return
 		}
-		t.Print(output)
+		t.Print("", output)
 		// PrintJSON(output)
 		t.summary()
 	}
@@ -128,16 +127,6 @@ func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
 			continue
 		}
 
-		var prefix []string
-		for j := 1; j < layer; j++ {
-			prefix = append(prefix, layerPrefix)
-		}
-		if i == n-1 {
-			prefix = append(prefix, endPrefix)
-		} else {
-			prefix = append(prefix, filePrefix)
-		}
-
 		fInfo, err := f.Info()
 		if err != nil {
 			return err
@@ -146,7 +135,6 @@ func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
 			Type:     t.stat.FileType(fInfo),
 			Name:     f.Name(),
 			Contents: &[]TreeFormat{},
-			prefix:   prefix,
 			layers:   layer,
 		}
 
@@ -165,18 +153,17 @@ func (t *TreeFlag) iterate(arg string, contents *[]TreeFormat) error {
 	return err
 }
 
-func (t *TreeFlag) Print(output TreeFormat) {
-	if output.Type == "Directory" {
-		for i := 0; i < output.layers-1; i++ {
-			if output.prefix[i] == layerPrefix {
-				output.prefix[i] = lastDirPrefix
-			}
-		}
-	}
-	PrintString(common.SliceStringToString(output.prefix) + output.Name)
+func (t *TreeFlag) Print(prefix string, output TreeFormat) {
+	PrintString(output.Name)
 
-	for _, v := range *output.Contents {
-		t.Print(v)
+	for i, v := range *output.Contents {
+		if i == len(*output.Contents)-1 {
+			fmt.Print(prefix + endPrefix)
+			t.Print(prefix+lastDirPrefix, v)
+		} else {
+			fmt.Print(prefix + filePrefix)
+			t.Print(prefix+layerPrefix, v)
+		}
 	}
 }
 
