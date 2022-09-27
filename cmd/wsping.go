@@ -36,16 +36,14 @@ func init() {
 			if !validator.ValidURL(args[0]) {
 				return common.ErrInvalidURL
 			}
-			d := websocket.Dialer{
-				ReadBufferSize:  1024,
-				WriteBufferSize: 1024,
-			}
-			ws, resp, err := d.Dial(args[0], nil)
+			ws, resp, err := websocket.DefaultDialer.Dial(args[0], nil)
 			if err != nil {
 				return err
 			}
 			defer ws.Close()
-			defer resp.Body.Close()
+			if resp != nil {
+				defer resp.Body.Close()
+			}
 			if resp.StatusCode != http.StatusSwitchingProtocols {
 				o := fmt.Sprintf("Status Code is not %d", http.StatusSwitchingProtocols)
 				return errors.New(o)
@@ -58,6 +56,7 @@ func init() {
 			// if err != nil {
 			// 	return err
 			// }
+			// message = bytes.TrimSpace(bytes.Replace(message, []byte{'\n'}, []byte{' '}, -1))
 			// if string(message) == "" {
 			// 	return common.ErrResponse
 			// }
