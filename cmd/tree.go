@@ -162,7 +162,7 @@ func (t *TreeFlag) getInfo(fileinfo fs.FileInfo) (string, string, string, string
 	if err != nil {
 		return "", "", "", "", err
 	}
-	return uid.Name, gid.Name, fmt.Sprintf("%d", t.stat.Ino), fmt.Sprintf("%d", t.stat.Dev), err
+	return uid.Username, gid.Name, fmt.Sprintf("%d", t.stat.Ino), fmt.Sprintf("%d", t.stat.Dev), err
 }
 
 func (t *TreeFlag) iterate(trees *TreeFormat) error {
