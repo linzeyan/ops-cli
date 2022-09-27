@@ -7,6 +7,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/gorilla/websocket v1.4.2
 	github.com/line/line-bot-sdk-go/v7 v7.16.0
 	github.com/makiuchi-d/gozxing v0.1.1
 	github.com/miekg/dns v1.1.47
@@ -38,7 +39,6 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/uuid v1.2.0 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.3.1 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect

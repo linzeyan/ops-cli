@@ -100,6 +100,7 @@ Available Commands:
   url         Get url content or expand shorten url or download
   version     Print version information
   whois       List domain name information
+  wsping      Connect to a websocket server
 
 Flags:
       --config string   Specify config path

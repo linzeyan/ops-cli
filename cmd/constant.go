@@ -99,6 +99,7 @@ const (
 	CommandVoice      = "voice"
 	CommandWhois      = "whois"
 	CommandWiFi       = "wifi"
+	CommandWsping     = "wsping"
 	CommandXML        = "xml"
 	CommandXML2Csv    = CommandXML + "2" + CommandCsv
 	CommandXML2JSON   = CommandXML + "2" + CommandJSON

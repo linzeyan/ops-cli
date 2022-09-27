@@ -29,7 +29,7 @@ import (
 
 func init() {
 	var wspingCmd = &cobra.Command{
-		Use:   "wsping",
+		Use:   CommandWsping,
 		Args:  cobra.ExactArgs(1),
 		Short: "Connect to a websocket server",
 		RunE: func(_ *cobra.Command, args []string) error {
