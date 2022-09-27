@@ -29,9 +29,12 @@ import (
 
 func init() {
 	var wspingCmd = &cobra.Command{
-		Use:   CommandWsping,
+		Use:   CommandWsping + " host",
 		Args:  cobra.ExactArgs(1),
 		Short: "Connect to a websocket server",
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return []string{"ws://", "wss://"}, cobra.ShellCompDirectiveNoFileComp
+		},
 		RunE: func(_ *cobra.Command, args []string) error {
 			if !validator.ValidURL(args[0]) {
 				return common.ErrInvalidURL

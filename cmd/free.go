@@ -31,7 +31,10 @@ func init() {
 	var freeCmd = &cobra.Command{
 		Use:   CommandFree,
 		Short: "Display free memory spaces",
-		RunE:  freeFlag.RunE,
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
+		RunE: freeFlag.RunE,
 	}
 	rootCmd.AddCommand(freeCmd)
 	freeCmd.Flags().UintVarP(&freeFlag.count, "count", "c", 0, common.Usage("Repeat printing times"))

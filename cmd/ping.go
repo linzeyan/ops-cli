@@ -35,8 +35,11 @@ import (
 func init() {
 	var pingFlag PingFlag
 	var pingCmd = &cobra.Command{
-		Use:   CommandPing + " [host]",
-		Args:  cobra.ExactArgs(1),
+		Use:  CommandPing + " [host]",
+		Args: cobra.ExactArgs(1),
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		Short: "Send ICMP ECHO_REQUEST packets to network hosts",
 		Run:   pingFlag.Run,
 	}

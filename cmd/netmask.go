@@ -33,7 +33,10 @@ func init() {
 	var netmaskCmd = &cobra.Command{
 		Use:   CommandNetmask,
 		Short: "Print IP/Mask pair, list address ranges",
-		RunE:  netmaskFlag.RunE,
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
+		RunE: netmaskFlag.RunE,
 		Example: common.Examples(`# Print IP address and mask in different format
 -b 1.2.3.4/32
 -o 2.4.6.8/24

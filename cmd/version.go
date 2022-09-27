@@ -36,6 +36,9 @@ func init() {
 	var versionCmd = &cobra.Command{
 		Use:   CommandVersion,
 		Short: "Print version information",
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		Run: func(_ *cobra.Command, _ []string) {
 			var v = VersionOutput{
 				Version: appVersion,

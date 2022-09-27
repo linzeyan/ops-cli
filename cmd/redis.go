@@ -32,6 +32,9 @@ func init() {
 	var redisCmd = &cobra.Command{
 		Use:   CommandRedis,
 		Short: "Opens a connection to a Redis server",
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		RunE: func(_ *cobra.Command, args []string) error {
 			if rootConfig != "" {
 				if err := ReadConfig(CommandRedis, &redisFlag); err != nil {

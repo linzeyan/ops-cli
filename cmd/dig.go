@@ -36,7 +36,10 @@ func init() {
 		Use:   CommandDig + " [host] [@server] [type]",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "Resolve domain name",
-		RunE:  digFlag.RunE,
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
+		RunE: digFlag.RunE,
 		Example: common.Examples(`# Query A record
 google.com
 @1.1.1.1 google.com A

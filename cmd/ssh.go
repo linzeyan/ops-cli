@@ -35,7 +35,10 @@ func init() {
 	var sshkeygenCmd = &cobra.Command{
 		Use:   CommandSSH,
 		Short: "Generate SSH keypair",
-		RunE:  sshkeygenFlag.RunE,
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
+		RunE: sshkeygenFlag.RunE,
 	}
 
 	rootCmd.AddCommand(sshkeygenCmd)

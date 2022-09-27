@@ -37,7 +37,10 @@ import (
 func init() {
 	var updateFlag UpdateFlag
 	var updateCmd = &cobra.Command{
-		Use:   CommandUpdate,
+		Use: CommandUpdate,
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		Short: fmt.Sprintf("Update %s to the latest release", common.RepoName),
 		RunE:  updateFlag.RunE,
 

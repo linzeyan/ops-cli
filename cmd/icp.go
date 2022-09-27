@@ -29,8 +29,11 @@ import (
 func init() {
 	var icpFlag ICPResponse
 	var icpCmd = &cobra.Command{
-		Use:   CommandIcp + " domain",
-		Args:  cobra.ExactArgs(1),
+		Use:  CommandIcp + " domain",
+		Args: cobra.ExactArgs(1),
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		Short: "Check ICP status",
 		RunE: func(_ *cobra.Command, args []string) error {
 			if rootConfig != "" {

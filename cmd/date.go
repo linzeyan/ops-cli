@@ -49,6 +49,9 @@ Time zone:
 "Z07" "-07"             Z or ±hh
 "Z070000" "-070000"     Z or ±hhmmss
 "Z07:00:00" "-07:00:00" Z or ±hh:mm:ss`),
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		Run: func(_ *cobra.Command, _ []string) {
 			dateFlag.Output()
 		},

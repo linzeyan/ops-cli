@@ -31,8 +31,11 @@ import (
 func init() {
 	var tracerouteFlag TracerouteFlag
 	var tracerouteCmd = &cobra.Command{
-		Use:   CommandTraceroute + " [host]",
-		Args:  cobra.ExactArgs(1),
+		Use:  CommandTraceroute + " [host]",
+		Args: cobra.ExactArgs(1),
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
 		Short: "Print the route packets trace to network host",
 		Run:   tracerouteFlag.Run,
 	}
