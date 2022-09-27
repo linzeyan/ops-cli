@@ -472,11 +472,18 @@ traceroute to 1.1.1.1 (1.1.1.1), 64 hops max, 24 byte packets
 ### `tree`
 
 ```bash
-→ ops-cli tree scripts
-scripts
-└── generate.bash
+→ ops-cli cmd/common -mg -l 1
+[staff drwxr-xr-x] cmd/common
+├── [staff -rw-r--r--] bytes.go
+├── [staff -rw-r--r--] common.go
+├── [staff -rw-r--r--] config.go
+├── [staff -rw-r--r--] constant.go
+├── [staff -rw-r--r--] hash.go
+├── [staff -rw-r--r--] http.go
+├── [staff -rw-r--r--] qrcode.go
+└── [staff -rw-r--r--] variable.go
 
-0 directories, 1 file
+0 directories, 8 files
 ```
 
 ### `update`
