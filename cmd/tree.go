@@ -18,9 +18,12 @@ package cmd
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
@@ -38,9 +41,17 @@ func init() {
 	}
 	rootCmd.AddCommand(treeCmd)
 	treeCmd.Flags().BoolVarP(&treeFlag.all, "all", "a", false, "List all files")
+	treeCmd.Flags().BoolVarP(&treeFlag.change, "change", "c", false, "Print the date of last modification")
 	treeCmd.Flags().BoolVarP(&treeFlag.dirs, "dirs", "d", false, "List only directories")
 	treeCmd.Flags().BoolVarP(&treeFlag.full, "full", "f", false, "Print full path for each file")
+	treeCmd.Flags().BoolVarP(&treeFlag.perm, "perm", "p", false, "Print file permission")
+	treeCmd.Flags().BoolVarP(&treeFlag.mode, "mode", "m", false, "Print file mode")
+	treeCmd.Flags().BoolVarP(&treeFlag.size, "size", "s", false, "Print the size for each file")
 	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 30, "Specify directories depth")
+	treeCmd.Flags().BoolVarP(&treeFlag.gid, "gid", "g", false, "Print group owner for each file")
+	treeCmd.Flags().BoolVarP(&treeFlag.uid, "uid", "u", false, "Print owner for each file")
+	treeCmd.Flags().BoolVarP(&treeFlag.inodes, "inodes", "", false, "Print inode number for each file")
+	treeCmd.Flags().BoolVarP(&treeFlag.device, "device", "", false, "Print device ID number for each file")
 }
 
 const (
@@ -56,16 +67,30 @@ type TreeFormat struct {
 	Name     string        `json:"name"`
 	Perm     string        `json:"perm"`
 	Mode     string        `json:"mode"`
+	Size     string        `json:"size"`
+	ModTime  string        `json:"modTime"`
+	UID      string        `json:"uid"`
+	GID      string        `json:"gid"`
+	Inode    string        `json:"inode"`
+	Devide   string        `json:"device"`
 	Contents *[]TreeFormat `json:"contents"`
 
 	layers int
 }
 
 type TreeFlag struct {
-	all   bool
-	dirs  bool
-	full  bool
-	limit int
+	all    bool
+	change bool
+	dirs   bool
+	full   bool
+	limit  int
+	perm   bool
+	mode   bool
+	size   bool
+	uid    bool
+	gid    bool
+	inodes bool
+	device bool
 
 	dirN, fileN int
 	stat        FileStat
@@ -92,11 +117,23 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			PrintString(err)
 			return
 		}
-
+		uid, gid, inode, device, err := t.getInfo(f)
+		if err != nil {
+			PrintString(err)
+			return
+		}
 		output := TreeFormat{
 			Type:     t.stat.FileType(f),
 			Path:     dirName,
 			Name:     v,
+			Perm:     fmt.Sprintf("%#o", f.Mode().Perm()),
+			Mode:     f.Mode().String(),
+			Size:     common.ByteSize(f.Size()).String(),
+			ModTime:  f.ModTime().Format(time.ANSIC),
+			UID:      uid,
+			GID:      gid,
+			Inode:    inode,
+			Devide:   device,
 			Contents: new([]TreeFormat),
 			layers:   1,
 		}
@@ -106,16 +143,26 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			PrintString(err)
 			return
 		}
-		switch {
-		default:
-			t.Print("", output)
-		case rootOutputJSON:
-			PrintJSON(output)
-		case rootOutputYAML:
-			PrintYAML(output)
-		}
+		t.Print("", output)
 		t.summary()
 	}
+}
+
+/* getInfo returns uid, gid, inodes, device and error. */
+func (t *TreeFlag) getInfo(fileinfo fs.FileInfo) (string, string, string, string, error) {
+	err := Encoder.JSONMarshaler(fileinfo.Sys(), &t.stat)
+	if err != nil {
+		return "", "", "", "", err
+	}
+	uid, err := user.LookupId(fmt.Sprintf(`%d`, t.stat.UID))
+	if err != nil {
+		return "", "", "", "", err
+	}
+	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, t.stat.GID))
+	if err != nil {
+		return "", "", "", "", err
+	}
+	return uid.Name, gid.Name, fmt.Sprintf("%d", t.stat.Ino), fmt.Sprintf("%d", t.stat.Dev), err
 }
 
 func (t *TreeFlag) iterate(trees *TreeFormat) error {
@@ -139,12 +186,22 @@ func (t *TreeFlag) iterate(trees *TreeFormat) error {
 		if err != nil {
 			return err
 		}
+		uid, gid, inode, device, err := t.getInfo(fi)
+		if err != nil {
+			return err
+		}
 		temp := &TreeFormat{
 			Type:     t.stat.FileType(fi),
 			Path:     filepath.Join(trees.Path, f.Name()),
 			Name:     f.Name(),
 			Perm:     fmt.Sprintf("%#o", fi.Mode().Perm()),
 			Mode:     fi.Mode().String(),
+			Size:     common.ByteSize(fi.Size()).String(),
+			ModTime:  fi.ModTime().Format(time.ANSIC),
+			UID:      uid,
+			GID:      gid,
+			Inode:    inode,
+			Devide:   device,
 			Contents: &[]TreeFormat{},
 			layers:   trees.layers + 1,
 		}
@@ -169,6 +226,44 @@ func (t *TreeFlag) iterate(trees *TreeFormat) error {
 }
 
 func (t *TreeFlag) Print(prefix string, output TreeFormat) {
+	switch {
+	case rootOutputJSON:
+		PrintJSON(output)
+		return
+	case rootOutputYAML:
+		PrintYAML(output)
+		return
+	}
+
+	var p []string
+	if t.uid {
+		p = append(p, output.UID)
+	}
+	if t.gid {
+		p = append(p, output.GID)
+	}
+	if t.change {
+		p = append(p, output.ModTime)
+	}
+	if t.mode {
+		p = append(p, output.Mode)
+	}
+	if t.perm {
+		p = append(p, output.Perm)
+	}
+	if t.size {
+		p = append(p, output.Size)
+	}
+	if t.inodes {
+		p = append(p, output.Inode)
+	}
+	if t.device {
+		p = append(p, output.Devide)
+	}
+	if len(p) != 0 {
+		fmt.Printf("%v ", p)
+	}
+
 	if t.full {
 		PrintString(output.Path)
 	} else {
