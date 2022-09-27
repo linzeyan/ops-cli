@@ -32,7 +32,7 @@ import (
 func init() {
 	var treeFlag TreeFlag
 	var treeCmd = &cobra.Command{
-		Use:   "tree",
+		Use:   CommandTree,
 		Short: "Show the contents of the giving directory as a tree",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveFilterDirs

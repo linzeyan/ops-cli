@@ -90,6 +90,7 @@ const (
 	CommandToml2XML   = CommandToml + "2" + CommandXML
 	CommandToml2Yaml  = CommandToml + "2" + CommandYaml
 	CommandTraceroute = "traceroute"
+	CommandTree       = "tree"
 	CommandUpdate     = "update"
 	CommandUppercase  = "uppercase"
 	CommandURL        = "url"
