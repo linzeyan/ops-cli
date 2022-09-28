@@ -42,9 +42,10 @@ func init() {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			if !validator.ValidIPv4(args[0]) {
-				return common.ErrInvalidIP
+				PrintString(common.ErrInvalidIP)
+				return
 			}
 			ip := net.ParseIP(args[0])
 			var hwAddr net.HardwareAddr
@@ -55,7 +56,8 @@ func init() {
 				hwAddr, _, err = arping.Ping(ip)
 			}
 			if err != nil && !errors.Is(err, arping.ErrTimeout) {
-				return err
+				PrintString(err)
+				return
 			}
 
 			switch {
@@ -77,15 +79,19 @@ func init() {
 					}
 					if errors.Is(err, arping.ErrTimeout) {
 						PrintString(fmt.Sprintf("seq=%d timeout", i))
+						if i >= 5 {
+							break
+						}
+						continue
 					} else if err != nil {
-						return err
+						PrintString(err)
+						return
 					}
 					out := fmt.Sprintf("response from %s (%s): index=%d time=%s", ip, hwAddr, i, duration)
 					PrintString(out)
 					time.Sleep(time.Second)
 				}
 			}
-			return err
 		},
 	}
 	rootCmd.AddCommand(arpingCmd)
