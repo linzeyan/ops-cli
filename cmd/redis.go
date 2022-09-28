@@ -28,7 +28,13 @@ import (
 )
 
 func init() {
-	var redisFlag RedisFlag
+	var flags struct {
+		Username string `json:"user"`
+		Password string `json:"auth"`
+		Host     string `json:"host"`
+		Port     string `json:"port"`
+		DB       int    `json:"db"`
+	}
 	var redisCmd = &cobra.Command{
 		Use:   CommandRedis,
 		Short: "Opens a connection to a Redis server",
@@ -36,45 +42,44 @@ func init() {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
+			var r Redis
 			if rootConfig != "" {
-				if err := ReadConfig(CommandRedis, &redisFlag); err != nil {
+				if err := ReadConfig(CommandRedis, &flags); err != nil {
 					return err
 				}
 			}
-			return redisFlag.Do(args)
+			conn := r.Connection(flags.Host, flags.Port, flags.Username, flags.Password, flags.DB)
+			if conn == nil {
+				return common.ErrFailedInitial
+			}
+			return r.Do(conn, args)
 		},
 	}
 
 	rootCmd.AddCommand(redisCmd)
-	redisCmd.Flags().StringVarP(&redisFlag.Username, "user", "u", "", common.Usage("Username to authenticate the current connection"))
-	redisCmd.Flags().StringVarP(&redisFlag.Password, "auth", "a", "", common.Usage("Password to use when connecting to the server"))
-	redisCmd.Flags().StringVarP(&redisFlag.Host, "hostname", "H", "127.0.0.1", common.Usage("Server hostname"))
-	redisCmd.Flags().StringVarP(&redisFlag.Port, "port", "p", "6379", common.Usage("Server port"))
-	redisCmd.Flags().IntVarP(&redisFlag.DB, "db", "n", 0, common.Usage("Database number"))
+	redisCmd.Flags().StringVarP(&flags.Username, "user", "u", "", common.Usage("Username to authenticate the current connection"))
+	redisCmd.Flags().StringVarP(&flags.Password, "auth", "a", "", common.Usage("Password to use when connecting to the server"))
+	redisCmd.Flags().StringVarP(&flags.Host, "hostname", "H", "127.0.0.1", common.Usage("Server hostname"))
+	redisCmd.Flags().StringVarP(&flags.Port, "port", "p", "6379", common.Usage("Server port"))
+	redisCmd.Flags().IntVarP(&flags.DB, "db", "n", 0, common.Usage("Database number"))
 }
 
-type RedisFlag struct {
-	Username string `json:"user"`
-	Password string `json:"auth"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	DB       int    `json:"db"`
-}
+type Redis struct{}
 
-func (r *RedisFlag) Connection() *redis.Client {
-	if validator.ValidIP(r.Host) || validator.ValidDomain(r.Host) {
+func (r *Redis) Connection(host, port, user, pass string, db int) *redis.Client {
+	if validator.ValidIP(host) || validator.ValidDomain(host) {
 		return redis.NewClient(&redis.Options{
-			Username: r.Username,
-			Password: r.Password,
-			Addr:     net.JoinHostPort(r.Host, r.Port),
-			DB:       r.DB,
+			Username: user,
+			Password: pass,
+			Addr:     net.JoinHostPort(host, port),
+			DB:       db,
 		})
 	}
 
 	return nil
 }
 
-func (r *RedisFlag) Do(commands []string) error {
+func (r *Redis) Do(rdb *redis.Client, commands []string) error {
 	if len(commands) == 0 {
 		return nil
 	}
@@ -84,13 +89,8 @@ func (r *RedisFlag) Do(commands []string) error {
 	} else {
 		args = commands
 	}
-
 	arg := common.SliceStringToInterface(args)
 
-	rdb := r.Connection()
-	if rdb == nil {
-		return common.ErrFailedInitial
-	}
 	cmd := rdb.Do(common.Context, arg...)
 	out, err := cmd.Result()
 	if err != nil {
