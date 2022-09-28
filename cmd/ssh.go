@@ -31,33 +31,36 @@ import (
 )
 
 func init() {
-	var sshkeygenFlag SSHKeygenFlag
+	var flags struct {
+		bit  int
+		path string
+	}
 	var sshkeygenCmd = &cobra.Command{
 		Use:   CommandSSH,
 		Short: "Generate SSH keypair",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: sshkeygenFlag.RunE,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			var k SSHKeygen
+			if flags.bit < 4096 {
+				flags.bit = 4096
+			}
+			return k.Generate(flags.bit, flags.path)
+		},
 	}
 
 	rootCmd.AddCommand(sshkeygenCmd)
 
-	sshkeygenCmd.Flags().IntVarP(&sshkeygenFlag.bit, "bits", "b", 4096, common.Usage("Specifies the number of bits in the key to create"))
-	sshkeygenCmd.Flags().StringVarP(&sshkeygenFlag.path, "file", "f", "id_rsa", common.Usage("Specify the file path to generate"))
+	sshkeygenCmd.Flags().IntVarP(&flags.bit, "bits", "b", 4096, common.Usage("Specifies the number of bits in the key to create"))
+	sshkeygenCmd.Flags().StringVarP(&flags.path, "file", "f", "id_rsa", common.Usage("Specify the file path to generate"))
 }
 
-type SSHKeygenFlag struct {
-	bit  int
-	path string
-}
+type SSHKeygen struct{}
 
-/* Init checks bit and file exist or not, and return files name. */
-func (r *SSHKeygenFlag) Init() (string, string) {
-	if r.bit < 4096 {
-		r.bit = 4096
-	}
-	privateKeyFile := r.path
+/* Prepare checks file exist or not, and return files name. */
+func (r *SSHKeygen) Prepare(path string) (string, string) {
+	privateKeyFile := path
 	if validator.ValidFile(privateKeyFile) {
 		PrintString(privateKeyFile + " exist.")
 		privateKeyFile += "_new"
@@ -67,10 +70,10 @@ func (r *SSHKeygenFlag) Init() (string, string) {
 	return privateKeyFile, publicKeyFile
 }
 
-func (r *SSHKeygenFlag) RunE(_ *cobra.Command, _ []string) error {
-	rsaFile, pubFile := r.Init()
+func (r *SSHKeygen) Generate(bit int, path string) error {
+	rsaFile, pubFile := r.Prepare(path)
 	/* Generate rsa keypair. */
-	key, err := rsa.GenerateKey(rand.Reader, r.bit)
+	key, err := rsa.GenerateKey(rand.Reader, bit)
 	if err != nil {
 		return err
 	}
