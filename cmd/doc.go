@@ -25,79 +25,68 @@ import (
 )
 
 func init() {
-	var docFlag DocFlag
+	var flags struct {
+		dir string
+	}
 	var docCmd = &cobra.Command{
 		Use:   CommandDoc,
 		Short: "Generate documentation",
 		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 	}
 
+	runE := func(cmd *cobra.Command, _ []string) error {
+		_, err := os.Stat(flags.dir)
+		if err != nil {
+			/* Create directory if not exist. */
+			if err = os.Mkdir(flags.dir, os.ModePerm); err != nil {
+				return err
+			}
+		}
+		switch cmd.Name() {
+		case CommandMan:
+			header := &doc.GenManHeader{
+				Title:   "MINE",
+				Section: "3",
+			}
+			err = doc.GenManTree(rootCmd, header, flags.dir)
+		case CommandMarkdown:
+			err = doc.GenMarkdownTree(rootCmd, flags.dir)
+		case CommandReST:
+			err = doc.GenReSTTree(rootCmd, flags.dir)
+		case CommandYaml:
+			err = doc.GenYamlTree(rootCmd, flags.dir)
+		}
+		return err
+	}
+
 	var docSubCmdMan = &cobra.Command{
 		Use:   CommandMan,
 		Short: "Generate man page documentation",
-		RunE:  docFlag.RunE,
+		RunE:  runE,
 	}
 
 	var docSubCmdMarkdown = &cobra.Command{
 		Use:   CommandMarkdown,
 		Short: "Generate markdown documentation",
-		RunE:  docFlag.RunE,
+		RunE:  runE,
 	}
 
 	var docSubCmdRest = &cobra.Command{
 		Use:   CommandReST,
 		Short: "Generate rest documentation",
-		RunE:  docFlag.RunE,
+		RunE:  runE,
 	}
 
 	var docSubCmdYaml = &cobra.Command{
 		Use:   CommandYaml,
 		Short: "Generate yaml documentation",
-		RunE:  docFlag.RunE,
+		RunE:  runE,
 	}
 	rootCmd.AddCommand(docCmd)
 
-	docCmd.PersistentFlags().StringVarP(&docFlag.dir, "dir", "d", "doc", common.Usage("Specify the path to generate documentation"))
+	docCmd.PersistentFlags().StringVarP(&flags.dir, "dir", "d", "doc", common.Usage("Specify the path to generate documentation"))
 	docCmd.AddCommand(docSubCmdMan)
 	docCmd.AddCommand(docSubCmdMarkdown)
 	docCmd.AddCommand(docSubCmdRest)
 	docCmd.AddCommand(docSubCmdYaml)
-}
-
-type DocFlag struct {
-	dir string
-}
-
-func (d *DocFlag) createDir() error {
-	var err error
-	_, err = os.Stat(d.dir)
-	if err != nil {
-		/* Create directory if not exist. */
-		if err = os.Mkdir(d.dir, os.ModePerm); err != nil {
-			return err
-		}
-	}
-	return err
-}
-
-func (d *DocFlag) RunE(cmd *cobra.Command, _ []string) error {
-	var err error
-	if err = d.createDir(); err != nil {
-		return err
-	}
-	switch cmd.Name() {
-	case CommandMan:
-		header := &doc.GenManHeader{
-			Title:   "MINE",
-			Section: "3",
-		}
-		err = doc.GenManTree(rootCmd, header, d.dir)
-	case CommandMarkdown:
-		err = doc.GenMarkdownTree(rootCmd, d.dir)
-	case CommandReST:
-		err = doc.GenReSTTree(rootCmd, d.dir)
-	case CommandYaml:
-		err = doc.GenYamlTree(rootCmd, d.dir)
-	}
-	return err
 }
