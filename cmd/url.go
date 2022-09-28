@@ -25,12 +25,49 @@ import (
 )
 
 func init() {
-	var urlFlag URLFlag
+	var urlFlag struct {
+		expand  bool
+		verbose bool
+		output  string
+		method  string
+		data    string
+		headers string
+	}
 	var urlCmd = &cobra.Command{
 		Use:   CommandURL,
 		Args:  cobra.ExactArgs(1),
 		Short: "Get url content or expand shorten url or download",
-		RunE:  urlFlag.RunE,
+		RunE: func(_ *cobra.Command, args []string) error {
+			url := args[0]
+			if !validator.ValidURL(url) {
+				return common.ErrInvalidURL
+			}
+			var err error
+			var result any
+			switch {
+			case urlFlag.expand:
+				result, err = common.HTTPRequestRedirectURL(url)
+				if err != nil {
+					return err
+				}
+			default:
+				body := common.HTTPConfig{
+					Body:    urlFlag.data,
+					Method:  urlFlag.method,
+					Verbose: urlFlag.verbose,
+					Headers: urlFlag.headers,
+				}
+				result, err = common.HTTPRequestContent(url, body)
+				if err != nil || urlFlag.verbose {
+					return err
+				}
+				if urlFlag.output != "" {
+					return os.WriteFile(urlFlag.output, result.([]byte), common.FileModeRAll)
+				}
+			}
+			PrintString(result)
+			return err
+		},
 		Example: common.Examples(`# Get the file from URL
 https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.reference.yml -o config.yaml
 
@@ -45,45 +82,4 @@ https://goo.gl/maps/b37Aq3Anc7taXQDd9 -e`,
 	urlCmd.Flags().StringVarP(&urlFlag.method, "method", "m", "GET", "Request method")
 	urlCmd.Flags().StringVarP(&urlFlag.data, "data", "d", "", "Request method")
 	urlCmd.Flags().StringVarP(&urlFlag.headers, "headers", "H", "", "Headers")
-}
-
-type URLFlag struct {
-	expand  bool
-	verbose bool
-	output  string
-	method  string
-	data    string
-	headers string
-}
-
-func (u *URLFlag) RunE(_ *cobra.Command, args []string) error {
-	url := args[0]
-	if !validator.ValidURL(url) {
-		return common.ErrInvalidURL
-	}
-	var err error
-	var result any
-	switch {
-	case u.expand:
-		result, err = common.HTTPRequestRedirectURL(url)
-		if err != nil {
-			return err
-		}
-	default:
-		body := common.HTTPConfig{
-			Body:    u.data,
-			Method:  u.method,
-			Verbose: u.verbose,
-			Headers: u.headers,
-		}
-		result, err = common.HTTPRequestContent(url, body)
-		if err != nil || u.verbose {
-			return err
-		}
-		if u.output != "" {
-			return os.WriteFile(u.output, result.([]byte), common.FileModeRAll)
-		}
-	}
-	PrintString(result)
-	return err
 }
