@@ -43,10 +43,10 @@ func init() {
 				resp, err = common.HTTPRequestContent("https://myexternalip.com/raw")
 				out = map[string]string{"ip": string(resp)}
 			case 1:
-				var r geoIPSingle
+				var r GeoIP
 				out, err = r.Request(args[0])
 			default:
-				var r geoIPBatch
+				var r GeoIPs
 				out, err = r.Request(args)
 			}
 			if err != nil {
@@ -65,7 +65,7 @@ func init() {
 	rootCmd.AddCommand(geoipCmd)
 }
 
-type geoIPSingle struct {
+type GeoIP struct {
 	Continent   string `json:"continent"`
 	Country     string `json:"country"`
 	CountryCode string `json:"countryCode"`
@@ -84,35 +84,35 @@ type geoIPSingle struct {
 	Query       string `json:"query"`
 }
 
-func (geoIPSingle) Request(geoipInput string) (*geoIPSingle, error) {
+func (GeoIP) Request(ip string) (*GeoIP, error) {
 	/* Valid IP */
-	if !validator.ValidIP(geoipInput) {
+	if !validator.ValidIP(ip) {
 		return nil, common.ErrInvalidIP
 	}
-	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", geoipInput)
+	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", ip)
 
 	content, err := common.HTTPRequestContent(apiURL)
 	if err != nil {
 		return nil, err
 	}
-	var data geoIPSingle
+	var data GeoIP
 	if err = Encoder.JSONMarshaler(content, &data); err != nil {
 		return nil, err
 	}
 	return &data, err
 }
 
-type geoIPBatch []geoIPSingle
+type GeoIPs []GeoIP
 
-func (geoIPBatch) Request(geoipBatch []string) (*geoIPBatch, error) {
+func (GeoIPs) Request(inputs []string) (*GeoIPs, error) {
 	var ips = `[`
 	/* Valid IP and combine args */
-	for i := range geoipBatch {
+	for i := range inputs {
 		switch {
-		case validator.ValidIP(geoipBatch[i]):
-			ips += fmt.Sprintf(`"%s", `, geoipBatch[i])
+		case validator.ValidIP(inputs[i]):
+			ips += fmt.Sprintf(`"%s", `, inputs[i])
 		default:
-			ip, err := net.LookupIP(geoipBatch[i])
+			ip, err := net.LookupIP(inputs[i])
 			if err != nil {
 				return nil, err
 			}
@@ -126,7 +126,7 @@ func (geoIPBatch) Request(geoipBatch []string) (*geoIPBatch, error) {
 	if err != nil {
 		return nil, err
 	}
-	var data geoIPBatch
+	var data GeoIPs
 	if err = Encoder.JSONMarshaler(content, &data); err != nil {
 		return nil, err
 	}
