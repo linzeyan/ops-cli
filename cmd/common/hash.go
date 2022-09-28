@@ -15,28 +15,3 @@ limitations under the License.
 */
 
 package common
-
-import (
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
-	"hash"
-)
-
-func HashAlgorithm(alg string) hash.Hash {
-	m := map[string]hash.Hash{
-		HashMd5:        md5.New(),
-		HashSha1:       sha1.New(),
-		HashSha224:     sha256.New224(),
-		HashSha256:     sha256.New(),
-		HashSha384:     sha512.New384(),
-		HashSha512:     sha512.New(),
-		HashSha512_224: sha512.New512_224(),
-		HashSha512_256: sha512.New512_256(),
-	}
-	if h, ok := m[alg]; ok {
-		return h
-	}
-	return nil
-}

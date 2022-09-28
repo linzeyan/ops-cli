@@ -231,7 +231,7 @@ func (*Encode) HexDecode(s string) ([]byte, error) {
 func (*Encode) JSONEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := json.NewEncoder(&buf)
-	encoder.SetIndent("", common.IndentTwoSpaces)
+	encoder.SetIndent("", IndentTwoSpaces)
 	err := encoder.Encode(i)
 	return buf.String(), err
 }
@@ -297,7 +297,7 @@ func (*Encode) PemDecode(b []byte) ([]byte, error) {
 func (*Encode) XMLEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := xml.NewEncoder(&buf)
-	encoder.Indent("", common.IndentTwoSpaces)
+	encoder.Indent("", IndentTwoSpaces)
 	err := encoder.Encode(i)
 	return buf.String(), err
 }

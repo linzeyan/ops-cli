@@ -74,7 +74,7 @@ type ICP struct {
 func (i *ICP) requestURI(account, key, domain string) (string, error) {
 	/* MD5 Hash */
 	hashData := account + key + "domainname"
-	sig, err := Hasher.Hash(common.HashAlgorithm(common.HashMd5), hashData)
+	sig, err := Hasher.Hash(HashAlgorithm(HashMd5), hashData)
 	if err != nil {
 		return "", err
 	}

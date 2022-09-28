@@ -16,6 +16,8 @@ limitations under the License.
 
 package cmd
 
+import "io/fs"
+
 const (
 	CommandArping     = "arping"
 	CommandAudio      = "audio"
@@ -121,6 +123,22 @@ const (
 )
 
 const (
+	FileModeROwner fs.FileMode = 0600
+	FileModeRAll   fs.FileMode = 0644
+)
+
+const (
+	HashMd5        = "md5"
+	HashSha1       = "sha1"
+	HashSha224     = "sha224"
+	HashSha256     = "sha256"
+	HashSha384     = "sha384"
+	HashSha512     = "sha512"
+	HashSha512_224 = "sha512_224"
+	HashSha512_256 = "sha512_256"
+)
+
+const (
 	TypeBinary  = "binary"
 	TypeOctal   = "octal"
 	TypeDecimal = "decimal"
@@ -129,6 +147,8 @@ const (
 )
 
 const (
+	IndentTwoSpaces = "  "
+
 	keyFileExtension  = ".key"
 	tempFileExtension = ".temp"
 )

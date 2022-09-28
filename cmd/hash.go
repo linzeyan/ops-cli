@@ -18,6 +18,10 @@ package cmd
 
 import (
 	"bufio"
+	"crypto/md5"
+	"crypto/sha1"
+	"crypto/sha256"
+	"crypto/sha512"
 	"hash"
 	"io"
 	"os"
@@ -56,7 +60,7 @@ func init() {
 
 	runE := func(cmd *cobra.Command, args []string) error {
 		var err error
-		hasher := common.HashAlgorithm(cmd.Name())
+		hasher := HashAlgorithm(cmd.Name())
 		out, err := Hasher.Hash(hasher, args[0])
 		if err != nil {
 			return err
@@ -66,7 +70,7 @@ func init() {
 	}
 
 	var hashSubCmdMd5 = &cobra.Command{
-		Use:   common.HashMd5 + " [string|file]",
+		Use:   HashMd5 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print MD5 Checksums",
 		RunE:  runE,
@@ -75,7 +79,7 @@ func init() {
 	}
 
 	var hashSubCmdSha1 = &cobra.Command{
-		Use:   common.HashSha1 + " [string|file]",
+		Use:   HashSha1 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-1 Checksums",
 		RunE:  runE,
@@ -84,7 +88,7 @@ func init() {
 	}
 
 	var hashSubCmdSha256 = &cobra.Command{
-		Use:   common.HashSha256 + " [string|file]",
+		Use:   HashSha256 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-256 Checksums",
 		RunE:  runE,
@@ -93,7 +97,7 @@ func init() {
 	}
 
 	var hashSubCmdSha512 = &cobra.Command{
-		Use:   common.HashSha512 + " [string|file]",
+		Use:   HashSha512 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-512 Checksums",
 		RunE:  runE,
@@ -154,13 +158,13 @@ func (h *Hash) CheckFile(filename string) {
 		slice := strings.Fields(reader.Text())
 		switch len([]byte(slice[0])) {
 		case 32:
-			hasher = common.HashAlgorithm(common.HashMd5)
+			hasher = HashAlgorithm(HashMd5)
 		case 40:
-			hasher = common.HashAlgorithm(common.HashSha1)
+			hasher = HashAlgorithm(HashSha1)
 		case 64:
-			hasher = common.HashAlgorithm(common.HashSha256)
+			hasher = HashAlgorithm(HashSha256)
 		case 128:
-			hasher = common.HashAlgorithm(common.HashSha512)
+			hasher = HashAlgorithm(HashSha512)
 		}
 		got, err := h.WriteFile(hasher, slice[1])
 		if err != nil {
@@ -175,10 +179,10 @@ func (h *Hash) CheckFile(filename string) {
 }
 
 func (h *Hash) ListAll(s string) {
-	algs := []string{common.HashMd5, common.HashSha1, common.HashSha256, common.HashSha512}
+	algs := []string{HashMd5, HashSha1, HashSha256, HashSha512}
 	m := make(map[string]string)
 	for _, alg := range algs {
-		hasher := common.HashAlgorithm(alg)
+		hasher := HashAlgorithm(alg)
 		out, err := h.Hash(hasher, s)
 		if err != nil {
 			PrintString(err)
@@ -187,4 +191,21 @@ func (h *Hash) ListAll(s string) {
 		m[strings.ToUpper(alg)] = out
 	}
 	OutputDefaultYAML(m)
+}
+
+func HashAlgorithm(alg string) hash.Hash {
+	m := map[string]hash.Hash{
+		HashMd5:        md5.New(),
+		HashSha1:       sha1.New(),
+		HashSha224:     sha256.New224(),
+		HashSha256:     sha256.New(),
+		HashSha384:     sha512.New384(),
+		HashSha512:     sha512.New(),
+		HashSha512_224: sha512.New512_224(),
+		HashSha512_256: sha512.New512_256(),
+	}
+	if h, ok := m[alg]; ok {
+		return h
+	}
+	return nil
 }

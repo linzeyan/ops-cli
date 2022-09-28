@@ -134,5 +134,5 @@ func (d DF) String(value any) {
 	case [][]string:
 		data = i
 	}
-	PrintTable(header, data, tablewriter.ALIGN_LEFT, common.IndentTwoSpaces, false)
+	PrintTable(header, data, tablewriter.ALIGN_LEFT, IndentTwoSpaces, false)
 }

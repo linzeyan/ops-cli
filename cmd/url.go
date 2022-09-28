@@ -62,7 +62,7 @@ func init() {
 					return err
 				}
 				if urlFlag.output != "" {
-					return os.WriteFile(urlFlag.output, result.([]byte), common.FileModeRAll)
+					return os.WriteFile(urlFlag.output, result.([]byte), FileModeRAll)
 				}
 			}
 			PrintString(result)

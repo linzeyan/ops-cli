@@ -85,7 +85,7 @@ func (r *SSHKeygen) Generate(bit int, path string) error {
 	if err != nil {
 		return err
 	}
-	if err = os.WriteFile(rsaFile, []byte(privateKey), common.FileModeROwner); err != nil {
+	if err = os.WriteFile(rsaFile, []byte(privateKey), FileModeROwner); err != nil {
 		return err
 	}
 	PrintString(rsaFile + " generated")
@@ -95,7 +95,7 @@ func (r *SSHKeygen) Generate(bit int, path string) error {
 		return err
 	}
 	publicKey := ssh.MarshalAuthorizedKey(pub)
-	err = os.WriteFile(pubFile, publicKey, common.FileModeROwner)
+	err = os.WriteFile(pubFile, publicKey, FileModeROwner)
 	if err != nil {
 		return err
 	}

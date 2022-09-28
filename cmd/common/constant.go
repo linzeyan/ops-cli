@@ -16,8 +16,6 @@ limitations under the License.
 
 package common
 
-import "os"
-
 const (
 	_            = iota
 	KiB ByteSize = 1 << (10 * iota)
@@ -31,24 +29,6 @@ const (
 )
 
 const (
-	FileModeROwner os.FileMode = 0600
-	FileModeRAll   os.FileMode = 0644
-)
-
-const (
-	HashMd5        = "md5"
-	HashSha1       = "sha1"
-	HashSha224     = "sha224"
-	HashSha256     = "sha256"
-	HashSha384     = "sha384"
-	HashSha512     = "sha512"
-	HashSha512_224 = "sha512_224"
-	HashSha512_256 = "sha512_256"
-)
-
-const (
-	IndentTwoSpaces = "  "
-
 	RepoOwner = "linzeyan"
 	RepoName  = "ops-cli"
 
