@@ -28,16 +28,19 @@ import (
 )
 
 func init() {
-	var arpingFlag ArpingFlag
+	var arpingFlag struct {
+		check bool
+		mac   bool
+	}
 	var arpingCmd = &cobra.Command{
-		Use:   "arping",
+		Use:   CommandArping,
 		Args:  cobra.ExactArgs(1),
 		Short: "Discover and probe hosts in a network using the ARP protocol",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
-			if !validator.ValidIP(args[0]) {
+			if !validator.ValidIPv4(args[0]) {
 				return common.ErrInvalidIP
 			}
 			ip := net.ParseIP(args[0])
@@ -63,9 +66,4 @@ func init() {
 	rootCmd.AddCommand(arpingCmd)
 	arpingCmd.Flags().BoolVarP(&arpingFlag.check, "check", "c", false, "Check if host is online")
 	arpingCmd.Flags().BoolVarP(&arpingFlag.mac, "mac", "m", false, "Resolve mac address")
-}
-
-type ArpingFlag struct {
-	check bool
-	mac   bool
 }

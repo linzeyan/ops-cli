@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 const (
+	CommandArping     = "arping"
 	CommandAudio      = "audio"
 	CommandBase32     = "base32"
 	CommandBase64     = "base64"
