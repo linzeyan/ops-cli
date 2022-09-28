@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/j-keck/arping"
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -59,7 +60,17 @@ func init() {
 			case arpingFlag.mac:
 				PrintString(hwAddr)
 			default:
-				fmt.Printf("response from %s (%s): time=%s\n", ip, hwAddr, duration)
+				out := fmt.Sprintf("response from %s (%s): sep=0 time=%s", ip, hwAddr, duration)
+				PrintString(out)
+				for i := 1; ; i++ {
+					hwAddr, duration, err := arping.Ping(ip)
+					if errors.Is(err, arping.ErrTimeout) {
+						PrintString(fmt.Sprintf("seq=%d timeout", i))
+					}
+					out := fmt.Sprintf("response from %s (%s): sep=%d time=%s", ip, hwAddr, i, duration)
+					PrintString(out)
+					time.Sleep(time.Second)
+				}
 			}
 			return err
 		},
