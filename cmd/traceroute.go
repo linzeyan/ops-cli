@@ -61,9 +61,7 @@ func (t *TracerouteFlag) Run(cmd *cobra.Command, args []string) {
 		t.interval = 50 * time.Millisecond
 	}
 	host := args[0]
-
-	var data RandomString
-	data = data.GenerateString(t.size, LowercaseLetters)
+	data := Randoms.GenerateString(t.size, LowercaseLetters)
 
 	ip, err := net.ResolveIPAddr("ip4", host)
 	if err != nil {

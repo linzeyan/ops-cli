@@ -75,9 +75,7 @@ func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
 	}
 
 	host := args[0]
-
-	var data RandomString
-	data = data.GenerateString(p.size, LowercaseLetters)
+	data := Randoms.GenerateString(p.size, LowercaseLetters)
 
 	network := "ip4"
 	if p.ipv6 {

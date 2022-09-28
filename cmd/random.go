@@ -27,13 +27,55 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var Randoms Random
+
 func init() {
-	var randomFlag RandomFlag
+	var flags struct {
+		/* Bind flags */
+		length, lower, upper, symbol, number int
+	}
+
+	run := func(cmd *cobra.Command, _ []string) {
+		var out []byte
+		switch cmd.Name() {
+		case CommandNumber:
+			out = Randoms.GenerateString(flags.length, Numbers)
+		case CommandSymbol:
+			out = Randoms.GenerateString(flags.length, Symbols)
+		case CommandUppercase:
+			out = Randoms.GenerateString(flags.length, UppercaseLetters)
+		case CommandLowercase:
+			out = Randoms.GenerateString(flags.length, LowercaseLetters)
+		case CommandRandom:
+			out = Randoms.GenerateAll(flags.length, flags.lower, flags.upper, flags.symbol, flags.number)
+		case CommandBootstrap:
+			r1 := Randoms.Rand(3)
+			r2 := Randoms.Rand(8)
+			id, _ := Encoder.HexEncode(r1)
+			token, _ := Encoder.HexEncode(r2)
+			PrintString(id + "." + token)
+			return
+		case CommandBase64:
+			b := Randoms.Rand(flags.length)
+			encode, _ := Encoder.PemEncode(b)
+			re := regexp.MustCompile("-.*-\n")
+			out := re.ReplaceAllString(encode, "")
+			PrintString(out)
+			return
+		case CommandHex:
+			b := Randoms.Rand(flags.length)
+			out, _ := Encoder.HexEncode(b)
+			PrintString(out)
+			return
+		}
+		PrintString(out)
+	}
+
 	var randomCmd = &cobra.Command{
 		Use:   CommandRandom,
 		Args:  cobra.NoArgs,
 		Short: "Generate random string",
-		Run:   randomFlag.Run,
+		Run:   run,
 		Example: common.Examples(`# Generate a random string of length 32
 -l 32
 
@@ -44,7 +86,7 @@ func init() {
 	var randomSubCmdLower = &cobra.Command{
 		Use:   CommandLowercase,
 		Short: "Generate a string consisting of lowercase letters",
-		Run:   randomFlag.Run,
+		Run:   run,
 		Example: common.Examples(` Generate a random string of lowercase letters
 -l 10`, CommandRandom, CommandLowercase),
 	}
@@ -52,7 +94,7 @@ func init() {
 	var randomSubCmdNumber = &cobra.Command{
 		Use:   CommandNumber,
 		Short: "Generate a string consisting of numbers",
-		Run:   randomFlag.Run,
+		Run:   run,
 		Example: common.Examples(`Generate a random string of numbers of length 100
 -l 100`, CommandRandom, CommandNumber),
 	}
@@ -60,19 +102,19 @@ func init() {
 	var randomSubCmdSymbol = &cobra.Command{
 		Use:   CommandSymbol,
 		Short: "Generate a string consisting of symbols",
-		Run:   randomFlag.Run,
+		Run:   run,
 	}
 
 	var randomSubCmdUpper = &cobra.Command{
 		Use:   CommandUppercase,
 		Short: "Generate a string consisting of uppercase letters",
-		Run:   randomFlag.Run,
+		Run:   run,
 	}
 
 	var randomSubCmdBootstrap = &cobra.Command{
 		Use:   CommandBootstrap,
 		Short: "Generate a bootstrap token",
-		Run:   randomFlag.Run,
+		Run:   run,
 
 		DisableFlagParsing:    true,
 		DisableFlagsInUseLine: true,
@@ -81,7 +123,7 @@ func init() {
 	var randomSubCmdBase64 = &cobra.Command{
 		Use:   CommandBase64,
 		Short: "Generate a base64 string",
-		Run:   randomFlag.Run,
+		Run:   run,
 		Example: common.Examples(`# Generate a base64 string
 -l 100`, CommandRandom, CommandBase64),
 	}
@@ -89,17 +131,17 @@ func init() {
 	var randomSubCmdHex = &cobra.Command{
 		Use:   CommandHex,
 		Short: "Generate a hexadecimal string",
-		Run:   randomFlag.Run,
+		Run:   run,
 		Example: common.Examples(`# Generate a hexadecimal string
 -l 30`, CommandRandom, CommandHex),
 	}
 	rootCmd.AddCommand(randomCmd)
 
-	randomCmd.PersistentFlags().IntVarP(&randomFlag.length, "length", "l", 24, common.Usage("Specify the string length"))
-	randomCmd.Flags().IntVarP(&randomFlag.lower, "lower", "o", 4, common.Usage("Number of lowercase letters to include in the string"))
-	randomCmd.Flags().IntVarP(&randomFlag.upper, "upper", "u", 4, common.Usage("Number of uppercase letters to include in the string"))
-	randomCmd.Flags().IntVarP(&randomFlag.symbol, "symbol", "s", 4, common.Usage("Number of symbols to include in the string"))
-	randomCmd.Flags().IntVarP(&randomFlag.number, "number", "n", 4, common.Usage("Number of digits to include in the string"))
+	randomCmd.PersistentFlags().IntVarP(&flags.length, "length", "l", 24, common.Usage("Specify the string length"))
+	randomCmd.Flags().IntVarP(&flags.lower, "lower", "o", 4, common.Usage("Number of lowercase letters to include in the string"))
+	randomCmd.Flags().IntVarP(&flags.upper, "upper", "u", 4, common.Usage("Number of uppercase letters to include in the string"))
+	randomCmd.Flags().IntVarP(&flags.symbol, "symbol", "s", 4, common.Usage("Number of symbols to include in the string"))
+	randomCmd.Flags().IntVarP(&flags.number, "number", "n", 4, common.Usage("Number of digits to include in the string"))
 
 	randomCmd.AddCommand(randomSubCmdLower)
 	randomCmd.AddCommand(randomSubCmdNumber)
@@ -108,47 +150,6 @@ func init() {
 	randomCmd.AddCommand(randomSubCmdBase64)
 	randomCmd.AddCommand(randomSubCmdHex)
 	randomCmd.AddCommand(randomSubCmdBootstrap)
-}
-
-type RandomFlag struct {
-	/* Bind flags */
-	length, lower, upper, symbol, number int
-}
-
-func (r *RandomFlag) Run(cmd *cobra.Command, _ []string) {
-	var p RandomString
-	switch cmd.Name() {
-	case CommandNumber:
-		p = p.GenerateString(r.length, Numbers)
-	case CommandSymbol:
-		p = p.GenerateString(r.length, Symbols)
-	case CommandUppercase:
-		p = p.GenerateString(r.length, UppercaseLetters)
-	case CommandLowercase:
-		p = p.GenerateString(r.length, LowercaseLetters)
-	case CommandRandom:
-		p = p.GenerateAll(r.length, r.lower, r.upper, r.symbol, r.number)
-	case CommandBootstrap:
-		r1 := p.Rand(3)
-		r2 := p.Rand(8)
-		id, _ := Encoder.HexEncode(r1)
-		token, _ := Encoder.HexEncode(r2)
-		PrintString(id + "." + token)
-		return
-	case CommandBase64:
-		b := p.Rand(r.length)
-		encode, _ := Encoder.PemEncode(b)
-		re := regexp.MustCompile("-.*-\n")
-		out := re.ReplaceAllString(encode, "")
-		PrintString(out)
-		return
-	case CommandHex:
-		b := p.Rand(r.length)
-		out, _ := Encoder.HexEncode(b)
-		PrintString(out)
-		return
-	}
-	PrintString(p.String())
 }
 
 type RandomCharacter string
@@ -161,9 +162,9 @@ const (
 	AllSet           RandomCharacter = LowercaseLetters + UppercaseLetters + Symbols + Numbers
 )
 
-type RandomString []byte
+type Random []byte
 
-func (RandomString) GenerateString(length int, charSet RandomCharacter) RandomString {
+func (Random) GenerateString(length int, charSet RandomCharacter) Random {
 	if length <= 0 {
 		return nil
 	}
@@ -180,11 +181,11 @@ func (RandomString) GenerateString(length int, charSet RandomCharacter) RandomSt
 	return buf.Bytes()
 }
 
-func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) RandomString {
+func (r Random) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int) Random {
 	if length <= 0 {
 		return nil
 	}
-	var result RandomString
+	var result Random
 	if minLower < 0 {
 		minLower = 0
 	}
@@ -223,7 +224,7 @@ func (r RandomString) GenerateAll(length, minLower, minUpper, minSymbol, minNumb
 	return result
 }
 
-func (r RandomString) Rand(length int) []byte {
+func (Random) Rand(length int) []byte {
 	if length <= 0 {
 		return nil
 	}
@@ -235,13 +236,9 @@ func (r RandomString) Rand(length int) []byte {
 	return b
 }
 
-func (r RandomString) String() string {
+func (r Random) String() string {
 	if r == nil {
 		return "<nil>"
 	}
 	return string(r)
-}
-
-func (r RandomString) Bytes() []byte {
-	return []byte(r)
 }

@@ -167,8 +167,7 @@ func (e *Encrypt) GetKey(secret, filename string, perm os.FileMode) []byte {
 		return nil
 	}
 	/* If secret is not a file and not a valid key, generate a new key. */
-	var p RandomString
-	key := p.GenerateString(32, AllSet)
+	key := Randoms.GenerateString(32, AllSet)
 	err := os.WriteFile(f, key, perm)
 	if err != nil {
 		return nil
