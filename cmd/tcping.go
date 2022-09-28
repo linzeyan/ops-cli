@@ -37,11 +37,27 @@ func init() {
 		Args:  cobra.ExactArgs(2),
 		Short: "Connect to a port of a host",
 		Run: func(_ *cobra.Command, args []string) {
-			var t TCPing
+			t := TCPing{
+				Protocal: flags.protocol,
+				Timeout:  flags.timeout,
+			}
 			for i := 0; ; {
-				if err := t.Connect(i, args, flags.protocol, flags.count, flags.timeout); err != nil {
+				addr, duration, err := t.Connect(i, args)
+				if err != nil {
 					PrintString(err)
 				}
+				ip, port, err := net.SplitHostPort(addr)
+				if err != nil {
+					PrintString(err)
+				}
+				var p string
+				if flags.count == 1 {
+					p = fmt.Sprintf("%s response from %s (%s) port %s [open] %v", t.Protocal, args[0], ip, port, duration)
+					PrintString(p)
+					return
+				}
+				p = fmt.Sprintf("seq %d: %s response from %s (%s) port %s [open] %v", i, t.Protocal, args[0], ip, port, duration)
+				PrintString(p)
 				i++
 				if i == flags.count {
 					break
@@ -56,32 +72,25 @@ func init() {
 	tcpingCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
 }
 
-type TCPing struct{}
+type TCPing struct {
+	Protocal string
+	Timeout  time.Duration
+}
 
-func (t *TCPing) Connect(counter int, args []string, protocol string, limit int, timeout time.Duration) error {
+func (t *TCPing) Connect(counter int, args []string) (string, time.Duration, error) {
 	var p string
 	startTime := time.Now()
-	conn, err := net.DialTimeout(protocol, net.JoinHostPort(args[0], args[1]), timeout)
+	conn, err := net.DialTimeout(t.Protocal, net.JoinHostPort(args[0], args[1]), t.Timeout)
 	if err != nil {
 		p = fmt.Sprintf("Connect error: %s", err.Error())
-		return errors.New(p)
+		return "", 0, errors.New(p)
 	}
 
 	if conn != nil {
 		duration := time.Since(startTime)
 		defer conn.Close()
-		ip, port, err := net.SplitHostPort(conn.RemoteAddr().String())
-		if err != nil {
-			return err
-		}
-		if limit != 1 {
-			p = fmt.Sprintf("seq %d: %s response from %s (%s) port %s [open] %v", counter, protocol, args[0], ip, port, duration)
-		} else {
-			p = fmt.Sprintf("%s response from %s (%s) port %s [open] %v", protocol, args[0], ip, port, duration)
-		}
-		PrintString(p)
-		return err
+		return conn.RemoteAddr().String(), duration, err
 	}
 	p = fmt.Sprintf("Connect error for seq %d", counter)
-	return errors.New(p)
+	return "", 0, errors.New(p)
 }
