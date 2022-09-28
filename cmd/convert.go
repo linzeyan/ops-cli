@@ -29,7 +29,10 @@ import (
 )
 
 func init() {
-	var convertFlag ConvertFlag
+	var flags struct {
+		inFile  string
+		outFile string
+	}
 	validArg := []string{
 		CommandCsv2JSON, CommandCsv2Toml, CommandCsv2XML, CommandCsv2Yaml,
 		CommandJSON2Csv, CommandJSON2Toml, CommandJSON2XML, CommandJSON2Yaml,
@@ -42,7 +45,28 @@ func init() {
 		Args:      cobra.OnlyValidArgs,
 		ValidArgs: validArg,
 		Short:     "Convert data format, support csv, json, toml, xml, yaml",
-		RunE:      convertFlag.RunE,
+		RunE: func(_ *cobra.Command, args []string) error {
+			if !validator.ValidFile(flags.inFile) {
+				return common.ErrInvalidFlag
+			}
+			slice := strings.Split(args[0], "2")
+			inType := slice[0]
+			outType := slice[1]
+			if flags.outFile == "" {
+				dir, filename := filepath.Split(flags.inFile)
+				flags.outFile = filepath.Join(dir, strings.Replace(filename, filepath.Ext(filename), "."+slice[1], 1))
+			}
+			node, err := dasel.NewFromFile(flags.inFile, inType)
+			if err != nil {
+				return err
+			}
+			return node.WriteToFile(
+				flags.outFile,
+				outType,
+				[]storage.ReadWriteOption{
+					storage.PrettyPrintOption(true),
+				})
+		},
 		Example: common.Examples(`# Convert yaml to json
 -i input.yaml -o output.json`, CommandConvert, CommandYaml2JSON) + `
 
@@ -53,37 +77,6 @@ Available Commands:
 
 	rootCmd.AddCommand(convertCmd)
 
-	convertCmd.Flags().StringVarP(&convertFlag.inFile, "in", "i", "", common.Usage("Input file (required)"))
-	convertCmd.Flags().StringVarP(&convertFlag.outFile, "out", "o", "", common.Usage("Output file"))
-}
-
-type ConvertFlag struct {
-	inFile  string
-	inType  string
-	outFile string
-	outType string
-}
-
-func (c *ConvertFlag) RunE(cmd *cobra.Command, args []string) error {
-	if !validator.ValidFile(c.inFile) {
-		return common.ErrInvalidFlag
-	}
-	slice := strings.Split(args[0], "2")
-	c.inType = slice[0]
-	c.outType = slice[1]
-	if c.outFile == "" {
-		dir, filename := filepath.Split(c.inFile)
-		c.outFile = filepath.Join(dir, strings.Replace(filename, filepath.Ext(filename), "."+slice[1], 1))
-	}
-	return c.Convert()
-}
-
-func (c *ConvertFlag) Convert() error {
-	node, err := dasel.NewFromFile(c.inFile, c.inType)
-	if err != nil {
-		return err
-	}
-	return node.WriteToFile(c.outFile, c.outType, []storage.ReadWriteOption{
-		storage.PrettyPrintOption(true),
-	})
+	convertCmd.Flags().StringVarP(&flags.inFile, "in", "i", "", common.Usage("Input file (required)"))
+	convertCmd.Flags().StringVarP(&flags.outFile, "out", "o", "", common.Usage("Output file"))
 }
