@@ -8,6 +8,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/gorilla/websocket v1.4.2
+	github.com/j-keck/arping v1.0.3
 	github.com/line/line-bot-sdk-go/v7 v7.16.0
 	github.com/makiuchi-d/gozxing v0.1.1
 	github.com/miekg/dns v1.1.47
