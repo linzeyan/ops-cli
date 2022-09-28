@@ -33,10 +33,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var Encoder EncodeFlag
+var Encoder Encode
 
 func init() {
-	var encodeFlag EncodeFlag
+	var flags struct {
+		decode bool
+	}
 	var encodeCmd = &cobra.Command{
 		Use:   CommandEncode,
 		Short: "Encode and decode string or file",
@@ -45,110 +47,108 @@ func init() {
 		DisableFlagsInUseLine: true,
 	}
 
+	runDecode := func(cmd *cobra.Command, args []string) error {
+		var err error
+		var out []byte
+		switch cmd.Name() {
+		case CommandBase32Hex:
+			out, err = Encoder.Base32HexDecode(args[0])
+		case CommandBase32Std:
+			out, err = Encoder.Base32StdDecode(args[0])
+		case CommandBase64Std:
+			out, err = Encoder.Base64StdDecode(args[0])
+		case CommandBase64URL:
+			out, err = Encoder.Base64URLDecode(args[0])
+		case CommandHex:
+			out, err = Encoder.HexDecode(args[0])
+		}
+		if err != nil {
+			return err
+		}
+		PrintString(out)
+		return err
+	}
+
+	runE := func(cmd *cobra.Command, args []string) error {
+		if flags.decode {
+			return runDecode(cmd, args)
+		}
+		var err error
+		var out string
+		var data any
+		switch validator.ValidFile(args[0]) {
+		case true:
+			data, err = os.ReadFile(args[0])
+			if err != nil {
+				return err
+			}
+		case false:
+			data = args[0]
+		}
+		switch cmd.Name() {
+		case CommandBase32Hex:
+			out, err = Encoder.Base32HexEncode(data)
+		case CommandBase32Std:
+			out, err = Encoder.Base32StdEncode(data)
+		case CommandBase64Std:
+			out, err = Encoder.Base64StdEncode(data)
+		case CommandBase64URL:
+			out, err = Encoder.Base64URLEncode(data)
+		case CommandHex:
+			out, err = Encoder.HexEncode(data)
+		}
+		if err != nil {
+			return err
+		}
+		PrintString(out)
+		return err
+	}
+
 	var encodeSubCmdBase32Hex = &cobra.Command{
 		Use:   CommandBase32Hex,
 		Args:  cobra.ExactArgs(1),
 		Short: "Base32 hex encoding or decoding",
-		RunE:  encodeFlag.RunE,
+		RunE:  runE,
 	}
 
 	var encodeSubCmdBase32Std = &cobra.Command{
 		Use:   CommandBase32Std,
 		Args:  cobra.ExactArgs(1),
 		Short: "Base32 standard encoding or decoding",
-		RunE:  encodeFlag.RunE,
+		RunE:  runE,
 	}
 
 	var encodeSubCmdBase64Std = &cobra.Command{
 		Use:   CommandBase64Std,
 		Args:  cobra.ExactArgs(1),
 		Short: "Base64 standard encoding or decoding",
-		RunE:  encodeFlag.RunE,
+		RunE:  runE,
 	}
 
 	var encodeSubCmdBase64URL = &cobra.Command{
 		Use:   CommandBase64URL,
 		Args:  cobra.ExactArgs(1),
 		Short: "Base64 url encoding or decoding",
-		RunE:  encodeFlag.RunE,
+		RunE:  runE,
 	}
 
 	var encodeSubCmdHex = &cobra.Command{
 		Use:   CommandHex,
 		Args:  cobra.ExactArgs(1),
 		Short: "Hexadecimal encoding or decoding",
-		RunE:  encodeFlag.RunE,
+		RunE:  runE,
 	}
 	rootCmd.AddCommand(encodeCmd)
 
-	encodeCmd.PersistentFlags().BoolVarP(&encodeFlag.decode, "decode", "d", false, common.Usage("Decodes input"))
+	encodeCmd.PersistentFlags().BoolVarP(&flags.decode, "decode", "d", false, common.Usage("Decodes input"))
 	encodeCmd.AddCommand(encodeSubCmdBase32Hex, encodeSubCmdBase32Std)
 	encodeCmd.AddCommand(encodeSubCmdBase64Std, encodeSubCmdBase64URL)
 	encodeCmd.AddCommand(encodeSubCmdHex)
 }
 
-type EncodeFlag struct {
-	decode bool
-}
+type Encode struct{}
 
-func (e *EncodeFlag) RunE(cmd *cobra.Command, args []string) error {
-	var err error
-	if e.decode {
-		return e.RunDecode(cmd, args)
-	}
-	var out string
-	var data any
-	switch validator.ValidFile(args[0]) {
-	case true:
-		data, err = os.ReadFile(args[0])
-		if err != nil {
-			return err
-		}
-	case false:
-		data = args[0]
-	}
-	switch cmd.Name() {
-	case CommandBase32Hex:
-		out, err = e.Base32HexEncode(data)
-	case CommandBase32Std:
-		out, err = e.Base32StdEncode(data)
-	case CommandBase64Std:
-		out, err = e.Base64StdEncode(data)
-	case CommandBase64URL:
-		out, err = e.Base64URLEncode(data)
-	case CommandHex:
-		out, err = e.HexEncode(data)
-	}
-	if err != nil {
-		return err
-	}
-	PrintString(out)
-	return err
-}
-
-func (e *EncodeFlag) RunDecode(cmd *cobra.Command, args []string) error {
-	var err error
-	var out []byte
-	switch cmd.Name() {
-	case CommandBase32Hex:
-		out, err = e.Base32HexDecode(args[0])
-	case CommandBase32Std:
-		out, err = e.Base32StdDecode(args[0])
-	case CommandBase64Std:
-		out, err = e.Base64StdDecode(args[0])
-	case CommandBase64URL:
-		out, err = e.Base64URLDecode(args[0])
-	case CommandHex:
-		out, err = e.HexDecode(args[0])
-	}
-	if err != nil {
-		return err
-	}
-	PrintString(out)
-	return err
-}
-
-func (e *EncodeFlag) Base32HexEncode(i any) (string, error) {
+func (*Encode) Base32HexEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -160,11 +160,11 @@ func (e *EncodeFlag) Base32HexEncode(i any) (string, error) {
 	}
 }
 
-func (e *EncodeFlag) Base32HexDecode(s string) ([]byte, error) {
+func (*Encode) Base32HexDecode(s string) ([]byte, error) {
 	return base32.HexEncoding.DecodeString(s)
 }
 
-func (e *EncodeFlag) Base32StdEncode(i any) (string, error) {
+func (*Encode) Base32StdEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -176,11 +176,11 @@ func (e *EncodeFlag) Base32StdEncode(i any) (string, error) {
 	}
 }
 
-func (e *EncodeFlag) Base32StdDecode(s string) ([]byte, error) {
+func (*Encode) Base32StdDecode(s string) ([]byte, error) {
 	return base32.StdEncoding.DecodeString(s)
 }
 
-func (e *EncodeFlag) Base64StdEncode(i any) (string, error) {
+func (*Encode) Base64StdEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -192,11 +192,11 @@ func (e *EncodeFlag) Base64StdEncode(i any) (string, error) {
 	}
 }
 
-func (e *EncodeFlag) Base64StdDecode(s string) ([]byte, error) {
+func (*Encode) Base64StdDecode(s string) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(s)
 }
 
-func (e *EncodeFlag) Base64URLEncode(i any) (string, error) {
+func (*Encode) Base64URLEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -208,11 +208,11 @@ func (e *EncodeFlag) Base64URLEncode(i any) (string, error) {
 	}
 }
 
-func (e *EncodeFlag) Base64URLDecode(s string) ([]byte, error) {
+func (*Encode) Base64URLDecode(s string) ([]byte, error) {
 	return base64.URLEncoding.DecodeString(s)
 }
 
-func (e *EncodeFlag) HexEncode(i any) (string, error) {
+func (*Encode) HexEncode(i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
@@ -224,11 +224,11 @@ func (e *EncodeFlag) HexEncode(i any) (string, error) {
 	}
 }
 
-func (e *EncodeFlag) HexDecode(s string) ([]byte, error) {
+func (*Encode) HexDecode(s string) ([]byte, error) {
 	return hex.DecodeString(s)
 }
 
-func (e *EncodeFlag) JSONEncode(i any) (string, error) {
+func (*Encode) JSONEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := json.NewEncoder(&buf)
 	encoder.SetIndent("", common.IndentTwoSpaces)
@@ -236,13 +236,13 @@ func (e *EncodeFlag) JSONEncode(i any) (string, error) {
 	return buf.String(), err
 }
 
-func (e *EncodeFlag) JSONDecode(r io.Reader, i any) (any, error) {
+func (*Encode) JSONDecode(r io.Reader, i any) (any, error) {
 	decoder := json.NewDecoder(r)
 	err := decoder.Decode(i)
 	return i, err
 }
 
-func (e *EncodeFlag) JSONMarshaler(src, dst any) error {
+func (*Encode) JSONMarshaler(src, dst any) error {
 	var err error
 	switch data := src.(type) {
 	case string:
@@ -265,7 +265,7 @@ func (e *EncodeFlag) JSONMarshaler(src, dst any) error {
 	return err
 }
 
-func (e *EncodeFlag) PemEncode(i any, t ...string) (string, error) {
+func (*Encode) PemEncode(i any, t ...string) (string, error) {
 	var err error
 	var block = &pem.Block{Type: ""}
 	if len(t) != 0 {
@@ -286,7 +286,7 @@ func (e *EncodeFlag) PemEncode(i any, t ...string) (string, error) {
 	return buf.String(), err
 }
 
-func (e *EncodeFlag) PemDecode(b []byte) ([]byte, error) {
+func (*Encode) PemDecode(b []byte) ([]byte, error) {
 	p, _ := pem.Decode(b)
 	if p == nil {
 		return nil, common.ErrInvalidFile
@@ -294,7 +294,7 @@ func (e *EncodeFlag) PemDecode(b []byte) ([]byte, error) {
 	return p.Bytes, nil
 }
 
-func (e *EncodeFlag) XMLEncode(i any) (string, error) {
+func (*Encode) XMLEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := xml.NewEncoder(&buf)
 	encoder.Indent("", common.IndentTwoSpaces)
@@ -302,13 +302,13 @@ func (e *EncodeFlag) XMLEncode(i any) (string, error) {
 	return buf.String(), err
 }
 
-func (e *EncodeFlag) XMLDecode(r io.Reader, i any) (any, error) {
+func (*Encode) XMLDecode(r io.Reader, i any) (any, error) {
 	decoder := xml.NewDecoder(r)
 	err := decoder.Decode(i)
 	return i, err
 }
 
-func (e *EncodeFlag) YamlEncode(i any) (string, error) {
+func (*Encode) YamlEncode(i any) (string, error) {
 	var buf bytes.Buffer
 	encoder := yaml.NewEncoder(&buf)
 	encoder.SetIndent(2)
@@ -316,7 +316,7 @@ func (e *EncodeFlag) YamlEncode(i any) (string, error) {
 	return buf.String(), err
 }
 
-func (e *EncodeFlag) YamlDecode(r io.Reader, i any) (any, error) {
+func (*Encode) YamlDecode(r io.Reader, i any) (any, error) {
 	decoder := yaml.NewDecoder(r)
 	err := decoder.Decode(i)
 	return i, err
