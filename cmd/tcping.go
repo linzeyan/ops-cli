@@ -27,42 +27,41 @@ import (
 )
 
 func init() {
-	var tcpingFlag TcpingFlag
+	var flags struct {
+		count    int
+		protocol string
+		timeout  time.Duration
+	}
 	var tcpingCmd = &cobra.Command{
 		Use:   CommandTcping + " [host] [port]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Connect to a port of a host",
-		Run:   tcpingFlag.Run,
+		Run: func(_ *cobra.Command, args []string) {
+			var t TCPing
+			for i := 0; ; {
+				if err := t.Connect(i, args, flags.protocol, flags.count, flags.timeout); err != nil {
+					PrintString(err)
+				}
+				i++
+				if i == flags.count {
+					break
+				}
+				time.Sleep(time.Second)
+			}
+		},
 	}
 	rootCmd.AddCommand(tcpingCmd)
-	tcpingCmd.Flags().IntVarP(&tcpingFlag.count, "count", "c", 1, common.Usage("Specify tcping counts"))
-	tcpingCmd.Flags().StringVarP(&tcpingFlag.protocol, "protocol", "p", "tcp", common.Usage("Specify protocol"))
-	tcpingCmd.Flags().DurationVarP(&tcpingFlag.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
+	tcpingCmd.Flags().IntVarP(&flags.count, "count", "c", 1, common.Usage("Specify tcping counts"))
+	tcpingCmd.Flags().StringVarP(&flags.protocol, "protocol", "p", "tcp", common.Usage("Specify protocol"))
+	tcpingCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
 }
 
-type TcpingFlag struct {
-	count    int
-	protocol string
-	timeout  time.Duration
-}
+type TCPing struct{}
 
-func (t *TcpingFlag) Run(cmd *cobra.Command, args []string) {
-	for i := 0; ; {
-		if err := t.Connect(i, args); err != nil {
-			PrintString(err)
-		}
-		i++
-		if i == t.count {
-			break
-		}
-		time.Sleep(time.Second)
-	}
-}
-
-func (t *TcpingFlag) Connect(counter int, args []string) error {
+func (t *TCPing) Connect(counter int, args []string, protocol string, limit int, timeout time.Duration) error {
 	var p string
 	startTime := time.Now()
-	conn, err := net.DialTimeout(t.protocol, net.JoinHostPort(args[0], args[1]), t.timeout)
+	conn, err := net.DialTimeout(protocol, net.JoinHostPort(args[0], args[1]), timeout)
 	if err != nil {
 		p = fmt.Sprintf("Connect error: %s", err.Error())
 		return errors.New(p)
@@ -75,10 +74,10 @@ func (t *TcpingFlag) Connect(counter int, args []string) error {
 		if err != nil {
 			return err
 		}
-		if t.count != 1 {
-			p = fmt.Sprintf("seq %d: %s response from %s (%s) port %s [open] %v", counter, t.protocol, args[0], ip, port, duration)
+		if limit != 1 {
+			p = fmt.Sprintf("seq %d: %s response from %s (%s) port %s [open] %v", counter, protocol, args[0], ip, port, duration)
 		} else {
-			p = fmt.Sprintf("%s response from %s (%s) port %s [open] %v", t.protocol, args[0], ip, port, duration)
+			p = fmt.Sprintf("%s response from %s (%s) port %s [open] %v", protocol, args[0], ip, port, duration)
 		}
 		PrintString(p)
 		return err
