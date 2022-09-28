@@ -32,7 +32,15 @@ import (
 )
 
 func init() {
-	var otpFlag OtpFlag
+	var flags struct {
+		/* Bind flags */
+		/* The period parameter defines a validity period in seconds */
+		period int8
+		/* The number of digits in a one-time password */
+		digit int8
+		/* The algorithm of OTP */
+		alg string
+	}
 	var otpCmd = &cobra.Command{
 		Use:   CommandOtp,
 		Short: "Calculate passcode or generate secret",
@@ -40,12 +48,36 @@ func init() {
 
 		DisableFlagsInUseLine: true,
 	}
+	var o OTP
+	runE := func(cmd *cobra.Command, args []string) error {
+		var result string
+		var err error
+		switch cmd.Name() {
+		case CommandCalculate:
+			var secret string
+			switch l := len(args); {
+			case l == 1:
+				secret = common.StringRemoveSpaces(args[0])
+			/* Merge all strings. */
+			case l > 1:
+				secret = common.SliceStringToStringNoSpaces(args)
+			}
+			result, err = o.TOTP(secret, flags.alg, flags.period, flags.digit)
+		case CommandGenerate:
+			result, err = o.GenSecret(flags.alg, flags.period)
+		}
+		if err != nil {
+			return err
+		}
+		PrintString(result)
+		return err
+	}
 
 	var otpSubCmdCalculate = &cobra.Command{
 		Use:   CommandCalculate,
 		Args:  cobra.MinimumNArgs(1),
 		Short: "Calculate passcode",
-		RunE:  otpFlag.RunE,
+		RunE:  runE,
 		Example: common.Examples(`# Calculate the passcode for the specified secret
 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
@@ -57,7 +89,7 @@ T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
 	var otpSubCmdGenerate = &cobra.Command{
 		Use:   CommandGenerate,
 		Short: "Generate otp secret",
-		RunE:  otpFlag.RunE,
+		RunE:  runE,
 		Example: common.Examples(`# Generate OTP and specify a period of 15 seconds
 -p 15
 
@@ -69,25 +101,17 @@ T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
 	}
 	rootCmd.AddCommand(otpCmd)
 
-	otpCmd.PersistentFlags().StringVarP(&otpFlag.alg, "algorithm", "a", "SHA1", common.Usage("The hash algorithm used by the credential(SHA1/SHA256/SHA512)"))
-	otpCmd.PersistentFlags().Int8VarP(&otpFlag.period, "period", "p", 30, common.Usage("The period parameter defines a validity period in seconds for the TOTP code(15/30/60)"))
-	otpCmd.PersistentFlags().Int8VarP(&otpFlag.digit, "digits", "d", 6, common.Usage("The number of digits in a one-time password(6/7/8)"))
+	otpCmd.PersistentFlags().StringVarP(&flags.alg, "algorithm", "a", "SHA1", common.Usage("The hash algorithm used by the credential(SHA1/SHA256/SHA512)"))
+	otpCmd.PersistentFlags().Int8VarP(&flags.period, "period", "p", 30, common.Usage("The period parameter defines a validity period in seconds for the TOTP code(15/30/60)"))
+	otpCmd.PersistentFlags().Int8VarP(&flags.digit, "digits", "d", 6, common.Usage("The number of digits in a one-time password(6/7/8)"))
 
 	otpCmd.AddCommand(otpSubCmdCalculate, otpSubCmdGenerate)
 }
 
-type OtpFlag struct {
-	/* Bind flags */
-	/* The period parameter defines a validity period in seconds */
-	period int8
-	/* The number of digits in a one-time password */
-	digit int8
-	/* The algorithm of OTP */
-	alg string
-}
+type OTP struct{}
 
-func (o *OtpFlag) SetTimeInterval() int64 {
-	switch o.period {
+func (*OTP) SetTimeInterval(period int8) int64 {
+	switch period {
 	case 15:
 		return common.TimeNow.Unix() / 15
 	case 60:
@@ -97,8 +121,8 @@ func (o *OtpFlag) SetTimeInterval() int64 {
 	}
 }
 
-func (o *OtpFlag) SetDigits() [2]int {
-	switch o.digit {
+func (*OTP) SetDigits(digit int8) [2]int {
+	switch digit {
 	case 7:
 		return [2]int{7, 10000000}
 	case 8:
@@ -108,8 +132,8 @@ func (o *OtpFlag) SetDigits() [2]int {
 	}
 }
 
-func (o *OtpFlag) SetAlgorithm() func() hash.Hash {
-	switch strings.ToLower(o.alg) {
+func (*OTP) SetAlgorithm(alg string) func() hash.Hash {
+	switch strings.ToLower(alg) {
 	case common.HashSha256:
 		return sha256.New
 	case common.HashSha512:
@@ -119,14 +143,14 @@ func (o *OtpFlag) SetAlgorithm() func() hash.Hash {
 	}
 }
 
-func (o *OtpFlag) HOTP(secret string, timeInterval int64) (string, error) {
+func (o *OTP) HOTP(secret, alg string, timeInterval int64, digit int8) (string, error) {
 	key, err := Encoder.Base32StdDecode(strings.ToUpper(secret))
 	if err != nil {
 		return "", err
 	}
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(timeInterval))
-	hasher := hmac.New(o.SetAlgorithm(), key)
+	hasher := hmac.New(o.SetAlgorithm(alg), key)
 	_, err = hasher.Write(buf)
 	if err != nil {
 		return "", err
@@ -139,7 +163,7 @@ func (o *OtpFlag) HOTP(secret string, timeInterval int64) (string, error) {
 	if err = binary.Read(r, binary.BigEndian, &data); err != nil {
 		return "", err
 	}
-	var digits = o.SetDigits()
+	var digits = o.SetDigits(digit)
 	h12 := (int(data) & 0x7fffffff) % digits[1]
 	passcode := strconv.Itoa(h12)
 
@@ -153,54 +177,21 @@ func (o *OtpFlag) HOTP(secret string, timeInterval int64) (string, error) {
 	return passcode, err
 }
 
-func (o *OtpFlag) TOTP(secret string) (string, error) {
-	return o.HOTP(secret, o.SetTimeInterval())
+func (o *OTP) TOTP(secret, alg string, period, digit int8) (string, error) {
+	return o.HOTP(secret, alg, o.SetTimeInterval(period), digit)
 }
 
-func (o *OtpFlag) GenSecret() (string, error) {
+func (o *OTP) GenSecret(alg string, period int8) (string, error) {
 	buf := bytes.Buffer{}
-	err := binary.Write(&buf, binary.BigEndian, o.SetTimeInterval())
+	err := binary.Write(&buf, binary.BigEndian, o.SetTimeInterval(period))
 	if err != nil {
 		return "", err
 	}
-	hasher := hmac.New(o.SetAlgorithm(), buf.Bytes())
+	hasher := hmac.New(o.SetAlgorithm(alg), buf.Bytes())
 	return Encoder.Base32StdEncode(hasher.Sum(nil))
 }
 
-func (o *OtpFlag) Verify(secret string, input string) (bool, error) {
-	passcode, err := o.TOTP(secret)
+func (o *OTP) Verify(input, secret, alg string, period, digit int8) (bool, error) {
+	passcode, err := o.TOTP(secret, alg, period, digit)
 	return passcode == input, err
-}
-
-func (o OtpFlag) RemoveSpaces(s string) string {
-	if strings.Contains(s, " ") {
-		return strings.ReplaceAll(s, " ", "")
-	}
-	return s
-}
-
-func (o *OtpFlag) RunE(cmd *cobra.Command, args []string) error {
-	var result string
-	var err error
-	switch cmd.Name() {
-	case CommandCalculate:
-		var secret string
-		switch l := len(args); {
-		case l == 1:
-			secret = o.RemoveSpaces(args[0])
-		/* Merge all strings. */
-		case l > 1:
-			for i := range args {
-				secret += o.RemoveSpaces(args[i])
-			}
-		}
-		result, err = o.TOTP(secret)
-	case CommandGenerate:
-		result, err = o.GenSecret()
-	}
-	if err != nil {
-		return err
-	}
-	PrintString(result)
-	return err
 }

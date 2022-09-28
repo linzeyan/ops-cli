@@ -19,6 +19,7 @@ package common
 import (
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -83,4 +84,23 @@ func SliceStringToString(s []string, args ...string) string {
 		o += v + arg
 	}
 	return o
+}
+
+func SliceStringToStringNoSpaces(s []string, args ...string) string {
+	var arg string
+	for _, v := range args {
+		arg += v
+	}
+	var o string
+	for _, v := range s {
+		o += v + arg
+	}
+	return StringRemoveSpaces(o)
+}
+
+func StringRemoveSpaces(s string) string {
+	if strings.Contains(s, " ") {
+		return strings.ReplaceAll(s, " ", "")
+	}
+	return s
 }
