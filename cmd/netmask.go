@@ -29,14 +29,71 @@ import (
 )
 
 func init() {
-	var netmaskFlag NetmaskFlag
+	var flags struct {
+		ranges bool
+
+		binary  bool
+		octal   bool
+		decimal bool
+		hex     bool
+		cisco   bool
+		cidr    bool
+	}
 	var netmaskCmd = &cobra.Command{
 		Use:   CommandNetmask,
 		Short: "Print IP/Mask pair, list address ranges",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: netmaskFlag.RunE,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			var err error
+			if len(args) == 0 {
+				return cmd.Help()
+			}
+			var n Netmask
+			if flags.ranges {
+				for _, v := range args {
+					if err = n.Range(v); err != nil {
+						PrintString(err)
+					}
+				}
+				return err
+			}
+
+			if flags.binary ||
+				flags.octal ||
+				flags.decimal ||
+				flags.hex ||
+				flags.cisco ||
+				flags.cidr {
+				var typ string
+				switch {
+				case flags.binary:
+					typ = TypeBinary
+				case flags.octal:
+					typ = TypeOctal
+				case flags.decimal:
+					typ = TypeDecimal
+				case flags.hex:
+					typ = TypeHex
+				case flags.cisco:
+					typ = TypeCisco
+				}
+				for _, v := range args {
+					slice := strings.Split(v, "-")
+					if len(slice) == 2 {
+						if err = n.CIDR(slice[0], slice[1], typ); err != nil {
+							PrintString(err)
+						}
+						continue
+					}
+					if err = n.Address(v, typ); err != nil {
+						PrintString(err)
+					}
+				}
+			}
+			return err
+		},
 		Example: common.Examples(`# Print IP address and mask in different format
 -b 1.2.3.4/32
 -o 2.4.6.8/24
@@ -52,65 +109,19 @@ func init() {
 	}
 
 	rootCmd.AddCommand(netmaskCmd)
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.ranges, "ranges", "r", false, common.Usage("Print IP address ranges"))
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.binary, "binary", "b", false, common.Usage("Print IP address and mask in binary"))
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.octal, "octal", "o", false, common.Usage("Print IP address and mask in octal"))
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.decimal, "decimal", "d", false, common.Usage("Print IP address and mask in decimal"))
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.hex, "hex", "x", false, common.Usage("Print IP address and mask in hex"))
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.cisco, "cisco", "i", false, common.Usage("Print Cisco style address lists"))
-	netmaskCmd.Flags().BoolVarP(&netmaskFlag.cidr, "cidr", "c", false, common.Usage("Print CIDR format address lists"))
+	netmaskCmd.Flags().BoolVarP(&flags.ranges, "ranges", "r", false, common.Usage("Print IP address ranges"))
+	netmaskCmd.Flags().BoolVarP(&flags.binary, TypeBinary, "b", false, common.Usage("Print IP address and mask in binary"))
+	netmaskCmd.Flags().BoolVarP(&flags.octal, TypeOctal, "o", false, common.Usage("Print IP address and mask in octal"))
+	netmaskCmd.Flags().BoolVarP(&flags.decimal, TypeDecimal, "d", false, common.Usage("Print IP address and mask in decimal"))
+	netmaskCmd.Flags().BoolVarP(&flags.hex, TypeHex, "x", false, common.Usage("Print IP address and mask in hex"))
+	netmaskCmd.Flags().BoolVarP(&flags.cisco, TypeCisco, "i", false, common.Usage("Print Cisco style address lists"))
+	netmaskCmd.Flags().BoolVarP(&flags.cidr, "cidr", "c", false, common.Usage("Print CIDR format address lists"))
 }
 
-type NetmaskFlag struct {
-	ranges bool
-
-	binary  bool
-	octal   bool
-	decimal bool
-	hex     bool
-	cisco   bool
-	cidr    bool
-}
-
-func (n *NetmaskFlag) RunE(cmd *cobra.Command, args []string) error {
-	var err error
-	if len(args) == 0 {
-		return cmd.Help()
-	}
-
-	if n.ranges {
-		for _, v := range args {
-			if err = n.Range(v); err != nil {
-				PrintString(err)
-			}
-		}
-		return err
-	}
-
-	if n.binary ||
-		n.octal ||
-		n.decimal ||
-		n.hex ||
-		n.cisco ||
-		n.cidr {
-		for _, v := range args {
-			slice := strings.Split(v, "-")
-			if len(slice) == 2 {
-				if err = n.CIDR(slice[0], slice[1]); err != nil {
-					PrintString(err)
-				}
-				continue
-			}
-			if err = n.Address(v); err != nil {
-				PrintString(err)
-			}
-		}
-	}
-	return err
-}
+type Netmask struct{}
 
 /* ipRange parse string and return CIDR, first IP and last IP. */
-func (*NetmaskFlag) ipRange(arg string) (*net.IPNet, netip.Addr, netip.Addr) {
+func (*Netmask) ipRange(arg string) (*net.IPNet, netip.Addr, netip.Addr) {
 	_, ipnet, err := net.ParseCIDR(arg)
 	if err != nil {
 		return nil, netip.Addr{}, netip.Addr{}
@@ -125,7 +136,7 @@ func (*NetmaskFlag) ipRange(arg string) (*net.IPNet, netip.Addr, netip.Addr) {
 	return ipnet, netip.MustParseAddr(first.String()), netip.MustParseAddr(last.String())
 }
 
-func (n *NetmaskFlag) Range(arg string) error {
+func (n *Netmask) Range(arg string) error {
 	ipnet, first, last := n.ipRange(arg)
 	if ipnet == nil {
 		return common.ErrInvalidArg
@@ -138,7 +149,7 @@ func (n *NetmaskFlag) Range(arg string) error {
 	return nil
 }
 
-func (n *NetmaskFlag) Address(arg string) error {
+func (n *Netmask) Address(arg, typ string) error {
 	var (
 		ipv4Len = fmt.Sprintf("/%d", net.IPv4len*8)
 		ipv6Len = fmt.Sprintf("/%d", net.IPv6len*8)
@@ -164,16 +175,16 @@ func (n *NetmaskFlag) Address(arg string) error {
 	var ip, mask string
 	for i := 0; i < len(ipnet.IP); i++ {
 		var f string
-		switch {
-		case n.binary:
+		switch typ {
+		case TypeBinary:
 			f = "%08b "
-		case n.octal:
+		case TypeOctal:
 			f = "%o "
-		case n.decimal:
+		case TypeDecimal:
 			f = "%d."
-		case n.hex:
+		case TypeHex:
 			f = "%x "
-		case n.cisco:
+		case TypeCisco:
 			ip += fmt.Sprintf("%d.", ipnet.IP[i])
 			mask += fmt.Sprintf("%d.", ipnet.Mask[i]^0xff)
 			continue
@@ -181,11 +192,11 @@ func (n *NetmaskFlag) Address(arg string) error {
 		ip += fmt.Sprintf(f, ipnet.IP[i])
 		mask += fmt.Sprintf(f, ipnet.Mask[i])
 	}
-	switch {
-	case n.binary, n.octal, n.hex:
+	switch typ {
+	case TypeBinary, TypeOctal, TypeHex:
 		ip = strings.TrimRight(ip, " ")
 		mask = strings.TrimRight(mask, " ")
-	case n.decimal, n.cisco:
+	case TypeDecimal, TypeCisco:
 		ip = strings.TrimRight(ip, ".")
 		mask = strings.TrimRight(mask, ".")
 	}
@@ -194,7 +205,7 @@ func (n *NetmaskFlag) Address(arg string) error {
 }
 
 /* iterate if not iterate over return next IP and prefix, else return "0" and prefix. */
-func (n *NetmaskFlag) iterate(ipa, ipb netip.Addr) (string, string) {
+func (n *Netmask) iterate(ipa, ipb netip.Addr) (string, string) {
 	for i := ipa.BitLen(); i >= 0; i-- {
 		p := fmt.Sprintf("%s/%d", ipa.String(), i)
 		ipnet, first, last := n.ipRange(p)
@@ -210,7 +221,7 @@ func (n *NetmaskFlag) iterate(ipa, ipb netip.Addr) (string, string) {
 	return "", ""
 }
 
-func (n *NetmaskFlag) CIDR(a, b string) error {
+func (n *Netmask) CIDR(a, b, typ string) error {
 	var err error
 	if (!validator.ValidIPv4(a) && !validator.ValidIPv4(b)) &&
 		(!validator.ValidIPv6(a) && !validator.ValidIPv6(b)) {
@@ -245,8 +256,8 @@ func (n *NetmaskFlag) CIDR(a, b string) error {
 	out = append(out, prefix)
 
 	for _, v := range out {
-		if n.cisco {
-			if err = n.Address(v); err != nil {
+		if typ == TypeCisco {
+			if err = n.Address(v, typ); err != nil {
 				return err
 			}
 		} else {

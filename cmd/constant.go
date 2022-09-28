@@ -121,6 +121,14 @@ const (
 )
 
 const (
+	TypeBinary  = "binary"
+	TypeOctal   = "octal"
+	TypeDecimal = "decimal"
+	TypeHex     = "hex"
+	TypeCisco   = "cisco"
+)
+
+const (
 	keyFileExtension  = ".key"
 	tempFileExtension = ".temp"
 )
