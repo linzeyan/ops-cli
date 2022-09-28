@@ -45,7 +45,7 @@ func init() {
 		Args:      cobra.OnlyValidArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
 			var err error
-			var d DfResponse
+			var d DF
 			var data [][]string
 			switch {
 			case len(args) == 0:
@@ -74,7 +74,7 @@ func init() {
 	rootCmd.AddCommand(dfCmd)
 }
 
-type DfResponse struct {
+type DF struct {
 	Filesystem  string `json:"Filesystem"`
 	Size        string `json:"Size"`
 	Used        string `json:"Used"`
@@ -89,7 +89,7 @@ type DfResponse struct {
 	InodesUsedPercent string `json:"iUse%"`
 }
 
-func (d *DfResponse) ParseDevices(usage *disk.UsageStat, partition []disk.PartitionStat) {
+func (d *DF) ParseDevices(usage *disk.UsageStat, partition []disk.PartitionStat) {
 	for _, v := range partition {
 		if usage.Path == v.Mountpoint {
 			d.Filesystem = v.Device
@@ -109,7 +109,7 @@ func (d *DfResponse) ParseDevices(usage *disk.UsageStat, partition []disk.Partit
 	}
 }
 
-func (d DfResponse) OutputData() []string {
+func (d DF) OutputData() []string {
 	var value []string
 	f := reflect.ValueOf(&d).Elem()
 	for i := 0; i < f.NumField(); i++ {
@@ -118,7 +118,7 @@ func (d DfResponse) OutputData() []string {
 	return value
 }
 
-func (d DfResponse) String(value any) {
+func (d DF) String(value any) {
 	var header []string
 	f := reflect.ValueOf(&d).Elem()
 	t := f.Type()
