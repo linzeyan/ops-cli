@@ -68,6 +68,7 @@ Available Commands:
   LINE        Send message to LINE
   Slack       Send message to Slack
   Telegram    Send message to Telegram
+  arping      Discover and probe hosts in a network using the ARP protocol
   cert        Check tls cert expiry time
   completion  Generate the autocompletion script for the specified shell
   convert     Convert data format, support csv, json, toml, xml, yaml
@@ -107,6 +108,13 @@ Flags:
   -h, --help            help for ops-cli
   -j, --json            Output JSON format
   -y, --yaml            Output YAML format
+```
+
+### `arping`
+
+```bash
+→ sudo ops-cli arping 192.168.181.1 -c
+online
 ```
 
 ### `cert`
