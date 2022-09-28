@@ -48,8 +48,12 @@ func init() {
 
 		DisableFlagsInUseLine: true,
 	}
-	var o OTP
 	runE := func(cmd *cobra.Command, args []string) error {
+		o := OTP{
+			Period:    flags.period,
+			Digit:     flags.digit,
+			Algorithm: flags.alg,
+		}
 		var result string
 		var err error
 		switch cmd.Name() {
@@ -62,9 +66,9 @@ func init() {
 			case l > 1:
 				secret = common.SliceStringToStringNoSpaces(args)
 			}
-			result, err = o.TOTP(secret, flags.alg, flags.period, flags.digit)
+			result, err = o.TOTP(secret)
 		case CommandGenerate:
-			result, err = o.GenSecret(flags.alg, flags.period)
+			result, err = o.GenSecret()
 		}
 		if err != nil {
 			return err
@@ -108,10 +112,14 @@ T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
 	otpCmd.AddCommand(otpSubCmdCalculate, otpSubCmdGenerate)
 }
 
-type OTP struct{}
+type OTP struct {
+	Period    int8
+	Digit     int8
+	Algorithm string
+}
 
-func (*OTP) SetTimeInterval(period int8) int64 {
-	switch period {
+func (o *OTP) SetTimeInterval() int64 {
+	switch o.Period {
 	case 15:
 		return common.TimeNow.Unix() / 15
 	case 60:
@@ -121,8 +129,8 @@ func (*OTP) SetTimeInterval(period int8) int64 {
 	}
 }
 
-func (*OTP) SetDigits(digit int8) [2]int {
-	switch digit {
+func (o *OTP) SetDigits() [2]int {
+	switch o.Digit {
 	case 7:
 		return [2]int{7, 10000000}
 	case 8:
@@ -132,8 +140,8 @@ func (*OTP) SetDigits(digit int8) [2]int {
 	}
 }
 
-func (*OTP) SetAlgorithm(alg string) func() hash.Hash {
-	switch strings.ToLower(alg) {
+func (o *OTP) SetAlgorithm() func() hash.Hash {
+	switch strings.ToLower(o.Algorithm) {
 	case common.HashSha256:
 		return sha256.New
 	case common.HashSha512:
@@ -143,14 +151,14 @@ func (*OTP) SetAlgorithm(alg string) func() hash.Hash {
 	}
 }
 
-func (o *OTP) HOTP(secret, alg string, timeInterval int64, digit int8) (string, error) {
+func (o *OTP) HOTP(secret string, timeInterval int64) (string, error) {
 	key, err := Encoder.Base32StdDecode(strings.ToUpper(secret))
 	if err != nil {
 		return "", err
 	}
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, uint64(timeInterval))
-	hasher := hmac.New(o.SetAlgorithm(alg), key)
+	hasher := hmac.New(o.SetAlgorithm(), key)
 	_, err = hasher.Write(buf)
 	if err != nil {
 		return "", err
@@ -163,7 +171,7 @@ func (o *OTP) HOTP(secret, alg string, timeInterval int64, digit int8) (string, 
 	if err = binary.Read(r, binary.BigEndian, &data); err != nil {
 		return "", err
 	}
-	var digits = o.SetDigits(digit)
+	var digits = o.SetDigits()
 	h12 := (int(data) & 0x7fffffff) % digits[1]
 	passcode := strconv.Itoa(h12)
 
@@ -177,21 +185,21 @@ func (o *OTP) HOTP(secret, alg string, timeInterval int64, digit int8) (string, 
 	return passcode, err
 }
 
-func (o *OTP) TOTP(secret, alg string, period, digit int8) (string, error) {
-	return o.HOTP(secret, alg, o.SetTimeInterval(period), digit)
+func (o *OTP) TOTP(secret string) (string, error) {
+	return o.HOTP(secret, o.SetTimeInterval())
 }
 
-func (o *OTP) GenSecret(alg string, period int8) (string, error) {
+func (o *OTP) GenSecret() (string, error) {
 	buf := bytes.Buffer{}
-	err := binary.Write(&buf, binary.BigEndian, o.SetTimeInterval(period))
+	err := binary.Write(&buf, binary.BigEndian, o.SetTimeInterval())
 	if err != nil {
 		return "", err
 	}
-	hasher := hmac.New(o.SetAlgorithm(alg), buf.Bytes())
+	hasher := hmac.New(o.SetAlgorithm(), buf.Bytes())
 	return Encoder.Base32StdEncode(hasher.Sum(nil))
 }
 
-func (o *OTP) Verify(input, secret, alg string, period, digit int8) (bool, error) {
-	passcode, err := o.TOTP(secret, alg, period, digit)
+func (o *OTP) Verify(input, secret string) (bool, error) {
+	passcode, err := o.TOTP(secret)
 	return passcode == input, err
 }
