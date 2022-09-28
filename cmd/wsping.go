@@ -17,9 +17,8 @@ limitations under the License.
 package cmd
 
 import (
-	"errors"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -35,21 +34,29 @@ func init() {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return []string{"ws://", "wss://"}, cobra.ShellCompDirectiveNoSpace
 		},
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			if !validator.ValidURL(args[0]) {
-				return common.ErrInvalidURL
+				PrintString(common.ErrInvalidURL)
+				return
 			}
-			ws, resp, err := websocket.DefaultDialer.Dial(args[0], nil)
+			d := websocket.Dialer{
+				HandshakeTimeout: 2 * time.Second,
+				ReadBufferSize:   1024,
+				WriteBufferSize:  1024,
+			}
+
+			ws, resp, err := d.DialContext(common.Context, args[0], nil)
 			if err != nil {
-				return err
+				PrintString(err)
+				return
 			}
 			defer ws.Close()
 			if resp != nil {
 				defer resp.Body.Close()
 			}
 			if resp.StatusCode != http.StatusSwitchingProtocols {
-				o := fmt.Sprintf("Status Code is not %d", http.StatusSwitchingProtocols)
-				return errors.New(o)
+				PrintString("Status is not " + http.StatusText(http.StatusSwitchingProtocols))
+				return
 			}
 			// err = ws.WriteMessage(websocket.PingMessage, []byte{})
 			// if err != nil {
@@ -64,7 +71,6 @@ func init() {
 			// 	return common.ErrResponse
 			// }
 			PrintString("Connect success")
-			return err
 		},
 	}
 	rootCmd.AddCommand(wspingCmd)
