@@ -33,7 +33,7 @@ func init() {
 		Args:  cobra.ExactArgs(1),
 		Short: "Connect to a websocket server",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-			return []string{"ws://", "wss://"}, cobra.ShellCompDirectiveNoFileComp
+			return []string{"ws://", "wss://"}, cobra.ShellCompDirectiveNoSpace
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
 			if !validator.ValidURL(args[0]) {
