@@ -40,18 +40,18 @@ func init() {
 		Run: treeFlag.Run,
 	}
 	rootCmd.AddCommand(treeCmd)
-	treeCmd.Flags().BoolVarP(&treeFlag.all, "all", "a", false, "List all files")
-	treeCmd.Flags().BoolVarP(&treeFlag.change, "change", "c", false, "Print the date of last modification")
-	treeCmd.Flags().BoolVarP(&treeFlag.dirs, "dirs", "d", false, "List only directories")
-	treeCmd.Flags().BoolVarP(&treeFlag.full, "full", "f", false, "Print full path for each file")
-	treeCmd.Flags().BoolVarP(&treeFlag.perm, "perm", "p", false, "Print file permission")
-	treeCmd.Flags().BoolVarP(&treeFlag.mode, "mode", "m", false, "Print file mode")
-	treeCmd.Flags().BoolVarP(&treeFlag.size, "size", "s", false, "Print the size for each file")
-	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 30, "Specify directories depth")
-	treeCmd.Flags().BoolVarP(&treeFlag.gid, "gid", "g", false, "Print group owner for each file")
-	treeCmd.Flags().BoolVarP(&treeFlag.uid, "uid", "u", false, "Print owner for each file")
-	treeCmd.Flags().BoolVarP(&treeFlag.inodes, "inodes", "", false, "Print inode number for each file")
-	treeCmd.Flags().BoolVarP(&treeFlag.device, "device", "", false, "Print device ID number for each file")
+	treeCmd.Flags().BoolVarP(&treeFlag.all, "all", "a", false, common.Usage("List all files"))
+	treeCmd.Flags().BoolVarP(&treeFlag.change, "change", "c", false, common.Usage("Print the date of last modification"))
+	treeCmd.Flags().BoolVarP(&treeFlag.dirs, "dirs", "d", false, common.Usage("List only directories"))
+	treeCmd.Flags().BoolVarP(&treeFlag.full, "full", "f", false, common.Usage("Print full path for each file"))
+	treeCmd.Flags().BoolVarP(&treeFlag.perm, "perm", "p", false, common.Usage("Print file permission"))
+	treeCmd.Flags().BoolVarP(&treeFlag.mode, "mode", "m", false, common.Usage("Print file mode"))
+	treeCmd.Flags().BoolVarP(&treeFlag.size, "size", "s", false, common.Usage("Print the size for each file"))
+	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 30, common.Usage("Specify directories depth"))
+	treeCmd.Flags().BoolVarP(&treeFlag.gid, "gid", "g", false, common.Usage("Print group owner for each file"))
+	treeCmd.Flags().BoolVarP(&treeFlag.uid, "uid", "u", false, common.Usage("Print owner for each file"))
+	treeCmd.Flags().BoolVarP(&treeFlag.inodes, "inodes", "", false, common.Usage("Print inode number for each file"))
+	treeCmd.Flags().BoolVarP(&treeFlag.device, "device", "", false, common.Usage("Print device ID number for each file"))
 }
 
 const (
