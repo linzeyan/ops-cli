@@ -29,7 +29,11 @@ import (
 )
 
 func init() {
-	var tracerouteFlag TracerouteFlag
+	var flags struct {
+		size, maxTTL int
+		interval     time.Duration
+		timeout      time.Duration
+	}
 	var tracerouteCmd = &cobra.Command{
 		Use:  CommandTraceroute + " [host]",
 		Args: cobra.ExactArgs(1),
@@ -37,61 +41,66 @@ func init() {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Short: "Print the route packets trace to network host",
-		Run:   tracerouteFlag.Run,
+		Run: func(_ *cobra.Command, args []string) {
+			if flags.size <= 0 || flags.maxTTL <= 0 {
+				return
+			}
+			if flags.interval < 50*time.Millisecond {
+				flags.interval = 50 * time.Millisecond
+			}
+
+			t := Traceroute{
+				Size:     flags.size,
+				TTL:      flags.maxTTL,
+				Retry:    3,
+				Interval: flags.interval,
+				Timeout:  flags.timeout,
+			}
+			host := args[0]
+			data := Randoms.GenerateString(t.Size, LowercaseLetters)
+
+			ip, err := net.ResolveIPAddr("ip4", host)
+			if err != nil {
+				PrintString(err)
+				return
+			}
+
+			conn, err := t.listen()
+			if err != nil {
+				PrintString(err)
+				return
+			}
+			if conn != nil {
+				defer conn.Close()
+			}
+
+			icmpData := icmp.Message{
+				Type: ipv4.ICMPTypeEcho,
+				Code: 0,
+				Body: &icmp.Echo{ID: os.Getpid() & 0xffff, Data: data},
+			}
+			header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, ip, t.TTL, len(data))
+			PrintString(header)
+			if err = t.Connect(conn, ip, icmpData); err != nil {
+				PrintString(err)
+				return
+			}
+		},
 	}
 	rootCmd.AddCommand(tracerouteCmd)
-	tracerouteCmd.Flags().IntVarP(&tracerouteFlag.size, "size", "s", 24, common.Usage("Specify packet size"))
-	tracerouteCmd.Flags().IntVarP(&tracerouteFlag.maxTTL, "max-ttl", "m", 64, common.Usage("Specify max hop"))
-	tracerouteCmd.Flags().DurationVarP(&tracerouteFlag.interval, "interval", "i", 500*time.Millisecond, common.Usage("Specify interval"))
-	tracerouteCmd.Flags().DurationVarP(&tracerouteFlag.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
+	tracerouteCmd.Flags().IntVarP(&flags.size, "size", "s", 24, common.Usage("Specify packet size"))
+	tracerouteCmd.Flags().IntVarP(&flags.maxTTL, "max-ttl", "m", 64, common.Usage("Specify max hop"))
+	tracerouteCmd.Flags().DurationVarP(&flags.interval, "interval", "i", 500*time.Millisecond, common.Usage("Specify interval"))
+	tracerouteCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
 }
 
-type TracerouteFlag struct {
-	size, maxTTL, retry int
-	interval            time.Duration
-	timeout             time.Duration
+type Traceroute struct {
+	Size, TTL, Retry int
+	Interval         time.Duration
+	Timeout          time.Duration
 }
 
-func (t *TracerouteFlag) Run(cmd *cobra.Command, args []string) {
-	if t.size <= 0 || t.maxTTL <= 0 {
-		return
-	}
-	t.retry = 3
-	if t.interval < 50*time.Millisecond {
-		t.interval = 50 * time.Millisecond
-	}
-	host := args[0]
-	data := Randoms.GenerateString(t.size, LowercaseLetters)
-
-	ip, err := net.ResolveIPAddr("ip4", host)
-	if err != nil {
-		PrintString(err)
-		return
-	}
-
-	conn, err := t.listen()
-	if err != nil {
-		PrintString(err)
-		return
-	}
-	if conn != nil {
-		defer conn.Close()
-	}
-
-	icmpData := icmp.Message{
-		Type: ipv4.ICMPTypeEcho,
-		Code: 0,
-		Body: &icmp.Echo{ID: os.Getpid() & 0xffff, Data: data},
-	}
-	header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, ip, t.maxTTL, len(data))
-	PrintString(header)
-	if err = t.Connect(conn, ip, icmpData); err != nil {
-		PrintString(err)
-		return
-	}
-}
-
-func (t *TracerouteFlag) listen() (*icmp.PacketConn, error) {
+func (*Traceroute) listen() (*icmp.PacketConn, error) {
 	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
 	if err != nil {
 		return nil, err
@@ -99,10 +108,10 @@ func (t *TracerouteFlag) listen() (*icmp.PacketConn, error) {
 	return conn, conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL|ipv4.FlagDst|ipv4.FlagInterface|ipv4.FlagSrc, true)
 }
 
-func (t *TracerouteFlag) Connect(conn *icmp.PacketConn, addr *net.IPAddr, data icmp.Message) error {
+func (t *Traceroute) Connect(conn *icmp.PacketConn, addr *net.IPAddr, data icmp.Message) error {
 	var err error
 	reply := make([]byte, 1500)
-	for i := 1; i <= t.maxTTL; i++ {
+	for i := 1; i <= t.TTL; i++ {
 		data.Body.(*icmp.Echo).Seq = i
 		b, err := data.Marshal(nil)
 		if err != nil {
@@ -118,16 +127,16 @@ func (t *TracerouteFlag) Connect(conn *icmp.PacketConn, addr *net.IPAddr, data i
 		if peer == addr.String() {
 			break
 		}
-		time.Sleep(t.interval)
+		time.Sleep(t.Interval)
 	}
 	return err
 }
 
-func (t *TracerouteFlag) sendPacket(hop int, conn *icmp.PacketConn, addr *net.IPAddr, b, reply []byte) (string, error) {
+func (t *Traceroute) sendPacket(hop int, conn *icmp.PacketConn, addr *net.IPAddr, b, reply []byte) (string, error) {
 	var err error
 	var ip string
 	var rtt []string
-	for i := 1; i <= t.retry; i++ {
+	for i := 1; i <= t.Retry; i++ {
 		/* Send packet. */
 		startTime := time.Now()
 		_, err = conn.IPv4PacketConn().WriteTo(b, nil, addr)
@@ -135,7 +144,7 @@ func (t *TracerouteFlag) sendPacket(hop int, conn *icmp.PacketConn, addr *net.IP
 			return "", err
 		}
 		/* Wait receiving. */
-		if err = conn.SetReadDeadline(time.Now().Add(t.timeout)); err != nil {
+		if err = conn.SetReadDeadline(time.Now().Add(t.Timeout)); err != nil {
 			return "", err
 		}
 		n, _, peer, err := conn.IPv4PacketConn().ReadFrom(reply)
@@ -157,10 +166,10 @@ func (t *TracerouteFlag) sendPacket(hop int, conn *icmp.PacketConn, addr *net.IP
 		if peer.String() != "" {
 			ip = peer.String()
 		}
-		if i == t.retry {
+		if i == t.Retry {
 			break
 		}
-		time.Sleep(t.interval)
+		time.Sleep(t.Interval)
 	}
 	out := fmt.Sprintf("%-4d  %-16v\t%-10s\t%-10s\t%-10s", hop, ip, rtt[0], rtt[1], rtt[2])
 	PrintString(out)
