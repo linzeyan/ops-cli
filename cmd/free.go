@@ -27,48 +27,48 @@ import (
 )
 
 func init() {
-	var freeFlag FreeFlag
+	var flags struct {
+		count  uint
+		second uint
+	}
 	var freeCmd = &cobra.Command{
 		Use:   CommandFree,
 		Short: "Display free memory spaces",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: freeFlag.RunE,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			var err error
+			var f Free
+			if flags.count == 0 && flags.second == 0 {
+				return f.Output()
+			}
+			var counter uint
+			for {
+				if flags.second == 0 {
+					flags.second = 2
+				}
+				err = f.Output()
+				if err != nil {
+					return err
+				}
+				counter++
+				if flags.count > 0 && flags.count == counter {
+					return err
+				}
+				PrintString("")
+				time.Sleep(time.Second * time.Duration(flags.second))
+			}
+		},
 	}
 	rootCmd.AddCommand(freeCmd)
-	freeCmd.Flags().UintVarP(&freeFlag.count, "count", "c", 0, common.Usage("Repeat printing times"))
-	freeCmd.Flags().UintVarP(&freeFlag.second, "seconds", "s", 0, common.Usage("Seconds between each repeat printing"))
+	freeCmd.Flags().UintVarP(&flags.count, "count", "c", 0, common.Usage("Repeat printing times"))
+	freeCmd.Flags().UintVarP(&flags.second, "seconds", "s", 0, common.Usage("Seconds between each repeat printing"))
 }
 
-type FreeFlag struct {
-	count  uint
-	second uint
-}
+type Free struct{}
 
-func (f *FreeFlag) RunE(_ *cobra.Command, _ []string) error {
-	var err error
-	if f.count == 0 && f.second == 0 {
-		return f.Output()
-	}
-	var counter uint
-	for {
-		err = f.Output()
-		if err != nil {
-			return err
-		}
-		counter++
-		if f.count > 0 && f.count == counter {
-			return err
-		}
-		if f.second == 0 {
-			f.second = 2
-		}
-		time.Sleep(time.Second * time.Duration(f.second))
-	}
-}
-
-func (f *FreeFlag) Output() error {
+func (f *Free) Output() error {
 	var err error
 	swap, err := mem.SwapMemory()
 	if err != nil {
@@ -100,6 +100,6 @@ func (f *FreeFlag) Output() error {
 	return err
 }
 
-func (FreeFlag) String(header []string, data [][]string) {
+func (Free) String(header []string, data [][]string) {
 	PrintTable(header, data, tablewriter.ALIGN_RIGHT, "\t ", false)
 }
