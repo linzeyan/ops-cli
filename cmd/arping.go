@@ -33,6 +33,7 @@ func init() {
 	var arpingFlag struct {
 		check bool
 		mac   bool
+		iface string
 	}
 	var arpingCmd = &cobra.Command{
 		Use:   CommandArping,
@@ -46,10 +47,17 @@ func init() {
 				return common.ErrInvalidIP
 			}
 			ip := net.ParseIP(args[0])
-			hwAddr, duration, err := arping.Ping(ip)
+			var hwAddr net.HardwareAddr
+			var err error
+			if arpingFlag.iface != "" {
+				hwAddr, _, err = arping.PingOverIfaceByName(ip, arpingFlag.iface)
+			} else {
+				hwAddr, _, err = arping.Ping(ip)
+			}
 			if err != nil && !errors.Is(err, arping.ErrTimeout) {
 				return err
 			}
+
 			switch {
 			case arpingFlag.check:
 				if errors.Is(err, arping.ErrTimeout) {
@@ -60,14 +68,19 @@ func init() {
 			case arpingFlag.mac:
 				PrintString(hwAddr)
 			default:
-				out := fmt.Sprintf("response from %s (%s): sep=0 time=%s", ip, hwAddr, duration)
-				PrintString(out)
-				for i := 1; ; i++ {
-					hwAddr, duration, err := arping.Ping(ip)
+				var duration time.Duration
+				for i := 0; ; i++ {
+					if arpingFlag.iface != "" {
+						hwAddr, duration, err = arping.PingOverIfaceByName(ip, arpingFlag.iface)
+					} else {
+						hwAddr, duration, err = arping.Ping(ip)
+					}
 					if errors.Is(err, arping.ErrTimeout) {
 						PrintString(fmt.Sprintf("seq=%d timeout", i))
+					} else if err != nil {
+						return err
 					}
-					out := fmt.Sprintf("response from %s (%s): sep=%d time=%s", ip, hwAddr, i, duration)
+					out := fmt.Sprintf("response from %s (%s): index=%d time=%s", ip, hwAddr, i, duration)
 					PrintString(out)
 					time.Sleep(time.Second)
 				}
@@ -78,4 +91,5 @@ func init() {
 	rootCmd.AddCommand(arpingCmd)
 	arpingCmd.Flags().BoolVarP(&arpingFlag.check, "check", "c", false, "Check if host is online")
 	arpingCmd.Flags().BoolVarP(&arpingFlag.mac, "mac", "m", false, "Resolve mac address")
+	arpingCmd.Flags().StringVarP(&arpingFlag.iface, "interface", "i", "", "Specify interface name")
 }
