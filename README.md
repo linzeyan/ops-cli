@@ -490,7 +490,12 @@ traceroute to 1.1.1.1 (1.1.1.1), 64 hops max, 24 byte packets
 ### `update`
 
 ```bash
-ops-cli update
+→ ops-cli update
+Update...
+==> Downloading file from GitHub
+Upgrading ops-cli v0.10.0 -> v0.10.1
+==> Cleanup...
+Update completed
 ```
 
 ### `url`
@@ -542,4 +547,11 @@ Source available at https://github.com/linzeyan/ops-cli
 ```bash
 → ops-cli whois google.com --expiry
 2028-09-14T12:00:00+08:00
+```
+
+### `wsping`
+
+```bash
+→ ops-cli wsping wss://wss.example.com
+Connect success
 ```
