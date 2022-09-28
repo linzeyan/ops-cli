@@ -1,4 +1,4 @@
-//go:build linux || bsd
+//go:build linux || darwin
 
 /*
 Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>
