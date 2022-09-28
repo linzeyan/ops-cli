@@ -27,7 +27,10 @@ import (
 )
 
 func init() {
-	var icpFlag ICPResponse
+	var flags struct {
+		Account string `json:"account"`
+		Key     string `json:"api_key"`
+	}
 	var icpCmd = &cobra.Command{
 		Use:  CommandIcp + " domain",
 		Args: cobra.ExactArgs(1),
@@ -37,18 +40,19 @@ func init() {
 		Short: "Check ICP status",
 		RunE: func(_ *cobra.Command, args []string) error {
 			if rootConfig != "" {
-				if err := ReadConfig(CommandIcp, &icpFlag.flags); err != nil {
+				if err := ReadConfig(CommandIcp, &flags); err != nil {
 					return err
 				}
 			}
-			if icpFlag.flags.Account == "" || icpFlag.flags.Key == "" {
+			if flags.Account == "" || flags.Key == "" {
 				return common.ErrInvalidToken
 			}
-			icpFlag.flags.domain = args[0]
-			if err := icpFlag.Request(); err != nil {
+
+			var i ICP
+			if err := i.Request(flags.Account, flags.Key, args[0]); err != nil {
 				return err
 			}
-			OutputDefaultYAML(icpFlag)
+			OutputDefaultYAML(i)
 			return nil
 		},
 		Example: common.Examples(`# Print the ICP status
@@ -56,40 +60,32 @@ func init() {
 	}
 	rootCmd.AddCommand(icpCmd)
 
-	icpCmd.Flags().StringVarP(&icpFlag.flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))
-	icpCmd.Flags().StringVarP(&icpFlag.flags.Key, "key", "k", "", common.Usage("Enter the WEST api key"))
+	icpCmd.Flags().StringVarP(&flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))
+	icpCmd.Flags().StringVarP(&flags.Key, "key", "k", "", common.Usage("Enter the WEST api key"))
 	icpCmd.MarkFlagsRequiredTogether("account", "key")
 }
 
-type IcpFlags struct {
-	Account string `json:"account"`
-	Key     string `json:"api_key"`
-	domain  string
-}
-
-type ICPResponse struct {
+type ICP struct {
 	DomainName string `json:"domain,omitempty" yaml:"domain,omitempty"`
 	ICPCode    string `json:"icp,omitempty" yaml:"icp,omitempty"`
 	ICPStatus  string `json:"icpstatus,omitempty" yaml:"icpstatus,omitempty"`
-
-	flags IcpFlags
 }
 
-func (i *ICPResponse) requestURI() (string, error) {
+func (i *ICP) requestURI(account, key, domain string) (string, error) {
 	/* MD5 Hash */
-	hashData := i.flags.Account + i.flags.Key + "domainname"
+	hashData := account + key + "domainname"
 	sig, err := Hasher.Hash(common.HashAlgorithm(common.HashMd5), hashData)
 	if err != nil {
 		return "", err
 	}
-	rawCmd := fmt.Sprintf("domainname\r\ncheck\r\nentityname:icp\r\ndomains:%s\r\n.\r\n", i.flags.domain)
+	rawCmd := fmt.Sprintf("domainname\r\ncheck\r\nentityname:icp\r\ndomains:%s\r\n.\r\n", domain)
 	/* URL Encoding */
 	strCmd := url.QueryEscape(rawCmd)
-	return fmt.Sprintf(`http://api.west263.com/api/?userid=%s&strCmd=%s&versig=%s`, i.flags.Account, strCmd, sig), nil
+	return fmt.Sprintf(`http://api.west263.com/api/?userid=%s&strCmd=%s&versig=%s`, account, strCmd, sig), nil
 }
 
-func (i *ICPResponse) Request() error {
-	uri, err := i.requestURI()
+func (i *ICP) Request(account, key, domain string) error {
+	uri, err := i.requestURI(account, key, domain)
 	if err != nil {
 		return err
 	}
