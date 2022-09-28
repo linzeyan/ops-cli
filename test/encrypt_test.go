@@ -15,10 +15,10 @@ func TestEncryptAes(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if err := cmd.Encryptor.EncryptFile("84815131446564008011748691915873", input); err != nil {
+	if err := cmd.Encryptor.EncryptFile("84815131446564008011748691915873", input, cmd.EncryptModeCTR); err != nil {
 		t.Error(err)
 	}
-	if err := cmd.Encryptor.DecryptFile("84815131446564008011748691915873", input); err != nil {
+	if err := cmd.Encryptor.DecryptFile("84815131446564008011748691915873", input, cmd.EncryptModeCTR); err != nil {
 		t.Error(err)
 	}
 	got, err := os.ReadFile(input)
