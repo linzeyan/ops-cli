@@ -31,13 +31,49 @@ import (
 )
 
 func init() {
-	var certFlag CertFlag
+	var flags struct {
+		ip, expiry, days, dns, issuer bool
 
+		port string
+	}
 	var certCmd = &cobra.Command{
 		Use:   CommandCert + " [host|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Check tls cert expiry time",
-		RunE:  certFlag.RunE,
+		RunE: func(_ *cobra.Command, args []string) error {
+			var err error
+			input := args[0]
+			resp := new(Cert)
+			switch {
+			case validator.ValidFile(input):
+				resp, err = resp.CheckFile(input)
+			case validator.ValidDomain(input) || validator.ValidIPv4(input):
+				resp, err = resp.CheckHost(net.JoinHostPort(input, flags.port))
+			default:
+				return common.ErrInvalidArg
+			}
+			if err != nil {
+				return err
+			}
+			if resp == nil {
+				return common.ErrResponse
+			}
+			switch {
+			default:
+				OutputDefaultJSON(resp)
+			case flags.ip:
+				PrintString(resp.ServerIP)
+			case flags.dns:
+				PrintJSON(resp.DNS)
+			case flags.expiry:
+				PrintString(resp.ExpiryTime)
+			case flags.issuer:
+				PrintString(resp.Issuer)
+			case flags.days:
+				PrintString(resp.Days)
+			}
+			return err
+		},
 		Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
 www.google.com
 
@@ -52,57 +88,15 @@ example.com.crt`, CommandCert),
 	}
 	rootCmd.AddCommand(certCmd)
 
-	certCmd.Flags().StringVarP(&certFlag.port, "port", "p", "443", common.Usage("Specify host port"))
-	certCmd.Flags().BoolVar(&certFlag.ip, "ip", false, common.Usage("Only print IP"))
-	certCmd.Flags().BoolVar(&certFlag.expiry, "expiry", false, common.Usage("Only print expiry time"))
-	certCmd.Flags().BoolVar(&certFlag.dns, "dns", false, common.Usage("Only print DNS names"))
-	certCmd.Flags().BoolVar(&certFlag.issuer, "issuer", false, common.Usage("Only print issuer"))
-	certCmd.Flags().BoolVar(&certFlag.days, "days", false, common.Usage("Only print the remaining days"))
+	certCmd.Flags().StringVarP(&flags.port, "port", "p", "443", common.Usage("Specify host port"))
+	certCmd.Flags().BoolVar(&flags.ip, "ip", false, common.Usage("Only print IP"))
+	certCmd.Flags().BoolVar(&flags.expiry, "expiry", false, common.Usage("Only print expiry time"))
+	certCmd.Flags().BoolVar(&flags.dns, "dns", false, common.Usage("Only print DNS names"))
+	certCmd.Flags().BoolVar(&flags.issuer, "issuer", false, common.Usage("Only print issuer"))
+	certCmd.Flags().BoolVar(&flags.days, "days", false, common.Usage("Only print the remaining days"))
 }
 
-type CertFlag struct {
-	ip, expiry, days, dns, issuer bool
-
-	port string
-
-	resp *certResponse
-}
-
-func (cf *CertFlag) RunE(cmd *cobra.Command, args []string) error {
-	var err error
-	input := args[0]
-	switch {
-	case validator.ValidFile(input):
-		cf.resp, err = cf.resp.CheckFile(input)
-	case validator.ValidDomain(input) || validator.ValidIPv4(input):
-		cf.resp, err = cf.resp.CheckHost(net.JoinHostPort(input, cf.port))
-	default:
-		return common.ErrInvalidArg
-	}
-	if err != nil {
-		return err
-	}
-	if cf.resp == nil {
-		return common.ErrResponse
-	}
-	switch {
-	default:
-		OutputDefaultJSON(cf.resp)
-	case cf.ip:
-		PrintString(cf.resp.ServerIP)
-	case cf.dns:
-		PrintJSON(cf.resp.DNS)
-	case cf.expiry:
-		PrintString(cf.resp.ExpiryTime)
-	case cf.issuer:
-		PrintString(cf.resp.Issuer)
-	case cf.days:
-		PrintString(cf.resp.Days)
-	}
-	return err
-}
-
-type certResponse struct {
+type Cert struct {
 	ExpiryTime string   `json:"expiryTime,omitempty" yaml:"expiryTime,omitempty"`
 	Days       int      `json:"days,omitempty" yaml:"days,omitempty"`
 	Issuer     string   `json:"issuer,omitempty" yaml:"issuer,omitempty"`
@@ -110,7 +104,7 @@ type certResponse struct {
 	DNS        []string `json:"dns,omitempty" yaml:"dns,omitempty"`
 }
 
-func (c *certResponse) CheckHost(host string) (*certResponse, error) {
+func (c *Cert) CheckHost(host string) (*Cert, error) {
 	conn, err := tls.Dial("tcp", host, nil)
 	if err != nil {
 		return nil, err
@@ -119,7 +113,7 @@ func (c *certResponse) CheckHost(host string) (*certResponse, error) {
 
 	cert := conn.ConnectionState().PeerCertificates[0]
 	dayRemain := cert.NotAfter.Local().Sub(common.TimeNow)
-	var out = certResponse{
+	var out = Cert{
 		ExpiryTime: cert.NotAfter.Local().Format(time.RFC3339),
 		DNS:        cert.DNSNames,
 		Issuer:     cert.Issuer.String(),
@@ -129,7 +123,7 @@ func (c *certResponse) CheckHost(host string) (*certResponse, error) {
 	return &out, err
 }
 
-func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
+func (c *Cert) CheckFile(fileName string) (*Cert, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
 		return nil, err
@@ -164,7 +158,7 @@ func (c *certResponse) CheckFile(fileName string) (*certResponse, error) {
 	}
 
 	dayRemain := cert[0].NotAfter.Local().Sub(common.TimeNow)
-	var out = certResponse{
+	var out = Cert{
 		ExpiryTime: cert[0].NotAfter.Local().Format(time.RFC3339),
 		DNS:        cert[0].DNSNames,
 		Issuer:     cert[0].Issuer.String(),
