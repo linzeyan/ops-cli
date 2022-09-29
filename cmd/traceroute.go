@@ -56,16 +56,14 @@ func init() {
 				Interval: flags.interval,
 				Timeout:  flags.timeout,
 			}
-			host := args[0]
 			data := Randoms.GenerateString(t.Size, LowercaseLetters)
-
-			ip, err := net.ResolveIPAddr("ip4", host)
-			if err != nil {
-				PrintString(err)
-				return
+			t.Data = icmp.Message{
+				Type: ipv4.ICMPTypeEcho,
+				Code: 0,
+				Body: &icmp.Echo{ID: os.Getpid() & 0xffff, Data: data},
 			}
 
-			conn, err := t.listen()
+			conn, err := t.Listen()
 			if err != nil {
 				PrintString(err)
 				return
@@ -74,14 +72,8 @@ func init() {
 				defer conn.Close()
 			}
 			t.Connetion = conn
-			icmpData := icmp.Message{
-				Type: ipv4.ICMPTypeEcho,
-				Code: 0,
-				Body: &icmp.Echo{ID: os.Getpid() & 0xffff, Data: data},
-			}
-			header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, ip, t.TTL, len(data))
-			PrintString(header)
-			if err = t.Connect(ip, icmpData); err != nil {
+
+			if err = t.Connect(args[0]); err != nil {
 				PrintString(err)
 				return
 			}
@@ -95,26 +87,38 @@ func init() {
 }
 
 type Traceroute struct {
-	Size, TTL, Retry int
-	Interval         time.Duration
-	Timeout          time.Duration
-	Connetion        *icmp.PacketConn
+	Size, TTL, Retry  int
+	Interval, Timeout time.Duration
+	Connetion         *icmp.PacketConn
+	Data              icmp.Message
 }
 
-func (*Traceroute) listen() (*icmp.PacketConn, error) {
+func (*Traceroute) Listen() (*icmp.PacketConn, error) {
 	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
 	if err != nil {
 		return nil, err
 	}
-	return conn, conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL|ipv4.FlagDst|ipv4.FlagInterface|ipv4.FlagSrc, true)
+	err = conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL|ipv4.FlagDst|ipv4.FlagInterface|ipv4.FlagSrc, true)
+	if err != nil {
+		return nil, err
+	}
+	return conn, err
 }
 
-func (t *Traceroute) Connect(addr *net.IPAddr, data icmp.Message) error {
+func (t *Traceroute) Connect(host string) error {
 	var err error
+	addr, err := net.ResolveIPAddr("ip4", host)
+	if err != nil {
+		return err
+	}
 	reply := make([]byte, 1500)
 	for i := 1; i <= t.TTL; i++ {
-		data.Body.(*icmp.Echo).Seq = i
-		b, err := data.Marshal(nil)
+		if i == 1 {
+			header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, addr, t.TTL, t.Size)
+			PrintString(header)
+		}
+		t.Data.Body.(*icmp.Echo).Seq = i
+		b, err := t.Data.Marshal(nil)
 		if err != nil {
 			return err
 		}

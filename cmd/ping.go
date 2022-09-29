@@ -54,7 +54,6 @@ func init() {
 				flags.interval = 50 * time.Millisecond
 			}
 
-			host := args[0]
 			var p = Ping{
 				IPv6:     flags.ipv6,
 				Count:    flags.count,
@@ -69,16 +68,6 @@ func init() {
 				},
 			}
 
-			network := "ip4"
-			if flags.ipv6 {
-				network = "ip6"
-			}
-			ip, err := net.ResolveIPAddr(network, host)
-			if err != nil {
-				PrintString(err)
-				return
-			}
-
 			conn, err := p.Listen()
 			if err != nil {
 				PrintString(err)
@@ -87,8 +76,8 @@ func init() {
 			if conn != nil {
 				defer conn.Close()
 			}
-
-			p.Connect(conn, ip, host)
+			p.Conn = conn
+			p.Connect(args[0])
 		},
 	}
 	rootCmd.AddCommand(pingCmd)
@@ -105,6 +94,7 @@ type Ping struct {
 	Count, Size, TTL  int
 	Interval, Timeout time.Duration
 	Data              icmp.Message
+	Conn              *icmp.PacketConn
 
 	lost bool
 	sta  struct {
@@ -123,7 +113,10 @@ func (p *Ping) Listen() (*icmp.PacketConn, error) {
 		if err = conn.IPv6PacketConn().SetHopLimit(p.TTL); err != nil {
 			return nil, err
 		}
-		return conn, conn.IPv6PacketConn().SetControlMessage(ipv6.FlagHopLimit, true)
+		if err = conn.IPv6PacketConn().SetControlMessage(ipv6.FlagHopLimit, true); err != nil {
+			return nil, err
+		}
+		return conn, err
 	}
 	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
 	if err != nil {
@@ -132,7 +125,10 @@ func (p *Ping) Listen() (*icmp.PacketConn, error) {
 	if err = conn.IPv4PacketConn().SetTTL(p.TTL); err != nil {
 		return nil, err
 	}
-	return conn, conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL, true)
+	if err = conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL, true); err != nil {
+		return nil, err
+	}
+	return conn, err
 }
 
 func (p *Ping) statistics(duration time.Duration) {
@@ -160,15 +156,15 @@ func (p *Ping) statistics(duration time.Duration) {
 	}
 }
 
-func (p *Ping) readReply(conn *icmp.PacketConn, reply []byte, counter int) (int, any, net.Addr, error) {
+func (p *Ping) readReply(reply []byte, counter int) (int, any, net.Addr, error) {
 	var n int
 	var cm any
 	var peer net.Addr
 	var err error
 	if p.IPv6 {
-		n, cm, peer, err = conn.IPv6PacketConn().ReadFrom(reply)
+		n, cm, peer, err = p.Conn.IPv6PacketConn().ReadFrom(reply)
 	} else {
-		n, cm, peer, err = conn.IPv4PacketConn().ReadFrom(reply)
+		n, cm, peer, err = p.Conn.IPv4PacketConn().ReadFrom(reply)
 	}
 	if err != nil {
 		p.lost = true
@@ -199,7 +195,16 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 	return out
 }
 
-func (p *Ping) Connect(conn *icmp.PacketConn, addr *net.IPAddr, host string) {
+func (p *Ping) Connect(host string) {
+	network := "ip4"
+	if p.IPv6 {
+		network = "ip6"
+	}
+	addr, err := net.ResolveIPAddr(network, host)
+	if err != nil {
+		PrintString(err)
+		return
+	}
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	reply := make([]byte, 1500)
@@ -221,16 +226,16 @@ func (p *Ping) Connect(conn *icmp.PacketConn, addr *net.IPAddr, host string) {
 
 		/* Send packet. */
 		startTime := time.Now()
-		_, err = conn.WriteTo(b, addr)
+		_, err = p.Conn.WriteTo(b, addr)
 		if err != nil {
 			PrintString(err)
 		}
 
 		/* Wait receiving. */
-		if err = conn.SetReadDeadline(time.Now().Add(p.Timeout)); err != nil {
+		if err = p.Conn.SetReadDeadline(time.Now().Add(p.Timeout)); err != nil {
 			PrintString(err)
 		}
-		n, cm, peer, err := p.readReply(conn, reply, i)
+		n, cm, peer, err := p.readReply(reply, i)
 		if err != nil {
 			PrintString(err)
 		}
