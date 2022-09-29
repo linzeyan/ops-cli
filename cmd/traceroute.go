@@ -73,7 +73,7 @@ func init() {
 			if conn != nil {
 				defer conn.Close()
 			}
-
+			t.Connetion = conn
 			icmpData := icmp.Message{
 				Type: ipv4.ICMPTypeEcho,
 				Code: 0,
@@ -81,7 +81,7 @@ func init() {
 			}
 			header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, ip, t.TTL, len(data))
 			PrintString(header)
-			if err = t.Connect(conn, ip, icmpData); err != nil {
+			if err = t.Connect(ip, icmpData); err != nil {
 				PrintString(err)
 				return
 			}
@@ -98,6 +98,7 @@ type Traceroute struct {
 	Size, TTL, Retry int
 	Interval         time.Duration
 	Timeout          time.Duration
+	Connetion        *icmp.PacketConn
 }
 
 func (*Traceroute) listen() (*icmp.PacketConn, error) {
@@ -108,7 +109,7 @@ func (*Traceroute) listen() (*icmp.PacketConn, error) {
 	return conn, conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL|ipv4.FlagDst|ipv4.FlagInterface|ipv4.FlagSrc, true)
 }
 
-func (t *Traceroute) Connect(conn *icmp.PacketConn, addr *net.IPAddr, data icmp.Message) error {
+func (t *Traceroute) Connect(addr *net.IPAddr, data icmp.Message) error {
 	var err error
 	reply := make([]byte, 1500)
 	for i := 1; i <= t.TTL; i++ {
@@ -117,10 +118,11 @@ func (t *Traceroute) Connect(conn *icmp.PacketConn, addr *net.IPAddr, data icmp.
 		if err != nil {
 			return err
 		}
-		if err = conn.IPv4PacketConn().SetTTL(i); err != nil {
+
+		if err = t.Connetion.IPv4PacketConn().SetTTL(i); err != nil {
 			return err
 		}
-		peer, err := t.sendPacket(i, conn, addr, b, reply)
+		peer, err := t.sendPacket(i, addr, b, reply)
 		if err != nil {
 			return err
 		}
@@ -132,22 +134,22 @@ func (t *Traceroute) Connect(conn *icmp.PacketConn, addr *net.IPAddr, data icmp.
 	return err
 }
 
-func (t *Traceroute) sendPacket(hop int, conn *icmp.PacketConn, addr *net.IPAddr, b, reply []byte) (string, error) {
+func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (string, error) {
 	var err error
 	var ip string
 	var rtt []string
 	for i := 1; i <= t.Retry; i++ {
 		/* Send packet. */
 		startTime := time.Now()
-		_, err = conn.IPv4PacketConn().WriteTo(b, nil, addr)
+		_, err = t.Connetion.IPv4PacketConn().WriteTo(b, nil, addr)
 		if err != nil {
 			return "", err
 		}
 		/* Wait receiving. */
-		if err = conn.SetReadDeadline(time.Now().Add(t.Timeout)); err != nil {
+		if err = t.Connetion.SetReadDeadline(time.Now().Add(t.Timeout)); err != nil {
 			return "", err
 		}
-		n, _, peer, err := conn.IPv4PacketConn().ReadFrom(reply)
+		n, _, peer, err := t.Connetion.IPv4PacketConn().ReadFrom(reply)
 		if err != nil {
 			rtt = append(rtt, "*")
 			continue
