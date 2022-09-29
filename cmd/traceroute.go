@@ -45,6 +45,9 @@ func init() {
 			if flags.size <= 0 || flags.maxTTL <= 0 {
 				return
 			}
+			if flags.maxTTL > 64 {
+				flags.maxTTL = 64
+			}
 			if flags.interval < 50*time.Millisecond {
 				flags.interval = 50 * time.Millisecond
 			}
@@ -72,7 +75,7 @@ func init() {
 				defer conn.Close()
 			}
 			t.Connetion = conn
-
+			t.stat = make([]ICMPStat, t.TTL)
 			if err = t.Connect(args[0]); err != nil {
 				PrintString(err)
 				return
@@ -91,6 +94,9 @@ type Traceroute struct {
 	Interval, Timeout time.Duration
 	Connetion         *icmp.PacketConn
 	Data              icmp.Message
+
+	Record bool
+	stat   []ICMPStat
 }
 
 func (*Traceroute) Listen() (*icmp.PacketConn, error) {
@@ -113,7 +119,7 @@ func (t *Traceroute) Connect(host string) error {
 	}
 	reply := make([]byte, 1500)
 	for i := 1; i <= t.TTL; i++ {
-		if i == 1 {
+		if i == 1 && !t.Record {
 			header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, addr, t.TTL, t.Size)
 			PrintString(header)
 		}
@@ -155,6 +161,8 @@ func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (str
 		}
 		n, _, peer, err := t.Connetion.IPv4PacketConn().ReadFrom(reply)
 		if err != nil {
+			t.stat[hop].Lost = true
+			t.statistics(hop, 0)
 			rtt = append(rtt, "*")
 			continue
 		}
@@ -169,6 +177,7 @@ func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (str
 		case ipv4.ICMPTypeDestinationUnreachable:
 			rtt = append(rtt, "*")
 		}
+		t.statistics(hop, duration)
 		if peer.String() != "" {
 			ip = peer.String()
 		}
@@ -177,7 +186,55 @@ func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (str
 		}
 		time.Sleep(t.Interval)
 	}
+	if t.Record {
+		return ip, err
+	}
 	out := fmt.Sprintf("%-4d  %-16v\t%-10s\t%-10s\t%-10s", hop, ip, rtt[0], rtt[1], rtt[2])
 	PrintString(out)
 	return ip, err
 }
+
+func (t *Traceroute) statistics(hop int, duration time.Duration) {
+	if !t.Record {
+		return
+	}
+	if t.stat[hop].Min == 0 {
+		t.stat[hop].Min = duration
+	}
+	if t.stat[hop].Max == 0 {
+		t.stat[hop].Max = duration
+	}
+	t.stat[hop].Avg += duration
+	t.stat[hop].Send++
+	t.stat[hop].Rtts = append(t.stat[hop].Rtts, duration)
+	if t.stat[hop].Lost {
+		t.stat[hop].Loss++
+		t.stat[hop].Lost = false
+	} else {
+		t.stat[hop].Receive++
+	}
+
+	if duration < t.stat[hop].Min {
+		t.stat[hop].Min = duration
+	}
+	if duration > t.stat[hop].Max {
+		t.stat[hop].Max = duration
+	}
+}
+
+// func (t *Traceroute) summary() {
+// 	for _, v := range t.stat {
+// 		if v.Send == 0 {
+// 			continue
+// 		}
+
+// 		loss := fmt.Sprintf("%.1f%%", float64(v.Loss*100)/float64(v.Send))
+// 		avg := v.Avg / time.Duration(v.Receive)
+// 		var temp float64
+// 		for _, vv := range v.Rtts {
+// 			temp += math.Pow(float64(vv-avg), 2)
+// 		}
+// 		variance := temp / float64(len(v.Rtts))
+// 		mdev := time.Duration(math.Sqrt(variance))
+// 	}
+// }
