@@ -29,7 +29,10 @@ import (
 )
 
 func init() {
-	var whoisFlag WhoisFlag
+	var flags struct {
+		/* Bind flags */
+		ns, expiry, registrar, days bool
+	}
 	var whoisCmd = &cobra.Command{
 		Use:  CommandWhois + " domain",
 		Args: cobra.ExactArgs(1),
@@ -39,13 +42,30 @@ func init() {
 		Short: "List domain name information",
 		RunE: func(_ *cobra.Command, args []string) error {
 			var err error
-			if err = whoisFlag.Request(args[0]); err != nil {
+			var w Whois
+			if err = w.Request(args[0]); err != nil {
 				return err
 			}
-			if whoisFlag.empty() {
+			if w.empty() {
 				return err
 			}
-			OutputInterfaceString(whoisFlag)
+			if flags.expiry {
+				PrintString(w.ExpiresDate)
+				return err
+			}
+			if flags.ns {
+				PrintJSON(w.NameServers)
+				return err
+			}
+			if flags.registrar {
+				PrintString(w.Registrar)
+				return err
+			}
+			if flags.days {
+				PrintString(w.RemainDays)
+				return err
+			}
+			OutputInterfaceString(w)
 			return err
 		},
 		Example: common.Examples(`# Search domain
@@ -53,25 +73,13 @@ apple.com`, CommandWhois),
 	}
 	rootCmd.AddCommand(whoisCmd)
 
-	whoisCmd.Flags().BoolVarP(&whoisFlag.ns, "ns", "n", false, common.Usage("Only print Name Servers"))
-	whoisCmd.Flags().BoolVarP(&whoisFlag.expiry, "expiry", "e", false, common.Usage("Only print expiry time"))
-	whoisCmd.Flags().BoolVarP(&whoisFlag.registrar, "registrar", "r", false, common.Usage("Only print Registrar"))
-	whoisCmd.Flags().BoolVarP(&whoisFlag.days, "days", "d", false, common.Usage("Only print the remaining days"))
+	whoisCmd.Flags().BoolVarP(&flags.ns, "ns", "n", false, common.Usage("Only print Name Servers"))
+	whoisCmd.Flags().BoolVarP(&flags.expiry, "expiry", "e", false, common.Usage("Only print expiry time"))
+	whoisCmd.Flags().BoolVarP(&flags.registrar, "registrar", "r", false, common.Usage("Only print Registrar"))
+	whoisCmd.Flags().BoolVarP(&flags.days, "days", "d", false, common.Usage("Only print the remaining days"))
 }
 
-// type WhoisResponse struct {
-// 	Registrar   string   `json:"registrar" yaml:"registrar"`
-// 	CreatedDate string   `json:"createdDate" yaml:"createdDate"`
-// 	ExpiresDate string   `json:"expiresDate" yaml:"expiresDate"`
-// 	UpdatedDate string   `json:"updatedDate" yaml:"updatedDate"`
-// 	RemainDays  int      `json:"remainDays" yaml:"remainDays"`
-// 	NameServers []string `json:"nameServers" yaml:"nameServers"`
-// }
-
-type WhoisFlag struct {
-	/* Bind flags */
-	ns, expiry, registrar, days bool
-
+type Whois struct {
 	Registrar   string   `json:"registrar" yaml:"registrar"`
 	CreatedDate string   `json:"createdDate" yaml:"createdDate"`
 	ExpiresDate string   `json:"expiresDate" yaml:"expiresDate"`
@@ -80,7 +88,7 @@ type WhoisFlag struct {
 	NameServers []string `json:"nameServers" yaml:"nameServers"`
 }
 
-func (w *WhoisFlag) Request(domain string) error {
+func (w *Whois) Request(domain string) error {
 	conn, err := net.Dial("tcp", net.JoinHostPort("whois.verisign-grs.com", "43"))
 	if err != nil {
 		return err
@@ -135,7 +143,7 @@ func (w *WhoisFlag) Request(domain string) error {
 }
 
 /* Convert time to RFC3339 format. */
-func (w *WhoisFlag) ParseTime(t string) (string, error) {
+func (w *Whois) ParseTime(t string) (string, error) {
 	/* 1997-09-15T04:00:00Z */
 	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
@@ -145,7 +153,7 @@ func (w *WhoisFlag) ParseTime(t string) (string, error) {
 }
 
 /* Convert time to days. */
-func (w *WhoisFlag) CalculateDays(t string) (int, error) {
+func (w *Whois) CalculateDays(t string) (int, error) {
 	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
 		return 0, err
@@ -153,31 +161,14 @@ func (w *WhoisFlag) CalculateDays(t string) (int, error) {
 	return int(s.Local().Sub(common.TimeNow.Local()).Hours() / 24), err
 }
 
-func (w *WhoisFlag) empty() bool {
+func (w *Whois) empty() bool {
 	if w.CreatedDate != w.ExpiresDate || w.UpdatedDate != w.Registrar {
 		return false
 	}
 	return true
 }
 
-func (w WhoisFlag) String() {
-	if w.expiry {
-		PrintString(w.ExpiresDate)
-		return
-	}
-	if w.ns {
-		PrintJSON(w.NameServers)
-		return
-	}
-	if w.registrar {
-		PrintString(w.Registrar)
-		return
-	}
-	if w.days {
-		PrintString(w.RemainDays)
-		return
-	}
-
+func (w Whois) String() {
 	var name []string
 	rt := reflect.TypeOf(w)
 	for _, f := range reflect.VisibleFields(rt) {
