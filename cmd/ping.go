@@ -57,10 +57,16 @@ func init() {
 			host := args[0]
 			var p = Ping{
 				IPv6:     flags.ipv6,
+				Count:    flags.count,
+				Size:     flags.size,
 				TTL:      flags.ttl,
 				Interval: flags.interval,
 				Timeout:  flags.timeout,
-				Data:     Randoms.GenerateString(flags.size, LowercaseLetters),
+				Data: icmp.Message{
+					Type: ipv4.ICMPTypeEcho,
+					Code: 0,
+					Body: &icmp.Echo{Data: Randoms.GenerateString(flags.size, LowercaseLetters)},
+				},
 			}
 
 			network := "ip4"
@@ -82,29 +88,7 @@ func init() {
 				defer conn.Close()
 			}
 
-			quit := make(chan os.Signal, 1)
-			signal.Notify(quit, os.Interrupt)
-			startTime := time.Now()
-			for i := 0; ; i++ {
-				if i == 0 {
-					header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(p.Data))
-					PrintString(header)
-				}
-				if err := p.Connect(conn, i, ip, p.Data); err != nil {
-					PrintString(err)
-				}
-				if i == flags.count-1 {
-					p.summary(host, time.Since(startTime))
-					return
-				}
-				time.Sleep(flags.interval)
-				select {
-				default:
-				case <-quit:
-					p.summary(host, time.Since(startTime))
-					return
-				}
-			}
+			p.Connect(conn, ip, host)
 		},
 	}
 	rootCmd.AddCommand(pingCmd)
@@ -118,9 +102,9 @@ func init() {
 
 type Ping struct {
 	IPv6              bool
-	TTL               int
+	Count, Size, TTL  int
 	Interval, Timeout time.Duration
-	Data              []byte
+	Data              icmp.Message
 
 	lost bool
 	sta  struct {
@@ -215,50 +199,65 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 	return out
 }
 
-func (p *Ping) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr, icmpData []byte) error {
-	data := icmp.Message{
-		Type: ipv4.ICMPTypeEcho,
-		Code: 0,
-		Body: &icmp.Echo{ID: counter & 0xffff, Seq: counter & 0xffff, Data: icmpData},
-	}
-	if p.IPv6 {
-		data.Type = ipv6.ICMPTypeEchoRequest
-	}
-	b, err := data.Marshal(nil)
-	if err != nil {
-		return err
-	}
-
-	/* Send packet. */
-	startTime := time.Now()
-	_, err = conn.WriteTo(b, addr)
-	if err != nil {
-		return err
-	}
-
-	/* Wait receiving. */
+func (p *Ping) Connect(conn *icmp.PacketConn, addr *net.IPAddr, host string) {
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
 	reply := make([]byte, 1500)
-	if err = conn.SetReadDeadline(time.Now().Add(p.Timeout)); err != nil {
-		return err
-	}
-	n, cm, peer, err := p.readReply(conn, reply, counter)
-	if err != nil {
-		return err
-	}
-	duration := time.Since(startTime)
+	allTime := time.Now()
+	for i := 0; ; i++ {
+		if i == 0 {
+			header := fmt.Sprintf("PING %s (%v): %d data bytes", host, addr, p.Size)
+			PrintString(header)
+		}
+		p.Data.Body.(*icmp.Echo).ID = i & 0xffff
+		p.Data.Body.(*icmp.Echo).Seq = i & 0xffff
+		if p.IPv6 {
+			p.Data.Type = ipv6.ICMPTypeEchoRequest
+		}
+		b, err := p.Data.Marshal(nil)
+		if err != nil {
+			PrintString(err)
+		}
 
-	proto := 1
-	if p.IPv6 {
-		proto = 58
-	}
-	result, err := icmp.ParseMessage(proto, reply[:n])
-	if err != nil {
-		return err
-	}
-	out := p.printMsg(result, duration, peer, counter, len(b), cm)
-	PrintString(out)
+		/* Send packet. */
+		startTime := time.Now()
+		_, err = conn.WriteTo(b, addr)
+		if err != nil {
+			PrintString(err)
+		}
 
-	return err
+		/* Wait receiving. */
+		if err = conn.SetReadDeadline(time.Now().Add(p.Timeout)); err != nil {
+			PrintString(err)
+		}
+		n, cm, peer, err := p.readReply(conn, reply, i)
+		if err != nil {
+			PrintString(err)
+		}
+		duration := time.Since(startTime)
+
+		proto := 1
+		if p.IPv6 {
+			proto = 58
+		}
+		result, err := icmp.ParseMessage(proto, reply[:n])
+		if err != nil {
+			PrintString(err)
+		}
+		out := p.printMsg(result, duration, peer, i, len(b), cm)
+		PrintString(out)
+		if i == p.Count-1 {
+			p.summary(host, time.Since(allTime))
+			return
+		}
+		time.Sleep(p.Interval)
+		select {
+		default:
+		case <-quit:
+			p.summary(host, time.Since(allTime))
+			return
+		}
+	}
 }
 
 func (p *Ping) summary(host string, t time.Duration) {
