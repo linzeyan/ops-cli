@@ -40,7 +40,7 @@ func init() {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(_ *cobra.Command, _ []string) {
-			var v = VersionOutput{
+			var v = Version{
 				Version: appVersion,
 				Commit:  appCommit,
 				Date:    appBuildTime,
@@ -52,14 +52,14 @@ func init() {
 	rootCmd.AddCommand(versionCmd)
 }
 
-type VersionOutput struct {
+type Version struct {
 	Version string `json:"version,omitempty" yaml:"version,omitempty"`
 	Commit  string `json:"commit,omitempty" yaml:"commit,omitempty"`
 	Date    string `json:"date,omitempty" yaml:"date,omitempty"`
 	Runtime string `json:"runtime,omitempty" yaml:"runtime,omitempty"`
 }
 
-func (r VersionOutput) String() {
+func (r Version) String() {
 	var ver strings.Builder
 	f := reflect.ValueOf(&r).Elem()
 	t := f.Type()
