@@ -192,7 +192,7 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 	case ipv4.ICMPTypeEchoReply, ipv6.ICMPTypeEchoReply:
 		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v", size, peer, counter, ttl, duration)
 	case ipv4.ICMPTypeDestinationUnreachable, ipv6.ICMPTypeDestinationUnreachable:
-		out = fmt.Sprintf("%v Destination Unreachable", peer)
+		out = "Destination Unreachable"
 	}
 	p.statistics(duration)
 	PrintString(out)
