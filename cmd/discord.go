@@ -40,14 +40,14 @@ func init() {
 	}
 
 	runE := func(cmd *cobra.Command, _ []string) error {
+		if flags.arg == "" {
+			return common.ErrInvalidFlag
+		}
 		var err error
 		if rootConfig != "" {
 			if err = ReadConfig(CommandDiscord, &flags); err != nil {
 				return err
 			}
-		}
-		if flags.arg == "" {
-			return common.ErrInvalidFlag
 		}
 		var d Discord
 		if err = d.Init(flags.Token); err != nil {
