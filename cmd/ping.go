@@ -175,7 +175,7 @@ func (p *Ping) readReply(reply []byte, counter int) (int, any, net.Addr, error) 
 	return n, cm, peer, err
 }
 
-func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.Addr, counter, size int, cm any) string {
+func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.Addr, counter, size int, cm any) {
 	var ttl int
 	switch c := cm.(type) {
 	case *ipv4.ControlMessage:
@@ -192,7 +192,7 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 		out = fmt.Sprintf("%v Destination Unreachable", peer)
 	}
 	p.statistics(duration)
-	return out
+	PrintString(out)
 }
 
 func (p *Ping) Connect(host string) {
@@ -205,10 +205,15 @@ func (p *Ping) Connect(host string) {
 		PrintString(err)
 		return
 	}
+	if p.IPv6 {
+		p.Data.Type = ipv6.ICMPTypeEchoRequest
+	}
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	reply := make([]byte, 1500)
 	allTime := time.Now()
+
 	for i := 0; ; i++ {
 		if i == 0 {
 			header := fmt.Sprintf("PING %s (%v): %d data bytes", host, addr, p.Size)
@@ -216,12 +221,11 @@ func (p *Ping) Connect(host string) {
 		}
 		p.Data.Body.(*icmp.Echo).ID = i & 0xffff
 		p.Data.Body.(*icmp.Echo).Seq = i & 0xffff
-		if p.IPv6 {
-			p.Data.Type = ipv6.ICMPTypeEchoRequest
-		}
+
 		b, err := p.Data.Marshal(nil)
 		if err != nil {
 			PrintString(err)
+			return
 		}
 
 		/* Send packet. */
@@ -249,8 +253,8 @@ func (p *Ping) Connect(host string) {
 		if err != nil {
 			PrintString(err)
 		}
-		out := p.printMsg(result, duration, peer, i, len(b), cm)
-		PrintString(out)
+
+		p.printMsg(result, duration, peer, i, len(b), cm)
 		if i == p.Count-1 {
 			p.summary(host, time.Since(allTime))
 			return
