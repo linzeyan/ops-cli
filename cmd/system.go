@@ -31,7 +31,6 @@ import (
 )
 
 func init() {
-	var systemFlag SystemFlag
 	var systemCmd = &cobra.Command{
 		Use:   CommandSystem,
 		Short: "Display system informations",
@@ -40,10 +39,35 @@ func init() {
 		DisableFlagsInUseLine: true,
 	}
 
+	runE := func(cmd *cobra.Command, _ []string) error {
+		var s System
+		var err error
+		var resp any
+		switch cmd.Name() {
+		case CommandCPU:
+			resp, err = s.CPUInfo()
+		case CommandDisk:
+			resp, err = s.DiskUsage()
+		case CommandHost:
+			resp, err = s.HostInfo()
+		case CommandLoad:
+			resp, err = s.LoadAvg()
+		case CommandMemory:
+			resp, err = s.MemUsage()
+		case CommandNetwork:
+			resp, err = s.NetInfo()
+		}
+		if err != nil {
+			return err
+		}
+		OutputDefaultJSON(resp)
+		return err
+	}
+
 	var systemSubCmdCPU = &cobra.Command{
 		Use:   CommandCPU,
 		Short: "Display cpu informations",
-		RunE:  systemFlag.RunE,
+		RunE:  runE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -51,7 +75,7 @@ func init() {
 	var systemSubCmdDisk = &cobra.Command{
 		Use:   CommandDisk,
 		Short: "Display disk informations",
-		RunE:  systemFlag.RunE,
+		RunE:  runE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -59,7 +83,7 @@ func init() {
 	var systemSubCmdHost = &cobra.Command{
 		Use:   CommandHost,
 		Short: "Display host informations",
-		RunE:  systemFlag.RunE,
+		RunE:  runE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -67,7 +91,7 @@ func init() {
 	var systemSubCmdLoad = &cobra.Command{
 		Use:   CommandLoad,
 		Short: "Display load informations",
-		RunE:  systemFlag.RunE,
+		RunE:  runE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -75,7 +99,7 @@ func init() {
 	var systemSubCmdMemory = &cobra.Command{
 		Use:   CommandMemory,
 		Short: "Display memory informations",
-		RunE:  systemFlag.RunE,
+		RunE:  runE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -83,7 +107,7 @@ func init() {
 	var systemSubCmdNetwork = &cobra.Command{
 		Use:   CommandNetwork,
 		Short: "Display network informations",
-		RunE:  systemFlag.RunE,
+		RunE:  runE,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -97,33 +121,9 @@ func init() {
 	systemCmd.AddCommand(systemSubCmdNetwork)
 }
 
-type SystemFlag struct{}
+type System struct{}
 
-func (s *SystemFlag) RunE(cmd *cobra.Command, _ []string) error {
-	var err error
-	var resp any
-	switch cmd.Name() {
-	case CommandCPU:
-		resp, err = s.CPUInfo()
-	case CommandDisk:
-		resp, err = s.DiskUsage()
-	case CommandHost:
-		resp, err = s.HostInfo()
-	case CommandLoad:
-		resp, err = s.LoadAvg()
-	case CommandMemory:
-		resp, err = s.MemUsage()
-	case CommandNetwork:
-		resp, err = s.NetInfo()
-	}
-	if err != nil {
-		return err
-	}
-	OutputDefaultJSON(resp)
-	return err
-}
-
-func (s *SystemFlag) CPUInfo() (any, error) {
+func (s *System) CPUInfo() (any, error) {
 	info, err := cpu.Info()
 	if err != nil {
 		return nil, err
@@ -142,7 +142,7 @@ func (s *SystemFlag) CPUInfo() (any, error) {
 	return &resp, err
 }
 
-func (s *SystemFlag) DiskUsage() (any, error) {
+func (s *System) DiskUsage() (any, error) {
 	info, err := disk.Usage("/")
 	if err != nil {
 		return nil, err
@@ -160,7 +160,7 @@ func (s *SystemFlag) DiskUsage() (any, error) {
 	return &resp, err
 }
 
-func (s *SystemFlag) HostInfo() (any, error) {
+func (s *System) HostInfo() (any, error) {
 	info, err := host.Info()
 	if err != nil {
 		return nil, err
@@ -189,7 +189,7 @@ func (s *SystemFlag) HostInfo() (any, error) {
 	return &resp, err
 }
 
-func (s *SystemFlag) LoadAvg() (any, error) {
+func (s *System) LoadAvg() (any, error) {
 	info, err := load.Avg()
 	if err != nil {
 		return nil, err
@@ -204,7 +204,7 @@ func (s *SystemFlag) LoadAvg() (any, error) {
 	return &resp, err
 }
 
-func (s *SystemFlag) MemUsage() (any, error) {
+func (s *System) MemUsage() (any, error) {
 	info, err := mem.VirtualMemory()
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (s *SystemFlag) MemUsage() (any, error) {
 	return &resp, err
 }
 
-func (s *SystemFlag) NetInfo() (any, error) {
+func (s *System) NetInfo() (any, error) {
 	info, err := net.IOCounters(false)
 	if err != nil {
 		return nil, err
