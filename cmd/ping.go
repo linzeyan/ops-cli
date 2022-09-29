@@ -96,12 +96,15 @@ type Ping struct {
 	Data              icmp.Message
 	Conn              *icmp.PacketConn
 
-	lost bool
-	sta  struct {
-		send, loss, receive int
-		min, avg, max       time.Duration
-		rtts                []time.Duration
-	}
+	stat ICMPStat
+}
+
+type ICMPStat struct {
+	Lost bool
+
+	Send, Loss, Receive int
+	Min, Avg, Max       time.Duration
+	Rtts                []time.Duration
 }
 
 func (p *Ping) Listen() (*icmp.PacketConn, error) {
@@ -132,27 +135,27 @@ func (p *Ping) Listen() (*icmp.PacketConn, error) {
 }
 
 func (p *Ping) statistics(duration time.Duration) {
-	if p.sta.min == 0 {
-		p.sta.min = duration
+	if p.stat.Min == 0 {
+		p.stat.Min = duration
 	}
-	if p.sta.max == 0 {
-		p.sta.max = duration
+	if p.stat.Max == 0 {
+		p.stat.Max = duration
 	}
-	p.sta.avg += duration
-	p.sta.send++
-	p.sta.rtts = append(p.sta.rtts, duration)
-	if p.lost {
-		p.sta.loss++
-		p.lost = false
+	p.stat.Avg += duration
+	p.stat.Send++
+	p.stat.Rtts = append(p.stat.Rtts, duration)
+	if p.stat.Lost {
+		p.stat.Loss++
+		p.stat.Lost = false
 	} else {
-		p.sta.receive++
+		p.stat.Receive++
 	}
 
-	if duration < p.sta.min {
-		p.sta.min = duration
+	if duration < p.stat.Min {
+		p.stat.Min = duration
 	}
-	if duration > p.sta.max {
-		p.sta.max = duration
+	if duration > p.stat.Max {
+		p.stat.Max = duration
 	}
 }
 
@@ -167,7 +170,7 @@ func (p *Ping) readReply(reply []byte, counter int) (int, any, net.Addr, error) 
 		n, cm, peer, err = p.Conn.IPv4PacketConn().ReadFrom(reply)
 	}
 	if err != nil {
-		p.lost = true
+		p.stat.Lost = true
 		p.statistics(0)
 		e := fmt.Sprintf("Request timeout for icmp_seq %d", counter)
 		return 0, nil, nil, errors.New(e)
@@ -270,27 +273,27 @@ func (p *Ping) Connect(host string) {
 }
 
 func (p *Ping) summary(host string, t time.Duration) {
-	if p.sta.send == 0 {
+	if p.stat.Send == 0 {
 		return
 	}
 
 	out := "\n"
 	out += fmt.Sprintf("--- %s ping statistics ---\n", host)
 	out += fmt.Sprintf("%d packets transmitted, %d received, %.1f%% packet loss, time %vms",
-		p.sta.send, p.sta.receive, float64(p.sta.loss*100)/float64(p.sta.send), t.Milliseconds())
-	if p.sta.send == p.sta.loss {
+		p.stat.Send, p.stat.Receive, float64(p.stat.Loss*100)/float64(p.stat.Send), t.Milliseconds())
+	if p.stat.Send == p.stat.Loss {
 		PrintString(out)
 		return
 	}
 
 	out += "\n"
-	avg := p.sta.avg / time.Duration(p.sta.receive)
+	avg := p.stat.Avg / time.Duration(p.stat.Receive)
 	var temp float64
-	for _, v := range p.sta.rtts {
+	for _, v := range p.stat.Rtts {
 		temp += math.Pow(float64(v-avg), 2)
 	}
-	variance := temp / float64(len(p.sta.rtts))
+	variance := temp / float64(len(p.stat.Rtts))
 	out += fmt.Sprintf("round-trip min/avg/max/mdev = %v/%v/%v/%v",
-		p.sta.min, avg, p.sta.max, time.Duration(math.Sqrt(variance)))
+		p.stat.Min, avg, p.stat.Max, time.Duration(math.Sqrt(variance)))
 	PrintString(out)
 }
