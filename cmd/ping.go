@@ -33,7 +33,12 @@ import (
 )
 
 func init() {
-	var pingFlag PingFlag
+	var flags struct {
+		ipv6             bool
+		count, size, ttl int
+		interval         time.Duration
+		timeout          time.Duration
+	}
 	var pingCmd = &cobra.Command{
 		Use:  CommandPing + " [host]",
 		Args: cobra.ExactArgs(1),
@@ -41,22 +46,81 @@ func init() {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Short: "Send ICMP ECHO_REQUEST packets to network hosts",
-		Run:   pingFlag.Run,
+		Run: func(_ *cobra.Command, args []string) {
+			if flags.count == 0 || flags.ttl <= 0 || flags.size <= 0 {
+				return
+			}
+			if flags.interval < 50*time.Millisecond {
+				flags.interval = 50 * time.Millisecond
+			}
+
+			host := args[0]
+			var p = Ping{
+				IPv6:     flags.ipv6,
+				TTL:      flags.ttl,
+				Interval: flags.interval,
+				Timeout:  flags.timeout,
+				Data:     Randoms.GenerateString(flags.size, LowercaseLetters),
+			}
+
+			network := "ip4"
+			if flags.ipv6 {
+				network = "ip6"
+			}
+			ip, err := net.ResolveIPAddr(network, host)
+			if err != nil {
+				PrintString(err)
+				return
+			}
+
+			conn, err := p.Listen()
+			if err != nil {
+				PrintString(err)
+				return
+			}
+			if conn != nil {
+				defer conn.Close()
+			}
+
+			quit := make(chan os.Signal, 1)
+			signal.Notify(quit, os.Interrupt)
+			startTime := time.Now()
+			for i := 0; ; i++ {
+				if i == 0 {
+					header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(p.Data))
+					PrintString(header)
+				}
+				if err := p.Connect(conn, i, ip, p.Data); err != nil {
+					PrintString(err)
+				}
+				if i == flags.count-1 {
+					p.summary(host, time.Since(startTime))
+					return
+				}
+				time.Sleep(flags.interval)
+				select {
+				default:
+				case <-quit:
+					p.summary(host, time.Since(startTime))
+					return
+				}
+			}
+		},
 	}
 	rootCmd.AddCommand(pingCmd)
-	pingCmd.Flags().IntVarP(&pingFlag.count, "count", "c", -1, common.Usage("Specify ping counts"))
-	pingCmd.Flags().BoolVarP(&pingFlag.ipv6, "ipv6", "6", false, common.Usage("Use ICMPv6"))
-	pingCmd.Flags().IntVarP(&pingFlag.size, "size", "s", 56, common.Usage("Specify packet size"))
-	pingCmd.Flags().IntVarP(&pingFlag.ttl, "ttl", "", 64, common.Usage("Specify packet ttl"))
-	pingCmd.Flags().DurationVarP(&pingFlag.interval, "interval", "i", time.Second, common.Usage("Specify interval"))
-	pingCmd.Flags().DurationVarP(&pingFlag.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
+	pingCmd.Flags().IntVarP(&flags.count, "count", "c", -1, common.Usage("Specify ping counts"))
+	pingCmd.Flags().BoolVarP(&flags.ipv6, "ipv6", "6", false, common.Usage("Use ICMPv6"))
+	pingCmd.Flags().IntVarP(&flags.size, "size", "s", 56, common.Usage("Specify packet size"))
+	pingCmd.Flags().IntVarP(&flags.ttl, "ttl", "", 64, common.Usage("Specify packet ttl"))
+	pingCmd.Flags().DurationVarP(&flags.interval, "interval", "i", time.Second, common.Usage("Specify interval"))
+	pingCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
 }
 
-type PingFlag struct {
-	ipv6             bool
-	count, size, ttl int
-	interval         time.Duration
-	timeout          time.Duration
+type Ping struct {
+	IPv6              bool
+	TTL               int
+	Interval, Timeout time.Duration
+	Data              []byte
 
 	lost bool
 	sta  struct {
@@ -66,68 +130,13 @@ type PingFlag struct {
 	}
 }
 
-func (p *PingFlag) Run(cmd *cobra.Command, args []string) {
-	if p.count == 0 || p.ttl <= 0 || p.size <= 0 {
-		return
-	}
-	if p.interval < 50*time.Millisecond {
-		p.interval = 50 * time.Millisecond
-	}
-
-	host := args[0]
-	data := Randoms.GenerateString(p.size, LowercaseLetters)
-
-	network := "ip4"
-	if p.ipv6 {
-		network = "ip6"
-	}
-	ip, err := net.ResolveIPAddr(network, host)
-	if err != nil {
-		PrintString(err)
-		return
-	}
-
-	conn, err := p.listen()
-	if err != nil {
-		PrintString(err)
-		return
-	}
-	if conn != nil {
-		defer conn.Close()
-	}
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	startTime := time.Now()
-	for i := 0; ; i++ {
-		if i == 0 {
-			header := fmt.Sprintf("PING %s (%v): %d data bytes", host, ip, len(data))
-			PrintString(header)
-		}
-		if err := p.Connect(conn, i, ip, data); err != nil {
-			PrintString(err)
-		}
-		if i == p.count-1 {
-			p.summary(host, time.Since(startTime))
-			return
-		}
-		time.Sleep(p.interval)
-		select {
-		default:
-		case <-quit:
-			p.summary(host, time.Since(startTime))
-			return
-		}
-	}
-}
-
-func (p *PingFlag) listen() (*icmp.PacketConn, error) {
-	if p.ipv6 {
+func (p *Ping) Listen() (*icmp.PacketConn, error) {
+	if p.IPv6 {
 		conn, err := icmp.ListenPacket("ip6:ipv6-icmp", "::")
 		if err != nil {
 			return nil, err
 		}
-		if err = conn.IPv6PacketConn().SetHopLimit(p.ttl); err != nil {
+		if err = conn.IPv6PacketConn().SetHopLimit(p.TTL); err != nil {
 			return nil, err
 		}
 		return conn, conn.IPv6PacketConn().SetControlMessage(ipv6.FlagHopLimit, true)
@@ -136,13 +145,13 @@ func (p *PingFlag) listen() (*icmp.PacketConn, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = conn.IPv4PacketConn().SetTTL(p.ttl); err != nil {
+	if err = conn.IPv4PacketConn().SetTTL(p.TTL); err != nil {
 		return nil, err
 	}
 	return conn, conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL, true)
 }
 
-func (p *PingFlag) statistics(duration time.Duration) {
+func (p *Ping) statistics(duration time.Duration) {
 	if p.sta.min == 0 {
 		p.sta.min = duration
 	}
@@ -167,12 +176,12 @@ func (p *PingFlag) statistics(duration time.Duration) {
 	}
 }
 
-func (p *PingFlag) readReply(conn *icmp.PacketConn, reply []byte, counter int) (int, any, net.Addr, error) {
+func (p *Ping) readReply(conn *icmp.PacketConn, reply []byte, counter int) (int, any, net.Addr, error) {
 	var n int
 	var cm any
 	var peer net.Addr
 	var err error
-	if p.ipv6 {
+	if p.IPv6 {
 		n, cm, peer, err = conn.IPv6PacketConn().ReadFrom(reply)
 	} else {
 		n, cm, peer, err = conn.IPv4PacketConn().ReadFrom(reply)
@@ -186,7 +195,7 @@ func (p *PingFlag) readReply(conn *icmp.PacketConn, reply []byte, counter int) (
 	return n, cm, peer, err
 }
 
-func (p *PingFlag) printMsg(result *icmp.Message, duration time.Duration, peer net.Addr, counter, size int, cm any) string {
+func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.Addr, counter, size int, cm any) string {
 	var ttl int
 	switch c := cm.(type) {
 	case *ipv4.ControlMessage:
@@ -206,13 +215,13 @@ func (p *PingFlag) printMsg(result *icmp.Message, duration time.Duration, peer n
 	return out
 }
 
-func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr, icmpData []byte) error {
+func (p *Ping) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr, icmpData []byte) error {
 	data := icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
 		Code: 0,
 		Body: &icmp.Echo{ID: counter & 0xffff, Seq: counter & 0xffff, Data: icmpData},
 	}
-	if p.ipv6 {
+	if p.IPv6 {
 		data.Type = ipv6.ICMPTypeEchoRequest
 	}
 	b, err := data.Marshal(nil)
@@ -229,7 +238,7 @@ func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr,
 
 	/* Wait receiving. */
 	reply := make([]byte, 1500)
-	if err = conn.SetReadDeadline(time.Now().Add(p.timeout)); err != nil {
+	if err = conn.SetReadDeadline(time.Now().Add(p.Timeout)); err != nil {
 		return err
 	}
 	n, cm, peer, err := p.readReply(conn, reply, counter)
@@ -239,7 +248,7 @@ func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr,
 	duration := time.Since(startTime)
 
 	proto := 1
-	if p.ipv6 {
+	if p.IPv6 {
 		proto = 58
 	}
 	result, err := icmp.ParseMessage(proto, reply[:n])
@@ -252,7 +261,7 @@ func (p *PingFlag) Connect(conn *icmp.PacketConn, counter int, addr *net.IPAddr,
 	return err
 }
 
-func (p *PingFlag) summary(host string, t time.Duration) {
+func (p *Ping) summary(host string, t time.Duration) {
 	if p.sta.send == 0 {
 		return
 	}
