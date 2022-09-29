@@ -109,13 +109,11 @@ func (r *repository) fetchLatestVersion(username, repo string) *repository {
 	downloadLink := fmt.Sprintf("%s%s/%s/%s_%s_%s_%s.%s",
 		urlBase, "download", tag, repo, tag, runtime.GOOS, runtime.GOARCH, extension)
 
-	*r = repository{
-		GithubUsername: username,
-		Repository:     repo,
-		ReleaseTag:     tag,
-		DownloadLink:   downloadLink,
-		DownloadPath:   path.Base(downloadLink),
-	}
+	r.GithubUsername = username
+	r.Repository = repo
+	r.ReleaseTag = tag
+	r.DownloadLink = downloadLink
+	r.DownloadPath = path.Base(downloadLink)
 
 	return r
 }
@@ -274,7 +272,14 @@ func (*Updater) split(tag string) *version {
 	}
 	replace := strings.Replace(tag, "v", "", 1)
 	s := strings.Split(replace, ".")
-
+	if len(s) != 3 {
+		return &version{
+			Ver:   s[0],
+			Major: 0,
+			Minor: 0,
+			Patch: 0,
+		}
+	}
 	major, err := strconv.Atoi(s[0])
 	if err != nil {
 		PrintString(err)
