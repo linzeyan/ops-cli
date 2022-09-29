@@ -120,7 +120,7 @@ google.com ANY
 	digCmd.Flags().StringVarP(&flags.network, "net", "n", "tcp", common.Usage("udp/tcp"))
 }
 
-type DigResponse struct {
+type Dig struct {
 	NAME   string `json:"name" yaml:"name"`
 	TTL    string `json:"ttl" yaml:"ttl"`
 	CLASS  string `json:"class" yaml:"class"`
@@ -128,7 +128,7 @@ type DigResponse struct {
 	RECORD string `json:"record" yaml:"record"`
 }
 
-type DigList []DigResponse
+type DigList []Dig
 
 func (d *DigList) GetLocalServer() (string, error) {
 	if runtime.GOOS == "windows" {
@@ -171,10 +171,10 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 	}
 
 	for i := range resp.Answer {
-		var out DigResponse
+		var out Dig
 		elements := strings.Fields(fmt.Sprintf("%s ", resp.Answer[i]))
 		if len(elements) == 5 {
-			out = DigResponse{
+			out = Dig{
 				NAME:   elements[0],
 				TTL:    elements[1],
 				CLASS:  elements[2],
@@ -188,7 +188,7 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 				remain = remain + " " + slice[i]
 			}
 
-			out = DigResponse{
+			out = Dig{
 				NAME:   elements[0],
 				TTL:    elements[1],
 				CLASS:  elements[2],
@@ -203,7 +203,7 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 
 func (d DigList) String() {
 	var header []string
-	var dd DigResponse
+	var dd Dig
 	f := reflect.ValueOf(&dd).Elem()
 	t := f.Type()
 	for i := 0; i < f.NumField(); i++ {

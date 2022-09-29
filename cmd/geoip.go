@@ -46,7 +46,7 @@ func init() {
 				var r GeoIP
 				out, err = r.Request(args[0])
 			default:
-				var r GeoIPs
+				var r GeoIPList
 				out, err = r.Request(args)
 			}
 			if err != nil {
@@ -102,9 +102,9 @@ func (GeoIP) Request(ip string) (*GeoIP, error) {
 	return &data, err
 }
 
-type GeoIPs []GeoIP
+type GeoIPList []GeoIP
 
-func (GeoIPs) Request(inputs []string) (*GeoIPs, error) {
+func (GeoIPList) Request(inputs []string) (*GeoIPList, error) {
 	var ips = `[`
 	/* Valid IP and combine args */
 	for i := range inputs {
@@ -126,7 +126,7 @@ func (GeoIPs) Request(inputs []string) (*GeoIPs, error) {
 	if err != nil {
 		return nil, err
 	}
-	var data GeoIPs
+	var data GeoIPList
 	if err = Encoder.JSONMarshaler(content, &data); err != nil {
 		return nil, err
 	}
