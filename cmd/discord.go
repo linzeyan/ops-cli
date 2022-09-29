@@ -26,7 +26,11 @@ import (
 )
 
 func init() {
-	var discordFlag DiscordFlag
+	var flags struct {
+		Token   string `json:"token"`
+		Channel string `json:"channel_id"`
+		arg     string
+	}
 	var discordCmd = &cobra.Command{
 		Use:   CommandDiscord,
 		Short: "Send message to Discord",
@@ -35,101 +39,98 @@ func init() {
 		DisableFlagsInUseLine: true,
 	}
 
+	runE := func(cmd *cobra.Command, _ []string) error {
+		var err error
+		if rootConfig != "" {
+			if err = ReadConfig(CommandDiscord, &flags); err != nil {
+				return err
+			}
+		}
+		if flags.arg == "" {
+			return common.ErrInvalidFlag
+		}
+		var d Discord
+		if err = d.Init(flags.Token); err != nil {
+			return err
+		}
+		switch cmd.Name() {
+		case CommandFile:
+			err = d.File(flags.Channel, flags.arg)
+		case CommandText:
+			err = d.Text(flags.Channel, flags.arg)
+		case CommandText + "TS":
+			err = d.TextTTS(flags.Channel, flags.arg)
+		}
+		if err != nil {
+			return err
+		}
+		OutputDefaultNone(d.Response)
+		return err
+	}
+
 	var discordSubCmdFile = &cobra.Command{
 		Use:   CommandFile,
 		Short: "Send file to Discord",
-		RunE:  discordFlag.RunE,
+		RunE:  runE,
 	}
 
 	var discordSubCmdText = &cobra.Command{
 		Use:   CommandText,
 		Short: "Send text to Discord",
-		RunE:  discordFlag.RunE,
+		RunE:  runE,
 	}
 
 	var discordSubCmdTextTS = &cobra.Command{
 		Use:   CommandText + "TS",
 		Short: "Send text to speech to Discord",
-		RunE:  discordFlag.RunE,
+		RunE:  runE,
 	}
 	rootCmd.AddCommand(discordCmd)
 
-	discordCmd.PersistentFlags().StringVarP(&discordFlag.Token, "token", "t", "", common.Usage("Token"))
-	discordCmd.PersistentFlags().StringVarP(&discordFlag.Channel, "channel-id", "c", "", common.Usage("Channel ID"))
-	discordCmd.PersistentFlags().StringVarP(&discordFlag.arg, "arg", "a", "", common.Usage("Input argument"))
+	discordCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Token"))
+	discordCmd.PersistentFlags().StringVarP(&flags.Channel, "channel-id", "c", "", common.Usage("Channel ID"))
+	discordCmd.PersistentFlags().StringVarP(&flags.arg, "arg", "a", "", common.Usage("Input argument"))
 
 	discordCmd.AddCommand(discordSubCmdFile, discordSubCmdText, discordSubCmdTextTS)
 }
 
-type DiscordFlag struct {
-	Token   string `json:"token"`
-	Channel string `json:"channel_id"`
-	arg     string
-
-	api  *discordgo.Session
-	resp *discordgo.Message
+type Discord struct {
+	API      *discordgo.Session
+	Response *discordgo.Message
 }
 
-func (d *DiscordFlag) RunE(cmd *cobra.Command, args []string) error {
-	if d.arg == "" {
-		return common.ErrInvalidFlag
-	}
+func (d *Discord) Init(token string) error {
 	var err error
-	if err = d.Init(); err != nil {
-		return err
-	}
-	switch cmd.Name() {
-	case CommandFile:
-		err = d.File()
-	case CommandText:
-		err = d.Text()
-	case CommandText + "TS":
-		err = d.TextTTS()
-	}
-	if err != nil {
-		return err
-	}
-	OutputDefaultNone(d.resp)
-	return err
-}
-
-func (d *DiscordFlag) Init() error {
-	var err error
-	if rootConfig != "" {
-		if err = ReadConfig(CommandDiscord, d); err != nil {
-			return err
-		}
-	}
-	if d.Token == "" {
+	if token == "" {
 		return common.ErrInvalidToken
 	}
-	d.api, err = discordgo.New("Bot " + d.Token)
-	if d.api == nil {
+	d.API, err = discordgo.New("Bot " + token)
+	if d.API == nil {
 		return common.ErrFailedInitial
 	}
 	return err
 }
 
-func (d *DiscordFlag) File() error {
+func (d *Discord) File(channel, arg string) error {
 	var err error
-	f, err := os.Open(d.arg)
+	f, err := os.Open(arg)
 	if err != nil {
 		return err
 	}
-	filename := filepath.Base(d.arg)
+	filename := filepath.Base(arg)
 	defer f.Close()
-	d.resp, err = d.api.ChannelFileSend(d.Channel, filename, f)
+	d.Response, err = d.API.ChannelFileSend(channel, filename, f)
 	return err
 }
 
-func (d *DiscordFlag) Text() error {
+func (d *Discord) Text(channel, arg string) error {
 	var err error
-	d.resp, err = d.api.ChannelMessageSend(d.Channel, d.arg)
+	d.Response, err = d.API.ChannelMessageSend(channel, arg)
 	return err
 }
 
-func (d *DiscordFlag) TextTTS() error {
+func (d *Discord) TextTTS(channel, arg string) error {
 	var err error
-	d.resp, err = d.api.ChannelMessageSendTTS(d.Channel, d.arg)
+	d.Response, err = d.API.ChannelMessageSendTTS(channel, arg)
 	return err
 }
