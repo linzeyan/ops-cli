@@ -75,7 +75,9 @@ func init() {
 				defer conn.Close()
 			}
 			t.Connetion = conn
-			t.stat = make([]ICMPStat, t.TTL)
+			if t.Record {
+				t.stat = make([]ICMPStat, t.TTL)
+			}
 			if err = t.Connect(args[0]); err != nil {
 				PrintString(err)
 				return
