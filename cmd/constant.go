@@ -139,6 +139,13 @@ const (
 )
 
 const (
+	treePerfixEmpty = "    "
+	treePerfixLayer = "│   "
+	treePerfixFile  = "├── "
+	treePerfixEnd   = "└── "
+)
+
+const (
 	TypeBinary  = "binary"
 	TypeOctal   = "octal"
 	TypeDecimal = "decimal"

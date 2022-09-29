@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -30,82 +31,78 @@ import (
 )
 
 func init() {
-	var treeFlag TreeFlag
+	var flags TreeOptions
 	var treeCmd = &cobra.Command{
 		Use:   CommandTree,
 		Short: "Show the contents of the giving directory as a tree",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveFilterDirs
 		},
-		Run: treeFlag.Run,
+		Run: func(_ *cobra.Command, args []string) {
+			if flags.Limit < 1 {
+				PrintString(common.ErrInvalidArg)
+				return
+			}
+			if len(args) == 0 {
+				args = append(args, ".")
+			}
+			var t Tree
+			t.Walk(args, &flags)
+		},
 	}
 	rootCmd.AddCommand(treeCmd)
-	treeCmd.Flags().BoolVarP(&treeFlag.all, "all", "a", false, common.Usage("List all files"))
-	treeCmd.Flags().BoolVarP(&treeFlag.change, "change", "c", false, common.Usage("Print the date of last modification"))
-	treeCmd.Flags().BoolVarP(&treeFlag.dirs, "dirs", "d", false, common.Usage("List only directories"))
-	treeCmd.Flags().BoolVarP(&treeFlag.full, "full", "f", false, common.Usage("Print full path for each file"))
-	treeCmd.Flags().BoolVarP(&treeFlag.perm, "perm", "p", false, common.Usage("Print file permission"))
-	treeCmd.Flags().BoolVarP(&treeFlag.mode, "mode", "m", false, common.Usage("Print file mode"))
-	treeCmd.Flags().BoolVarP(&treeFlag.size, "size", "s", false, common.Usage("Print the size for each file"))
-	treeCmd.Flags().IntVarP(&treeFlag.limit, "limit", "l", 30, common.Usage("Specify directories depth"))
-	treeCmd.Flags().BoolVarP(&treeFlag.gid, "gid", "g", false, common.Usage("Print group owner for each file"))
-	treeCmd.Flags().BoolVarP(&treeFlag.uid, "uid", "u", false, common.Usage("Print owner for each file"))
-	treeCmd.Flags().BoolVarP(&treeFlag.inodes, "inodes", "", false, common.Usage("Print inode number for each file"))
-	treeCmd.Flags().BoolVarP(&treeFlag.device, "device", "", false, common.Usage("Print device ID number for each file"))
+	treeCmd.Flags().BoolVarP(&flags.All, "all", "a", false, common.Usage("List all files"))
+	treeCmd.Flags().BoolVarP(&flags.Change, "change", "c", false, common.Usage("Print the date of last modification"))
+	treeCmd.Flags().BoolVarP(&flags.Dirs, "dirs", "d", false, common.Usage("List only directories"))
+	treeCmd.Flags().BoolVarP(&flags.Full, "full", "f", false, common.Usage("Print full path for each file"))
+	treeCmd.Flags().BoolVarP(&flags.Perm, "perm", "p", false, common.Usage("Print file permission"))
+	treeCmd.Flags().BoolVarP(&flags.Mode, "mode", "m", false, common.Usage("Print file mode"))
+	treeCmd.Flags().BoolVarP(&flags.Size, "size", "s", false, common.Usage("Print the size for each file"))
+	treeCmd.Flags().IntVarP(&flags.Limit, "limit", "l", 30, common.Usage("Specify directories depth"))
+	treeCmd.Flags().BoolVarP(&flags.GID, "gid", "g", false, common.Usage("Print group owner for each file"))
+	treeCmd.Flags().BoolVarP(&flags.UID, "uid", "u", false, common.Usage("Print owner for each file"))
+	treeCmd.Flags().BoolVarP(&flags.Links, "links", "", false, common.Usage("Print links for each file"))
+	treeCmd.Flags().BoolVarP(&flags.Inodes, "inodes", "", false, common.Usage("Print inode number for each file"))
+	treeCmd.Flags().BoolVarP(&flags.Device, "device", "", false, common.Usage("Print device ID number for each file"))
 }
 
-const (
-	lastDirPrefix = "    "
-	layerPrefix   = "│   "
-	filePrefix    = "├── "
-	endPrefix     = "└── "
-)
-
-type TreeFormat struct {
-	Type     string        `json:"type"`
-	Path     string        `json:"path"`
-	Name     string        `json:"name"`
-	Perm     string        `json:"perm"`
-	Mode     string        `json:"mode"`
-	Size     string        `json:"size"`
-	ModTime  string        `json:"modTime"`
-	UID      string        `json:"uid"`
-	GID      string        `json:"gid"`
-	Inode    string        `json:"inode"`
-	Devide   string        `json:"device"`
-	Contents *[]TreeFormat `json:"contents"`
-
-	layers int
+type TreeOptions struct {
+	All    bool
+	Change bool
+	Dirs   bool
+	Full   bool
+	Limit  int
+	Perm   bool
+	Mode   bool
+	Size   bool
+	UID    bool
+	GID    bool
+	Inodes bool
+	Device bool
+	Links  bool
 }
 
-type TreeFlag struct {
-	all    bool
-	change bool
-	dirs   bool
-	full   bool
-	limit  int
-	perm   bool
-	mode   bool
-	size   bool
-	uid    bool
-	gid    bool
-	inodes bool
-	device bool
+type Tree struct {
+	Type     string  `json:"type"`
+	Path     string  `json:"path"`
+	Name     string  `json:"name"`
+	Perm     string  `json:"perm"`
+	Mode     string  `json:"mode"`
+	Links    uint16  `json:"links"`
+	UID      string  `json:"uid"`
+	GID      string  `json:"gid"`
+	Size     string  `json:"size"`
+	ModTime  string  `json:"modTime"`
+	Inode    string  `json:"inode"`
+	Devide   string  `json:"device"`
+	Contents *[]Tree `json:"contents"`
 
+	layers      int
 	dirN, fileN int
 	stat        FileStat
 }
 
-func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
-	if t.limit < 1 {
-		PrintString(common.ErrInvalidArg)
-		return
-	}
-
-	if len(args) == 0 {
-		args = append(args, ".")
-	}
-
+func (t *Tree) Walk(args []string, opt *TreeOptions) {
 	for _, v := range args {
 		dirName, err := filepath.Abs(v)
 		if err != nil {
@@ -117,12 +114,12 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			PrintString(err)
 			return
 		}
-		uid, gid, inode, device, err := t.getInfo(f)
+		uid, gid, links, inode, device, err := t.getInfo(f)
 		if err != nil {
 			PrintString(err)
 			return
 		}
-		output := TreeFormat{
+		*t = Tree{
 			Type:     t.stat.FileType(f),
 			Path:     dirName,
 			Name:     v,
@@ -132,52 +129,53 @@ func (t *TreeFlag) Run(cmd *cobra.Command, args []string) {
 			ModTime:  f.ModTime().Format(time.ANSIC),
 			UID:      uid,
 			GID:      gid,
+			Links:    links,
 			Inode:    inode,
 			Devide:   device,
-			Contents: new([]TreeFormat),
+			Contents: new([]Tree),
 			layers:   1,
 		}
 
-		err = t.iterate(&output)
+		err = t.iterate(t, opt)
 		if err != nil {
 			PrintString(err)
 			return
 		}
-		t.Print("", output)
+		t.print("", *t, opt)
 		t.summary()
 	}
 }
 
 /* getInfo returns uid, gid, inodes, device and error. */
-func (t *TreeFlag) getInfo(fileinfo fs.FileInfo) (string, string, string, string, error) {
+func (t *Tree) getInfo(fileinfo fs.FileInfo) (string, string, uint16, string, string, error) {
 	err := Encoder.JSONMarshaler(fileinfo.Sys(), &t.stat)
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", 0, "", "", err
 	}
 	uid, err := user.LookupId(fmt.Sprintf(`%d`, t.stat.UID))
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", 0, "", "", err
 	}
 	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, t.stat.GID))
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", 0, "", "", err
 	}
-	return uid.Username, gid.Name, fmt.Sprintf("%d", t.stat.Ino), fmt.Sprintf("%d", t.stat.Dev), err
+	return uid.Username, gid.Name, t.stat.Nlink, fmt.Sprintf("%d", t.stat.Ino), fmt.Sprintf("%d", t.stat.Dev), err
 }
 
-func (t *TreeFlag) iterate(trees *TreeFormat) error {
+func (t *Tree) iterate(trees *Tree, opt *TreeOptions) error {
 	files, err := os.ReadDir(trees.Path)
 	if err != nil {
 		return err
 	}
 
 	for _, f := range files {
-		if !t.all {
+		if !opt.All {
 			if strings.HasPrefix(f.Name(), ".") {
 				continue
 			}
 		}
-		if t.dirs {
+		if opt.Dirs {
 			if !f.IsDir() {
 				continue
 			}
@@ -186,11 +184,11 @@ func (t *TreeFlag) iterate(trees *TreeFormat) error {
 		if err != nil {
 			return err
 		}
-		uid, gid, inode, device, err := t.getInfo(fi)
+		uid, gid, links, inode, device, err := t.getInfo(fi)
 		if err != nil {
 			return err
 		}
-		temp := &TreeFormat{
+		temp := &Tree{
 			Type:     t.stat.FileType(fi),
 			Path:     filepath.Join(trees.Path, f.Name()),
 			Name:     f.Name(),
@@ -198,22 +196,23 @@ func (t *TreeFlag) iterate(trees *TreeFormat) error {
 			Mode:     fi.Mode().String(),
 			Size:     common.ByteSize(fi.Size()).String(),
 			ModTime:  fi.ModTime().Format(time.ANSIC),
+			Links:    links,
 			UID:      uid,
 			GID:      gid,
 			Inode:    inode,
 			Devide:   device,
-			Contents: &[]TreeFormat{},
+			Contents: &[]Tree{},
 			layers:   trees.layers + 1,
 		}
 
-		if trees.layers > t.limit {
+		if trees.layers > opt.Limit {
 			continue
 		}
 
 		if f.IsDir() {
 			t.dirN++
 			*trees.Contents = append(*trees.Contents, *temp)
-			err = t.iterate(temp)
+			err = t.iterate(temp, opt)
 			if err != nil {
 				return err
 			}
@@ -225,7 +224,7 @@ func (t *TreeFlag) iterate(trees *TreeFormat) error {
 	return err
 }
 
-func (t *TreeFlag) Print(prefix string, output TreeFormat) {
+func (t *Tree) print(prefix string, output Tree, opt *TreeOptions) {
 	switch {
 	case rootOutputJSON:
 		PrintJSON(output)
@@ -236,35 +235,38 @@ func (t *TreeFlag) Print(prefix string, output TreeFormat) {
 	}
 
 	var p []string
-	if t.uid {
-		p = append(p, output.UID)
-	}
-	if t.gid {
-		p = append(p, output.GID)
-	}
-	if t.change {
-		p = append(p, output.ModTime)
-	}
-	if t.mode {
+	if opt.Mode {
 		p = append(p, output.Mode)
 	}
-	if t.perm {
+	if opt.Perm {
 		p = append(p, output.Perm)
 	}
-	if t.size {
+	if opt.Links {
+		p = append(p, strconv.Itoa(int(output.Links)))
+	}
+	if opt.UID {
+		p = append(p, output.UID)
+	}
+	if opt.GID {
+		p = append(p, output.GID)
+	}
+	if opt.Size {
 		p = append(p, output.Size)
 	}
-	if t.inodes {
+	if opt.Change {
+		p = append(p, output.ModTime)
+	}
+	if opt.Inodes {
 		p = append(p, output.Inode)
 	}
-	if t.device {
+	if opt.Device {
 		p = append(p, output.Devide)
 	}
 	if len(p) != 0 {
 		fmt.Printf("%v ", p)
 	}
 
-	if t.full {
+	if opt.Full {
 		PrintString(output.Path)
 	} else {
 		PrintString(output.Name)
@@ -272,16 +274,16 @@ func (t *TreeFlag) Print(prefix string, output TreeFormat) {
 
 	for i, v := range *output.Contents {
 		if i == len(*output.Contents)-1 {
-			fmt.Print(prefix + endPrefix)
-			t.Print(prefix+lastDirPrefix, v)
+			fmt.Print(prefix + treePerfixEnd)
+			t.print(prefix+treePerfixEmpty, v, opt)
 		} else {
-			fmt.Print(prefix + filePrefix)
-			t.Print(prefix+layerPrefix, v)
+			fmt.Print(prefix + treePerfixFile)
+			t.print(prefix+treePerfixLayer, v, opt)
 		}
 	}
 }
 
-func (t *TreeFlag) summary() {
+func (t *Tree) summary() {
 	out := "\n%d "
 	switch {
 	default:
