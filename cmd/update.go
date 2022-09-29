@@ -35,43 +35,40 @@ import (
 )
 
 func init() {
-	var updateFlag UpdateFlag
 	var updateCmd = &cobra.Command{
 		Use: CommandUpdate,
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Short: fmt.Sprintf("Update %s to the latest release", common.RepoName),
-		RunE:  updateFlag.RunE,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			var err error
+			updater := NewUpdater(common.RepoOwner, common.RepoName)
+			if !updater.Upgrade {
+				PrintString("up-to-date")
+				return nil
+			}
+
+			PrintString("Update...")
+			PrintString(common.Usage("==> Downloading file from GitHub"))
+			err = updater.Download()
+			if err != nil {
+				return err
+			}
+
+			PrintString(fmt.Sprintf("Upgrading %s %s -> %s", common.RepoName, appVersion, updater.Repository.ReleaseTag))
+			PrintString(common.Usage("==> Cleanup..."))
+			err = updater.Rename()
+			if err != nil {
+				return err
+			}
+			PrintString("Update completed")
+			return err
+		},
 
 		DisableFlagsInUseLine: true,
 	}
 	rootCmd.AddCommand(updateCmd)
-}
-
-type UpdateFlag struct{}
-
-func (u *UpdateFlag) RunE(_ *cobra.Command, _ []string) error {
-	var err error
-	updater := NewUpdater(common.RepoOwner, common.RepoName)
-	if !updater.Upgrade {
-		PrintString("up-to-date")
-		return nil
-	}
-	PrintString("Update...")
-	PrintString(common.Usage("==> Downloading file from GitHub"))
-	err = updater.Download()
-	if err != nil {
-		return err
-	}
-	PrintString(fmt.Sprintf("Upgrading %s %s -> %s", common.RepoName, appVersion, updater.Repository.ReleaseTag))
-	PrintString(common.Usage("==> Cleanup..."))
-	err = updater.Rename()
-	if err != nil {
-		return err
-	}
-	PrintString("Update completed")
-	return err
 }
 
 type Version struct {
