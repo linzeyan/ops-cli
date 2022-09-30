@@ -75,9 +75,6 @@ func init() {
 				defer conn.Close()
 			}
 			t.Connetion = conn
-			if t.Record {
-				t.Stat = make([]ICMPStat, t.TTL)
-			}
 			if err = t.Connect(args[0]); err != nil {
 				PrintString(err)
 				return
@@ -97,6 +94,7 @@ type Traceroute struct {
 	Connetion         *icmp.PacketConn
 	Data              icmp.Message
 
+	lost   bool
 	Record bool
 	Stat   []ICMPStat
 }
@@ -163,7 +161,7 @@ func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (str
 		}
 		n, _, peer, err := t.Connetion.IPv4PacketConn().ReadFrom(reply)
 		if err != nil {
-			t.Stat[hop].Lost = true
+			t.lost = true
 			t.statistics(hop, peer.String(), 0)
 			rtt = append(rtt, "*")
 			continue
@@ -200,27 +198,32 @@ func (t *Traceroute) statistics(hop int, ip string, duration time.Duration) {
 	if !t.Record {
 		return
 	}
-	if t.Stat[hop].Min == 0 {
-		t.Stat[hop].Min = duration
+	if len(t.Stat) < hop {
+		t.Stat = append(t.Stat, ICMPStat{
+			Hop: hop,
+		})
 	}
-	if t.Stat[hop].Max == 0 {
-		t.Stat[hop].Max = duration
+	if t.Stat[hop-1].Min == 0 {
+		t.Stat[hop-1].Min = duration
 	}
-	t.Stat[hop].Avg += duration
-	t.Stat[hop].DstIP = ip
-	t.Stat[hop].Send++
-	t.Stat[hop].Rtts = append(t.Stat[hop].Rtts, duration)
-	if t.Stat[hop].Lost {
-		t.Stat[hop].Loss++
-		t.Stat[hop].Lost = false
+	if t.Stat[hop-1].Max == 0 {
+		t.Stat[hop-1].Max = duration
+	}
+	t.Stat[hop-1].Avg += duration
+	t.Stat[hop-1].DstIP = ip
+	t.Stat[hop-1].Send++
+	t.Stat[hop-1].Rtts = append(t.Stat[hop-1].Rtts, duration)
+	if t.lost {
+		t.Stat[hop-1].Loss++
+		t.lost = false
 	} else {
-		t.Stat[hop].Receive++
+		t.Stat[hop-1].Receive++
 	}
 
-	if duration < t.Stat[hop].Min {
-		t.Stat[hop].Min = duration
+	if duration < t.Stat[hop-1].Min && duration != 0 {
+		t.Stat[hop-1].Min = duration
 	}
-	if duration > t.Stat[hop].Max {
-		t.Stat[hop].Max = duration
+	if duration > t.Stat[hop-1].Max {
+		t.Stat[hop-1].Max = duration
 	}
 }

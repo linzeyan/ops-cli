@@ -102,6 +102,7 @@ type Ping struct {
 type ICMPStat struct {
 	Lost bool
 
+	Hop   int
 	DstIP string
 
 	Send, Loss, Receive int
