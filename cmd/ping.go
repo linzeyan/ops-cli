@@ -102,6 +102,8 @@ type Ping struct {
 type ICMPStat struct {
 	Lost bool
 
+	DstIP string
+
 	Send, Loss, Receive int
 	Min, Avg, Max       time.Duration
 	Rtts                []time.Duration
