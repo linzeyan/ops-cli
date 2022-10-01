@@ -21,12 +21,12 @@ import (
 	"math"
 	"net"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
@@ -36,10 +36,11 @@ import (
 func init() {
 	var mtrCmd = &cobra.Command{
 		Use:   "mtr",
-		Short: "A brief description of your command",
+		Short: "Combined traceroute and ping",
+		Args:  cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
-			if len(args) == 0 {
-				args = append(args, "1.1.1.1")
+			if !validator.ValidDomain(args[0]) && !validator.ValidIP(args[0]) {
+				return
 			}
 			var m MTR
 			err := m.getInfo(args[0])
@@ -105,18 +106,9 @@ func init() {
 			table.RowSeparator = false
 			table.Rows = [][]string{{""}}
 
-			setTable := func(w int) {
+			setTable := func(w int, tbRows [][]string) {
 				table.SetRect(0, 7, w, 6)
-				tbRows := make([][]string, len(m.result))
-
-				for i, v := range m.result {
-					spaces := strings.Repeat(" ", w-len(v.Host)-len(title2R.Text))
-					r := fmt.Sprintf("%s%s%s  %s  %s  %s  %s  %s  %s",
-						v.Host, spaces, v.Loss, v.Snt, v.Last, v.Avg, v.Best, v.Wrst, v.StDev)
-					tbRows[i] = []string{r}
-				}
 				table.Rows = tbRows
-				// log.Println(tbRows)
 				table.ColumnWidths = []int{w}
 			}
 
@@ -125,8 +117,8 @@ func init() {
 				w := setRect()
 				infoR.Text = fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
 				m.Run()
-				m.Summary()
-				setTable(w)
+				rows := m.Summary(w)
+				setTable(w, rows)
 				termui.Render(header, infoL, infoR, keys, title1, title2L, title2R, table)
 			}
 
@@ -157,8 +149,7 @@ type MTR struct {
 	RemoteHostname string
 	TargetIP       string
 
-	trace  Traceroute
-	result []ICMPStatOutput
+	trace Traceroute
 }
 
 func (m *MTR) getInfo(host string) error {
@@ -222,38 +213,27 @@ func (m *MTR) Run() {
 	}
 }
 
-func (m *MTR) Summary() {
-	m.result = make([]ICMPStatOutput, len(m.trace.Stat))
+func (m *MTR) Summary(width int) [][]string {
+	rows := make([][]string, len(m.trace.Stat))
 	for i, v := range m.trace.Stat {
-		// "Loss%   Snt   Last   Avg  Best  Wrst StDev"
-		loss := fmt.Sprintf("%.1f%%", float64(v.Loss*100)/float64(v.Send))
-		avg := v.Avg / time.Duration(v.Receive)
+		const statHeader = "Loss%   Snt   Last   Avg  Best  Wrst StDev"
+		var avg time.Duration
+		if v.Receive == 0 {
+			avg = 0
+		} else {
+			avg = v.Avg / time.Duration(v.Receive)
+		}
 		var temp float64
 		for _, vv := range v.Rtts {
 			temp += math.Pow(float64(vv-avg), 2)
 		}
 		variance := temp / float64(len(v.Rtts))
 		mdev := time.Duration(math.Sqrt(variance))
-		m.result[i] = ICMPStatOutput{
-			Host:  fmt.Sprintf("%d. %s", v.Hop, v.DstIP),
-			Loss:  loss,
-			Snt:   strconv.Itoa(v.Send),
-			Last:  fmt.Sprintf("%3s", v.Rtts[len(v.Rtts)-1]),
-			Avg:   fmt.Sprintf("%3d", avg.Microseconds()),
-			Best:  fmt.Sprintf("%3d", v.Min.Microseconds()),
-			Wrst:  fmt.Sprintf("%3d", v.Max.Microseconds()),
-			StDev: fmt.Sprintf("%3d", mdev.Microseconds()),
-		}
+		host := fmt.Sprintf("%d. %s", v.Hop, v.DstIP)
+		stats := fmt.Sprintf("%4.1f%%   %3d   %4s   %3d  %4d  %4d %5d",
+			float64(v.Loss*100)/float64(v.Send), v.Send, v.Rtts[len(v.Rtts)-1], avg.Microseconds(), v.Min.Microseconds(), v.Max.Microseconds(), mdev.Microseconds())
+		spaces := strings.Repeat(" ", width-19-len(statHeader))
+		rows[i] = []string{host + spaces + stats}
 	}
-}
-
-type ICMPStatOutput struct {
-	Host  string
-	Loss  string
-	Snt   string
-	Last  string
-	Avg   string
-	Best  string
-	Wrst  string
-	StDev string
+	return rows
 }

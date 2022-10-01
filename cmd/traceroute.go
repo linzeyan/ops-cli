@@ -162,7 +162,7 @@ func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (str
 		n, _, peer, err := t.Connetion.IPv4PacketConn().ReadFrom(reply)
 		if err != nil {
 			t.lost = true
-			t.statistics(hop, peer.String(), 0)
+			t.statistics(hop, "*", 0)
 			rtt = append(rtt, "*")
 			continue
 		}
