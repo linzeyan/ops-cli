@@ -181,7 +181,7 @@ func (p *Ping) readReply(reply []byte, counter int) (int, any, net.Addr, error) 
 	return n, cm, peer, err
 }
 
-func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.Addr, counter, size int, cm any) {
+func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.Addr, cm any) {
 	var ttl int
 	switch c := cm.(type) {
 	case *ipv4.ControlMessage:
@@ -189,11 +189,12 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 	case *ipv6.ControlMessage:
 		ttl = c.HopLimit
 	}
-
+	b, _ := result.Marshal(nil)
 	var out string
 	switch result.Type {
 	case ipv4.ICMPTypeEchoReply, ipv6.ICMPTypeEchoReply:
-		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v", size, peer, counter, ttl, duration)
+		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v",
+			len(b), peer, result.Body.(*icmp.Echo).Seq, ttl, duration)
 	case ipv4.ICMPTypeDestinationUnreachable, ipv6.ICMPTypeDestinationUnreachable:
 		out = "Destination Unreachable"
 	}
@@ -260,7 +261,7 @@ func (p *Ping) Connect(host string) {
 			PrintString(err)
 		}
 
-		p.printMsg(result, duration, peer, i, len(b), cm)
+		p.printMsg(result, duration, peer, cm)
 		if i == p.Count-1 {
 			p.summary(host, time.Since(allTime))
 			return
