@@ -137,7 +137,7 @@ func (t *Traceroute) Connect(host string) error {
 			return err
 		}
 		if peer == addr.String() {
-			break
+			return err
 		}
 		time.Sleep(t.Interval)
 	}
