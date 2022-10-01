@@ -21,6 +21,7 @@ import (
 	"math"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -230,20 +231,25 @@ func (m *MTR) Summary(width int) [][]string {
 		variance := temp / float64(len(v.Rtts))
 		mdev := time.Duration(math.Sqrt(variance))
 
-		last := fmt.Sprintf("%v", v.Rtts[len(v.Rtts)-1])
 		host := fmt.Sprintf("%d. %s", v.Hop, v.DstIP)
-		stats := fmt.Sprintf("%4.1f%%   %3d   %4s   %3s  %4s  %4s %5s",
-			float64(v.Loss*100)/float64(v.Send), v.Send, m.trimDuration(last), m.trimDuration(avg.String()), m.trimDuration(v.Min.String()),
-			m.trimDuration(v.Max.String()), m.trimDuration(mdev.String()))
-		spaces := strings.Repeat(" ", width-19-len(statHeader)+2)
+		stats := fmt.Sprintf("%4s%%   %3s   %4s   %3s  %4s  %4s %5s",
+			m.trim(fmt.Sprintf("%.1f", float64(v.Loss*100)/float64(v.Send)), "Loss"),
+			m.trim(strconv.Itoa(v.Send), "Snt"),
+			m.trim(v.Rtts[len(v.Rtts)-1].String(), "Last"),
+			m.trim(avg.String(), "Avg"), m.trim(v.Min.String(), "Best"),
+			m.trim(v.Max.String(), "Wrst"), m.trim(mdev.String(), "StDev"))
+		spaces := strings.Repeat(" ", width-19-len(statHeader)-2)
 
 		// fmt.Println(host + spaces + stats)
-		rows = append(rows, []string{host + spaces + stats})
+		rows = append(rows, []string{fmt.Sprintf("%-19s", host) + spaces + stats})
 	}
 	return rows
 }
 
-func (m *MTR) trimDuration(s string) string {
+func (m *MTR) trim(s, header string) string {
 	i := strings.Index(s, ".")
+	if len(s[:i+2]) > len(header) {
+		return s[0:i]
+	}
 	return s[:i+2]
 }
