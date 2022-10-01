@@ -107,7 +107,7 @@ func init() {
 			table.Rows = [][]string{{""}}
 
 			setTable := func(w int, tbRows [][]string) {
-				table.SetRect(0, 7, w, 6)
+				table.SetRect(0, 7, w, 36)
 				table.Rows = tbRows
 				table.ColumnWidths = []int{w}
 			}
@@ -214,8 +214,8 @@ func (m *MTR) Run() {
 }
 
 func (m *MTR) Summary(width int) [][]string {
-	rows := make([][]string, len(m.trace.Stat))
-	for i, v := range m.trace.Stat {
+	var rows [][]string
+	for _, v := range m.trace.Stat {
 		const statHeader = "Loss%   Snt   Last   Avg  Best  Wrst StDev"
 		var avg time.Duration
 		if v.Receive == 0 {
@@ -229,11 +229,21 @@ func (m *MTR) Summary(width int) [][]string {
 		}
 		variance := temp / float64(len(v.Rtts))
 		mdev := time.Duration(math.Sqrt(variance))
+
+		last := fmt.Sprintf("%v", v.Rtts[len(v.Rtts)-1])
 		host := fmt.Sprintf("%d. %s", v.Hop, v.DstIP)
-		stats := fmt.Sprintf("%4.1f%%   %3d   %4s   %3d  %4d  %4d %5d",
-			float64(v.Loss*100)/float64(v.Send), v.Send, v.Rtts[len(v.Rtts)-1], avg.Microseconds(), v.Min.Microseconds(), v.Max.Microseconds(), mdev.Microseconds())
-		spaces := strings.Repeat(" ", width-19-len(statHeader))
-		rows[i] = []string{host + spaces + stats}
+		stats := fmt.Sprintf("%4.1f%%   %3d   %4s   %3s  %4s  %4s %5s",
+			float64(v.Loss*100)/float64(v.Send), v.Send, m.trimDuration(last), m.trimDuration(avg.String()), m.trimDuration(v.Min.String()),
+			m.trimDuration(v.Max.String()), m.trimDuration(mdev.String()))
+		spaces := strings.Repeat(" ", width-19-len(statHeader)+2)
+
+		// fmt.Println(host + spaces + stats)
+		rows = append(rows, []string{host + spaces + stats})
 	}
 	return rows
+}
+
+func (m *MTR) trimDuration(s string) string {
+	i := strings.Index(s, ".")
+	return s[:i+2]
 }
