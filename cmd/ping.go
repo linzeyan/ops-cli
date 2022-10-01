@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -77,7 +78,19 @@ func init() {
 				defer conn.Close()
 			}
 			p.Conn = conn
-			p.Connect(args[0])
+
+			ctx, cancel := signal.NotifyContext(common.Context, os.Interrupt)
+			defer func() {
+				cancel()
+			}()
+			go func() {
+				select {
+				case <-ctx.Done():
+				default:
+				}
+			}()
+
+			p.Connect(ctx, args[0])
 		},
 	}
 	rootCmd.AddCommand(pingCmd)
@@ -202,7 +215,7 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 	PrintString(out)
 }
 
-func (p *Ping) Connect(host string) {
+func (p *Ping) Connect(c context.Context, host string) {
 	network := "ip4"
 	if p.IPv6 {
 		network = "ip6"
@@ -216,8 +229,6 @@ func (p *Ping) Connect(host string) {
 		p.Data.Type = ipv6.ICMPTypeEchoRequest
 	}
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
 	reply := make([]byte, 1500)
 	allTime := time.Now()
 
@@ -249,6 +260,7 @@ func (p *Ping) Connect(host string) {
 		n, cm, peer, err := p.readReply(reply, i)
 		if err != nil {
 			PrintString(err)
+			continue
 		}
 		duration := time.Since(startTime)
 
@@ -260,8 +272,9 @@ func (p *Ping) Connect(host string) {
 		if err != nil {
 			PrintString(err)
 		}
-
-		p.printMsg(result, duration, peer, cm)
+		if peer.String() == host {
+			p.printMsg(result, duration, peer, cm)
+		}
 		if i == p.Count-1 {
 			p.summary(host, time.Since(allTime))
 			return
@@ -269,7 +282,7 @@ func (p *Ping) Connect(host string) {
 		time.Sleep(p.Interval)
 		select {
 		default:
-		case <-quit:
+		case <-c.Done():
 			p.summary(host, time.Since(allTime))
 			return
 		}
