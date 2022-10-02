@@ -17,16 +17,19 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"net"
 	"os"
+	"os/signal"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/icmp"
@@ -113,11 +116,23 @@ func init() {
 				table.ColumnWidths = []int{w}
 			}
 
+			ctx, cancel := signal.NotifyContext(common.Context, os.Interrupt)
+			defer func() {
+				cancel()
+			}()
+			go func() {
+				select {
+				case <-ctx.Done():
+				default:
+				}
+			}()
+
+			m.Run(ctx)
+
 			update := func() {
 				termui.Clear()
 				w := setRect()
 				infoR.Text = fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
-				m.Run()
 				rows := m.Summary(w)
 				setTable(w, rows)
 				termui.Render(header, infoL, infoR, keys, title1, title2L, title2R, table)
@@ -181,14 +196,16 @@ func (m *MTR) getInfo(host string) error {
 	return err
 }
 
-func (m *MTR) Run() {
+func (m *MTR) Run(ctx context.Context) {
 	m.trace = Traceroute{
 		Size:     24,
 		TTL:      64,
 		Retry:    1,
 		Interval: 100 * time.Millisecond,
 		Timeout:  2 * time.Second,
-		Record:   true,
+
+		Record: true,
+		Count:  -1,
 	}
 	data := Randoms.GenerateString(m.trace.Size, LowercaseLetters)
 	m.trace.Data = icmp.Message{
@@ -206,9 +223,8 @@ func (m *MTR) Run() {
 		defer conn.Close()
 	}
 	m.trace.Connetion = conn
-	// m.result = make([]ICMPStatOutput, m.trace.TTL)
 
-	if err = m.trace.Connect(m.TargetIP); err != nil {
+	if err = m.trace.Connect(ctx, m.TargetIP); err != nil {
 		PrintString(err)
 		return
 	}

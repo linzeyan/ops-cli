@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"os"
@@ -58,6 +59,7 @@ func init() {
 				Retry:    3,
 				Interval: flags.interval,
 				Timeout:  flags.timeout,
+				Count:    1,
 			}
 			data := Randoms.GenerateString(t.Size, LowercaseLetters)
 			t.Data = icmp.Message{
@@ -75,7 +77,7 @@ func init() {
 				defer conn.Close()
 			}
 			t.Connetion = conn
-			if err = t.Connect(args[0]); err != nil {
+			if err = t.Connect(common.Context, args[0]); err != nil {
 				PrintString(err)
 				return
 			}
@@ -94,6 +96,8 @@ type Traceroute struct {
 	Connetion         *icmp.PacketConn
 	Data              icmp.Message
 
+	Count int
+
 	lost   bool
 	Record bool
 	Stat   []ICMPStat
@@ -111,37 +115,50 @@ func (*Traceroute) Listen() (*icmp.PacketConn, error) {
 	return conn, err
 }
 
-func (t *Traceroute) Connect(host string) error {
+func (t *Traceroute) Connect(ctx context.Context, host string) error {
 	var err error
 	addr, err := net.ResolveIPAddr("ip4", host)
 	if err != nil {
 		return err
 	}
 	reply := make([]byte, 1500)
-	for i := 1; i <= t.TTL; i++ {
-		if i == 1 && !t.Record {
-			header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, addr, t.TTL, t.Size)
-			PrintString(header)
-		}
-		t.Data.Body.(*icmp.Echo).Seq = i
-		b, err := t.Data.Marshal(nil)
-		if err != nil {
-			return err
-		}
+	for round := 0; ; {
+		for i := 1; i <= t.TTL; i++ {
+			if i == 1 && !t.Record {
+				header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, addr, t.TTL, t.Size)
+				PrintString(header)
+			}
+			t.Data.Body.(*icmp.Echo).Seq = i
+			b, err := t.Data.Marshal(nil)
+			if err != nil {
+				return err
+			}
 
-		if err = t.Connetion.IPv4PacketConn().SetTTL(i); err != nil {
+			if err = t.Connetion.IPv4PacketConn().SetTTL(i); err != nil {
+				return err
+			}
+			peer, err := t.sendPacket(i, addr, b, reply)
+			if err != nil {
+				return err
+			}
+			if peer == addr.String() {
+				return err
+			}
+			time.Sleep(t.Interval)
+		}
+		if !t.Record {
 			return err
 		}
-		peer, err := t.sendPacket(i, addr, b, reply)
-		if err != nil {
+		round++
+		if round == t.Count {
 			return err
 		}
-		if peer == addr.String() {
+		select {
+		default:
+		case <-ctx.Done():
 			return err
 		}
-		time.Sleep(t.Interval)
 	}
-	return err
 }
 
 func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (string, error) {
@@ -189,7 +206,7 @@ func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (str
 	if t.Record {
 		return ip, err
 	}
-	out := fmt.Sprintf("%-4d  %-16v\t%-10s\t%-10s\t%-10s", hop, ip, rtt[0], rtt[1], rtt[2])
+	out := fmt.Sprintf("%2d. %-16v\t%-10s\t%-10s\t%-10s", hop, ip, rtt[0], rtt[1], rtt[2])
 	PrintString(out)
 	return ip, err
 }
