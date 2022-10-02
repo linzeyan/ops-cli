@@ -138,8 +138,6 @@ func init() {
 				termui.Render(header, infoL, infoR, keys, title1, title2L, title2R, table)
 			}
 
-			tickerCount := 1
-			tickerCount++
 			uiEvents := termui.PollEvents()
 			ticker := time.NewTicker(50 * time.Millisecond).C
 			for {
@@ -151,7 +149,6 @@ func init() {
 					}
 				case <-ticker:
 					update()
-					tickerCount++
 				}
 			}
 		},
