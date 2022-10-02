@@ -142,7 +142,7 @@ func (t *Traceroute) Connect(ctx context.Context, host string) error {
 				return err
 			}
 			if peer == addr.String() {
-				return err
+				break
 			}
 			time.Sleep(t.Interval)
 		}
@@ -156,7 +156,7 @@ func (t *Traceroute) Connect(ctx context.Context, host string) error {
 		select {
 		default:
 		case <-ctx.Done():
-			return err
+			return ctx.Err()
 		}
 	}
 }
