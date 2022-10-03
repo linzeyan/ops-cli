@@ -106,7 +106,6 @@ func init() {
 			}
 			setRect()
 
-			m.Statistics = [][]string{{""}}
 			table := widgets.NewTable()
 			table.Border = false
 			table.RowSeparator = false
@@ -118,19 +117,6 @@ func init() {
 				table.ColumnWidths = []int{w}
 			}
 
-			ctx, cancel := signal.NotifyContext(common.Context, os.Interrupt)
-			defer func() {
-				cancel()
-			}()
-			go func() {
-				select {
-				case <-ctx.Done():
-				default:
-				}
-			}()
-
-			m.Run(ctx)
-
 			update := func() {
 				termui.Clear()
 				w := setRect()
@@ -140,18 +126,22 @@ func init() {
 			}
 
 			uiEvents := termui.PollEvents()
-			ticker := time.NewTicker(50 * time.Millisecond).C
-			for {
-				select {
-				case e := <-uiEvents:
-					switch e.ID {
-					case "q", "<C-c>":
+			ticker := time.NewTicker(100 * time.Millisecond).C
+			ctx, cancel := signal.NotifyContext(common.Context, os.Interrupt)
+			defer func() {
+				cancel()
+			}()
+			go func() {
+				for {
+					select {
+					case <-ctx.Done():
 						return
+					case <-ticker:
+						update()
 					}
-				case <-ticker:
-					update()
 				}
-			}
+			}()
+			m.Run(ctx, uiEvents)
 		},
 	}
 	rootCmd.AddCommand(mtrCmd)
@@ -192,10 +182,11 @@ func (m *MTR) getInfo(host string) error {
 	m.RemoteHostname = fmt.Sprintf("%s (%s)", m.trace.Host, m.trace.Target)
 	ip, _, err := net.SplitHostPort(conn.LocalAddr().String())
 	m.LocalHostname = fmt.Sprintf("%s (%s)", hostname, ip)
+	m.Statistics = [][]string{{""}}
 	return err
 }
 
-func (m *MTR) Run(ctx context.Context) {
+func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) {
 	m.trace.Size = 24
 	m.trace.TTL = 64
 	m.trace.Retry = 1
@@ -231,11 +222,23 @@ func (m *MTR) Run(ctx context.Context) {
 		if round == m.trace.Count {
 			return
 		}
+		// select {
+		// default:
+		// 	m.Summary()
+		// case <-ctx.Done():
+		// 	return
+		// }
+
 		select {
-		default:
-			m.Summary()
+		case e := <-events:
+			switch e.ID {
+			case "q", "<C-c>":
+				return
+			}
 		case <-ctx.Done():
 			return
+		default:
+			m.Summary()
 		}
 	}
 }
