@@ -38,6 +38,11 @@ import (
 )
 
 func init() {
+	var flags struct {
+		count    int
+		interval time.Duration
+		timeout  time.Duration
+	}
 	var mtrCmd = &cobra.Command{
 		Use:   CommandMtr,
 		Short: "Combined traceroute and ping",
@@ -50,8 +55,15 @@ func init() {
 				return common.ErrInvalidArg
 			}
 
+			if flags.interval < 50*time.Millisecond {
+				flags.interval = 50 * time.Millisecond
+			}
+
 			var m MTR
 			m.trace.Host = args[0]
+			m.trace.Interval = flags.interval
+			m.trace.Timeout = flags.timeout
+			m.trace.Count = flags.count
 			err := m.init()
 			if err != nil {
 				return err
@@ -149,6 +161,9 @@ func init() {
 		},
 	}
 	rootCmd.AddCommand(mtrCmd)
+	mtrCmd.Flags().IntVarP(&flags.count, "count", "c", -1, common.Usage("Specify ping counts"))
+	mtrCmd.Flags().DurationVarP(&flags.interval, "interval", "i", 100*time.Millisecond, common.Usage("Specify interval"))
+	mtrCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
 }
 
 type MTR struct {
@@ -189,10 +204,7 @@ func (m *MTR) init() error {
 	m.trace.Size = 24
 	m.trace.TTL = 64
 	m.trace.Retry = 1
-	m.trace.Interval = 100 * time.Millisecond
-	m.trace.Timeout = 2 * time.Second
 	m.trace.Record = true
-	m.trace.Count = -1
 	return err
 }
 
@@ -214,11 +226,10 @@ func (m *MTR) Run(ctx context.Context) error {
 	m.trace.Connetion = conn
 
 	reply := make([]byte, 1500)
-	for round := 0; ; {
+	for round := 0; ; round++ {
 		if err = m.trace.Connect(ctx, reply); err != nil {
 			return err
 		}
-		round++
 		if round == m.trace.Count {
 			return err
 		}
