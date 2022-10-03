@@ -39,7 +39,7 @@ import (
 
 func init() {
 	var mtrCmd = &cobra.Command{
-		Use:   "mtr",
+		Use:   CommandMtr,
 		Short: "Combined traceroute and ping",
 		Args:  cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
@@ -112,7 +112,7 @@ func init() {
 			table.Rows = m.Statistics
 
 			setTable := func(w int) {
-				table.SetRect(0, 7, w, 36)
+				table.SetRect(0, 6, w, 36)
 				table.Rows = m.Statistics
 				table.ColumnWidths = []int{w}
 			}
@@ -222,12 +222,6 @@ func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) {
 		if round == m.trace.Count {
 			return
 		}
-		// select {
-		// default:
-		// 	m.Summary()
-		// case <-ctx.Done():
-		// 	return
-		// }
 
 		select {
 		case e := <-events:
@@ -245,8 +239,8 @@ func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) {
 
 func (m *MTR) Summary() {
 	var rows [][]string
+	const statHeader = "Loss%   Snt   Last   Avg  Best  Wrst StDev"
 	for _, v := range m.trace.Stat {
-		const statHeader = "Loss%   Snt   Last   Avg  Best  Wrst StDev"
 		var avg time.Duration
 		if v.Receive == 0 {
 			avg = 0
@@ -263,13 +257,12 @@ func (m *MTR) Summary() {
 		host := fmt.Sprintf("%d. %s", v.Hop, v.DstIP)
 		stats := fmt.Sprintf("%4s%%   %3s   %4s   %3s  %4s  %4s %5s",
 			m.trim(fmt.Sprintf("%.1f", float64(v.Loss*100)/float64(v.Send)), "Loss"),
-			m.trim(strconv.Itoa(v.Send), "Snt"),
+			strconv.Itoa(v.Send),
 			m.trim(v.Rtts[len(v.Rtts)-1].String(), "Last"),
 			m.trim(avg.String(), "Avg"), m.trim(v.Min.String(), "Best"),
 			m.trim(v.Max.String(), "Wrst"), m.trim(mdev.String(), "StDev"))
 		spaces := strings.Repeat(" ", m.TerminalWidth-19-len(statHeader)-2)
 
-		// fmt.Println(host + spaces + stats)
 		rows = append(rows, []string{fmt.Sprintf("%-19s", host) + spaces + stats})
 	}
 	m.Statistics = rows
@@ -277,6 +270,16 @@ func (m *MTR) Summary() {
 
 func (m *MTR) trim(s, header string) string {
 	i := strings.Index(s, ".")
+	s = strings.Replace(s, "ms", "", 1)
+	if strings.Contains(s, "µ") {
+		s = strings.Replace(s, "µs", "", 1)
+		num, err := strconv.ParseFloat(s, 64)
+		if err == nil {
+			ms := num / 1000
+			s = fmt.Sprintf("%f", ms)
+		}
+	}
+
 	if len(s[:i+2]) > len(header) {
 		return s[0:i]
 	}
