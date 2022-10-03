@@ -85,6 +85,7 @@ Available Commands:
   help        Help about any command
   icp         Check ICP status
   ip          View interfaces configuration
+  mtr         Combined traceroute and ping
   netmask     Print IP/Mask pair, list address ranges
   otp         Calculate passcode or generate secret
   ping        Send ICMP ECHO_REQUEST packets to network hosts
@@ -302,6 +303,24 @@ icpstatus: 已备案
 
 ```bash
 ops-cli LINE text 'hello' --config ~/.config/.myconfig
+```
+
+### `mtr`
+
+```bash
+ops-cli mtr 1.1.1.1
+
+                                                Packets               Pings
+ Host                                          Loss%   Snt   Last   Avg  Best  Wrst StDev
+
+ 1. 192.168.181.1                               0.0%    16    1.9   2.5   1.2  10.0   2.4
+ 2. 61.220.168.254                              0.0%    16   12.3   8.4   3.3  13.1   2.7
+ 3. 168.95.83.214                               0.0%    16   24.0   6.6   2.5  32.9   8.4
+ 4. 220.128.27.94                               0.0%    16    3.6   3.8   2.8   5.3 0.656
+ 5. 220.128.25.181                              0.0%    16    4.7   5.6   3.0   8.6   1.5
+ 6. 220.128.4.77                                0.0%    16    3.3   3.3   2.7   4.7 0.513
+ 7. 210.242.214.45                              0.0%    16    5.8   6.7   4.0  19.7   3.6
+ 8. 1.1.1.1                                     0.0%    16    3.0   5.4   3.0  26.6   5.5
 ```
 
 ### `netmask`
