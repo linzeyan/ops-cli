@@ -122,7 +122,7 @@ func init() {
 
 				keys.SetRect(0, 3, w, 2)
 
-				n = w - len(t1String) - 15
+				n = w - len(mtrStatHeader)
 				spaces = strings.Repeat(" ", n)
 				title1.Text = spaces + t1String
 				title1.SetRect(0, 4, w, 3)
