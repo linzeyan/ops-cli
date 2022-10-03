@@ -19,6 +19,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"time"
@@ -77,7 +78,14 @@ func init() {
 				defer conn.Close()
 			}
 			t.Connetion = conn
-			if err = t.Connect(common.Context, args[0]); err != nil {
+			t.Host = args[0]
+			t.Target, err = net.ResolveIPAddr("ip4", t.Host)
+			if err != nil {
+				PrintString(err)
+				return
+			}
+			reply := make([]byte, 1500)
+			if err = t.Connect(common.Context, reply); err != nil {
 				PrintString(err)
 				return
 			}
@@ -95,6 +103,9 @@ type Traceroute struct {
 	Interval, Timeout time.Duration
 	Connetion         *icmp.PacketConn
 	Data              icmp.Message
+
+	Host   string
+	Target *net.IPAddr
 
 	Count int
 
@@ -115,60 +126,43 @@ func (*Traceroute) Listen() (*icmp.PacketConn, error) {
 	return conn, err
 }
 
-func (t *Traceroute) Connect(ctx context.Context, host string) error {
+func (t *Traceroute) Connect(ctx context.Context, reply []byte) error {
 	var err error
-	addr, err := net.ResolveIPAddr("ip4", host)
-	if err != nil {
-		return err
-	}
-	reply := make([]byte, 1500)
-	for round := 0; ; {
-		for i := 1; i <= t.TTL; i++ {
-			if i == 1 && !t.Record {
-				header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", host, addr, t.TTL, t.Size)
-				PrintString(header)
-			}
-			t.Data.Body.(*icmp.Echo).Seq = i
-			b, err := t.Data.Marshal(nil)
-			if err != nil {
-				return err
-			}
+	for i := 1; i <= t.TTL; i++ {
+		if i == 1 && !t.Record {
+			header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", t.Host, t.Target, t.TTL, t.Size)
+			PrintString(header)
+		}
+		t.Data.Body.(*icmp.Echo).Seq = i
+		b, err := t.Data.Marshal(nil)
+		if err != nil {
+			return err
+		}
 
-			if err = t.Connetion.IPv4PacketConn().SetTTL(i); err != nil {
-				return err
-			}
-			peer, err := t.sendPacket(i, addr, b, reply)
-			if err != nil {
-				return err
-			}
-			if peer == addr.String() {
-				break
-			}
-			time.Sleep(t.Interval)
-		}
-		if !t.Record {
+		if err = t.Connetion.IPv4PacketConn().SetTTL(i); err != nil {
 			return err
 		}
-		round++
-		if round == t.Count {
+		peer, err := t.sendPacket(i, b, reply)
+		if err != nil {
 			return err
 		}
-		select {
-		default:
-		case <-ctx.Done():
-			return ctx.Err()
+		if peer == t.Target.String() {
+			break
 		}
+		time.Sleep(t.Interval)
 	}
+	return err
 }
 
-func (t *Traceroute) sendPacket(hop int, addr *net.IPAddr, b, reply []byte) (string, error) {
+func (t *Traceroute) sendPacket(hop int, b, reply []byte) (string, error) {
 	var err error
 	var ip string
 	var rtt []string
 	for i := 1; i <= t.Retry; i++ {
 		/* Send packet. */
 		startTime := time.Now()
-		_, err = t.Connetion.IPv4PacketConn().WriteTo(b, nil, addr)
+		log.Println(t.Target)
+		_, err = t.Connetion.IPv4PacketConn().WriteTo(b, nil, t.Target)
 		if err != nil {
 			return "", err
 		}

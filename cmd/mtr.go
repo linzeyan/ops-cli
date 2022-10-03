@@ -101,18 +101,20 @@ func init() {
 				title1.SetRect(w-len(title1.Text)-15, 5, w, 4)
 				title2L.SetRect(0, 6, len(title2L.Text)+2, 5)
 				title2R.SetRect(w-len(title2R.Text)-2, 6, w, 5)
+				m.TerminalWidth = w
 				return w
 			}
 			setRect()
 
+			m.Statistics = [][]string{{""}}
 			table := widgets.NewTable()
 			table.Border = false
 			table.RowSeparator = false
-			table.Rows = [][]string{{""}}
+			table.Rows = m.Statistics
 
-			setTable := func(w int, tbRows [][]string) {
+			setTable := func(w int) {
 				table.SetRect(0, 7, w, 36)
-				table.Rows = tbRows
+				table.Rows = m.Statistics
 				table.ColumnWidths = []int{w}
 			}
 
@@ -133,8 +135,7 @@ func init() {
 				termui.Clear()
 				w := setRect()
 				infoR.Text = fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
-				rows := m.Summary(w)
-				setTable(w, rows)
+				setTable(w)
 				termui.Render(header, infoL, infoR, keys, title1, title2L, title2R, table)
 			}
 
@@ -160,7 +161,8 @@ type MTR struct {
 	IPv6           bool
 	LocalHostname  string
 	RemoteHostname string
-	TargetIP       string
+	TerminalWidth  int
+	Statistics     [][]string
 
 	trace Traceroute
 }
@@ -182,12 +184,12 @@ func (m *MTR) getInfo(host string) error {
 	if m.IPv6 {
 		network = "ip6"
 	}
-	addr, err := net.ResolveIPAddr(network, host)
+	m.trace.Host = host
+	m.trace.Target, err = net.ResolveIPAddr(network, m.trace.Host)
 	if err != nil {
 		return err
 	}
-	m.RemoteHostname = fmt.Sprintf("%s (%s)", host, addr.IP)
-	m.TargetIP = addr.IP.String()
+	m.RemoteHostname = fmt.Sprintf("%s (%s)", m.trace.Host, m.trace.Target.IP)
 	ip, _, err := net.SplitHostPort(conn.LocalAddr().String())
 	m.LocalHostname = fmt.Sprintf("%s (%s)", hostname, ip)
 	return err
@@ -221,13 +223,26 @@ func (m *MTR) Run(ctx context.Context) {
 	}
 	m.trace.Connetion = conn
 
-	if err = m.trace.Connect(ctx, m.TargetIP); err != nil {
-		PrintString(err)
-		return
+	reply := make([]byte, 1500)
+	for round := 0; ; {
+		if err = m.trace.Connect(ctx, reply); err != nil {
+			PrintString(err)
+			return
+		}
+		round++
+		if round == m.trace.Count {
+			return
+		}
+		select {
+		default:
+			m.Summary()
+		case <-ctx.Done():
+			return
+		}
 	}
 }
 
-func (m *MTR) Summary(width int) [][]string {
+func (m *MTR) Summary() {
 	var rows [][]string
 	for _, v := range m.trace.Stat {
 		const statHeader = "Loss%   Snt   Last   Avg  Best  Wrst StDev"
@@ -251,12 +266,12 @@ func (m *MTR) Summary(width int) [][]string {
 			m.trim(v.Rtts[len(v.Rtts)-1].String(), "Last"),
 			m.trim(avg.String(), "Avg"), m.trim(v.Min.String(), "Best"),
 			m.trim(v.Max.String(), "Wrst"), m.trim(mdev.String(), "StDev"))
-		spaces := strings.Repeat(" ", width-19-len(statHeader)-2)
+		spaces := strings.Repeat(" ", m.TerminalWidth-19-len(statHeader)-2)
 
 		// fmt.Println(host + spaces + stats)
 		rows = append(rows, []string{fmt.Sprintf("%-19s", host) + spaces + stats})
 	}
-	return rows
+	m.Statistics = rows
 }
 
 func (m *MTR) trim(s, header string) string {
