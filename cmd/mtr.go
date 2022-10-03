@@ -81,17 +81,14 @@ func init() {
 			header := widgets.NewParagraph()
 			header.Border = false
 			header.WrapText = false
-			header.Text = "My Traceroute"
+			headerString := "My Traceroute"
 			header.TextStyle.Modifier = termui.ModifierBold
 
 			/* Hostname (Host IP) -> Remote Hostname (Target IP)    time.RFC3339. */
-			infoL := widgets.NewParagraph()
-			infoL.Border = false
-			infoL.WrapText = false
-			infoL.Text = fmt.Sprintf("%s -> %s", m.LocalHostname, m.RemoteHostname)
-			infoR := widgets.NewParagraph()
-			infoR.Border = false
-			infoR.Text = fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
+			info := widgets.NewParagraph()
+			info.Border = false
+			info.WrapText = false
+			infoString := fmt.Sprintf("%s -> %s", m.LocalHostname, m.RemoteHostname)
 
 			/* Keys: (q)uit. */
 			keys := widgets.NewParagraph()
@@ -101,28 +98,39 @@ func init() {
 			/* Packets               Pings */
 			title1 := widgets.NewParagraph()
 			title1.Border = false
-			title1.Text = "Packets               Pings"
+			t1String := "Packets               Pings"
 			title1.TextStyle.Modifier = termui.ModifierBold
 
 			/* Host        Loss%   Snt   Last   Avg  Best  Wrst StDev */
 			title2 := widgets.NewParagraph()
 			title2.Border = false
 			title2.WrapText = false
-			hostString := "Host"
-			title2.Text = hostString
+			titl2String := "Host"
 			title2.TextStyle.Modifier = termui.ModifierBold
 
 			setRect := func() {
 				w, _, _ := term.GetSize(int(os.Stdin.Fd()))
-				header.SetRect(w/2-len(header.Text)/2, 1, w/2+len(header.Text), 0)
-				infoL.SetRect(0, 3, w/2, 2)
-				infoR.SetRect(w-len(time.RFC3339)-2, 3, w, 2)
-				keys.SetRect(0, 4, len(keys.Text)+2, 3)
-				title1.SetRect(w-len(title1.Text)-15, 5, w, 4)
+				n := (w-len(headerString))/2 - 2
+				spaces := strings.Repeat(" ", n)
+				header.Text = spaces + headerString + spaces
+				header.SetRect(0, 1, w, 0)
 
-				title2Spaces := strings.Repeat(" ", w-len(hostString)-len(mtrStatHeader)-2)
-				title2.Text = hostString + title2Spaces + mtrStatHeader
-				title2.SetRect(0, 6, w, 5)
+				n = w - len(infoString) - len(time.RFC3339) - 2
+				spaces = strings.Repeat(" ", n)
+				info.Text = infoString + spaces + fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
+				info.SetRect(0, 2, w, 1)
+
+				keys.SetRect(0, 3, w, 2)
+
+				n = w - len(t1String) - 15
+				spaces = strings.Repeat(" ", n)
+				title1.Text = spaces + t1String
+				title1.SetRect(0, 4, w, 3)
+
+				n = w - len(titl2String) - len(mtrStatHeader) - 2
+				spaces = strings.Repeat(" ", n)
+				title2.Text = titl2String + spaces + mtrStatHeader
+				title2.SetRect(0, 5, w, 4)
 				m.TerminalWidth = w
 			}
 			setRect()
@@ -150,11 +158,10 @@ func init() {
 					case <-ticker:
 						termui.Clear()
 						setRect()
-						infoR.Text = fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
-						table.SetRect(0, 6, m.TerminalWidth, 36)
+						table.SetRect(0, 5, m.TerminalWidth, 36)
 						table.Rows = m.Statistics
 						table.ColumnWidths = []int{m.TerminalWidth}
-						termui.Render(header, infoL, infoR, keys, title1, title2, table)
+						termui.Render(header, info, keys, title1, title2, table)
 					}
 				}
 			}()
@@ -162,17 +169,10 @@ func init() {
 			if errors.Is(err, common.ErrResponse) {
 				if flags.count != -1 && flags.output != "" {
 					var buf bytes.Buffer
-					buf.WriteString(header.Text + "\n")
-					buf.WriteString(infoL.Text)
-					buf.WriteString(infoR.Text + "\n")
-					buf.WriteString(keys.Text + "\n")
-					buf.WriteString(title1.Text + "\n")
-					buf.WriteString(title2.Text + "\n")
-
+					buf.WriteString(header.Text + "\n" + info.Text + "\n" + keys.Text + "\n" + title1.Text + "\n" + title2.Text + "\n")
 					for _, i := range m.Statistics {
 						buf.WriteString(i[0] + "\n")
 					}
-
 					return os.WriteFile(flags.output, buf.Bytes(), FileModeRAll)
 				}
 			} else if err != nil {
