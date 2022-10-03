@@ -17,7 +17,9 @@ limitations under the License.
 package cmd
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"net"
@@ -39,6 +41,7 @@ import (
 
 func init() {
 	var flags struct {
+		output   string
 		count    int
 		interval time.Duration
 		timeout  time.Duration
@@ -102,15 +105,12 @@ func init() {
 			title1.TextStyle.Modifier = termui.ModifierBold
 
 			/* Host        Loss%   Snt   Last   Avg  Best  Wrst StDev */
-			title2L := widgets.NewParagraph()
-			title2L.Border = false
-			title2L.WrapText = false
-			title2L.Text = "Host"
-			title2L.TextStyle.Modifier = termui.ModifierBold
-			title2R := widgets.NewParagraph()
-			title2R.Border = false
-			title2R.Text = mtrStatHeader
-			title2R.TextStyle.Modifier = termui.ModifierBold
+			title2 := widgets.NewParagraph()
+			title2.Border = false
+			title2.WrapText = false
+			hostString := "Host"
+			title2.Text = hostString
+			title2.TextStyle.Modifier = termui.ModifierBold
 
 			setRect := func() {
 				w, _, _ := term.GetSize(int(os.Stdin.Fd()))
@@ -119,8 +119,10 @@ func init() {
 				infoR.SetRect(w-len(time.RFC3339)-2, 3, w, 2)
 				keys.SetRect(0, 4, len(keys.Text)+2, 3)
 				title1.SetRect(w-len(title1.Text)-15, 5, w, 4)
-				title2L.SetRect(0, 6, len(title2L.Text)+2, 5)
-				title2R.SetRect(w-len(title2R.Text)-2, 6, w, 5)
+
+				title2Spaces := strings.Repeat(" ", w-len(hostString)-len(mtrStatHeader)-2)
+				title2.Text = hostString + title2Spaces + mtrStatHeader
+				title2.SetRect(0, 6, w, 5)
 				m.TerminalWidth = w
 			}
 			setRect()
@@ -152,15 +154,35 @@ func init() {
 						table.SetRect(0, 6, m.TerminalWidth, 36)
 						table.Rows = m.Statistics
 						table.ColumnWidths = []int{m.TerminalWidth}
-						termui.Render(header, infoL, infoR, keys, title1, title2L, title2R, table)
+						termui.Render(header, infoL, infoR, keys, title1, title2, table)
 					}
 				}
 			}()
+			err = m.Run(ctx)
+			if errors.Is(err, common.ErrResponse) {
+				if flags.count != -1 && flags.output != "" {
+					var buf bytes.Buffer
+					buf.WriteString(header.Text + "\n")
+					buf.WriteString(infoL.Text)
+					buf.WriteString(infoR.Text + "\n")
+					buf.WriteString(keys.Text + "\n")
+					buf.WriteString(title1.Text + "\n")
+					buf.WriteString(title2.Text + "\n")
 
-			return m.Run(ctx)
+					for _, i := range m.Statistics {
+						buf.WriteString(i[0] + "\n")
+					}
+
+					return os.WriteFile(flags.output, buf.Bytes(), FileModeRAll)
+				}
+			} else if err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 	rootCmd.AddCommand(mtrCmd)
+	mtrCmd.Flags().StringVarP(&flags.output, "output", "o", "", common.Usage("Specify output file name"))
 	mtrCmd.Flags().IntVarP(&flags.count, "count", "c", -1, common.Usage("Specify ping counts"))
 	mtrCmd.Flags().DurationVarP(&flags.interval, "interval", "i", 100*time.Millisecond, common.Usage("Specify interval"))
 	mtrCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
@@ -201,7 +223,7 @@ func (m *MTR) init() error {
 	ip, _, err := net.SplitHostPort(conn.LocalAddr().String())
 	m.LocalHostname = fmt.Sprintf("%s (%s)", hostname, ip)
 	m.Statistics = [][]string{{""}}
-	m.trace.Size = 24
+	m.trace.Size = 60
 	m.trace.TTL = 64
 	m.trace.Retry = 1
 	m.trace.Record = true
@@ -231,7 +253,7 @@ func (m *MTR) Run(ctx context.Context) error {
 			return err
 		}
 		if round == m.trace.Count {
-			return err
+			return common.ErrResponse
 		}
 
 		select {
