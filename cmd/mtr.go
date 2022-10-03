@@ -189,23 +189,21 @@ func (m *MTR) getInfo(host string) error {
 	if err != nil {
 		return err
 	}
-	m.RemoteHostname = fmt.Sprintf("%s (%s)", m.trace.Host, m.trace.Target.IP)
+	m.RemoteHostname = fmt.Sprintf("%s (%s)", m.trace.Host, m.trace.Target)
 	ip, _, err := net.SplitHostPort(conn.LocalAddr().String())
 	m.LocalHostname = fmt.Sprintf("%s (%s)", hostname, ip)
 	return err
 }
 
 func (m *MTR) Run(ctx context.Context) {
-	m.trace = Traceroute{
-		Size:     24,
-		TTL:      64,
-		Retry:    1,
-		Interval: 100 * time.Millisecond,
-		Timeout:  2 * time.Second,
+	m.trace.Size = 24
+	m.trace.TTL = 64
+	m.trace.Retry = 1
+	m.trace.Interval = 100 * time.Millisecond
+	m.trace.Timeout = 2 * time.Second
+	m.trace.Record = true
+	m.trace.Count = -1
 
-		Record: true,
-		Count:  -1,
-	}
 	data := Randoms.GenerateString(m.trace.Size, LowercaseLetters)
 	m.trace.Data = icmp.Message{
 		Type: ipv4.ICMPTypeEcho,

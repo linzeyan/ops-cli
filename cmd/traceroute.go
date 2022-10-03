@@ -19,7 +19,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"time"
@@ -161,7 +160,6 @@ func (t *Traceroute) sendPacket(hop int, b, reply []byte) (string, error) {
 	for i := 1; i <= t.Retry; i++ {
 		/* Send packet. */
 		startTime := time.Now()
-		log.Println(t.Target)
 		_, err = t.Connetion.IPv4PacketConn().WriteTo(b, nil, t.Target)
 		if err != nil {
 			return "", err
