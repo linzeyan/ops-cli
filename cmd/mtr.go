@@ -42,20 +42,22 @@ func init() {
 		Use:   CommandMtr,
 		Short: "Combined traceroute and ping",
 		Args:  cobra.ExactArgs(1),
-		Run: func(_ *cobra.Command, args []string) {
+		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
+		RunE: func(_ *cobra.Command, args []string) error {
 			if !validator.ValidDomain(args[0]) && !validator.ValidIP(args[0]) {
-				return
+				return common.ErrInvalidArg
 			}
+
 			var m MTR
 			err := m.getInfo(args[0])
 			if err != nil {
-				PrintString(err)
-				return
+				return err
 			}
 
 			if err := termui.Init(); err != nil {
-				PrintString(err)
-				return
+				return err
 			}
 			defer termui.Close()
 
@@ -126,7 +128,7 @@ func init() {
 			}
 
 			uiEvents := termui.PollEvents()
-			ticker := time.NewTicker(100 * time.Millisecond).C
+			ticker := time.NewTicker(10 * time.Millisecond).C
 			ctx, cancel := signal.NotifyContext(common.Context, os.Interrupt)
 			defer func() {
 				cancel()
@@ -141,7 +143,8 @@ func init() {
 					}
 				}
 			}()
-			m.Run(ctx, uiEvents)
+
+			return m.Run(ctx, uiEvents)
 		},
 	}
 	rootCmd.AddCommand(mtrCmd)
@@ -186,7 +189,7 @@ func (m *MTR) getInfo(host string) error {
 	return err
 }
 
-func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) {
+func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) error {
 	m.trace.Size = 24
 	m.trace.TTL = 64
 	m.trace.Retry = 1
@@ -204,8 +207,7 @@ func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) {
 
 	conn, err := m.trace.Listen()
 	if err != nil {
-		PrintString(err)
-		return
+		return err
 	}
 	if conn != nil {
 		defer conn.Close()
@@ -215,22 +217,21 @@ func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) {
 	reply := make([]byte, 1500)
 	for round := 0; ; {
 		if err = m.trace.Connect(ctx, reply); err != nil {
-			PrintString(err)
-			return
+			return err
 		}
 		round++
 		if round == m.trace.Count {
-			return
+			return err
 		}
 
 		select {
 		case e := <-events:
 			switch e.ID {
 			case "q", "<C-c>":
-				return
+				return err
 			}
 		case <-ctx.Done():
-			return
+			return ctx.Err()
 		default:
 			m.Summary()
 		}
