@@ -159,4 +159,6 @@ const (
 
 	keyFileExtension  = ".key"
 	tempFileExtension = ".temp"
+
+	mtrStatHeader = "Loss%   Snt   Last   Avg  Best  Wrst StDev"
 )

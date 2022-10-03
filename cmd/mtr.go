@@ -51,7 +51,8 @@ func init() {
 			}
 
 			var m MTR
-			err := m.getInfo(args[0])
+			m.trace.Host = args[0]
+			err := m.init()
 			if err != nil {
 				return err
 			}
@@ -61,12 +62,14 @@ func init() {
 			}
 			defer termui.Close()
 
+			/* My Traceroute. */
 			header := widgets.NewParagraph()
 			header.Border = false
 			header.WrapText = false
 			header.Text = "My Traceroute"
 			header.TextStyle.Modifier = termui.ModifierBold
 
+			/* Hostname (Host IP) -> Remote Hostname (Target IP)    time.RFC3339. */
 			infoL := widgets.NewParagraph()
 			infoL.Border = false
 			infoL.WrapText = false
@@ -75,15 +78,18 @@ func init() {
 			infoR.Border = false
 			infoR.Text = fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
 
+			/* Keys: (q)uit. */
 			keys := widgets.NewParagraph()
 			keys.Border = false
 			keys.Text = "Keys: (q)uit"
 
+			/* Packets               Pings */
 			title1 := widgets.NewParagraph()
 			title1.Border = false
 			title1.Text = "Packets               Pings"
 			title1.TextStyle.Modifier = termui.ModifierBold
 
+			/* Host        Loss%   Snt   Last   Avg  Best  Wrst StDev */
 			title2L := widgets.NewParagraph()
 			title2L.Border = false
 			title2L.WrapText = false
@@ -91,10 +97,10 @@ func init() {
 			title2L.TextStyle.Modifier = termui.ModifierBold
 			title2R := widgets.NewParagraph()
 			title2R.Border = false
-			title2R.Text = "Loss%   Snt   Last   Avg  Best  Wrst StDev"
+			title2R.Text = mtrStatHeader
 			title2R.TextStyle.Modifier = termui.ModifierBold
 
-			setRect := func() int {
+			setRect := func() {
 				w, _, _ := term.GetSize(int(os.Stdin.Fd()))
 				header.SetRect(w/2-len(header.Text)/2, 1, w/2+len(header.Text), 0)
 				infoL.SetRect(0, 3, w/2, 2)
@@ -104,7 +110,6 @@ func init() {
 				title2L.SetRect(0, 6, len(title2L.Text)+2, 5)
 				title2R.SetRect(w-len(title2R.Text)-2, 6, w, 5)
 				m.TerminalWidth = w
-				return w
 			}
 			setRect()
 
@@ -112,20 +117,6 @@ func init() {
 			table.Border = false
 			table.RowSeparator = false
 			table.Rows = m.Statistics
-
-			setTable := func(w int) {
-				table.SetRect(0, 6, w, 36)
-				table.Rows = m.Statistics
-				table.ColumnWidths = []int{w}
-			}
-
-			update := func() {
-				termui.Clear()
-				w := setRect()
-				infoR.Text = fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
-				setTable(w)
-				termui.Render(header, infoL, infoR, keys, title1, title2L, title2R, table)
-			}
 
 			uiEvents := termui.PollEvents()
 			ticker := time.NewTicker(10 * time.Millisecond).C
@@ -136,15 +127,25 @@ func init() {
 			go func() {
 				for {
 					select {
-					case <-ctx.Done():
-						return
+					case e := <-uiEvents:
+						switch e.ID {
+						case "q", "<C-c>":
+							termui.Close()
+							os.Exit(0)
+						}
 					case <-ticker:
-						update()
+						termui.Clear()
+						setRect()
+						infoR.Text = fmt.Sprintf("%v", time.Now().Local().Format(time.RFC3339))
+						table.SetRect(0, 6, m.TerminalWidth, 36)
+						table.Rows = m.Statistics
+						table.ColumnWidths = []int{m.TerminalWidth}
+						termui.Render(header, infoL, infoR, keys, title1, title2L, title2R, table)
 					}
 				}
 			}()
 
-			return m.Run(ctx, uiEvents)
+			return m.Run(ctx)
 		},
 	}
 	rootCmd.AddCommand(mtrCmd)
@@ -160,7 +161,7 @@ type MTR struct {
 	trace Traceroute
 }
 
-func (m *MTR) getInfo(host string) error {
+func (m *MTR) init() error {
 	var err error
 	hostname, err := os.Hostname()
 	if err != nil {
@@ -177,7 +178,6 @@ func (m *MTR) getInfo(host string) error {
 	if m.IPv6 {
 		network = "ip6"
 	}
-	m.trace.Host = host
 	m.trace.Target, err = net.ResolveIPAddr(network, m.trace.Host)
 	if err != nil {
 		return err
@@ -186,10 +186,6 @@ func (m *MTR) getInfo(host string) error {
 	ip, _, err := net.SplitHostPort(conn.LocalAddr().String())
 	m.LocalHostname = fmt.Sprintf("%s (%s)", hostname, ip)
 	m.Statistics = [][]string{{""}}
-	return err
-}
-
-func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) error {
 	m.trace.Size = 24
 	m.trace.TTL = 64
 	m.trace.Retry = 1
@@ -197,7 +193,10 @@ func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) error {
 	m.trace.Timeout = 2 * time.Second
 	m.trace.Record = true
 	m.trace.Count = -1
+	return err
+}
 
+func (m *MTR) Run(ctx context.Context) error {
 	data := Randoms.GenerateString(m.trace.Size, LowercaseLetters)
 	m.trace.Data = icmp.Message{
 		Type: ipv4.ICMPTypeEcho,
@@ -225,11 +224,6 @@ func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) error {
 		}
 
 		select {
-		case e := <-events:
-			switch e.ID {
-			case "q", "<C-c>":
-				return err
-			}
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
@@ -240,7 +234,7 @@ func (m *MTR) Run(ctx context.Context, events <-chan termui.Event) error {
 
 func (m *MTR) Summary() {
 	var rows [][]string
-	const statHeader = "Loss%   Snt   Last   Avg  Best  Wrst StDev"
+	headers := strings.Fields(mtrStatHeader)
 	for _, v := range m.trace.Stat {
 		var avg time.Duration
 		if v.Receive == 0 {
@@ -257,12 +251,12 @@ func (m *MTR) Summary() {
 
 		host := fmt.Sprintf("%d. %s", v.Hop, v.DstIP)
 		stats := fmt.Sprintf("%4s%%   %3s   %4s   %3s  %4s  %4s %5s",
-			m.trim(fmt.Sprintf("%.1f", float64(v.Loss*100)/float64(v.Send)), "Loss"),
+			m.trim(fmt.Sprintf("%.1f", float64(v.Loss*100)/float64(v.Send)), strings.Replace(headers[0], "%", "", 1)),
 			strconv.Itoa(v.Send),
-			m.trim(v.Rtts[len(v.Rtts)-1].String(), "Last"),
-			m.trim(avg.String(), "Avg"), m.trim(v.Min.String(), "Best"),
-			m.trim(v.Max.String(), "Wrst"), m.trim(mdev.String(), "StDev"))
-		spaces := strings.Repeat(" ", m.TerminalWidth-19-len(statHeader)-2)
+			m.trim(v.Rtts[len(v.Rtts)-1].String(), headers[2]),
+			m.trim(avg.String(), headers[3]), m.trim(v.Min.String(), headers[4]),
+			m.trim(v.Max.String(), headers[5]), m.trim(mdev.String(), headers[6]))
+		spaces := strings.Repeat(" ", m.TerminalWidth-19-len(mtrStatHeader)-2)
 
 		rows = append(rows, []string{fmt.Sprintf("%-19s", host) + spaces + stats})
 	}
