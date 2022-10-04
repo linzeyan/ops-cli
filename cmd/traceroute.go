@@ -169,6 +169,9 @@ func (t *Traceroute) sendPacket(hop int, b, reply []byte) (string, error) {
 			return "", err
 		}
 		n, _, peer, err := t.Connetion.IPv4PacketConn().ReadFrom(reply)
+		if peer.String() == inetLocalhost && t.Target.String() != inetLocalhost {
+			continue
+		}
 		if err != nil {
 			t.lost = true
 			t.statistics(hop, "*", 0)
