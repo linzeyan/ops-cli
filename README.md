@@ -91,6 +91,7 @@ Available Commands:
   ping        Send ICMP ECHO_REQUEST packets to network hosts
   qrcode      Read or generate QR Code
   random      Generate random string
+  readlink    Get symlink information
   redis       Opens a connection to a Redis server
   ssh-keygen  Generate SSH keypair
   stat        Display file informations
@@ -417,6 +418,13 @@ fR/ivHlj+PtIyB4em5y0Nq2nTuajHRjZbZTC7akTKx070UWH4uNajkP/Eq82E6Kn
 QbqZnLicRpJj60TUiAFuA3ohjqFynoozRUWjmI8ZmBD6J4o+2viDUHTLRCdIuVeV
 Garvm8Mi95i4Zt8ZMjOhcI6W9zzuMb9bJZqBVsl8GYANHo35X2sfR6burD94We7O
 JkiKqH3a33NP9AA2xpVGrcQrBdo=
+```
+
+### `readlink`
+
+```bash
+→ ops-cli readlink /tmp
+private/tmp
 ```
 
 ### `redis`
