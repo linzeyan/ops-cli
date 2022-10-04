@@ -275,7 +275,6 @@ func (m *MTR) Run(ctx context.Context) error {
 
 func (m *MTR) Summary() {
 	var rows [][]string
-	headers := strings.Fields(mtrStatHeader)
 	for _, v := range m.trace.Stat {
 		var avg time.Duration
 		if v.Receive == 0 {
@@ -291,20 +290,20 @@ func (m *MTR) Summary() {
 		mdev := time.Duration(math.Sqrt(variance))
 
 		host := fmt.Sprintf("%d. %s", v.Hop, v.DstIP)
-		stats := fmt.Sprintf("%4s%% %5s   %4s   %3s  %4s  %4s %5s",
-			m.trim(fmt.Sprintf("%.1f", float64(v.Loss*100)/float64(v.Send)), strings.Replace(headers[0], "%", "", 1)),
+		stats := fmt.Sprintf("%5s%% %5s  %5s %5s %5s %5s %5s",
+			fmt.Sprintf("%.1f", float64(v.Loss*100)/float64(v.Send)),
 			strconv.Itoa(v.Send),
-			m.trim(v.Rtts[len(v.Rtts)-1].String(), headers[2]),
-			m.trim(avg.String(), headers[3]), m.trim(v.Min.String(), headers[4]),
-			m.trim(v.Max.String(), headers[5]), m.trim(mdev.String(), headers[6]))
-		spaces := strings.Repeat(" ", m.TerminalWidth-19-len(mtrStatHeader)-2)
+			m.trim(v.Rtts[len(v.Rtts)-1].String()),
+			m.trim(avg.String()), m.trim(v.Min.String()),
+			m.trim(v.Max.String()), m.trim(mdev.String()))
+		spaces := strings.Repeat(" ", m.TerminalWidth-19-len(mtrStatHeader)-3)
 
 		rows = append(rows, []string{fmt.Sprintf("%-19s", host) + spaces + stats})
 	}
 	m.Statistics = rows
 }
 
-func (m *MTR) trim(s, header string) string {
+func (m *MTR) trim(s string) string {
 	i := strings.Index(s, ".")
 	s = strings.Replace(s, "ms", "", 1)
 	if strings.Contains(s, "µ") {
@@ -316,7 +315,7 @@ func (m *MTR) trim(s, header string) string {
 		}
 	}
 
-	if len(s[:i+2]) > len(header) {
+	if len(s[:i+2]) > 5 {
 		return s[0:i]
 	}
 	return s[:i+2]
