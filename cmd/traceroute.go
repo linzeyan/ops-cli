@@ -169,7 +169,7 @@ func (t *Traceroute) sendPacket(hop int, b, reply []byte) (string, error) {
 			return "", err
 		}
 		n, _, peer, err := t.Connetion.IPv4PacketConn().ReadFrom(reply)
-		if peer.String() == inetLocalhost && t.Target.String() != inetLocalhost {
+		if peer.String() == inetLocalhost && t.Host != inetLocalhost {
 			continue
 		}
 		if err != nil {
