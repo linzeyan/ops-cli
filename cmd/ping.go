@@ -260,7 +260,13 @@ func (p *Ping) Connect(c context.Context, host string) {
 		n, cm, peer, err := p.readReply(reply, i)
 		if err != nil {
 			PrintString(err)
-			continue
+			select {
+			default:
+				continue
+			case <-c.Done():
+				p.summary(host, time.Since(allTime))
+				return
+			}
 		}
 		duration := time.Since(startTime)
 
