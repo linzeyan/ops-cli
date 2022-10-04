@@ -77,6 +77,7 @@ const (
 	CommandQrcode     = "qrcode"
 	CommandRandom     = "random"
 	CommandRead       = "read"
+	CommandReadlink   = "readlink"
 	CommandRedis      = "redis"
 	CommandReST       = "rest"
 	CommandSlack      = "Slack"
