@@ -185,7 +185,7 @@ func init() {
 	mtrCmd.Flags().StringVarP(&flags.output, "output", "o", "", common.Usage("Specify output file name"))
 	mtrCmd.Flags().IntVarP(&flags.count, "count", "c", -1, common.Usage("Specify ping counts"))
 	mtrCmd.Flags().DurationVarP(&flags.interval, "interval", "i", 100*time.Millisecond, common.Usage("Specify interval"))
-	mtrCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
+	mtrCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 800*time.Millisecond, common.Usage("Specify timeout"))
 }
 
 type MTR struct {
@@ -248,6 +248,14 @@ func (m *MTR) Run(ctx context.Context) error {
 	m.trace.Connetion = conn
 
 	reply := make([]byte, 1500)
+
+	go func() {
+		for {
+			if len(m.trace.Stat) != 0 {
+				m.Summary()
+			}
+		}
+	}()
 	for round := 0; ; round++ {
 		if err = m.trace.Connect(ctx, reply); err != nil {
 			return err
@@ -260,7 +268,7 @@ func (m *MTR) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			m.Summary()
+			continue
 		}
 	}
 }
@@ -283,7 +291,7 @@ func (m *MTR) Summary() {
 		mdev := time.Duration(math.Sqrt(variance))
 
 		host := fmt.Sprintf("%d. %s", v.Hop, v.DstIP)
-		stats := fmt.Sprintf("%4s%%   %3s   %4s   %3s  %4s  %4s %5s",
+		stats := fmt.Sprintf("%4s%% %5s   %4s   %3s  %4s  %4s %5s",
 			m.trim(fmt.Sprintf("%.1f", float64(v.Loss*100)/float64(v.Send)), strings.Replace(headers[0], "%", "", 1)),
 			strconv.Itoa(v.Send),
 			m.trim(v.Rtts[len(v.Rtts)-1].String(), headers[2]),
