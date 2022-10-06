@@ -158,7 +158,8 @@ const (
 const (
 	IndentTwoSpaces = "  "
 
-	inetLocalhost = "127.0.0.1"
+	inetLocalhost   = "localhost"
+	inetLocalhostIP = "127.0.0.1"
 
 	keyFileExtension  = ".key"
 	tempFileExtension = ".temp"

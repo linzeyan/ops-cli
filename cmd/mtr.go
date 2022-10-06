@@ -263,7 +263,7 @@ func (m *MTR) Run(ctx context.Context) error {
 		if round == m.trace.Count {
 			return common.ErrResponse
 		}
-
+		time.Sleep(time.Second)
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
