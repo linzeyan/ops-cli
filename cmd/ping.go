@@ -260,6 +260,10 @@ func (p *Ping) Connect(c context.Context, host string) {
 		n, cm, peer, err := p.readReply(reply, i)
 		if err != nil {
 			PrintString(err)
+			if i == p.Count-1 {
+				p.summary(host, time.Since(allTime))
+				return
+			}
 			select {
 			default:
 				continue
