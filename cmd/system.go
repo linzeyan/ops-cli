@@ -111,7 +111,7 @@ func init() {
 
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.AddCommand(systemCmd)
+	RootCmd.AddCommand(systemCmd)
 
 	systemCmd.AddCommand(systemSubCmdCPU)
 	systemCmd.AddCommand(systemSubCmdDisk)

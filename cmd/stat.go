@@ -45,7 +45,7 @@ func init() {
 		},
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.AddCommand(statCmd)
+	RootCmd.AddCommand(statCmd)
 }
 
 type FileStat struct {

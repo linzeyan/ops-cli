@@ -94,7 +94,7 @@ func init() {
 		Example: common.Examples(`# Send photo
 -a "~/robot.png"`, CommandSlack, CommandPhoto),
 	}
-	rootCmd.AddCommand(slackCmd)
+	RootCmd.AddCommand(slackCmd)
 
 	slackCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Bot token (required)"))
 	slackCmd.PersistentFlags().StringVarP(&flags.Channel, "channel", "c", "", common.Usage("Channel ID"))

@@ -86,7 +86,7 @@ www.google.com --dns
 # Print certificate expiration time, DNS and issuer
 example.com.crt`, CommandCert),
 	}
-	rootCmd.AddCommand(certCmd)
+	RootCmd.AddCommand(certCmd)
 
 	certCmd.Flags().StringVarP(&flags.port, "port", "p", "443", common.Usage("Specify host port"))
 	certCmd.Flags().BoolVar(&flags.ip, "ip", false, common.Usage("Only print IP"))

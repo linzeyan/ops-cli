@@ -138,7 +138,7 @@ func init() {
 		Short: "Hexadecimal encoding or decoding",
 		RunE:  runE,
 	}
-	rootCmd.AddCommand(encodeCmd)
+	RootCmd.AddCommand(encodeCmd)
 
 	encodeCmd.PersistentFlags().BoolVarP(&flags.decode, "decode", "d", false, common.Usage("Decodes input"))
 	encodeCmd.AddCommand(encodeSubCmdBase32Hex, encodeSubCmdBase32Std)

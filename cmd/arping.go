@@ -94,7 +94,7 @@ func init() {
 			}
 		},
 	}
-	rootCmd.AddCommand(arpingCmd)
+	RootCmd.AddCommand(arpingCmd)
 	arpingCmd.Flags().BoolVarP(&arpingFlag.check, "check", "c", false, common.Usage("Check if host is online"))
 	arpingCmd.Flags().BoolVarP(&arpingFlag.mac, "mac", "m", false, common.Usage("Resolve mac address"))
 	arpingCmd.Flags().StringVarP(&arpingFlag.iface, "interface", "i", "", common.Usage("Specify interface name"))

@@ -58,7 +58,7 @@ func init() {
 		Example: common.Examples(`# Print the ICP status
 -a account -k api_key google.com`, CommandIcp),
 	}
-	rootCmd.AddCommand(icpCmd)
+	RootCmd.AddCommand(icpCmd)
 
 	icpCmd.Flags().StringVarP(&flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))
 	icpCmd.Flags().StringVarP(&flags.Key, "key", "k", "", common.Usage("Enter the WEST api key"))

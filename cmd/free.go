@@ -61,7 +61,7 @@ func init() {
 			}
 		},
 	}
-	rootCmd.AddCommand(freeCmd)
+	RootCmd.AddCommand(freeCmd)
 	freeCmd.Flags().UintVarP(&flags.count, "count", "c", 0, common.Usage("Repeat printing times"))
 	freeCmd.Flags().UintVarP(&flags.second, "seconds", "s", 0, common.Usage("Seconds between each repeat printing"))
 }

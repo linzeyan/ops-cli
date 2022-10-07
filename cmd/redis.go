@@ -56,7 +56,7 @@ func init() {
 		},
 	}
 
-	rootCmd.AddCommand(redisCmd)
+	RootCmd.AddCommand(redisCmd)
 	redisCmd.Flags().StringVarP(&flags.Username, "user", "u", "", common.Usage("Username to authenticate the current connection"))
 	redisCmd.Flags().StringVarP(&flags.Password, "auth", "a", "", common.Usage("Password to use when connecting to the server"))
 	redisCmd.Flags().StringVarP(&flags.Host, "hostname", "H", "127.0.0.1", common.Usage("Server hostname"))

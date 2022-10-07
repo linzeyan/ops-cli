@@ -68,7 +68,7 @@ func init() {
 
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.AddCommand(updateCmd)
+	RootCmd.AddCommand(updateCmd)
 }
 
 type version struct {

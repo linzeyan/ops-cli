@@ -125,7 +125,7 @@ func init() {
 "Hello World!" -k '45984614e8f7d6c5' -d
 "Hello World!" -k key.txt -d`, CommandEncrypt, CommandString),
 	}
-	rootCmd.AddCommand(encryptCmd)
+	RootCmd.AddCommand(encryptCmd)
 
 	encryptCmd.PersistentFlags().BoolVarP(&flags.decrypt, "decrypt", "d", false, common.Usage("Decrypt"))
 	encryptCmd.PersistentFlags().StringVarP(&flags.mode, "mode", "m", "CTR", common.Usage("Encrypt mode(CFB/OFB/CTR/GCM)"))

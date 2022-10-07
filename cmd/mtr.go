@@ -181,7 +181,7 @@ func init() {
 			return nil
 		},
 	}
-	rootCmd.AddCommand(mtrCmd)
+	RootCmd.AddCommand(mtrCmd)
 	mtrCmd.Flags().StringVarP(&flags.output, "output", "o", "", common.Usage("Specify output file name"))
 	mtrCmd.Flags().IntVarP(&flags.count, "count", "c", -1, common.Usage("Specify ping counts"))
 	mtrCmd.Flags().DurationVarP(&flags.interval, "interval", "i", 100*time.Millisecond, common.Usage("Specify interval"))

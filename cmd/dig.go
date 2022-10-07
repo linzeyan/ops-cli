@@ -115,7 +115,7 @@ google.com ANY
 # Query PTR record
 1.1.1.1 PTR`, CommandDig),
 	}
-	rootCmd.AddCommand(digCmd)
+	RootCmd.AddCommand(digCmd)
 
 	digCmd.Flags().StringVarP(&flags.network, "net", "n", "tcp", common.Usage("udp/tcp"))
 }

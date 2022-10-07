@@ -36,5 +36,5 @@ func init() {
 		},
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.AddCommand(dos2unixCmd)
+	RootCmd.AddCommand(dos2unixCmd)
 }

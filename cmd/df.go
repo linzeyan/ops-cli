@@ -71,7 +71,7 @@ func init() {
 			return err
 		},
 	}
-	rootCmd.AddCommand(dfCmd)
+	RootCmd.AddCommand(dfCmd)
 }
 
 type DF struct {

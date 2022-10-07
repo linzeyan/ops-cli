@@ -73,5 +73,5 @@ func init() {
 			PrintString("Connect success")
 		},
 	}
-	rootCmd.AddCommand(wspingCmd)
+	RootCmd.AddCommand(wspingCmd)
 }

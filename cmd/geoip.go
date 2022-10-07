@@ -62,7 +62,7 @@ func init() {
 1.1.1.1 8.8.8.8`, CommandGeoip),
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.AddCommand(geoipCmd)
+	RootCmd.AddCommand(geoipCmd)
 }
 
 type GeoIP struct {

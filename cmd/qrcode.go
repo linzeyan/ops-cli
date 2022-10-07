@@ -134,7 +134,7 @@ https://www.google.com -o out.png -s 500`, CommandQrcode, CommandText),
 --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid -o wifi.png`,
 			CommandQrcode, CommandWiFi),
 	}
-	rootCmd.AddCommand(qrcodeCmd)
+	RootCmd.AddCommand(qrcodeCmd)
 
 	/* output arguments */
 	qrcodeCmd.PersistentFlags().StringVarP(&flags.output, "output", "o", "qrcode.png", common.Usage("Output QRCode file path"))

@@ -145,7 +145,7 @@ func init() {
 		Short: "Send voice file to Telegram",
 		RunE:  runE,
 	}
-	rootCmd.AddCommand(telegramCmd)
+	RootCmd.AddCommand(telegramCmd)
 
 	telegramCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Bot token (required)"))
 	telegramCmd.PersistentFlags().Int64VarP(&flags.Chat, "chat-id", "c", 0, common.Usage("Chat ID"))

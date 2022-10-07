@@ -135,7 +135,7 @@ func init() {
 		Example: common.Examples(`# Generate a hexadecimal string
 -l 30`, CommandRandom, CommandHex),
 	}
-	rootCmd.AddCommand(randomCmd)
+	RootCmd.AddCommand(randomCmd)
 
 	randomCmd.PersistentFlags().IntVarP(&flags.length, "length", "l", 24, common.Usage("Specify the string length"))
 	randomCmd.Flags().IntVarP(&flags.lower, "lower", "o", 4, common.Usage("Number of lowercase letters to include in the string"))

@@ -97,7 +97,7 @@ Time zone:
 			}
 		},
 	}
-	rootCmd.AddCommand(dateCmd)
+	RootCmd.AddCommand(dateCmd)
 	dateCmd.Flags().StringVarP(&flags.format, "format", "f", "", common.Usage("Print date using specific format"))
 	dateCmd.Flags().StringVarP(&flags.timezone, "timezone", "z", "", common.Usage("Specify timezone"))
 	dateCmd.Flags().BoolVarP(&flags.seconds, "seconds", "s", false, common.Usage("Print Unix time"))

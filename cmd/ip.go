@@ -71,7 +71,7 @@ func init() {
 		DisableFlagsInUseLine: true,
 		DisableFlagParsing:    true,
 	}
-	rootCmd.AddCommand(ipCmd)
+	RootCmd.AddCommand(ipCmd)
 }
 
 func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat) (map[string]int, map[int]string) {

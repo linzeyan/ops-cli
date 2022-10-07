@@ -50,7 +50,7 @@ func init() {
 			t.Walk(args, &flags)
 		},
 	}
-	rootCmd.AddCommand(treeCmd)
+	RootCmd.AddCommand(treeCmd)
 	treeCmd.Flags().BoolVarP(&flags.All, "all", "a", false, common.Usage("List all files"))
 	treeCmd.Flags().BoolVarP(&flags.Change, "change", "c", false, common.Usage("Print the date of last modification"))
 	treeCmd.Flags().BoolVarP(&flags.Dirs, "dirs", "d", false, common.Usage("List only directories"))

@@ -108,7 +108,7 @@ func init() {
 -i 10.0.0.0-10.122.10.0`, CommandNetmask),
 	}
 
-	rootCmd.AddCommand(netmaskCmd)
+	RootCmd.AddCommand(netmaskCmd)
 	netmaskCmd.Flags().BoolVarP(&flags.ranges, "ranges", "r", false, common.Usage("Print IP address ranges"))
 	netmaskCmd.Flags().BoolVarP(&flags.binary, TypeBinary, "b", false, common.Usage("Print IP address and mask in binary"))
 	netmaskCmd.Flags().BoolVarP(&flags.octal, TypeOctal, "o", false, common.Usage("Print IP address and mask in octal"))

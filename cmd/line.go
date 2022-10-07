@@ -116,7 +116,7 @@ https://callback_url`, CommandLINE, CommandID),
 -s secret -t token --id GroupID -a https://video.url`, CommandLINE, CommandVideo),
 		RunE: runE,
 	}
-	rootCmd.AddCommand(lineCmd)
+	RootCmd.AddCommand(lineCmd)
 
 	lineCmd.PersistentFlags().StringVarP(&flags.Secret, "secret", "s", "", common.Usage("Channel Secret"))
 	lineCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Channel Access Token"))

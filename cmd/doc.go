@@ -48,13 +48,13 @@ func init() {
 				Title:   "MINE",
 				Section: "3",
 			}
-			err = doc.GenManTree(rootCmd, header, flags.dir)
+			err = doc.GenManTree(RootCmd, header, flags.dir)
 		case CommandMarkdown:
-			err = doc.GenMarkdownTree(rootCmd, flags.dir)
+			err = doc.GenMarkdownTree(RootCmd, flags.dir)
 		case CommandReST:
-			err = doc.GenReSTTree(rootCmd, flags.dir)
+			err = doc.GenReSTTree(RootCmd, flags.dir)
 		case CommandYaml:
-			err = doc.GenYamlTree(rootCmd, flags.dir)
+			err = doc.GenYamlTree(RootCmd, flags.dir)
 		}
 		return err
 	}
@@ -82,7 +82,7 @@ func init() {
 		Short: "Generate yaml documentation",
 		RunE:  runE,
 	}
-	rootCmd.AddCommand(docCmd)
+	RootCmd.AddCommand(docCmd)
 
 	docCmd.PersistentFlags().StringVarP(&flags.dir, "dir", "d", "doc", common.Usage("Specify the path to generate documentation"))
 	docCmd.AddCommand(docSubCmdMan)

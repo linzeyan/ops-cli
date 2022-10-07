@@ -50,7 +50,7 @@ func init() {
 		},
 	}
 
-	rootCmd.AddCommand(sshkeygenCmd)
+	RootCmd.AddCommand(sshkeygenCmd)
 
 	sshkeygenCmd.Flags().IntVarP(&flags.bit, "bits", "b", 4096, common.Usage("Specifies the number of bits in the key to create"))
 	sshkeygenCmd.Flags().StringVarP(&flags.path, "file", "f", "id_rsa", common.Usage("Specify the file path to generate"))

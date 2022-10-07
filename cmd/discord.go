@@ -85,7 +85,7 @@ func init() {
 		Short: "Send text to speech to Discord",
 		RunE:  runE,
 	}
-	rootCmd.AddCommand(discordCmd)
+	RootCmd.AddCommand(discordCmd)
 
 	discordCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Token"))
 	discordCmd.PersistentFlags().StringVarP(&flags.Channel, "channel-id", "c", "", common.Usage("Channel ID"))

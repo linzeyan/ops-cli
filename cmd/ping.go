@@ -93,7 +93,7 @@ func init() {
 			p.Connect(ctx, args[0])
 		},
 	}
-	rootCmd.AddCommand(pingCmd)
+	RootCmd.AddCommand(pingCmd)
 	pingCmd.Flags().IntVarP(&flags.count, "count", "c", -1, common.Usage("Specify ping counts"))
 	pingCmd.Flags().BoolVarP(&flags.ipv6, "ipv6", "6", false, common.Usage("Use ICMPv6"))
 	pingCmd.Flags().IntVarP(&flags.size, "size", "s", 56, common.Usage("Specify packet size"))

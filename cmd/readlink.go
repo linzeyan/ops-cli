@@ -51,6 +51,6 @@ func init() {
 			}
 		},
 	}
-	rootCmd.AddCommand(readlinkCmd)
+	RootCmd.AddCommand(readlinkCmd)
 	readlinkCmd.Flags().BoolVarP(&flags, "follow", "f", false, common.Usage("Follow all symlinks"))
 }

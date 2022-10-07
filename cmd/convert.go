@@ -75,7 +75,7 @@ Available Commands:
 			common.SliceStringToInterface(validArg)...),
 	}
 
-	rootCmd.AddCommand(convertCmd)
+	RootCmd.AddCommand(convertCmd)
 
 	convertCmd.Flags().StringVarP(&flags.inFile, "in", "i", "", common.Usage("Input file (required)"))
 	convertCmd.Flags().StringVarP(&flags.outFile, "out", "o", "", common.Usage("Output file"))

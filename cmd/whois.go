@@ -71,7 +71,7 @@ func init() {
 		Example: common.Examples(`# Search domain
 apple.com`, CommandWhois),
 	}
-	rootCmd.AddCommand(whoisCmd)
+	RootCmd.AddCommand(whoisCmd)
 
 	whoisCmd.Flags().BoolVarP(&flags.ns, "ns", "n", false, common.Usage("Only print Name Servers"))
 	whoisCmd.Flags().BoolVarP(&flags.expiry, "expiry", "e", false, common.Usage("Only print expiry time"))

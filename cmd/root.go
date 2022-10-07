@@ -27,13 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   common.RepoName,
-	Short: "OPS useful tools",
-	Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
-
-	DisableFlagsInUseLine: true,
-}
+var RootCmd = root()
 
 /* Flags. */
 var (
@@ -42,17 +36,18 @@ var (
 	rootOutputYAML bool
 )
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-}
+func root() *cobra.Command {
+	var rootCmd = &cobra.Command{
+		Use:   common.RepoName,
+		Short: "OPS useful tools",
+		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
-func init() {
+		DisableFlagsInUseLine: true,
+	}
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, common.Usage("Output JSON format"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, common.Usage("Output YAML format"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
+	return rootCmd
 }
 
 type OutputFormat interface {

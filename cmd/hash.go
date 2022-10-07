@@ -104,7 +104,7 @@ func init() {
 
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.AddCommand(hashCmd)
+	RootCmd.AddCommand(hashCmd)
 
 	hashCmd.Flags().BoolVarP(&flags.check, "check", "c", false, common.Usage("Read SHA sums from the file and check them"))
 	hashCmd.Flags().BoolVarP(&flags.list, "list", "l", false, common.Usage("List multiple SHA sums for the specify input"))

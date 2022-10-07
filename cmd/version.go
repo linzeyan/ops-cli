@@ -49,7 +49,7 @@ func init() {
 			OutputInterfaceString(v)
 		},
 	}
-	rootCmd.AddCommand(versionCmd)
+	RootCmd.AddCommand(versionCmd)
 }
 
 type Version struct {

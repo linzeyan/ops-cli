@@ -90,7 +90,7 @@ func init() {
 			}
 		},
 	}
-	rootCmd.AddCommand(tracerouteCmd)
+	RootCmd.AddCommand(tracerouteCmd)
 	tracerouteCmd.Flags().IntVarP(&flags.size, "size", "s", 60, common.Usage("Specify packet size"))
 	tracerouteCmd.Flags().IntVarP(&flags.maxTTL, "max-ttl", "m", 64, common.Usage("Specify max hop"))
 	tracerouteCmd.Flags().DurationVarP(&flags.interval, "interval", "i", 500*time.Millisecond, common.Usage("Specify interval"))

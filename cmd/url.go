@@ -75,7 +75,7 @@ https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.refere
 https://goo.gl/maps/b37Aq3Anc7taXQDd9 -e`,
 			CommandURL),
 	}
-	rootCmd.AddCommand(urlCmd)
+	RootCmd.AddCommand(urlCmd)
 	urlCmd.Flags().BoolVarP(&urlFlag.expand, "expand", "e", false, "Expand shorten url")
 	urlCmd.Flags().BoolVarP(&urlFlag.verbose, "verbose", "v", false, "Verbose output")
 	urlCmd.Flags().StringVarP(&urlFlag.output, "output", "o", "", "Write to file")
