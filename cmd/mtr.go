@@ -290,6 +290,9 @@ func (m *MTR) Summary() {
 		mdev := time.Duration(math.Sqrt(variance))
 
 		host := fmt.Sprintf("%d. %s", v.Hop, v.DstIP)
+		if len(v.Rtts)-1 < 0 {
+			time.Sleep(time.Second)
+		}
 		stats := fmt.Sprintf("%5s%% %5s  %5s %5s %5s %5s %5s",
 			fmt.Sprintf("%.1f", float64(v.Loss*100)/float64(v.Send)),
 			strconv.Itoa(v.Send),
