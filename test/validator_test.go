@@ -37,7 +37,7 @@ func TestValidatorFile(t *testing.T) {
 		{"../vendor", true},
 		{"command.json", false},
 		{"root_test.go", true},
-		{"/dev/null", !isWindows()},
+		{"/dev/null", !validator.IsWindows()},
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {

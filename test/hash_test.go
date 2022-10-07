@@ -6,6 +6,7 @@ import (
 
 	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/linzeyan/ops-cli/cmd/common"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +31,7 @@ func TestHashFile(t *testing.T) {
 			}},
 	}
 	for _, testCase := range testCases {
-		if isWindows() {
+		if validator.IsWindows() {
 			if err := common.Dos2Unix(testCase.input); err != nil {
 				t.Error(err)
 			}

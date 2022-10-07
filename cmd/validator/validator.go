@@ -20,6 +20,7 @@ import (
 	"net/netip"
 	"net/url"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -106,4 +107,12 @@ func ValidIPv6CIDR(i string) bool {
 func ValidURL(u string) bool {
 	_, err := url.ParseRequestURI(u)
 	return err == nil
+}
+
+func IsDarwin() bool {
+	return runtime.GOOS == "darwin"
+}
+
+func IsWindows() bool {
+	return runtime.GOOS == "windows"
 }

@@ -5,10 +5,11 @@ import (
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 )
 
 func TestTreeBinary(t *testing.T) {
-	if isWindows() {
+	if validator.IsWindows() {
 		return
 	}
 	const subCommand = cmd.CommandTree

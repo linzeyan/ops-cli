@@ -9,6 +9,7 @@ import (
 
 	"github.com/linzeyan/ops-cli/cmd"
 	"github.com/linzeyan/ops-cli/cmd/common"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +23,7 @@ func TestConvert(t *testing.T) {
 		{[]string{runCommand, mainGo, subCommand, cmd.CommandYaml2Toml, "-i", "assets/proxy.yaml", "-o", "testy.toml"}, "assets/proxy.toml"},
 		{[]string{runCommand, mainGo, subCommand, cmd.CommandToml2JSON, "-i", "assets/proxy.toml", "-o", "testt.json"}, "assets/proxy.json"},
 	}
-	if isWindows() {
+	if validator.IsWindows() {
 		if err := common.Dos2Unix("assets/proxy.json"); err != nil {
 			t.Error(err)
 		}

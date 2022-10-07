@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"runtime"
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 )
 
 const (
@@ -19,16 +19,8 @@ const (
 
 var binaryCommand = "../" + common.RepoName
 
-func isDarwin() bool {
-	return runtime.GOOS == "darwin"
-}
-
-func isWindows() bool {
-	return runtime.GOOS == "windows"
-}
-
 func TestMain(m *testing.M) {
-	if isWindows() {
+	if validator.IsWindows() {
 		binaryCommand += ".exe"
 	}
 	cmd := exec.Command(mainCommand, "build", "-trimpath", "-ldflags", "-s -w", "-o", binaryCommand, mainGo)
