@@ -49,7 +49,7 @@ func root() *cobra.Command {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, common.Usage("Output YAML format"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
 
-	if validator.IsWindows() {
+	if !validator.IsWindows() {
 		rootCmd.AddCommand(initArping())
 	}
 	rootCmd.AddCommand(initCert(), initConvert())
