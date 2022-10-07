@@ -35,7 +35,7 @@ import (
 
 var Encoder Encode
 
-func init() {
+func initEncode() *cobra.Command {
 	var flags struct {
 		decode bool
 	}
@@ -138,12 +138,12 @@ func init() {
 		Short: "Hexadecimal encoding or decoding",
 		RunE:  runE,
 	}
-	RootCmd.AddCommand(encodeCmd)
 
 	encodeCmd.PersistentFlags().BoolVarP(&flags.decode, "decode", "d", false, common.Usage("Decodes input"))
 	encodeCmd.AddCommand(encodeSubCmdBase32Hex, encodeSubCmdBase32Std)
 	encodeCmd.AddCommand(encodeSubCmdBase64Std, encodeSubCmdBase64URL)
 	encodeCmd.AddCommand(encodeSubCmdHex)
+	return encodeCmd
 }
 
 type Encode struct{}

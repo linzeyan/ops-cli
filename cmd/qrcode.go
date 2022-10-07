@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initQrcode() *cobra.Command {
 	var flags struct {
 		/* Bind flags */
 		/* QR Code generate file path */
@@ -134,7 +134,6 @@ https://www.google.com -o out.png -s 500`, CommandQrcode, CommandText),
 --wifi-type WPA --wifi-pass your_password --wifi-ssid your_wifi_ssid -o wifi.png`,
 			CommandQrcode, CommandWiFi),
 	}
-	RootCmd.AddCommand(qrcodeCmd)
 
 	/* output arguments */
 	qrcodeCmd.PersistentFlags().StringVarP(&flags.output, "output", "o", "qrcode.png", common.Usage("Output QRCode file path"))
@@ -157,4 +156,5 @@ https://www.google.com -o out.png -s 500`, CommandQrcode, CommandText),
 	qrcodeSubCmdOtp.Flags().IntVarP(&flags.otpDigits, "otp-digits", "", 6, common.Usage("Specify digits"))
 	qrcodeSubCmdOtp.Flags().IntVarP(&flags.otpPeriod, "otp-period", "", 30, common.Usage("Specify period"))
 	qrcodeSubCmdOtp.MarkFlagsRequiredTogether("otp-account", "otp-issuer", "otp-secret")
+	return qrcodeCmd
 }

@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initDos2Unix() *cobra.Command {
 	var dos2unixCmd = &cobra.Command{
 		Use:   CommandDos2Unix + " file...",
 		Args:  cobra.MinimumNArgs(1),
@@ -36,5 +36,5 @@ func init() {
 		},
 		DisableFlagsInUseLine: true,
 	}
-	RootCmd.AddCommand(dos2unixCmd)
+	return dos2unixCmd
 }

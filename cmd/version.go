@@ -32,7 +32,7 @@ var (
 	appCommit    = "unknown"
 )
 
-func init() {
+func initVersion() *cobra.Command {
 	var versionCmd = &cobra.Command{
 		Use:   CommandVersion,
 		Short: "Print version information",
@@ -49,7 +49,7 @@ func init() {
 			OutputInterfaceString(v)
 		},
 	}
-	RootCmd.AddCommand(versionCmd)
+	return versionCmd
 }
 
 type Version struct {

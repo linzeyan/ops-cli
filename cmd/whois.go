@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initWhois() *cobra.Command {
 	var flags struct {
 		/* Bind flags */
 		ns, expiry, registrar, days bool
@@ -71,12 +71,11 @@ func init() {
 		Example: common.Examples(`# Search domain
 apple.com`, CommandWhois),
 	}
-	RootCmd.AddCommand(whoisCmd)
-
 	whoisCmd.Flags().BoolVarP(&flags.ns, "ns", "n", false, common.Usage("Only print Name Servers"))
 	whoisCmd.Flags().BoolVarP(&flags.expiry, "expiry", "e", false, common.Usage("Only print expiry time"))
 	whoisCmd.Flags().BoolVarP(&flags.registrar, "registrar", "r", false, common.Usage("Only print Registrar"))
 	whoisCmd.Flags().BoolVarP(&flags.days, "days", "d", false, common.Usage("Only print the remaining days"))
+	return whoisCmd
 }
 
 type Whois struct {

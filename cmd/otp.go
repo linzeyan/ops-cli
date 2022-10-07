@@ -31,7 +31,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initOtp() *cobra.Command {
 	var flags struct {
 		/* Bind flags */
 		/* The period parameter defines a validity period in seconds */
@@ -103,13 +103,13 @@ T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
 # Generate OTP and specify SHA512 algorithm, the period is 15 seconds
 -a sha512 -p 15`, CommandOtp, CommandGenerate),
 	}
-	RootCmd.AddCommand(otpCmd)
 
 	otpCmd.PersistentFlags().StringVarP(&flags.alg, "algorithm", "a", "SHA1", common.Usage("The hash algorithm used by the credential(SHA1/SHA256/SHA512)"))
 	otpCmd.PersistentFlags().Int8VarP(&flags.period, "period", "p", 30, common.Usage("The period parameter defines a validity period in seconds for the TOTP code(15/30/60)"))
 	otpCmd.PersistentFlags().Int8VarP(&flags.digit, "digits", "d", 6, common.Usage("The number of digits in a one-time password(6/7/8)"))
 
 	otpCmd.AddCommand(otpSubCmdCalculate, otpSubCmdGenerate)
+	return otpCmd
 }
 
 type OTP struct {

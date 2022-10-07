@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initFree() *cobra.Command {
 	var flags struct {
 		count  uint
 		second uint
@@ -61,9 +61,9 @@ func init() {
 			}
 		},
 	}
-	RootCmd.AddCommand(freeCmd)
 	freeCmd.Flags().UintVarP(&flags.count, "count", "c", 0, common.Usage("Repeat printing times"))
 	freeCmd.Flags().UintVarP(&flags.second, "seconds", "s", 0, common.Usage("Seconds between each repeat printing"))
+	return freeCmd
 }
 
 type Free struct{}

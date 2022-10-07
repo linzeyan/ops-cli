@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initSystem() *cobra.Command {
 	var systemCmd = &cobra.Command{
 		Use:   CommandSystem,
 		Short: "Display system informations",
@@ -111,14 +111,13 @@ func init() {
 
 		DisableFlagsInUseLine: true,
 	}
-	RootCmd.AddCommand(systemCmd)
-
 	systemCmd.AddCommand(systemSubCmdCPU)
 	systemCmd.AddCommand(systemSubCmdDisk)
 	systemCmd.AddCommand(systemSubCmdHost)
 	systemCmd.AddCommand(systemSubCmdLoad)
 	systemCmd.AddCommand(systemSubCmdMemory)
 	systemCmd.AddCommand(systemSubCmdNetwork)
+	return systemCmd
 }
 
 type System struct{}

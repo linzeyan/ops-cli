@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initReadlink() *cobra.Command {
 	var flags bool
 	var readlinkCmd = &cobra.Command{
 		Use:   CommandReadlink,
@@ -51,6 +51,6 @@ func init() {
 			}
 		},
 	}
-	RootCmd.AddCommand(readlinkCmd)
 	readlinkCmd.Flags().BoolVarP(&flags, "follow", "f", false, common.Usage("Follow all symlinks"))
+	return readlinkCmd
 }

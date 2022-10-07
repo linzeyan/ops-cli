@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initSSHKeyGen() *cobra.Command {
 	var flags struct {
 		bit  int
 		path string
@@ -49,11 +49,9 @@ func init() {
 			return k.Generate(flags.bit, flags.path)
 		},
 	}
-
-	RootCmd.AddCommand(sshkeygenCmd)
-
 	sshkeygenCmd.Flags().IntVarP(&flags.bit, "bits", "b", 4096, common.Usage("Specifies the number of bits in the key to create"))
 	sshkeygenCmd.Flags().StringVarP(&flags.path, "file", "f", "id_rsa", common.Usage("Specify the file path to generate"))
+	return sshkeygenCmd
 }
 
 type SSHKeygen struct{}

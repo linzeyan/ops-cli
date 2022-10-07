@@ -32,7 +32,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initSlack() *cobra.Command {
 	var flags struct {
 		Token   string `json:"token"`
 		Channel string `json:"channel_id"`
@@ -94,13 +94,13 @@ func init() {
 		Example: common.Examples(`# Send photo
 -a "~/robot.png"`, CommandSlack, CommandPhoto),
 	}
-	RootCmd.AddCommand(slackCmd)
 
 	slackCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Bot token (required)"))
 	slackCmd.PersistentFlags().StringVarP(&flags.Channel, "channel", "c", "", common.Usage("Channel ID"))
 	slackCmd.PersistentFlags().StringVarP(&flags.arg, "arg", "a", "", common.Usage("Input argument"))
 
 	slackCmd.AddCommand(slackSubCmdFile, slackSubCmdText, slackSubCmdPhoto)
+	return slackCmd
 }
 
 type Slack struct {

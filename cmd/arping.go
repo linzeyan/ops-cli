@@ -29,7 +29,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initArping() *cobra.Command {
 	var arpingFlag struct {
 		check bool
 		mac   bool
@@ -94,8 +94,8 @@ func init() {
 			}
 		},
 	}
-	RootCmd.AddCommand(arpingCmd)
 	arpingCmd.Flags().BoolVarP(&arpingFlag.check, "check", "c", false, common.Usage("Check if host is online"))
 	arpingCmd.Flags().BoolVarP(&arpingFlag.mac, "mac", "m", false, common.Usage("Resolve mac address"))
 	arpingCmd.Flags().StringVarP(&arpingFlag.iface, "interface", "i", "", common.Usage("Specify interface name"))
+	return arpingCmd
 }

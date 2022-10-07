@@ -28,7 +28,7 @@ import (
 	"github.com/tomwright/dasel/storage"
 )
 
-func init() {
+func initConvert() *cobra.Command {
 	var flags struct {
 		inFile  string
 		outFile string
@@ -75,8 +75,7 @@ Available Commands:
 			common.SliceStringToInterface(validArg)...),
 	}
 
-	RootCmd.AddCommand(convertCmd)
-
 	convertCmd.Flags().StringVarP(&flags.inFile, "in", "i", "", common.Usage("Input file (required)"))
 	convertCmd.Flags().StringVarP(&flags.outFile, "out", "o", "", common.Usage("Output file"))
+	return convertCmd
 }

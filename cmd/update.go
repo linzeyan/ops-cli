@@ -34,7 +34,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initUpdate() *cobra.Command {
 	var updateCmd = &cobra.Command{
 		Use: CommandUpdate,
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
@@ -68,7 +68,7 @@ func init() {
 
 		DisableFlagsInUseLine: true,
 	}
-	RootCmd.AddCommand(updateCmd)
+	return updateCmd
 }
 
 type version struct {

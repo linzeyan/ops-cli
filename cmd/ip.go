@@ -28,10 +28,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initIP() *cobra.Command {
 	iface, err := net.Interfaces()
 	if err != nil {
-		return
+		return nil
 	}
 	var validArgs []string
 	for _, v := range iface {
@@ -71,7 +71,7 @@ func init() {
 		DisableFlagsInUseLine: true,
 		DisableFlagParsing:    true,
 	}
-	RootCmd.AddCommand(ipCmd)
+	return ipCmd
 }
 
 func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat) (map[string]int, map[int]string) {

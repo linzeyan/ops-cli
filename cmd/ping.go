@@ -33,7 +33,7 @@ import (
 	"golang.org/x/net/ipv6"
 )
 
-func init() {
+func initPing() *cobra.Command {
 	var flags struct {
 		ipv6             bool
 		count, size, ttl int
@@ -93,13 +93,13 @@ func init() {
 			p.Connect(ctx, args[0])
 		},
 	}
-	RootCmd.AddCommand(pingCmd)
 	pingCmd.Flags().IntVarP(&flags.count, "count", "c", -1, common.Usage("Specify ping counts"))
 	pingCmd.Flags().BoolVarP(&flags.ipv6, "ipv6", "6", false, common.Usage("Use ICMPv6"))
 	pingCmd.Flags().IntVarP(&flags.size, "size", "s", 56, common.Usage("Specify packet size"))
 	pingCmd.Flags().IntVarP(&flags.ttl, "ttl", "", 64, common.Usage("Specify packet ttl"))
 	pingCmd.Flags().DurationVarP(&flags.interval, "interval", "i", time.Second, common.Usage("Specify interval"))
 	pingCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
+	return pingCmd
 }
 
 type Ping struct {

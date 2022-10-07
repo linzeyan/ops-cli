@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initTelegram() *cobra.Command {
 	var flags struct {
 		/* Bind flags */
 		Token   string `json:"token"`
@@ -145,8 +145,6 @@ func init() {
 		Short: "Send voice file to Telegram",
 		RunE:  runE,
 	}
-	RootCmd.AddCommand(telegramCmd)
-
 	telegramCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Bot token (required)"))
 	telegramCmd.PersistentFlags().Int64VarP(&flags.Chat, "chat-id", "c", 0, common.Usage("Chat ID"))
 	telegramCmd.PersistentFlags().StringVarP(&flags.arg, "arg", "a", "", common.Usage("Input argument"))
@@ -159,6 +157,7 @@ func init() {
 	telegramCmd.AddCommand(telegramSubCmdPhoto)
 	telegramCmd.AddCommand(telegramSubCmdVideo)
 	telegramCmd.AddCommand(telegramSubCmdVoice)
+	return telegramCmd
 }
 
 type Telegram struct {

@@ -29,7 +29,7 @@ import (
 	"golang.org/x/net/ipv4"
 )
 
-func init() {
+func initTraceroute() *cobra.Command {
 	var flags struct {
 		size, maxTTL int
 		interval     time.Duration
@@ -90,11 +90,11 @@ func init() {
 			}
 		},
 	}
-	RootCmd.AddCommand(tracerouteCmd)
 	tracerouteCmd.Flags().IntVarP(&flags.size, "size", "s", 60, common.Usage("Specify packet size"))
 	tracerouteCmd.Flags().IntVarP(&flags.maxTTL, "max-ttl", "m", 64, common.Usage("Specify max hop"))
 	tracerouteCmd.Flags().DurationVarP(&flags.interval, "interval", "i", 500*time.Millisecond, common.Usage("Specify interval"))
 	tracerouteCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
+	return tracerouteCmd
 }
 
 type Traceroute struct {

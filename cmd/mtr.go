@@ -39,7 +39,7 @@ import (
 	"golang.org/x/term"
 )
 
-func init() {
+func initMtr() *cobra.Command {
 	var flags struct {
 		output   string
 		count    int
@@ -181,11 +181,11 @@ func init() {
 			return nil
 		},
 	}
-	RootCmd.AddCommand(mtrCmd)
 	mtrCmd.Flags().StringVarP(&flags.output, "output", "o", "", common.Usage("Specify output file name"))
 	mtrCmd.Flags().IntVarP(&flags.count, "count", "c", -1, common.Usage("Specify ping counts"))
 	mtrCmd.Flags().DurationVarP(&flags.interval, "interval", "i", 100*time.Millisecond, common.Usage("Specify interval"))
 	mtrCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 800*time.Millisecond, common.Usage("Specify timeout"))
+	return mtrCmd
 }
 
 type MTR struct {

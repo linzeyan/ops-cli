@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initNetmask() *cobra.Command {
 	var flags struct {
 		ranges bool
 
@@ -108,7 +108,6 @@ func init() {
 -i 10.0.0.0-10.122.10.0`, CommandNetmask),
 	}
 
-	RootCmd.AddCommand(netmaskCmd)
 	netmaskCmd.Flags().BoolVarP(&flags.ranges, "ranges", "r", false, common.Usage("Print IP address ranges"))
 	netmaskCmd.Flags().BoolVarP(&flags.binary, TypeBinary, "b", false, common.Usage("Print IP address and mask in binary"))
 	netmaskCmd.Flags().BoolVarP(&flags.octal, TypeOctal, "o", false, common.Usage("Print IP address and mask in octal"))
@@ -116,6 +115,7 @@ func init() {
 	netmaskCmd.Flags().BoolVarP(&flags.hex, TypeHex, "x", false, common.Usage("Print IP address and mask in hex"))
 	netmaskCmd.Flags().BoolVarP(&flags.cisco, TypeCisco, "i", false, common.Usage("Print Cisco style address lists"))
 	netmaskCmd.Flags().BoolVarP(&flags.cidr, "cidr", "c", false, common.Usage("Print CIDR format address lists"))
+	return netmaskCmd
 }
 
 type Netmask struct{}

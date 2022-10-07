@@ -34,7 +34,7 @@ import (
 
 var Hasher Hash
 
-func init() {
+func initHash() *cobra.Command {
 	var flags struct {
 		check bool
 		list  bool
@@ -104,11 +104,11 @@ func init() {
 
 		DisableFlagsInUseLine: true,
 	}
-	RootCmd.AddCommand(hashCmd)
 
 	hashCmd.Flags().BoolVarP(&flags.check, "check", "c", false, common.Usage("Read SHA sums from the file and check them"))
 	hashCmd.Flags().BoolVarP(&flags.list, "list", "l", false, common.Usage("List multiple SHA sums for the specify input"))
 	hashCmd.AddCommand(hashSubCmdMd5, hashSubCmdSha1, hashSubCmdSha256, hashSubCmdSha512)
+	return hashCmd
 }
 
 type Hash struct{}

@@ -47,6 +47,27 @@ func root() *cobra.Command {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, common.Usage("Output JSON format"))
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, common.Usage("Output YAML format"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
+
+	rootCmd.AddCommand(initArping())
+	rootCmd.AddCommand(initCert(), initConvert())
+	rootCmd.AddCommand(initDate(), initDF(), initDig(), initDiscord(), initDoc(rootCmd), initDos2Unix())
+	rootCmd.AddCommand(initEncode(), initEncrypt())
+	rootCmd.AddCommand(initFree())
+	rootCmd.AddCommand(initGeoip())
+	rootCmd.AddCommand(initHash())
+	rootCmd.AddCommand(initIcp(), initIP())
+	rootCmd.AddCommand(initLINE())
+	rootCmd.AddCommand(initMtr())
+	rootCmd.AddCommand(initNetmask())
+	rootCmd.AddCommand(initOtp())
+	rootCmd.AddCommand(initPing())
+	rootCmd.AddCommand(initQrcode())
+	rootCmd.AddCommand(initRandom(), initReadlink(), initRedis())
+	rootCmd.AddCommand(initSlack(), initSSHKeyGen(), initStat(), initSystem())
+	rootCmd.AddCommand(initTcping(), initTelegram(), initTraceroute(), initTree())
+	rootCmd.AddCommand(initUpdate(), initURL())
+	rootCmd.AddCommand(initVersion())
+	rootCmd.AddCommand(initWhois(), initWsping())
 	return rootCmd
 }
 

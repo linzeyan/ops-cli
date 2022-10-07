@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initRedis() *cobra.Command {
 	var flags struct {
 		Username string `json:"user"`
 		Password string `json:"auth"`
@@ -56,12 +56,12 @@ func init() {
 		},
 	}
 
-	RootCmd.AddCommand(redisCmd)
 	redisCmd.Flags().StringVarP(&flags.Username, "user", "u", "", common.Usage("Username to authenticate the current connection"))
 	redisCmd.Flags().StringVarP(&flags.Password, "auth", "a", "", common.Usage("Password to use when connecting to the server"))
 	redisCmd.Flags().StringVarP(&flags.Host, "hostname", "H", "127.0.0.1", common.Usage("Server hostname"))
 	redisCmd.Flags().StringVarP(&flags.Port, "port", "p", "6379", common.Usage("Server port"))
 	redisCmd.Flags().IntVarP(&flags.DB, "db", "n", 0, common.Usage("Database number"))
+	return redisCmd
 }
 
 type Redis struct{}

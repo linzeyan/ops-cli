@@ -28,10 +28,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initDF() *cobra.Command {
 	partition, err := disk.Partitions(true)
 	if err != nil {
-		return
+		return nil
 	}
 	var validArgs []string
 	for _, v := range partition {
@@ -71,7 +71,7 @@ func init() {
 			return err
 		},
 	}
-	RootCmd.AddCommand(dfCmd)
+	return dfCmd
 }
 
 type DF struct {

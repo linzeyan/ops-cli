@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initWsping() *cobra.Command {
 	var wspingCmd = &cobra.Command{
 		Use:   CommandWsping + " host",
 		Args:  cobra.ExactArgs(1),
@@ -73,5 +73,5 @@ func init() {
 			PrintString("Connect success")
 		},
 	}
-	RootCmd.AddCommand(wspingCmd)
+	return wspingCmd
 }

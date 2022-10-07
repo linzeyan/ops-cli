@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initGeoip() *cobra.Command {
 	var geoipCmd = &cobra.Command{
 		Use:   CommandGeoip + " IP...",
 		Short: "Print IP geographic information",
@@ -62,7 +62,7 @@ func init() {
 1.1.1.1 8.8.8.8`, CommandGeoip),
 		DisableFlagsInUseLine: true,
 	}
-	RootCmd.AddCommand(geoipCmd)
+	return geoipCmd
 }
 
 type GeoIP struct {

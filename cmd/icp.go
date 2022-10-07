@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initIcp() *cobra.Command {
 	var flags struct {
 		Account string `json:"account"`
 		Key     string `json:"api_key"`
@@ -58,11 +58,11 @@ func init() {
 		Example: common.Examples(`# Print the ICP status
 -a account -k api_key google.com`, CommandIcp),
 	}
-	RootCmd.AddCommand(icpCmd)
 
 	icpCmd.Flags().StringVarP(&flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))
 	icpCmd.Flags().StringVarP(&flags.Key, "key", "k", "", common.Usage("Enter the WEST api key"))
 	icpCmd.MarkFlagsRequiredTogether("account", "key")
+	return icpCmd
 }
 
 type ICP struct {

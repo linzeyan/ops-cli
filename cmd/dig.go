@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initDig() *cobra.Command {
 	var flags struct {
 		network string
 		domain  string
@@ -115,9 +115,9 @@ google.com ANY
 # Query PTR record
 1.1.1.1 PTR`, CommandDig),
 	}
-	RootCmd.AddCommand(digCmd)
 
 	digCmd.Flags().StringVarP(&flags.network, "net", "n", "tcp", common.Usage("udp/tcp"))
+	return digCmd
 }
 
 type Dig struct {

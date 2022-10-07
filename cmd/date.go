@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initDate() *cobra.Command {
 	var flags struct {
 		utc          bool
 		seconds      bool
@@ -97,7 +97,7 @@ Time zone:
 			}
 		},
 	}
-	RootCmd.AddCommand(dateCmd)
+
 	dateCmd.Flags().StringVarP(&flags.format, "format", "f", "", common.Usage("Print date using specific format"))
 	dateCmd.Flags().StringVarP(&flags.timezone, "timezone", "z", "", common.Usage("Specify timezone"))
 	dateCmd.Flags().BoolVarP(&flags.seconds, "seconds", "s", false, common.Usage("Print Unix time"))
@@ -107,4 +107,5 @@ Time zone:
 	dateCmd.Flags().BoolVarP(&flags.utc, "utc", "u", false, common.Usage("Print date using UTC time"))
 	dateCmd.Flags().BoolVarP(&flags.date, "date", "D", false, common.Usage(`Print date using '2006-01-02' format`))
 	dateCmd.Flags().BoolVarP(&flags.time, "time", "T", false, common.Usage("Print time using '15:04:05' format"))
+	return dateCmd
 }

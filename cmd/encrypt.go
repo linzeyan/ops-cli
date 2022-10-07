@@ -31,7 +31,7 @@ import (
 
 var Encryptor Encrypt
 
-func init() {
+func initEncrypt() *cobra.Command {
 	var flags struct {
 		Key string `json:"key"`
 
@@ -125,7 +125,6 @@ func init() {
 "Hello World!" -k '45984614e8f7d6c5' -d
 "Hello World!" -k key.txt -d`, CommandEncrypt, CommandString),
 	}
-	RootCmd.AddCommand(encryptCmd)
 
 	encryptCmd.PersistentFlags().BoolVarP(&flags.decrypt, "decrypt", "d", false, common.Usage("Decrypt"))
 	encryptCmd.PersistentFlags().StringVarP(&flags.mode, "mode", "m", "CTR", common.Usage("Encrypt mode(CFB/OFB/CTR/GCM)"))
@@ -133,6 +132,7 @@ func init() {
 
 	encryptCmd.AddCommand(encryptSubCmdFile)
 	encryptCmd.AddCommand(encryptSubCmdString)
+	return encryptCmd
 }
 
 type Encrypt struct{}

@@ -24,7 +24,7 @@ import (
 	"github.com/spf13/cobra/doc"
 )
 
-func init() {
+func initDoc(command *cobra.Command) *cobra.Command {
 	var flags struct {
 		dir string
 	}
@@ -48,13 +48,13 @@ func init() {
 				Title:   "MINE",
 				Section: "3",
 			}
-			err = doc.GenManTree(RootCmd, header, flags.dir)
+			err = doc.GenManTree(command, header, flags.dir)
 		case CommandMarkdown:
-			err = doc.GenMarkdownTree(RootCmd, flags.dir)
+			err = doc.GenMarkdownTree(command, flags.dir)
 		case CommandReST:
-			err = doc.GenReSTTree(RootCmd, flags.dir)
+			err = doc.GenReSTTree(command, flags.dir)
 		case CommandYaml:
-			err = doc.GenYamlTree(RootCmd, flags.dir)
+			err = doc.GenYamlTree(command, flags.dir)
 		}
 		return err
 	}
@@ -82,11 +82,11 @@ func init() {
 		Short: "Generate yaml documentation",
 		RunE:  runE,
 	}
-	RootCmd.AddCommand(docCmd)
 
 	docCmd.PersistentFlags().StringVarP(&flags.dir, "dir", "d", "doc", common.Usage("Specify the path to generate documentation"))
 	docCmd.AddCommand(docSubCmdMan)
 	docCmd.AddCommand(docSubCmdMarkdown)
 	docCmd.AddCommand(docSubCmdRest)
 	docCmd.AddCommand(docSubCmdYaml)
+	return docCmd
 }

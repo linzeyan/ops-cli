@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initTcping() *cobra.Command {
 	var flags struct {
 		count    int
 		protocol string
@@ -66,10 +66,10 @@ func init() {
 			}
 		},
 	}
-	RootCmd.AddCommand(tcpingCmd)
 	tcpingCmd.Flags().IntVarP(&flags.count, "count", "c", 1, common.Usage("Specify tcping counts"))
 	tcpingCmd.Flags().StringVarP(&flags.protocol, "protocol", "p", "tcp", common.Usage("Specify protocol"))
 	tcpingCmd.Flags().DurationVarP(&flags.timeout, "timeout", "t", 2*time.Second, common.Usage("Specify timeout"))
+	return tcpingCmd
 }
 
 type TCPing struct {

@@ -24,7 +24,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initURL() *cobra.Command {
 	var urlFlag struct {
 		expand  bool
 		verbose bool
@@ -75,11 +75,11 @@ https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.refere
 https://goo.gl/maps/b37Aq3Anc7taXQDd9 -e`,
 			CommandURL),
 	}
-	RootCmd.AddCommand(urlCmd)
 	urlCmd.Flags().BoolVarP(&urlFlag.expand, "expand", "e", false, "Expand shorten url")
 	urlCmd.Flags().BoolVarP(&urlFlag.verbose, "verbose", "v", false, "Verbose output")
 	urlCmd.Flags().StringVarP(&urlFlag.output, "output", "o", "", "Write to file")
 	urlCmd.Flags().StringVarP(&urlFlag.method, "method", "m", "GET", "Request method")
 	urlCmd.Flags().StringVarP(&urlFlag.data, "data", "d", "", "Request method")
 	urlCmd.Flags().StringVarP(&urlFlag.headers, "headers", "H", "", "Headers")
+	return urlCmd
 }

@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initStat() *cobra.Command {
 	var statCmd = &cobra.Command{
 		Use:   CommandStat + " path...",
 		Short: "Display file informations",
@@ -45,7 +45,7 @@ func init() {
 		},
 		DisableFlagsInUseLine: true,
 	}
-	RootCmd.AddCommand(statCmd)
+	return statCmd
 }
 
 type FileStat struct {

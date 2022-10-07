@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initDiscord() *cobra.Command {
 	var flags struct {
 		Token   string `json:"token"`
 		Channel string `json:"channel_id"`
@@ -85,13 +85,13 @@ func init() {
 		Short: "Send text to speech to Discord",
 		RunE:  runE,
 	}
-	RootCmd.AddCommand(discordCmd)
 
 	discordCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Token"))
 	discordCmd.PersistentFlags().StringVarP(&flags.Channel, "channel-id", "c", "", common.Usage("Channel ID"))
 	discordCmd.PersistentFlags().StringVarP(&flags.arg, "arg", "a", "", common.Usage("Input argument"))
 
 	discordCmd.AddCommand(discordSubCmdFile, discordSubCmdText, discordSubCmdTextTS)
+	return discordCmd
 }
 
 type Discord struct {

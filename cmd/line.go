@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initLINE() *cobra.Command {
 	var flags struct {
 		Secret string `json:"secret"`
 		Token  string `json:"access_token"`
@@ -116,7 +116,6 @@ https://callback_url`, CommandLINE, CommandID),
 -s secret -t token --id GroupID -a https://video.url`, CommandLINE, CommandVideo),
 		RunE: runE,
 	}
-	RootCmd.AddCommand(lineCmd)
 
 	lineCmd.PersistentFlags().StringVarP(&flags.Secret, "secret", "s", "", common.Usage("Channel Secret"))
 	lineCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Channel Access Token"))
@@ -124,6 +123,7 @@ https://callback_url`, CommandLINE, CommandID),
 	lineCmd.PersistentFlags().StringVar(&flags.ID, "id", "", common.Usage("UserID/GroupID/RoomID"))
 
 	lineCmd.AddCommand(lineSubCmdID, lineSubCmdPhoto, lineSubCmdText, lineSubCmdVideo)
+	return lineCmd
 }
 
 type LINE struct {

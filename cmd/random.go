@@ -29,7 +29,7 @@ import (
 
 var Randoms Random
 
-func init() {
+func initRandom() *cobra.Command {
 	var flags struct {
 		/* Bind flags */
 		length, lower, upper, symbol, number int
@@ -135,8 +135,6 @@ func init() {
 		Example: common.Examples(`# Generate a hexadecimal string
 -l 30`, CommandRandom, CommandHex),
 	}
-	RootCmd.AddCommand(randomCmd)
-
 	randomCmd.PersistentFlags().IntVarP(&flags.length, "length", "l", 24, common.Usage("Specify the string length"))
 	randomCmd.Flags().IntVarP(&flags.lower, "lower", "o", 4, common.Usage("Number of lowercase letters to include in the string"))
 	randomCmd.Flags().IntVarP(&flags.upper, "upper", "u", 4, common.Usage("Number of uppercase letters to include in the string"))
@@ -150,6 +148,7 @@ func init() {
 	randomCmd.AddCommand(randomSubCmdBase64)
 	randomCmd.AddCommand(randomSubCmdHex)
 	randomCmd.AddCommand(randomSubCmdBootstrap)
+	return randomCmd
 }
 
 type RandomCharacter string

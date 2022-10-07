@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initCert() *cobra.Command {
 	var flags struct {
 		ip, expiry, days, dns, issuer bool
 
@@ -86,7 +86,6 @@ www.google.com --dns
 # Print certificate expiration time, DNS and issuer
 example.com.crt`, CommandCert),
 	}
-	RootCmd.AddCommand(certCmd)
 
 	certCmd.Flags().StringVarP(&flags.port, "port", "p", "443", common.Usage("Specify host port"))
 	certCmd.Flags().BoolVar(&flags.ip, "ip", false, common.Usage("Only print IP"))
@@ -94,6 +93,7 @@ example.com.crt`, CommandCert),
 	certCmd.Flags().BoolVar(&flags.dns, "dns", false, common.Usage("Only print DNS names"))
 	certCmd.Flags().BoolVar(&flags.issuer, "issuer", false, common.Usage("Only print issuer"))
 	certCmd.Flags().BoolVar(&flags.days, "days", false, common.Usage("Only print the remaining days"))
+	return certCmd
 }
 
 type Cert struct {

@@ -30,7 +30,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
+func initTree() *cobra.Command {
 	var flags TreeOptions
 	var treeCmd = &cobra.Command{
 		Use:   CommandTree,
@@ -50,7 +50,6 @@ func init() {
 			t.Walk(args, &flags)
 		},
 	}
-	RootCmd.AddCommand(treeCmd)
 	treeCmd.Flags().BoolVarP(&flags.All, "all", "a", false, common.Usage("List all files"))
 	treeCmd.Flags().BoolVarP(&flags.Change, "change", "c", false, common.Usage("Print the date of last modification"))
 	treeCmd.Flags().BoolVarP(&flags.Dirs, "dirs", "d", false, common.Usage("List only directories"))
@@ -64,6 +63,7 @@ func init() {
 	treeCmd.Flags().BoolVarP(&flags.Links, "links", "", false, common.Usage("Print links for each file"))
 	treeCmd.Flags().BoolVarP(&flags.Inodes, "inodes", "", false, common.Usage("Print inode number for each file"))
 	treeCmd.Flags().BoolVarP(&flags.Device, "device", "", false, common.Usage("Print device ID number for each file"))
+	return treeCmd
 }
 
 type TreeOptions struct {
