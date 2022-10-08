@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
@@ -49,9 +48,7 @@ func root() *cobra.Command {
 	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, common.Usage("Output YAML format"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
 
-	if !validator.IsWindows() {
-		rootCmd.AddCommand(initArping())
-	}
+	// rootCmd.AddCommand(initArping())
 	rootCmd.AddCommand(initCert(), initConvert())
 	rootCmd.AddCommand(initDate(), initDF(), initDig(), initDiscord(), initDoc(rootCmd), initDos2Unix())
 	rootCmd.AddCommand(initEncode(), initEncrypt())
