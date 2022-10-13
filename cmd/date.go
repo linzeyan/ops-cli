@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -36,6 +37,9 @@ func initDate() *cobra.Command {
 		reference    string
 		date         bool
 		time         bool
+		weekDay      bool
+		week         bool
+		zone         bool
 	}
 	var dateCmd = &cobra.Command{
 		Use:   CommandDate,
@@ -106,6 +110,14 @@ Time zone:
 				PrintString(t.UnixMicro())
 			case flags.nanoseconds:
 				PrintString(t.UnixNano())
+			case flags.week:
+				_, w := t.ISOWeek()
+				PrintString(w)
+			case flags.weekDay:
+				PrintString(int(t.Weekday()))
+			case flags.zone:
+				z, o := t.Zone()
+				PrintString(fmt.Sprintf("%s(%d)", z, o/60/60))
 			case flags.format == "":
 				PrintString(t.Format("2006-01-02T15:04:05-07:00"))
 			case flags.format != "":
@@ -124,5 +136,8 @@ Time zone:
 	dateCmd.Flags().BoolVarP(&flags.utc, "utc", "u", false, common.Usage("Print date using UTC time"))
 	dateCmd.Flags().BoolVarP(&flags.date, "date", "D", false, common.Usage(`Print date using '2006-01-02' format`))
 	dateCmd.Flags().BoolVarP(&flags.time, "time", "T", false, common.Usage("Print time using '15:04:05' format"))
+	dateCmd.Flags().BoolVarP(&flags.weekDay, "weekDay", "w", false, common.Usage("Print day number of week"))
+	dateCmd.Flags().BoolVarP(&flags.week, "week", "W", false, common.Usage("Print week number of current year"))
+	dateCmd.Flags().BoolVarP(&flags.zone, "zone", "Z", false, common.Usage("Print time zone name and UTC offset"))
 	return dateCmd
 }
