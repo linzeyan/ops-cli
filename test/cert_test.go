@@ -40,7 +40,7 @@ func TestCertBinary(t *testing.T) {
 		}
 	})
 
-	args := []string{"--days", "--dns", "--expiry", "--ip", "--issuer", "-j", "-y"}
+	args := []string{"--days", "--dns", "--expiry", "--ip", "--issuer"}
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, testHost, args[i]).Run(); err != nil {

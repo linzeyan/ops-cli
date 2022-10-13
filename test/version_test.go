@@ -14,10 +14,10 @@ func TestVersionBinary(t *testing.T) {
 			t.Error(err)
 		}
 	})
-	args := []string{"", "-y", "-j"}
+	args := []string{"yaml", "json"}
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
-			if err := exec.Command(binaryCommand, subCommand, args[i]).Run(); err != nil {
+			if err := exec.Command(binaryCommand, subCommand, "--output", args[i]).Run(); err != nil {
 				t.Error(args[i], err)
 			}
 		})

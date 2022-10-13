@@ -226,10 +226,10 @@ func (t *Tree) iterate(trees *Tree, opt *TreeOptions) error {
 
 func (t *Tree) print(prefix string, output Tree, opt *TreeOptions) {
 	switch {
-	case rootOutputJSON:
+	case rootOutputFormat == CommandJSON:
 		PrintJSON(output)
 		return
-	case rootOutputYAML:
+	case rootOutputFormat == CommandYaml:
 		PrintYAML(output)
 		return
 	}

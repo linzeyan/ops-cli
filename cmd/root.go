@@ -31,9 +31,8 @@ var RootCmd = root()
 
 /* Flags. */
 var (
-	rootConfig     string
-	rootOutputJSON bool
-	rootOutputYAML bool
+	rootConfig       string
+	rootOutputFormat string
 )
 
 func root() *cobra.Command {
@@ -44,8 +43,7 @@ func root() *cobra.Command {
 
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.PersistentFlags().BoolVarP(&rootOutputJSON, "json", "j", false, common.Usage("Output JSON format"))
-	rootCmd.PersistentFlags().BoolVarP(&rootOutputYAML, "yaml", "y", false, common.Usage("Output YAML format"))
+	rootCmd.PersistentFlags().StringVarP(&rootOutputFormat, "output", "o", "", common.Usage("Output format, can be json/yaml"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
 
 	// rootCmd.AddCommand(initArping())
@@ -76,10 +74,10 @@ type OutputFormat interface {
 }
 
 func OutputInterfaceString(r OutputFormat) {
-	switch {
-	case rootOutputJSON:
+	switch rootOutputFormat {
+	case CommandJSON:
 		PrintJSON(r)
-	case rootOutputYAML:
+	case CommandYaml:
 		PrintYAML(r)
 	default:
 		r.String()
@@ -87,7 +85,7 @@ func OutputInterfaceString(r OutputFormat) {
 }
 
 func OutputDefaultJSON(i any) {
-	if rootOutputYAML {
+	if rootOutputFormat == CommandYaml {
 		PrintYAML(i)
 	} else {
 		PrintJSON(i)
@@ -95,18 +93,18 @@ func OutputDefaultJSON(i any) {
 }
 
 func OutputDefaultNone(i any) {
-	if rootOutputJSON {
+	if rootOutputFormat == CommandJSON {
 		PrintJSON(i)
-	} else if rootOutputYAML {
+	} else if rootOutputFormat == CommandYaml {
 		PrintYAML(i)
 	}
 }
 
 func OutputDefaultString(i any) {
-	switch {
-	case rootOutputJSON:
+	switch rootOutputFormat {
+	case CommandJSON:
 		PrintJSON(i)
-	case rootOutputYAML:
+	case CommandYaml:
 		PrintYAML(i)
 	default:
 		PrintString(i)
@@ -114,7 +112,7 @@ func OutputDefaultString(i any) {
 }
 
 func OutputDefaultYAML(i any) {
-	if rootOutputJSON {
+	if rootOutputFormat == CommandJSON {
 		PrintJSON(i)
 	} else {
 		PrintYAML(i)

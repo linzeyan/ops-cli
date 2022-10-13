@@ -51,7 +51,7 @@ func TestDigBinary(t *testing.T) {
 		})
 	}
 
-	args := []string{"A", "AAAA", "CNAME", "NS", "ANY", "-j", "-y"}
+	args := []string{"A", "AAAA", "CNAME", "NS", "ANY"}
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
 			if err := exec.Command(binaryCommand, subCommand, testHost, "@8.8.8.8", args[i]).Run(); err != nil {

@@ -101,10 +101,10 @@ func TestGeoipBinary(t *testing.T) {
 	})
 
 	host := "8.8.8.8"
-	args := []string{"-j", "-y"}
+	args := []string{"json", "yaml"}
 	for i := range args {
 		t.Run(args[i], func(t *testing.T) {
-			if err := exec.Command(binaryCommand, subCommand, host, args[i]).Run(); err != nil {
+			if err := exec.Command(binaryCommand, subCommand, host, "--output", args[i]).Run(); err != nil {
 				t.Error(args[i], err)
 			}
 		})
