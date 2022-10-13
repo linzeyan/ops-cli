@@ -108,8 +108,7 @@ Available Commands:
 Flags:
       --config string   Specify config path
   -h, --help            help for ops-cli
-  -j, --json            Output JSON format
-  -y, --yaml            Output YAML format
+      --output string   Output format, can be json/yaml
 ```
 
 ### `arping`
@@ -551,7 +550,7 @@ Date       2022-09-21T01:40:44Z
 Runtime    go1.18.5 darwin/amd64
 Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>
 Source available at https://github.com/linzeyan/ops-cli
-→ ops-cli version -j
+→ ops-cli version --output json
 {
   "version": "v0.8.4",
   "commit": "e4b96dfeb732a81440969877a6bb5fdef17d5d09",
@@ -563,7 +562,7 @@ Source available at https://github.com/linzeyan/ops-cli
 ### `whois`
 
 ```bash
-→ ops-cli whois apple.com -j
+→ ops-cli whois apple.com --output json
 {
   "registrar": "CSC Corporate Domains",
   "createdDate": "1987-02-19T13:00:00+08:00",

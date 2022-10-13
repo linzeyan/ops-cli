@@ -43,7 +43,7 @@ func root() *cobra.Command {
 
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.PersistentFlags().StringVarP(&rootOutputFormat, "output", "o", "", common.Usage("Output format, can be json/yaml"))
+	rootCmd.PersistentFlags().StringVar(&rootOutputFormat, "output", "", common.Usage("Output format, can be json/yaml"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
 
 	// rootCmd.AddCommand(initArping())
