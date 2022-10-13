@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -32,6 +33,7 @@ func initDate() *cobra.Command {
 		nanoseconds  bool
 		format       string
 		timezone     string
+		reference    string
 		date         bool
 		time         bool
 	}
@@ -76,6 +78,20 @@ Time zone:
 				}
 				t = common.TimeNow.In(z)
 			}
+
+			if flags.reference != "" {
+				n := len(strconv.Itoa(int(time.Second)))
+				if len(flags.reference) > n {
+					flags.reference = flags.reference[:n]
+				}
+				r, err := strconv.ParseInt(flags.reference, 10, 64)
+				if err != nil {
+					PrintString(err)
+					return
+				}
+				t = time.Unix(r, 0)
+			}
+
 			/* Print format. */
 			switch {
 			case flags.date:
@@ -100,6 +116,7 @@ Time zone:
 
 	dateCmd.Flags().StringVarP(&flags.format, "format", "f", "", common.Usage("Print date using specific format"))
 	dateCmd.Flags().StringVarP(&flags.timezone, "timezone", "z", "", common.Usage("Specify timezone"))
+	dateCmd.Flags().StringVarP(&flags.reference, "reference", "r", "", common.Usage("Output date specified by reference time"))
 	dateCmd.Flags().BoolVarP(&flags.seconds, "seconds", "s", false, common.Usage("Print Unix time"))
 	dateCmd.Flags().BoolVarP(&flags.milliseconds, "milliseconds", "m", false, common.Usage("Print Unix time in milliseconds"))
 	dateCmd.Flags().BoolVarP(&flags.microseconds, "microseconds", "M", false, common.Usage("Print Unix time in microseconds"))
