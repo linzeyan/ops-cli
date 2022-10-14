@@ -80,6 +80,7 @@ const (
 	CommandReadlink   = "readlink"
 	CommandRedis      = "redis"
 	CommandReST       = "rest"
+	CommandSign       = "sign"
 	CommandSlack      = "Slack"
 	CommandSSH        = "ssh-keygen"
 	CommandStat       = "stat"

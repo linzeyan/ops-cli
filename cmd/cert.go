@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"bufio"
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
@@ -41,6 +40,8 @@ func initCert() *cobra.Command {
 		ip, expiry, days, dns, issuer bool
 
 		port string
+
+		ca, key string
 	}
 	var certCmd = &cobra.Command{
 		Use:   CommandCert + " [host|file]",
@@ -107,7 +108,21 @@ example.com.crt`, CommandCert),
 			var c Cert
 			return c.Generate()
 		}}
+
+	var certSubCmdSign = &cobra.Command{
+		Use:   CommandSign,
+		Short: "Sign certificates from giving ca files",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			if flags.ca == "" || flags.key == "" {
+				return nil
+			}
+			var c Cert
+			return c.Sign(flags.ca, flags.key)
+		}}
+	certSubCmdSign.Flags().StringVarP(&flags.ca, "ca", "c", "", common.Usage("Specify CA file"))
+	certSubCmdSign.Flags().StringVarP(&flags.key, "key", "k", "", common.Usage("Specify private key file"))
 	certCmd.AddCommand(certSubCmdGenerate)
+	certCmd.AddCommand(certSubCmdSign)
 	return certCmd
 }
 
@@ -333,13 +348,62 @@ func (c *Cert) Generate() error {
 		return err
 	}
 
-	var b bytes.Buffer
-	b.Write([]byte(serverCertPem))
-	b.Write([]byte(crtPem))
-	b.Write([]byte(caCertPem))
 	_ = os.WriteFile("root.key", []byte(caKeyPem), FileModeROwner)
+	_ = os.WriteFile("root.crt", []byte(caCertPem), FileModeRAll)
 	_ = os.WriteFile("ca.key", []byte(keyPem), FileModeROwner)
+	_ = os.WriteFile("ca.crt", []byte(crtPem), FileModeRAll)
 	_ = os.WriteFile("server.key", []byte(serverKeyPem), FileModeROwner)
-	_ = os.WriteFile("server.crt", b.Bytes(), FileModeRAll)
+	_ = os.WriteFile("server.crt", []byte(serverCertPem), FileModeRAll)
+	return err
+}
+
+func (c *Cert) Sign(caCert, caKey string) error {
+	bits := 4096
+	caCertFile, err := os.ReadFile(caCert)
+	if err != nil {
+		return err
+	}
+	caKeyFile, err := os.ReadFile(caKey)
+	if err != nil {
+		return err
+	}
+	caCertDecode, err := Encoder.PemDecode(caCertFile)
+	if err != nil {
+		return err
+	}
+	caKeyDecode, err := Encoder.PemDecode(caKeyFile)
+	if err != nil {
+		return err
+	}
+	key, err := x509.ParsePKCS1PrivateKey(caKeyDecode)
+	if err != nil {
+		return err
+	}
+	ca, err := x509.ParseCertificate(caCertDecode)
+	if err != nil {
+		return err
+	}
+
+	server := c.serverSubject()
+	serverKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return err
+	}
+	serverCert, err := x509.CreateCertificate(rand.Reader, server, ca, &serverKey.PublicKey, key)
+	if err != nil {
+		return err
+	}
+	var serverCertPem, serverKeyPem string
+	serverKeyPem, err = Encoder.PemEncode(x509.MarshalPKCS1PrivateKey(serverKey), "RSA PRIVATE KEY")
+	if err != nil {
+		return err
+	}
+	serverCertPem, err = Encoder.PemEncode(serverCert, "CERTIFICATE")
+	if err != nil {
+		return err
+	}
+
+	_ = os.WriteFile("server.key", []byte(serverKeyPem), FileModeROwner)
+	err = os.WriteFile("server.crt", []byte(serverCertPem), FileModeRAll)
 	return err
 }
