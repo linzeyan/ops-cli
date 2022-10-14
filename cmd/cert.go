@@ -18,10 +18,16 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"io"
+	"math/big"
 	"net"
+	"net/url"
 	"os"
 	"time"
 
@@ -93,6 +99,15 @@ example.com.crt`, CommandCert),
 	certCmd.Flags().BoolVar(&flags.dns, "dns", false, common.Usage("Only print DNS names"))
 	certCmd.Flags().BoolVar(&flags.issuer, "issuer", false, common.Usage("Only print issuer"))
 	certCmd.Flags().BoolVar(&flags.days, "days", false, common.Usage("Only print the remaining days"))
+
+	var certSubCmdGenerate = &cobra.Command{
+		Use:   CommandGenerate,
+		Short: "Generate certificates",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			var c Cert
+			return c.Generate()
+		}}
+	certCmd.AddCommand(certSubCmdGenerate)
 	return certCmd
 }
 
@@ -165,4 +180,166 @@ func (c *Cert) CheckFile(fileName string) (*Cert, error) {
 		Days:       int(dayRemain.Hours() / 24),
 	}
 	return &out, err
+}
+
+func (*Cert) defaultSubject() pkix.Name {
+	return pkix.Name{
+		Organization:       []string{"OPS-CLI"},
+		OrganizationalUnit: []string{"Root CA"},
+		Country:            []string{"TW"},
+		Locality:           []string{"Taipei"},
+		CommonName:         "Self-Sign Root CA",
+	}
+}
+
+func (*Cert) serverSubject() *x509.Certificate {
+	type cnf struct {
+		Country        string   `json:"C"`
+		CommonName     string   `json:"CN"`
+		Location       string   `json:"L"`
+		Org            string   `json:"O"`
+		OrgUnit        string   `json:"OU"`
+		State          string   `json:"ST"`
+		DNSNames       []string `json:"dnsNames"`
+		EmailAddresses []string `json:"emailAddresses"`
+		IPAddresses    []string `json:"ipAddresses"`
+		URIs           []string `json:"uris"`
+		Year           int      `json:"year"`
+	}
+
+	var info cnf
+	if rootConfig != "" {
+		if err := ReadConfig(CommandCert, &info); err != nil {
+			return nil
+		}
+	}
+	var ip []net.IP
+	for _, v := range info.IPAddresses {
+		ip = append(ip, net.ParseIP(v))
+	}
+	var uri []*url.URL
+	for _, v := range info.URIs {
+		u, err := url.ParseRequestURI(v)
+		if err == nil {
+			uri = append(uri, u)
+		}
+	}
+	return &x509.Certificate{
+		SerialNumber: big.NewInt(common.TimeNow.Unix()),
+		Subject: pkix.Name{
+			Country:            []string{info.Country},
+			Organization:       []string{info.Org},
+			OrganizationalUnit: []string{info.OrgUnit},
+			Province:           []string{info.State},
+			Locality:           []string{info.Location},
+			CommonName:         info.CommonName,
+		},
+		NotBefore: common.TimeNow.UTC(),
+		NotAfter:  common.TimeNow.UTC().AddDate(info.Year, 0, 0),
+		KeyUsage:  x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+
+		DNSNames:       info.DNSNames,
+		EmailAddresses: info.EmailAddresses,
+		IPAddresses:    ip,
+		URIs:           uri,
+
+		SubjectKeyId: []byte{1, 1, 1, 1, 1, 1},
+	}
+}
+
+func (c *Cert) Generate() error {
+	bits := 4096
+	ca := &x509.Certificate{
+		SerialNumber: big.NewInt(common.TimeNow.Unix()),
+		Subject:      c.defaultSubject(),
+		NotBefore:    common.TimeNow.UTC(),
+		NotAfter:     common.TimeNow.UTC().AddDate(15, 0, 0),
+		KeyUsage:     x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+	}
+	caKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return err
+	}
+	caCert, err := x509.CreateCertificate(rand.Reader, ca, ca, &caKey.PublicKey, caKey)
+	if err != nil {
+		return err
+	}
+	var caCertPem, caKeyPem string
+	caKeyPem, err = Encoder.PemEncode(x509.MarshalPKCS1PrivateKey(caKey), "RSA PRIVATE KEY")
+	if err != nil {
+		return err
+	}
+	caCertPem, err = Encoder.PemEncode(caCert, "CERTIFICATE")
+	if err != nil {
+		return err
+	}
+
+	subCa := &x509.Certificate{
+		SerialNumber: big.NewInt(common.TimeNow.Unix()),
+		Subject:      c.defaultSubject(),
+		NotBefore:    common.TimeNow.UTC(),
+		NotAfter:     common.TimeNow.UTC().AddDate(10, 0, 0),
+		KeyUsage:     x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+
+		BasicConstraintsValid: true,
+		IsCA:                  true,
+
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+	}
+	privKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return err
+	}
+	crt, err := x509.CreateCertificate(rand.Reader, subCa, ca, &privKey.PublicKey, caKey)
+	if err != nil {
+		return err
+	}
+	var crtPem, keyPem string
+	keyPem, err = Encoder.PemEncode(x509.MarshalPKCS1PrivateKey(privKey), "RSA PRIVATE KEY")
+	if err != nil {
+		return err
+	}
+	crtPem, err = Encoder.PemEncode(crt, "CERTIFICATE")
+	if err != nil {
+		return err
+	}
+
+	server := c.serverSubject()
+	serverKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return err
+	}
+	serverCert, err := x509.CreateCertificate(rand.Reader, server, subCa, &serverKey.PublicKey, privKey)
+	if err != nil {
+		return err
+	}
+	var serverCertPem, serverKeyPem string
+	serverKeyPem, err = Encoder.PemEncode(x509.MarshalPKCS1PrivateKey(serverKey), "RSA PRIVATE KEY")
+	if err != nil {
+		return err
+	}
+	serverCertPem, err = Encoder.PemEncode(serverCert, "CERTIFICATE")
+	if err != nil {
+		return err
+	}
+
+	var b bytes.Buffer
+	b.Write([]byte(serverCertPem))
+	b.Write([]byte(crtPem))
+	b.Write([]byte(caCertPem))
+	_ = os.WriteFile("root.key", []byte(caKeyPem), FileModeROwner)
+	_ = os.WriteFile("ca.key", []byte(keyPem), FileModeROwner)
+	_ = os.WriteFile("server.key", []byte(serverKeyPem), FileModeROwner)
+	_ = os.WriteFile("server.crt", b.Bytes(), FileModeRAll)
+	return err
 }

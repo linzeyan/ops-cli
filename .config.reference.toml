@@ -1,3 +1,16 @@
+[cert]
+C = "TW"
+CN = "test.com"
+L = "Taipei"
+O = "ops-cli"
+OU = "IT"
+ST = ""
+dnsNames = ["*.test.com"]
+emailAddresses = []
+ipAddresses = []
+uris = []
+year = 1
+
 # https://discord.com/
 [discord]
 channel_id = "channelID"
