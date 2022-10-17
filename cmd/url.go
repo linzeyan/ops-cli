@@ -80,6 +80,6 @@ https://goo.gl/maps/b37Aq3Anc7taXQDd9 -e`,
 	urlCmd.Flags().StringVarP(&urlFlag.output, "output", "o", "", "Write to file")
 	urlCmd.Flags().StringVarP(&urlFlag.method, "method", "m", "GET", "Request method")
 	urlCmd.Flags().StringVarP(&urlFlag.data, "data", "d", "", "Request method")
-	urlCmd.Flags().StringVarP(&urlFlag.headers, "headers", "H", "", "Headers")
+	urlCmd.Flags().StringVarP(&urlFlag.headers, "headers", "h", "", "Headers")
 	return urlCmd
 }

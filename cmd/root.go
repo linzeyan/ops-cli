@@ -45,6 +45,7 @@ func root() *cobra.Command {
 	}
 	rootCmd.PersistentFlags().StringVar(&rootOutputFormat, "output", "", common.Usage("Output format, can be json/yaml"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
+	rootCmd.PersistentFlags().BoolP("help", "", false, common.Usage("Help for this command"))
 
 	// rootCmd.AddCommand(initArping())
 	rootCmd.AddCommand(initCert(), initConvert())

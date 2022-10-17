@@ -31,14 +31,6 @@ func TestURL(t *testing.T) {
 			"https://www.storm.mg/lifestyle/4366824?utm_source=telegram&utm_medium=post\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "-e", "https://lihi1.cc/itv4p"},
-			"https://www.businessweekly.com.tw/focus/indep/6007870?utm_source=Line&utm_medium=social&utm_content=bw&utm_campaign=content\n",
-		},
-		{
-			[]string{runCommand, mainGo, subCommand, "-e", "https://linshibi.pros.is/4c7llt"},
-			"https://open.firstory.me/story/cl5k47dii00eo01zxamrp684m/platforms\n",
-		},
-		{
 			[]string{runCommand, mainGo, subCommand, "-e", "https://spoti.fi/3O6QgAb"},
 			"https://open.spotify.com/episode/0XOruTQxsN295v0ePD2YAk\n",
 		},

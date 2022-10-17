@@ -10,7 +10,7 @@ import (
 func TestPingBinary(t *testing.T) {
 	const subCommand = cmd.CommandPing
 	t.Run(subCommand, func(t *testing.T) {
-		if err := exec.Command(binaryCommand, subCommand, "-h").Run(); err != nil {
+		if err := exec.Command(binaryCommand, subCommand, "--help").Run(); err != nil {
 			t.Error(err)
 		}
 	})
