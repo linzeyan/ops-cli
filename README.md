@@ -93,6 +93,7 @@ Available Commands:
   random      Generate random string
   readlink    Get symlink information
   redis       Opens a connection to a Redis server
+  ss          Displays sockets informations
   ssh-keygen  Generate SSH keypair
   stat        Display file informations
   system      Display system informations
@@ -439,6 +440,15 @@ private/tmp
 
 ```bash
 ops-cli Slack text 'hello' --config ~/.config/.myconfig
+```
+
+### `ss`
+
+```bash
+ops-cli ss
+Proto Local Address Foreign Address  State PID/Program name
+  tcp    0.0.0.0:80       0.0.0.0:0 LISTEN         25/nginx
+ tcp6         :::80            :::0 LISTEN         25/nginx
 ```
 
 ### `ssh-keygen`
