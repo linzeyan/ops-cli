@@ -48,12 +48,12 @@ func initSs() *cobra.Command {
 					return s.State == netstat.Listen
 				}
 			}
-			ip := All
+			inet := All
 			switch {
 			case flags.ipv4:
-				ip = IPv4
+				inet = IPv4
 			case flags.ipv6:
-				ip = IPv6
+				inet = IPv6
 			}
 			proto := All
 			switch {
@@ -63,7 +63,7 @@ func initSs() *cobra.Command {
 				proto = UDP
 			}
 			var s SS
-			s.String(s.GetData(ip, proto, fn))
+			s.String(s.GetData(inet, proto, fn))
 		},
 	}
 	ssCmd.Flags().BoolVarP(&flags.listen, "listen", "l", false, common.Usage("Only listening sockets"))
@@ -76,45 +76,63 @@ func initSs() *cobra.Command {
 
 type SS struct{}
 
-func (*SS) GetData(ip, proto string, fn netstat.AcceptFn) [][]string {
+func (*SS) getTCPSocks(inet string, fn netstat.AcceptFn) [][]string {
 	var data [][]string
-	if ip == IPv4 || ip == All {
-		if proto == TCP || proto == All {
-			socks, err := netstat.TCPSocks(fn)
-			if err == nil {
-				for _, v := range socks {
-					data = append(data, []string{TCP, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
-				}
-			}
+	if inet == IPv4 || inet == All {
+		socks, err := netstat.TCPSocks(fn)
+		if err != nil {
+			return nil
 		}
-		if proto == UDP || proto == All {
-			socks, err := netstat.UDPSocks(fn)
-			if err == nil {
-				for _, v := range socks {
-					data = append(data, []string{UDP, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
-				}
-			}
+		for _, v := range socks {
+			data = append(data, []string{TCP, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
 		}
 	}
-	if ip == IPv6 || ip == All {
-		if proto == TCP || proto == All {
-			socks, err := netstat.TCP6Socks(fn)
-			if err == nil {
-				for _, v := range socks {
-					data = append(data, []string{TCP6, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
-				}
-			}
-		}
-		if proto == UDP || proto == All {
-			socks, err := netstat.UDP6Socks(fn)
-			if err == nil {
-				for _, v := range socks {
-					data = append(data, []string{UDP6, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
-				}
-			}
-		}
+	if inet == IPv4 {
+		return data
+	}
+	socks6, err := netstat.TCP6Socks(fn)
+	if err != nil {
+		return nil
+	}
+	for _, v := range socks6 {
+		data = append(data, []string{TCP6, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
 	}
 	return data
+}
+
+func (*SS) getUDPSocks(inet string, fn netstat.AcceptFn) [][]string {
+	var data [][]string
+	if inet == IPv4 || inet == All {
+		socks, err := netstat.UDPSocks(fn)
+		if err != nil {
+			return nil
+		}
+		for _, v := range socks {
+			data = append(data, []string{UDP, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
+		}
+	}
+	if inet == IPv4 {
+		return data
+	}
+	socks6, err := netstat.UDP6Socks(fn)
+	if err != nil {
+		return nil
+	}
+	for _, v := range socks6 {
+		data = append(data, []string{UDP6, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
+	}
+	return data
+}
+
+func (s *SS) GetData(inet, proto string, fn netstat.AcceptFn) [][]string {
+	var data [][]string
+	if proto == TCP || proto == All {
+		data = s.getTCPSocks(inet, fn)
+	}
+	if proto == TCP {
+		return data
+	}
+	return append(data, s.getUDPSocks(inet, fn)...)
 }
 
 func (*SS) String(data [][]string) {
