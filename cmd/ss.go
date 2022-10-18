@@ -114,11 +114,8 @@ func (*SS) getUDPSocks(inet string, fn netstat.AcceptFn) [][]string {
 			return data
 		}
 	}
-	socks6, err := netstat.UDP6Socks(fn)
-	if err != nil {
-		return nil
-	}
-	for _, v := range socks6 {
+	socks, _ := netstat.UDP6Socks(fn)
+	for _, v := range socks {
 		data = append(data, []string{UDP6, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
 	}
 	return data
