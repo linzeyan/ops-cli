@@ -121,5 +121,5 @@ func (*SS) GetData(ip, proto string, fn netstat.AcceptFn) [][]string {
 
 func (*SS) String(data [][]string) {
 	header := []string{"Proto", "Local Address", "Foreign Address", "State", "PID/Program name"}
-	PrintTable(header, data, tablewriter.ALIGN_RIGHT, "\t", false)
+	PrintTable(header, data, tablewriter.ALIGN_LEFT, "\t", false)
 }
