@@ -110,9 +110,9 @@ func (*SS) getUDPSocks(inet string, fn netstat.AcceptFn) [][]string {
 		for _, v := range socks {
 			data = append(data, []string{UDP, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
 		}
-	}
-	if inet == IPv4 {
-		return data
+		if inet == IPv4 {
+			return data
+		}
 	}
 	socks6, err := netstat.UDP6Socks(fn)
 	if err != nil {
