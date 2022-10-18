@@ -68,10 +68,9 @@ jobs:
       - name: Set output
         id: vars
         run: |
-          d=$(date '+%Y-%m-%dT%H:%M:%SZ')
-          echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-          echo ::set-output name=commit::${GITHUB_SHA}
-          echo ::set-output name=date::${d}
+          echo "tag=${GITHUB_REF#refs/*/}">>$GITHUB_ENV
+          echo "commit=${GITHUB_SHA}">>$GITHUB_ENV
+          echo "date=$(date '+%Y-%m-%dT%H:%M:%SZ')">>$GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v3
@@ -81,9 +80,9 @@ jobs:
           platforms: linux/amd64, linux/arm64
           push: true
           build-args: |
-            Tag=${{ steps.vars.outputs.tag }}
-            Commit=${{ steps.vars.outputs.commit }}
-            Date=${{ steps.vars.outputs.date }}
+            Tag=${{ env.tag }}
+            Commit=${{ env.commit }}
+            Date=${{ env.date }}
           tags: |
             zeyanlin/ops-cli:latest
-            zeyanlin/ops-cli:${{ steps.vars.outputs.tag }}
+            zeyanlin/ops-cli:${{ env.tag }}
