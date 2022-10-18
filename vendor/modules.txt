@@ -46,6 +46,9 @@ github.com/alecthomas/chroma/styles
 # github.com/bwmarrin/discordgo v0.25.0
 ## explicit; go 1.13
 github.com/bwmarrin/discordgo
+# github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
+## explicit; go 1.13
+github.com/cakturk/go-netstat/netstat
 # github.com/cespare/xxhash/v2 v2.1.2
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2

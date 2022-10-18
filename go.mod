@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/bwmarrin/discordgo v0.25.0
+	github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
 	github.com/fatih/color v1.13.0
 	github.com/gizak/termui/v3 v3.1.0
 	github.com/go-redis/redis/v8 v8.11.5
