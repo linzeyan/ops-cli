@@ -160,6 +160,14 @@ const (
 const (
 	IndentTwoSpaces = "  "
 
+	TCP  = "tcp"
+	TCP6 = "tcp6"
+	UDP  = "udp"
+	UDP6 = "udp6"
+	All  = "all"
+	IPv4 = "ipv4"
+	IPv6 = "ipv6"
+
 	inetLocalhost   = "localhost"
 	inetLocalhostIP = "127.0.0.1"
 

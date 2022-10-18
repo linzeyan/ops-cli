@@ -48,29 +48,29 @@ func initSs() *cobra.Command {
 					return s.State == netstat.Listen
 				}
 			}
-			ip := "all"
+			ip := All
 			switch {
 			case flags.ipv4:
-				ip = "ipv4"
+				ip = IPv4
 			case flags.ipv6:
-				ip = "ipv6"
+				ip = IPv6
 			}
-			proto := "all"
+			proto := All
 			switch {
 			case flags.tcp:
-				proto = "tcp"
+				proto = TCP
 			case flags.udp:
-				proto = "udp"
+				proto = UDP
 			}
 			var s SS
 			s.String(s.GetData(ip, proto, fn))
 		},
 	}
 	ssCmd.Flags().BoolVarP(&flags.listen, "listen", "l", false, common.Usage("Only listening sockets"))
-	ssCmd.Flags().BoolVarP(&flags.ipv4, "ipv4", "4", false, common.Usage("Only IPv4 sockets"))
-	ssCmd.Flags().BoolVarP(&flags.ipv6, "ipv6", "6", false, common.Usage("Only IPv6 sockets"))
-	ssCmd.Flags().BoolVarP(&flags.tcp, "tcp", "t", false, common.Usage("Only TCP sockets"))
-	ssCmd.Flags().BoolVarP(&flags.udp, "udp", "u", false, common.Usage("Only UDP sockets"))
+	ssCmd.Flags().BoolVarP(&flags.ipv4, IPv4, "4", false, common.Usage("Only IPv4 sockets"))
+	ssCmd.Flags().BoolVarP(&flags.ipv6, IPv6, "6", false, common.Usage("Only IPv6 sockets"))
+	ssCmd.Flags().BoolVarP(&flags.tcp, TCP, "t", false, common.Usage("Only TCP sockets"))
+	ssCmd.Flags().BoolVarP(&flags.udp, UDP, "u", false, common.Usage("Only UDP sockets"))
 	return ssCmd
 }
 
@@ -78,40 +78,38 @@ type SS struct{}
 
 func (*SS) GetData(ip, proto string, fn netstat.AcceptFn) [][]string {
 	var data [][]string
-	var socks []netstat.SockTabEntry
-	var err error
-	if ip == "ipv4" || ip == "all" {
-		if proto == "tcp" || proto == "all" {
-			socks, err = netstat.TCPSocks(fn)
+	if ip == IPv4 || ip == All {
+		if proto == TCP || proto == All {
+			socks, err := netstat.TCPSocks(fn)
 			if err == nil {
 				for _, v := range socks {
-					data = append(data, []string{"tcp", v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
+					data = append(data, []string{TCP, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
 				}
 			}
 		}
-		if proto == "udp" || proto == "all" {
-			socks, err = netstat.UDPSocks(fn)
+		if proto == UDP || proto == All {
+			socks, err := netstat.UDPSocks(fn)
 			if err == nil {
 				for _, v := range socks {
-					data = append(data, []string{"udp", v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
+					data = append(data, []string{UDP, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
 				}
 			}
 		}
 	}
-	if ip == "ipv6" || ip == "all" {
-		if proto == "tcp" || proto == "all" {
-			socks, err = netstat.TCP6Socks(fn)
+	if ip == IPv6 || ip == All {
+		if proto == TCP || proto == All {
+			socks, err := netstat.TCP6Socks(fn)
 			if err == nil {
 				for _, v := range socks {
-					data = append(data, []string{"tcp6", v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
+					data = append(data, []string{TCP6, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
 				}
 			}
 		}
-		if proto == "udp" || proto == "all" {
-			socks, err = netstat.UDP6Socks(fn)
+		if proto == UDP || proto == All {
+			socks, err := netstat.UDP6Socks(fn)
 			if err == nil {
 				for _, v := range socks {
-					data = append(data, []string{"udp6", v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
+					data = append(data, []string{UDP6, v.LocalAddr.String(), v.RemoteAddr.String(), v.State.String(), v.Process.String()})
 				}
 			}
 		}
