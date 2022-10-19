@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"net"
 	"reflect"
-	"runtime"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -131,7 +130,7 @@ type Dig struct {
 type DigList []Dig
 
 func (d *DigList) GetLocalServer() (string, error) {
-	if runtime.GOOS == "windows" {
+	if validator.IsWindows() {
 		return "1.1.1.1", nil
 	}
 	const resolvConfig = "/etc/resolv.conf"
