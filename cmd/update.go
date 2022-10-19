@@ -28,6 +28,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
@@ -50,7 +51,8 @@ func initUpdate() *cobra.Command {
 			}
 
 			PrintString("Update...")
-			PrintString(common.Usage("==> Downloading file from GitHub"))
+			PrintString(common.Usage("==> Downloading file from GitHub " + updater.Repository.DownloadLink))
+			PrintString("")
 			err = updater.Download()
 			if err != nil {
 				return err
@@ -62,7 +64,8 @@ func initUpdate() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			PrintString("Update completed")
+			PrintString("")
+			PrintString("Update completed in " + time.Since(common.TimeNow).String())
 			return err
 		},
 
