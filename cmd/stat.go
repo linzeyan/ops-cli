@@ -100,10 +100,10 @@ func (f *FileStat) String(path string) error {
 	out += fmt.Sprintf("\nDevice: %d", f.Dev)
 	out += fmt.Sprintf("\tInode: %d", f.Ino)
 	out += fmt.Sprintf("\tLinks: %d", f.Nlink)
-	out += fmt.Sprintf("\nAccess: %s", time.Unix(f.Atimespec.SEC, f.Atimespec.Nsec).Local().Format(time.ANSIC))
-	out += fmt.Sprintf("\nModify: %s", time.Unix(f.Mtimespec.SEC, f.Mtimespec.Nsec).Local().Format(time.ANSIC))
-	out += fmt.Sprintf("\nChange: %s", time.Unix(f.Ctimespec.SEC, f.Ctimespec.Nsec).Local().Format(time.ANSIC))
-	out += fmt.Sprintf("\n Birth: %s", time.Unix(f.Birthtimespec.SEC, f.Birthtimespec.Nsec).Local().Format(time.ANSIC))
+	out += fmt.Sprintf("\nAccess: %s", time.Unix(f.Atimespec.Sec, f.Atimespec.Nsec).Local().Format(time.ANSIC))
+	out += fmt.Sprintf("\nModify: %s", time.Unix(f.Mtimespec.Sec, f.Mtimespec.Nsec).Local().Format(time.ANSIC))
+	out += fmt.Sprintf("\nChange: %s", time.Unix(f.Ctimespec.Sec, f.Ctimespec.Nsec).Local().Format(time.ANSIC))
+	out += fmt.Sprintf("\n Birth: %s", time.Unix(f.Birthtimespec.Sec, f.Birthtimespec.Nsec).Local().Format(time.ANSIC))
 	PrintString(out)
 	return err
 }
@@ -144,6 +144,6 @@ func (f *FileStat) FileType(stat fs.FileInfo) string {
 }
 
 type Timespec struct {
-	SEC  int64 `json:"Sec"`
+	Sec  int64 `json:"Sec"`
 	Nsec int64 `json:"Nsec"`
 }
