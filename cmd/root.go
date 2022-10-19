@@ -47,7 +47,7 @@ func root() *cobra.Command {
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
 	rootCmd.PersistentFlags().BoolP("help", "", false, common.Usage("Help for this command"))
 
-	// rootCmd.AddCommand(initArping())
+	rootCmd.AddCommand(initArping())
 	rootCmd.AddCommand(initCert(), initConvert())
 	rootCmd.AddCommand(initDate(), initDF(), initDig(), initDiscord(), initDoc(rootCmd), initDos2Unix())
 	rootCmd.AddCommand(initEncode(), initEncrypt())

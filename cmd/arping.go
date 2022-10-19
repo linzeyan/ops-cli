@@ -30,10 +30,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	RootCmd.AddCommand(initArping())
-}
-
 func initArping() *cobra.Command {
 	var arpingFlag struct {
 		check bool
