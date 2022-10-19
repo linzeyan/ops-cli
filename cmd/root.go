@@ -62,7 +62,7 @@ func root() *cobra.Command {
 	rootCmd.AddCommand(initPing())
 	rootCmd.AddCommand(initQrcode())
 	rootCmd.AddCommand(initRandom(), initReadlink(), initRedis())
-	rootCmd.AddCommand(initSlack(), initSSHKeyGen(), initStat(), initSystem())
+	rootCmd.AddCommand(initSlack(), initSs(), initSSHKeyGen(), initStat(), initSystem())
 	rootCmd.AddCommand(initTcping(), initTelegram(), initTraceroute(), initTree())
 	rootCmd.AddCommand(initUpdate(), initURL())
 	rootCmd.AddCommand(initVersion())

@@ -25,10 +25,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func init() {
-	RootCmd.AddCommand(initSs())
-}
-
 func initSs() *cobra.Command {
 	var flags struct {
 		listen     bool
