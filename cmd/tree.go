@@ -22,8 +22,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -88,7 +88,7 @@ type Tree struct {
 	Name     string  `json:"name"`
 	Perm     string  `json:"perm"`
 	Mode     string  `json:"mode"`
-	Links    uint16  `json:"links"`
+	Links    string  `json:"links"`
 	UID      string  `json:"uid"`
 	GID      string  `json:"gid"`
 	Size     string  `json:"size"`
@@ -147,20 +147,19 @@ func (t *Tree) Walk(args []string, opt *TreeOptions) {
 }
 
 /* getInfo returns uid, gid, inodes, device and error. */
-func (t *Tree) getInfo(fileinfo fs.FileInfo) (string, string, uint16, string, string, error) {
-	err := Encoder.JSONMarshaler(fileinfo.Sys(), &t.stat)
+func (t *Tree) getInfo(fileinfo fs.FileInfo) (string, string, string, string, string, error) {
+	uid, err := user.LookupId(fmt.Sprintf(`%d`, fileinfo.Sys().(*syscall.Stat_t).Uid))
 	if err != nil {
-		return "", "", 0, "", "", err
+		return "", "", "0", "", "", err
 	}
-	uid, err := user.LookupId(fmt.Sprintf(`%d`, t.stat.UID))
+	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, fileinfo.Sys().(*syscall.Stat_t).Gid))
 	if err != nil {
-		return "", "", 0, "", "", err
+		return "", "", "0", "", "", err
 	}
-	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, t.stat.GID))
-	if err != nil {
-		return "", "", 0, "", "", err
-	}
-	return uid.Username, gid.Name, t.stat.Nlink, fmt.Sprintf("%d", t.stat.Ino), fmt.Sprintf("%d", t.stat.Dev), err
+	return uid.Username, gid.Name,
+		fmt.Sprintf("%d", fileinfo.Sys().(*syscall.Stat_t).Nlink),
+		fmt.Sprintf("%d", fileinfo.Sys().(*syscall.Stat_t).Ino),
+		fmt.Sprintf("%d", fileinfo.Sys().(*syscall.Stat_t).Dev), err
 }
 
 func (t *Tree) iterate(trees *Tree, opt *TreeOptions) error {
@@ -242,7 +241,7 @@ func (t *Tree) print(prefix string, output Tree, opt *TreeOptions) {
 		p = append(p, output.Perm)
 	}
 	if opt.Links {
-		p = append(p, strconv.Itoa(int(output.Links)))
+		p = append(p, output.Links)
 	}
 	if opt.UID {
 		p = append(p, output.UID)

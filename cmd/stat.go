@@ -21,6 +21,7 @@ import (
 	"io/fs"
 	"os"
 	"os/user"
+	"syscall"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -48,27 +49,7 @@ func initStat() *cobra.Command {
 	return statCmd
 }
 
-type FileStat struct {
-	Dev           int32    `json:"Dev"`
-	Mode          uint16   `json:"Mode"`
-	Nlink         uint16   `json:"Nlink"`
-	Ino           uint64   `json:"Ino"`
-	UID           uint32   `json:"Uid"`
-	GID           uint32   `json:"Gid"`
-	Rdev          int32    `json:"Rdev"`
-	PadCgo0       [4]byte  `json:"Pad_cgo_0"`
-	Atimespec     Timespec `json:"Atimespec"`
-	Mtimespec     Timespec `json:"Mtimespec"`
-	Ctimespec     Timespec `json:"Ctimespec"`
-	Birthtimespec Timespec `json:"Birthtimespec"`
-	Size          int64    `json:"Size"`
-	Blocks        int64    `json:"Blocks"`
-	Blksize       int32    `json:"Blksize"`
-	Flags         uint32   `json:"Flags"`
-	Gen           uint32   `json:"Gen"`
-	Lspare        int32    `json:"Lspare"`
-	Qspare        [2]int64 `json:"Qspare"`
-}
+type FileStat struct{}
 
 func (f *FileStat) String(path string) error {
 	var err error
@@ -82,28 +63,28 @@ func (f *FileStat) String(path string) error {
 	}
 	var out string
 	out = fmt.Sprintf(`  File: "%s"`, path)
-	out += fmt.Sprintf("\n  Size: %s", common.ByteSize(f.Size).String())
-	out += fmt.Sprintf("\t\tBlocks: %d", f.Blocks)
-	out += fmt.Sprintf("\tIO Block: %d", f.Blksize)
+	out += fmt.Sprintf("\n  Size: %s", common.ByteSize(stat.Sys().(*syscall.Stat_t).Size).String())
+	out += fmt.Sprintf("\t\tBlocks: %d", stat.Sys().(*syscall.Stat_t).Blocks)
+	out += fmt.Sprintf("\tIO Block: %d", stat.Sys().(*syscall.Stat_t).Blksize)
 	out += fmt.Sprintf("\tFileType: %s", f.FileType(stat))
 	out += fmt.Sprintf("\n  Mode: (%#o/%s)", stat.Mode().Perm(), stat.Mode())
-	uid, err := user.LookupId(fmt.Sprintf(`%d`, f.UID))
+	uid, err := user.LookupId(fmt.Sprintf(`%d`, stat.Sys().(*syscall.Stat_t).Uid))
 	if err != nil {
 		return err
 	}
-	out += fmt.Sprintf("\tUid: (%5d/%8s)", f.UID, uid.Username)
-	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, f.GID))
+	out += fmt.Sprintf("\tUid: (%5d/%8s)", stat.Sys().(*syscall.Stat_t).Uid, uid.Username)
+	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, stat.Sys().(*syscall.Stat_t).Gid))
 	if err != nil {
 		return err
 	}
-	out += fmt.Sprintf("\tGid: (%5d/%8s)", f.GID, gid.Name)
-	out += fmt.Sprintf("\nDevice: %d", f.Dev)
-	out += fmt.Sprintf("\tInode: %d", f.Ino)
-	out += fmt.Sprintf("\tLinks: %d", f.Nlink)
-	out += fmt.Sprintf("\nAccess: %s", time.Unix(f.Atimespec.Sec, f.Atimespec.Nsec).Local().Format(time.ANSIC))
-	out += fmt.Sprintf("\nModify: %s", time.Unix(f.Mtimespec.Sec, f.Mtimespec.Nsec).Local().Format(time.ANSIC))
-	out += fmt.Sprintf("\nChange: %s", time.Unix(f.Ctimespec.Sec, f.Ctimespec.Nsec).Local().Format(time.ANSIC))
-	out += fmt.Sprintf("\n Birth: %s", time.Unix(f.Birthtimespec.Sec, f.Birthtimespec.Nsec).Local().Format(time.ANSIC))
+	out += fmt.Sprintf("\tGid: (%5d/%8s)", stat.Sys().(*syscall.Stat_t).Gid, gid.Name)
+	out += fmt.Sprintf("\nDevice: %d", stat.Sys().(*syscall.Stat_t).Dev)
+	out += fmt.Sprintf("\tInode: %d", stat.Sys().(*syscall.Stat_t).Ino)
+	out += fmt.Sprintf("\tLinks: %d", stat.Sys().(*syscall.Stat_t).Nlink)
+	out += fmt.Sprintf("\nAccess: %s", time.Unix(stat.Sys().(*syscall.Stat_t).Atimespec.Unix()).Local().Format(time.ANSIC))
+	out += fmt.Sprintf("\nModify: %s", time.Unix(stat.Sys().(*syscall.Stat_t).Mtimespec.Unix()).Local().Format(time.ANSIC))
+	out += fmt.Sprintf("\nChange: %s", time.Unix(stat.Sys().(*syscall.Stat_t).Ctimespec.Unix()).Local().Format(time.ANSIC))
+	out += fmt.Sprintf("\n Birth: %s", time.Unix(stat.Sys().(*syscall.Stat_t).Birthtimespec.Unix()).Local().Format(time.ANSIC))
 	PrintString(out)
 	return err
 }
@@ -141,9 +122,4 @@ func (f *FileStat) FileType(stat fs.FileInfo) string {
 	default:
 		return "Regular File"
 	}
-}
-
-type Timespec struct {
-	Sec  int64 `json:"Sec"`
-	Nsec int64 `json:"Nsec"`
 }
