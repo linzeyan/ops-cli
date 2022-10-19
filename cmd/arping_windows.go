@@ -16,9 +16,7 @@ limitations under the License.
 
 package cmd
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
 func initArping() *cobra.Command {
 	var arpingCmd = &cobra.Command{
@@ -28,7 +26,7 @@ func initArping() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(_ *cobra.Command, _ []string) {
-			PrintString("Not implemented")
+			PrintString(NotImplemented)
 		},
 	}
 	return arpingCmd

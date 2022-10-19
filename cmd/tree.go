@@ -1,3 +1,5 @@
+//go:build linux || darwin
+
 /*
 Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>
 
@@ -148,18 +150,22 @@ func (t *Tree) Walk(args []string, opt *TreeOptions) {
 
 /* getInfo returns uid, gid, inodes, device and error. */
 func (t *Tree) getInfo(fileinfo fs.FileInfo) (string, string, string, string, string, error) {
-	uid, err := user.LookupId(fmt.Sprintf(`%d`, fileinfo.Sys().(*syscall.Stat_t).Uid))
+	s, ok := fileinfo.Sys().(*syscall.Stat_t)
+	if !ok {
+		return "", "", "0", "", "", common.ErrResponse
+	}
+	uid, err := user.LookupId(fmt.Sprintf(`%d`, s.Uid))
 	if err != nil {
 		return "", "", "0", "", "", err
 	}
-	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, fileinfo.Sys().(*syscall.Stat_t).Gid))
+	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, s.Gid))
 	if err != nil {
 		return "", "", "0", "", "", err
 	}
 	return uid.Username, gid.Name,
-		fmt.Sprintf("%d", fileinfo.Sys().(*syscall.Stat_t).Nlink),
-		fmt.Sprintf("%d", fileinfo.Sys().(*syscall.Stat_t).Ino),
-		fmt.Sprintf("%d", fileinfo.Sys().(*syscall.Stat_t).Dev), err
+		fmt.Sprintf("%d", s.Nlink),
+		fmt.Sprintf("%d", s.Ino),
+		fmt.Sprintf("%d", s.Dev), err
 }
 
 func (t *Tree) iterate(trees *Tree, opt *TreeOptions) error {

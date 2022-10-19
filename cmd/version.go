@@ -44,7 +44,7 @@ func initVersion() *cobra.Command {
 				Version: appVersion,
 				Commit:  appCommit,
 				Date:    appBuildTime,
-				Runtime: fmt.Sprintf("%s %s/%s", runtime.Version(), runtime.GOOS, runtime.GOARCH),
+				Runtime: fmt.Sprintf("%s %s", runtime.Version(), PlatformS),
 			}
 			OutputInterfaceString(v)
 		},

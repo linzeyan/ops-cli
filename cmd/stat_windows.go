@@ -16,15 +16,9 @@ limitations under the License.
 
 package cmd
 
-import "github.com/spf13/cobra"
+type FileStat struct{}
 
-func initSs() *cobra.Command {
-	var ssCmd = &cobra.Command{
-		Use:   CommandSs,
-		Short: "Displays sockets informations",
-		Run: func(_ *cobra.Command, _ []string) {
-			PrintString(NotImplemented)
-		},
-	}
-	return ssCmd
+func (f *FileStat) String(path string) error {
+	PrintString(NotImplemented)
+	return nil
 }

@@ -16,16 +16,14 @@ limitations under the License.
 
 package cmd
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
 func initSs() *cobra.Command {
 	var ssCmd = &cobra.Command{
 		Use:   CommandSs,
 		Short: "Displays sockets informations",
 		Run: func(_ *cobra.Command, _ []string) {
-			PrintString("Not implemented")
+			PrintString(NotImplemented)
 		},
 	}
 	return ssCmd

@@ -18,13 +18,13 @@ package cmd
 
 import "github.com/spf13/cobra"
 
-func initSs() *cobra.Command {
-	var ssCmd = &cobra.Command{
-		Use:   CommandSs,
-		Short: "Displays sockets informations",
-		Run: func(_ *cobra.Command, _ []string) {
+func initTree() *cobra.Command {
+	var treeCmd = &cobra.Command{
+		Use:   CommandTree,
+		Short: "Show the contents of the giving directory as a tree",
+		Run: func(_ *cobra.Command, args []string) {
 			PrintString(NotImplemented)
 		},
 	}
-	return ssCmd
+	return treeCmd
 }

@@ -106,8 +106,8 @@ func (r *repository) fetchLatestVersion(username, repo string) *repository {
 		extension = "tar.gz"
 		r.ExtractFunc = r.UnGzip
 	}
-	downloadLink := fmt.Sprintf("%s%s/%s/%s_%s_%s_%s.%s",
-		urlBase, "download", tag, repo, tag, runtime.GOOS, runtime.GOARCH, extension)
+	downloadLink := fmt.Sprintf("%s%s/%s/%s_%s_%s.%s",
+		urlBase, "download", tag, repo, tag, PlatformU, extension)
 
 	r.GithubUsername = username
 	r.Repository = repo

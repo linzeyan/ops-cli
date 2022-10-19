@@ -16,7 +16,10 @@ limitations under the License.
 
 package cmd
 
-import "io/fs"
+import (
+	"io/fs"
+	"runtime"
+)
 
 const (
 	CommandArping     = "arping"
@@ -159,6 +162,10 @@ const (
 
 const (
 	IndentTwoSpaces = "  "
+
+	NotImplemented = "not implemented on " + PlatformS
+	PlatformS      = runtime.GOOS + "/" + runtime.GOARCH
+	PlatformU      = runtime.GOOS + "_" + runtime.GOARCH
 
 	TCP  = "tcp"
 	TCP6 = "tcp6"
