@@ -1,5 +1,3 @@
-//go:build linux || darwin
-
 /*
 Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>
 
@@ -29,6 +27,7 @@ import (
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -41,6 +40,10 @@ func initTree() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveFilterDirs
 		},
 		Run: func(_ *cobra.Command, args []string) {
+			if validator.IsWindows() {
+				PrintString(NotImplemented)
+				return
+			}
 			if flags.Limit < 1 {
 				PrintString(common.ErrInvalidArg)
 				return
