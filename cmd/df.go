@@ -29,7 +29,7 @@ import (
 )
 
 func initDF() *cobra.Command {
-	partition, err := disk.Partitions(true)
+	partition, err := disk.PartitionsWithContext(common.Context, true)
 	if err != nil {
 		return nil
 	}

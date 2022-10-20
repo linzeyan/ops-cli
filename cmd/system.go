@@ -123,7 +123,7 @@ func initSystem() *cobra.Command {
 type System struct{}
 
 func (s *System) CPUInfo() (any, error) {
-	info, err := cpu.Info()
+	info, err := cpu.InfoWithContext(common.Context)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +142,7 @@ func (s *System) CPUInfo() (any, error) {
 }
 
 func (s *System) DiskUsage() (any, error) {
-	info, err := disk.Usage("/")
+	info, err := disk.UsageWithContext(common.Context, "/")
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +160,7 @@ func (s *System) DiskUsage() (any, error) {
 }
 
 func (s *System) HostInfo() (any, error) {
-	info, err := host.Info()
+	info, err := host.InfoWithContext(common.Context)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func (s *System) HostInfo() (any, error) {
 }
 
 func (s *System) LoadAvg() (any, error) {
-	info, err := load.Avg()
+	info, err := load.AvgWithContext(common.Context)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +204,7 @@ func (s *System) LoadAvg() (any, error) {
 }
 
 func (s *System) MemUsage() (any, error) {
-	info, err := mem.VirtualMemory()
+	info, err := mem.VirtualMemoryWithContext(common.Context)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (s *System) MemUsage() (any, error) {
 }
 
 func (s *System) NetInfo() (any, error) {
-	info, err := net.IOCounters(false)
+	info, err := net.IOCountersWithContext(common.Context, false)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +244,7 @@ func (s *System) NetInfo() (any, error) {
 	if err != nil {
 		return &netResp, err
 	}
-	inet, err := net.Interfaces()
+	inet, err := net.InterfacesWithContext(common.Context)
 	if err != nil {
 		return &netResp, err
 	}
