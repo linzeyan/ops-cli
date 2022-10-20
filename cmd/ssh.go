@@ -64,7 +64,7 @@ type SSHKeygen struct{}
 /* Prepare checks file exist or not, and return files name. */
 func (*SSHKeygen) Prepare(path string) (string, string) {
 	privateKeyFile := path
-	if validator.ValidFile(privateKeyFile) {
+	if validator.IsFile(privateKeyFile) {
 		PrintString(privateKeyFile + " exist.")
 		privateKeyFile += "_new"
 		PrintString("Use " + privateKeyFile)

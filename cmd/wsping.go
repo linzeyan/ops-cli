@@ -35,7 +35,7 @@ func initWsping() *cobra.Command {
 			return []string{"ws://", "wss://"}, cobra.ShellCompDirectiveNoSpace
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			if !validator.ValidURL(args[0]) {
+			if !validator.IsURL(args[0]) {
 				PrintString(common.ErrInvalidURL)
 				return
 			}

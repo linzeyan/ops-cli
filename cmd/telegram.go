@@ -257,9 +257,9 @@ func (t *Telegram) GetUpdate() {
 
 func (t *Telegram) parseFile(s string) tgBot.RequestFileData {
 	switch {
-	case validator.ValidFile(s):
+	case validator.IsFile(s):
 		return tgBot.FilePath(s)
-	case validator.ValidURL(s):
+	case validator.IsURL(s):
 		return tgBot.FileURL(s)
 	}
 	return nil

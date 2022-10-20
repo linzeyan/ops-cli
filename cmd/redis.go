@@ -67,7 +67,7 @@ func initRedis() *cobra.Command {
 type Redis struct{}
 
 func (r *Redis) Connection(host, port, user, pass string, db int) *redis.Client {
-	if validator.ValidIP(host) || validator.ValidDomain(host) {
+	if validator.IsIP(host) || validator.IsDomain(host) {
 		return redis.NewClient(&redis.Options{
 			Username: user,
 			Password: pass,

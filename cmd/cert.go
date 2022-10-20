@@ -52,9 +52,9 @@ func initCert() *cobra.Command {
 			input := args[0]
 			resp := new(Cert)
 			switch {
-			case validator.ValidFile(input):
+			case validator.IsFile(input):
 				resp, err = resp.CheckFile(input)
-			case validator.ValidDomain(input) || validator.ValidIPv4(input):
+			case validator.IsDomain(input) || validator.IsIPv4(input):
 				resp, err = resp.CheckHost(net.JoinHostPort(input, flags.port))
 			default:
 				return common.ErrInvalidArg

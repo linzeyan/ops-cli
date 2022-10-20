@@ -53,7 +53,7 @@ func initQrcode() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Short: "Read QR code and print message",
 		RunE: func(_ *cobra.Command, args []string) error {
-			if !validator.ValidFile(args[0]) {
+			if !validator.IsFile(args[0]) {
 				return common.ErrInvalidArg
 			}
 			result, err := common.ReadQRCode(args[0])

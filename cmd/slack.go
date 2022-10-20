@@ -128,9 +128,9 @@ func (s *Slack) Photo(channel, arg string) error {
 	var base64Image string
 	var err error
 	switch {
-	case validator.ValidFile(arg):
+	case validator.IsFile(arg):
 		base64Image, err = s.localFile(arg)
-	case validator.ValidURL(arg):
+	case validator.IsURL(arg):
 		base64Image, err = s.remoteFile(arg)
 	}
 	if err != nil {

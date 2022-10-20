@@ -139,7 +139,7 @@ type Encrypt struct{}
 
 func (*Encrypt) CheckSecret(secret string) []byte {
 	/* Read key file. */
-	if validator.ValidFile(secret) {
+	if validator.IsFile(secret) {
 		key, err := os.ReadFile(secret)
 		if err != nil {
 			return nil
@@ -163,7 +163,7 @@ func (e *Encrypt) GetKey(secret, filename string, perm os.FileMode) []byte {
 		return key
 	}
 	f := filepath.Clean(filename) + keyFileExtension
-	if validator.ValidFile(f) {
+	if validator.IsFile(f) {
 		return nil
 	}
 	/* If secret is not a file and not a valid key, generate a new key. */

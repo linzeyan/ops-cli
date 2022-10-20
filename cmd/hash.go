@@ -117,7 +117,7 @@ func (h *Hash) Hash(hasher hash.Hash, i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
-		if validator.ValidFile(data) {
+		if validator.IsFile(data) {
 			return h.WriteFile(hasher, data)
 		}
 		_, err = hasher.Write([]byte(data))

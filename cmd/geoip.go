@@ -86,7 +86,7 @@ type GeoIP struct {
 
 func (GeoIP) Request(ip string) (*GeoIP, error) {
 	/* Valid IP */
-	if !validator.ValidIP(ip) {
+	if !validator.IsIP(ip) {
 		return nil, common.ErrInvalidIP
 	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", ip)
@@ -109,7 +109,7 @@ func (GeoIPList) Request(inputs []string) (*GeoIPList, error) {
 	/* Valid IP and combine args */
 	for i := range inputs {
 		switch {
-		case validator.ValidIP(inputs[i]):
+		case validator.IsIP(inputs[i]):
 			ips += fmt.Sprintf(`"%s", `, inputs[i])
 		default:
 			ip, err := net.LookupIP(inputs[i])

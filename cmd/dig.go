@@ -61,7 +61,7 @@ func initDig() *cobra.Command {
 			case lens > 1:
 				/* Find which arg is domain. */
 				for i := range args {
-					if validator.ValidDomain(args[i]) || validator.ValidIP(args[i]) {
+					if validator.IsDomain(args[i]) || validator.IsIP(args[i]) {
 						flags.domain = args[i]
 						argsWithoutDomain = append(argsWithoutDomain, args[:i]...)
 						argsWithoutDomain = append(argsWithoutDomain, args[i+1:]...)

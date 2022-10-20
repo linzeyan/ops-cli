@@ -157,12 +157,12 @@ func (n *Netmask) Address(arg, typ string) error {
 	var err error
 	ipnet := new(net.IPNet)
 	switch {
-	case !validator.ValidIP(arg) && validator.ValidIPCIDR(arg):
+	case !validator.IsIP(arg) && validator.IsCIDR(arg):
 		_, ipnet, err = net.ParseCIDR(arg)
-	case validator.ValidIP(arg) && !validator.ValidIPCIDR(arg):
-		if validator.ValidIPv4(arg) {
+	case validator.IsIP(arg) && !validator.IsCIDR(arg):
+		if validator.IsIPv4(arg) {
 			_, ipnet, err = net.ParseCIDR(arg + ipv4Len)
-		} else if validator.ValidIPv6(arg) {
+		} else if validator.IsIPv6(arg) {
 			_, ipnet, err = net.ParseCIDR(arg + ipv6Len)
 		}
 	default:
@@ -223,8 +223,8 @@ func (n *Netmask) iterate(ipa, ipb netip.Addr) (string, string) {
 
 func (n *Netmask) CIDR(a, b, typ string) error {
 	var err error
-	if (!validator.ValidIPv4(a) && !validator.ValidIPv4(b)) &&
-		(!validator.ValidIPv6(a) && !validator.ValidIPv6(b)) {
+	if (!validator.IsIPv4(a) && !validator.IsIPv4(b)) &&
+		(!validator.IsIPv6(a) && !validator.IsIPv6(b)) {
 		return common.ErrInvalidArg
 	}
 

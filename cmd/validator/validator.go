@@ -26,7 +26,7 @@ import (
 )
 
 /* If i is a domain return true. */
-func ValidDomain(i any) bool {
+func IsDomain(i any) bool {
 	const elements = "~!@#$%^&*()_+`={}|[]\\:\"<>?,/"
 	if val, ok := i.(string); ok {
 		if strings.ContainsAny(val, elements) {
@@ -47,13 +47,13 @@ func ValidDomain(i any) bool {
 }
 
 /* If f is a valid path return true. */
-func ValidFile(f string) bool {
+func IsFile(f string) bool {
 	_, err := os.Stat(f)
 	return err == nil
 }
 
 /* If i is a ipv address return true. */
-func ValidIP(i string) bool {
+func IsIP(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
 		return false
@@ -61,7 +61,7 @@ func ValidIP(i string) bool {
 	return ip.IsValid()
 }
 
-func ValidIPCIDR(i string) bool {
+func IsCIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
 		return false
@@ -70,7 +70,7 @@ func ValidIPCIDR(i string) bool {
 }
 
 /* If i is a ipv4 address return true. */
-func ValidIPv4(i string) bool {
+func IsIPv4(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
 		return false
@@ -78,7 +78,7 @@ func ValidIPv4(i string) bool {
 	return ip.Is4()
 }
 
-func ValidIPv4CIDR(i string) bool {
+func IsIPv4CIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
 		return false
@@ -87,7 +87,7 @@ func ValidIPv4CIDR(i string) bool {
 }
 
 /* If i is a ipv6 address return true. */
-func ValidIPv6(i string) bool {
+func IsIPv6(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
 		return false
@@ -95,7 +95,7 @@ func ValidIPv6(i string) bool {
 	return ip.Is6()
 }
 
-func ValidIPv6CIDR(i string) bool {
+func IsIPv6CIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
 		return false
@@ -104,7 +104,7 @@ func ValidIPv6CIDR(i string) bool {
 }
 
 /* If u is a valid url return true. */
-func ValidURL(u string) bool {
+func IsURL(u string) bool {
 	_, err := url.ParseRequestURI(u)
 	return err == nil
 }

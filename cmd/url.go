@@ -39,7 +39,7 @@ func initURL() *cobra.Command {
 		Short: "Get url content or expand shorten url or download",
 		RunE: func(_ *cobra.Command, args []string) error {
 			url := args[0]
-			if !validator.ValidURL(url) {
+			if !validator.IsURL(url) {
 				return common.ErrInvalidURL
 			}
 			var err error

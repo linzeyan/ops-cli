@@ -46,7 +46,7 @@ func initConvert() *cobra.Command {
 		ValidArgs: validArg,
 		Short:     "Convert data format, support csv, json, toml, xml, yaml",
 		RunE: func(_ *cobra.Command, args []string) error {
-			if !validator.ValidFile(flags.inFile) {
+			if !validator.IsFile(flags.inFile) {
 				return common.ErrInvalidFlag
 			}
 			slice := strings.Split(args[0], "2")

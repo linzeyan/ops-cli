@@ -54,7 +54,7 @@ func initMtr() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
-			if !validator.ValidDomain(args[0]) && !validator.ValidIP(args[0]) {
+			if !validator.IsDomain(args[0]) && !validator.IsIP(args[0]) {
 				return common.ErrInvalidArg
 			}
 

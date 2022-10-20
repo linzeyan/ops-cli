@@ -44,7 +44,7 @@ func initArping() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			if !validator.ValidIPv4(args[0]) {
+			if !validator.IsIPv4(args[0]) {
 				PrintString(common.ErrInvalidIP)
 				return
 			}
