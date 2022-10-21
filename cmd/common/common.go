@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/linzeyan/ops-cli/cmd/validator"
 )
 
 func Dos2Unix(filename string) error {
@@ -57,11 +58,17 @@ func Examples(example string, cmdName ...string) string {
 	restore2 := replace2.ReplaceAllString(restore1, "\n")
 	replace3 := regexp.MustCompile(`\n$`)
 	out := replace3.ReplaceAllString(restore2, "")
+	if validator.IsWindows() {
+		return out
+	}
 	c := color.New(color.FgYellow)
 	return c.Sprintf(`%s`, out)
 }
 
 func Usage(s string) string {
+	if validator.IsWindows() {
+		return s
+	}
 	c := color.New(color.FgGreen)
 	return c.Sprintf(`%s`, s)
 }
