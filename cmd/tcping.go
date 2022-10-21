@@ -26,14 +26,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func initTcping() *cobra.Command {
+func initTCPing() *cobra.Command {
 	var flags struct {
 		count    int
 		protocol string
 		timeout  time.Duration
 	}
 	var tcpingCmd = &cobra.Command{
-		Use:   CommandTcping + " [host] [port]",
+		Use:   CommandTCPing + " [host] [port]",
 		Args:  cobra.ExactArgs(2),
 		Short: "Connect to a port of a host",
 		Run: func(_ *cobra.Command, args []string) {

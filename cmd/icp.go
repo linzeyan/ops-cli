@@ -26,13 +26,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func initIcp() *cobra.Command {
+func initICP() *cobra.Command {
 	var flags struct {
 		Account string `json:"account"`
 		Key     string `json:"api_key"`
 	}
 	var icpCmd = &cobra.Command{
-		Use:  CommandIcp + " domain",
+		Use:  CommandICP + " domain",
 		Args: cobra.ExactArgs(1),
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
@@ -40,7 +40,7 @@ func initIcp() *cobra.Command {
 		Short: "Check ICP status",
 		RunE: func(_ *cobra.Command, args []string) error {
 			if rootConfig != "" {
-				if err := ReadConfig(CommandIcp, &flags); err != nil {
+				if err := ReadConfig(CommandICP, &flags); err != nil {
 					return err
 				}
 			}
@@ -56,7 +56,7 @@ func initIcp() *cobra.Command {
 			return nil
 		},
 		Example: common.Examples(`# Print the ICP status
--a account -k api_key google.com`, CommandIcp),
+-a account -k api_key google.com`, CommandICP),
 	}
 
 	icpCmd.Flags().StringVarP(&flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))

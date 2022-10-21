@@ -31,7 +31,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func initOtp() *cobra.Command {
+func initOTP() *cobra.Command {
 	var flags struct {
 		/* Bind flags */
 		/* The period parameter defines a validity period in seconds */
@@ -42,7 +42,7 @@ func initOtp() *cobra.Command {
 		alg string
 	}
 	var otpCmd = &cobra.Command{
-		Use:   CommandOtp,
+		Use:   CommandOTP,
 		Short: "Calculate passcode or generate secret",
 		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
@@ -87,7 +87,7 @@ func initOtp() *cobra.Command {
 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
 
 # Calculate the passcode of the specified secret, the period is 15 seconds, and the number of digits is 7
-T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
+T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOTP, CommandCalculate),
 	}
 
 	var otpSubCmdGenerate = &cobra.Command{
@@ -101,7 +101,7 @@ T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOtp, CommandCalculate),
 -a sha256
 
 # Generate OTP and specify SHA512 algorithm, the period is 15 seconds
--a sha512 -p 15`, CommandOtp, CommandGenerate),
+-a sha512 -p 15`, CommandOTP, CommandGenerate),
 	}
 
 	otpCmd.PersistentFlags().StringVarP(&flags.alg, "algorithm", "a", "SHA1", common.Usage("The hash algorithm used by the credential(SHA1/SHA256/SHA512)"))

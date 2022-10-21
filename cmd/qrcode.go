@@ -73,7 +73,7 @@ qrcode.png`, CommandQrcode, CommandRead),
 		case CommandText:
 			flags.text = common.SliceStringToString(args, " ")
 			flags.text = strings.TrimRight(flags.text, " ")
-		case CommandOtp:
+		case CommandOTP:
 			if flags.otpSecret == "" {
 				return common.ErrInvalidArg
 			}
@@ -118,12 +118,12 @@ https://www.google.com -o out.png -s 500`, CommandQrcode, CommandText),
 	}
 
 	var qrcodeSubCmdOtp = &cobra.Command{
-		Use:   CommandOtp,
+		Use:   CommandOTP,
 		Short: "Generate OTP QR code",
 		RunE:  runE,
 		Example: common.Examples(`# Generate OTP QR code
 --otp-account my@gmail.com --otp-secret fqowefilkjfoqwie --otp-issuer aws`,
-			CommandQrcode, CommandOtp),
+			CommandQrcode, CommandOTP),
 	}
 
 	var qrcodeSubCmdWifi = &cobra.Command{

@@ -8,7 +8,7 @@ import (
 )
 
 func TestIcpBinary(t *testing.T) {
-	const subCommand = cmd.CommandIcp
+	const subCommand = cmd.CommandICP
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand, "--help").Run(); err != nil {
 			t.Error(err)

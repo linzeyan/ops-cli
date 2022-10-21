@@ -17,7 +17,7 @@ func TestQrcode(t *testing.T) {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandOtp, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", files[2]}, files[2]},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandOTP, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", files[2]}, files[2]},
 		{[]string{runCommand, mainGo, subCommand, cmd.CommandWiFi, "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", files[1], "-s", "500"}, files[1]},
 		{[]string{runCommand, mainGo, subCommand, cmd.CommandText, "https://www.google.com", "-o", files[0]}, files[0]},
 	}
@@ -64,7 +64,7 @@ func TestQrcodeBinary(t *testing.T) {
 		}
 	})
 	args := [][]string{
-		{subCommand, cmd.CommandOtp, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", files[2]},
+		{subCommand, cmd.CommandOTP, "--otp-account", "my@gmail.com", "--otp-secret", "fqowefilkjfoqwie", "--otp-issuer", "aws", "-o", files[2]},
 		{subCommand, cmd.CommandWiFi, "--wifi-type", "WPA", "--wifi-pass", "your_password", "--wifi-ssid", "your_wifi_ssid", "-o", files[1], "-s", "500"},
 		{subCommand, cmd.CommandText, "https://www.google.com", "-o", files[0]},
 	}

@@ -8,7 +8,7 @@ import (
 )
 
 func TestTcpingBinary(t *testing.T) {
-	const subCommand = cmd.CommandTcping
+	const subCommand = cmd.CommandTCPing
 	t.Run(subCommand, func(t *testing.T) {
 		if err := exec.Command(binaryCommand, subCommand, "--help").Run(); err != nil {
 			t.Error(err)

@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func initDF() *cobra.Command {
+func initDf() *cobra.Command {
 	partition, err := disk.PartitionsWithContext(common.Context, true)
 	if err != nil {
 		return nil
@@ -45,7 +45,7 @@ func initDF() *cobra.Command {
 		Args:      cobra.OnlyValidArgs,
 		RunE: func(_ *cobra.Command, args []string) error {
 			var err error
-			var d DF
+			var d Df
 			var data [][]string
 			switch {
 			case len(args) == 0:
@@ -74,7 +74,7 @@ func initDF() *cobra.Command {
 	return dfCmd
 }
 
-type DF struct {
+type Df struct {
 	Filesystem  string `json:"Filesystem"`
 	Size        string `json:"Size"`
 	Used        string `json:"Used"`
@@ -89,7 +89,7 @@ type DF struct {
 	InodesUsedPercent string `json:"iUse%"`
 }
 
-func (d *DF) ParseDevices(usage *disk.UsageStat, partition []disk.PartitionStat) {
+func (d *Df) ParseDevices(usage *disk.UsageStat, partition []disk.PartitionStat) {
 	for _, v := range partition {
 		if usage.Path == v.Mountpoint {
 			d.Filesystem = v.Device
@@ -109,7 +109,7 @@ func (d *DF) ParseDevices(usage *disk.UsageStat, partition []disk.PartitionStat)
 	}
 }
 
-func (d DF) OutputData() []string {
+func (d Df) OutputData() []string {
 	var value []string
 	f := reflect.ValueOf(&d).Elem()
 	for i := 0; i < f.NumField(); i++ {
@@ -118,7 +118,7 @@ func (d DF) OutputData() []string {
 	return value
 }
 
-func (d DF) String(value any) {
+func (d Df) String(value any) {
 	var header []string
 	f := reflect.ValueOf(&d).Elem()
 	t := f.Type()

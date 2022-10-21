@@ -8,7 +8,7 @@ import (
 )
 
 func TestOtpBinary(t *testing.T) {
-	const subCommand = cmd.CommandOtp
+	const subCommand = cmd.CommandOTP
 	calculateArgs := [][]string{
 		{subCommand, cmd.CommandCalculate, "6BDR", "T7AT", "RRCZ", "V5IS", " FLOH", "AHQL", "YF4Z", " ORG7", "-p", "15", "-d", "7"},
 		{subCommand, cmd.CommandCalculate, "6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7", "-p", "30", "-d", "8"},
