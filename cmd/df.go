@@ -50,7 +50,7 @@ func initDf() *cobra.Command {
 			switch {
 			case len(args) == 0:
 				for _, v := range partition {
-					usage, err := disk.Usage(v.Mountpoint)
+					usage, err := disk.UsageWithContext(common.Context, v.Mountpoint)
 					if err != nil {
 						return err
 					}
@@ -59,7 +59,7 @@ func initDf() *cobra.Command {
 				}
 			default:
 				for _, v := range args {
-					usage, err := disk.Usage(v)
+					usage, err := disk.UsageWithContext(common.Context, v)
 					if err != nil {
 						return err
 					}
