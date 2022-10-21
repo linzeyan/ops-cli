@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/linzeyan/ops-cli/cmd"
@@ -25,7 +24,6 @@ import (
 
 func main() {
 	if err := cmd.RootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
