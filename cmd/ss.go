@@ -58,7 +58,7 @@ func initSs() *cobra.Command {
 			case flags.udp:
 				proto = UDP
 			}
-			var s SS
+			var s Ss
 			s.String(s.GetData(inet, proto, fn))
 		},
 	}
@@ -70,9 +70,9 @@ func initSs() *cobra.Command {
 	return ssCmd
 }
 
-type SS struct{}
+type Ss struct{}
 
-func (*SS) getTCPSocks(inet string, fn netstat.AcceptFn) [][]string {
+func (*Ss) getTCPSocks(inet string, fn netstat.AcceptFn) [][]string {
 	var data [][]string
 	if inet == IPv4 || inet == All {
 		socks, err := netstat.TCPSocks(fn)
@@ -96,7 +96,7 @@ func (*SS) getTCPSocks(inet string, fn netstat.AcceptFn) [][]string {
 	return data
 }
 
-func (*SS) getUDPSocks(inet string, fn netstat.AcceptFn) [][]string {
+func (*Ss) getUDPSocks(inet string, fn netstat.AcceptFn) [][]string {
 	var data [][]string
 	if inet == IPv4 || inet == All {
 		socks, err := netstat.UDPSocks(fn)
@@ -117,7 +117,7 @@ func (*SS) getUDPSocks(inet string, fn netstat.AcceptFn) [][]string {
 	return data
 }
 
-func (s *SS) GetData(inet, proto string, fn netstat.AcceptFn) [][]string {
+func (s *Ss) GetData(inet, proto string, fn netstat.AcceptFn) [][]string {
 	var data [][]string
 	if proto == TCP || proto == All {
 		data = s.getTCPSocks(inet, fn)
@@ -128,7 +128,7 @@ func (s *SS) GetData(inet, proto string, fn netstat.AcceptFn) [][]string {
 	return append(data, s.getUDPSocks(inet, fn)...)
 }
 
-func (*SS) String(data [][]string) {
+func (*Ss) String(data [][]string) {
 	header := []string{"Proto", "Local Address", "Foreign Address", "State", "PID/Program name"}
 	PrintTable(header, data, tablewriter.ALIGN_LEFT, "\t", false)
 }
