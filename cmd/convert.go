@@ -45,9 +45,10 @@ func initConvert() *cobra.Command {
 		Args:      cobra.OnlyValidArgs,
 		ValidArgs: validArg,
 		Short:     "Convert data format, support csv, json, toml, xml, yaml",
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			if !validator.IsFile(flags.inFile) {
-				return common.ErrInvalidFlag
+				p.Printf(rootOutputFormat, common.ErrInvalidFlag)
+				return
 			}
 			slice := strings.Split(args[0], "2")
 			inType := slice[0]
@@ -58,14 +59,19 @@ func initConvert() *cobra.Command {
 			}
 			node, err := dasel.NewFromFile(flags.inFile, inType)
 			if err != nil {
-				return err
+				p.Printf(rootOutputFormat, err)
+				return
 			}
-			return node.WriteToFile(
+			err = node.WriteToFile(
 				flags.outFile,
 				outType,
 				[]storage.ReadWriteOption{
 					storage.PrettyPrintOption(true),
 				})
+			if err != nil {
+				p.Printf(rootOutputFormat, err)
+				return
+			}
 		},
 		Example: common.Examples(`# Convert yaml to json
 -i input.yaml -o output.json`, CommandConvert, CommandYaml2JSON) + `

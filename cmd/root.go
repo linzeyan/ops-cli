@@ -23,11 +23,13 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
+	"github.com/linzeyan/ops-cli/cmd/printer"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
 var RootCmd = root()
+var p = printer.NewPrinter()
 
 /* Flags. */
 var (

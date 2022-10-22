@@ -67,17 +67,20 @@ func initCert() *cobra.Command {
 			}
 			switch {
 			default:
-				OutputDefaultJSON(resp)
+				if rootOutputFormat == "" {
+					rootOutputFormat = CommandJSON
+				}
+				p.Printf(rootOutputFormat, resp)
 			case flags.ip:
-				PrintString(resp.ServerIP)
+				p.Printf(rootOutputFormat, resp.ServerIP)
 			case flags.dns:
-				PrintJSON(resp.DNS)
+				p.Printf(rootOutputFormat, resp.DNS)
 			case flags.expiry:
-				PrintString(resp.ExpiryTime)
+				p.Printf(rootOutputFormat, resp.ExpiryTime)
 			case flags.issuer:
-				PrintString(resp.Issuer)
+				p.Printf(rootOutputFormat, resp.Issuer)
 			case flags.days:
-				PrintString(resp.Days)
+				p.Printf(rootOutputFormat, resp.Days)
 			}
 			return err
 		},
