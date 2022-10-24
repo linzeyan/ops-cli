@@ -135,5 +135,5 @@ func (d Df) String(value any) {
 	/* tablewriter.ALIGN_LEFT */
 	printer.SetTableAlign(3)
 	printer.SetTablePadding(IndentTwoSpaces)
-	printer.Printf(defaultTableFormat(), header, data)
+	printer.Printf(printer.SetTableAsDefaultFormat(rootOutputFormat), header, data)
 }

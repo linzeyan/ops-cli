@@ -52,7 +52,7 @@ func initGeoip() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			printer.Printf(defaultJSONFormat(), out)
+			printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), out)
 			return err
 		},
 		Example: common.Examples(`# Print IP geographic information

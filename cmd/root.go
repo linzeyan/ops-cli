@@ -67,34 +67,6 @@ func root() *cobra.Command {
 	return rootCmd
 }
 
-func defaultJSONFormat() string {
-	if rootOutputFormat == "" {
-		return "json"
-	}
-	return rootOutputFormat
-}
-
-func defaultNoneFormat() string {
-	if rootOutputFormat == "" {
-		return "none"
-	}
-	return rootOutputFormat
-}
-
-func defaultTableFormat() string {
-	if rootOutputFormat == "" {
-		return "table"
-	}
-	return rootOutputFormat
-}
-
-func defaultYamlFormat() string {
-	if rootOutputFormat == "" {
-		return "yaml"
-	}
-	return rootOutputFormat
-}
-
 func ReadConfig(block string, flag any) error {
 	v := common.Config(rootConfig, strings.ToLower(block))
 	return Encoder.JSONMarshaler(v, flag)

@@ -77,7 +77,7 @@ func initLINE() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		printer.Printf(defaultNoneFormat(), l.Response)
+		printer.Printf(printer.SetNoneAsDefaultFormat(rootOutputFormat), l.Response)
 		return err
 	}
 

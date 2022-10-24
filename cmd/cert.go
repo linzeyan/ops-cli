@@ -70,7 +70,7 @@ func initCert() *cobra.Command {
 			}
 			switch {
 			default:
-				printer.Printf(defaultJSONFormat(), resp)
+				printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), resp)
 			case flags.ip:
 				printer.Printf(rootOutputFormat, resp.ServerIP)
 			case flags.dns:

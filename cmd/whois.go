@@ -53,7 +53,7 @@ func initWhois() *cobra.Command {
 				return err
 			}
 			if flags.ns {
-				printer.Printf(defaultJSONFormat(), w.NameServers)
+				printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), w.NameServers)
 				return err
 			}
 			if flags.registrar {

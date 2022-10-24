@@ -103,5 +103,5 @@ func (Free) String(header []string, data [][]string) {
 	/* tablewriter.ALIGN_RIGHT */
 	printer.SetTableAlign(2)
 	printer.SetTablePadding("\t ")
-	printer.Printf(defaultTableFormat(), header, data)
+	printer.Printf(printer.SetTableAsDefaultFormat(rootOutputFormat), header, data)
 }

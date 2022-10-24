@@ -102,7 +102,7 @@ func (r *Redis) Do(rdb *redis.Client, commands []string) error {
 			printer.Printf("%d) %s\n", i+1, data[i])
 		}
 	default:
-		printer.Printf(defaultJSONFormat(), out)
+		printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), out)
 	}
 	return err
 }

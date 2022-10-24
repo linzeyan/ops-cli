@@ -78,7 +78,7 @@ func initTelegram() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		printer.Printf(defaultNoneFormat(), t.Response)
+		printer.Printf(printer.SetNoneAsDefaultFormat(rootOutputFormat), t.Response)
 		return err
 	}
 

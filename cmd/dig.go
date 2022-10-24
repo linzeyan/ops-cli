@@ -219,5 +219,5 @@ func (d DigList) String() {
 	printer.SetTableAlign(3)
 	printer.SetTablePadding("\t")
 	printer.SetTableFormatHeaders(true)
-	printer.Printf(defaultTableFormat(), header, data)
+	printer.Printf(printer.SetTableAsDefaultFormat(rootOutputFormat), header, data)
 }

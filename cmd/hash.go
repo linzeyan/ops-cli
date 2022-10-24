@@ -190,7 +190,7 @@ func (h *Hash) ListAll(s string) {
 		}
 		m[strings.ToUpper(alg)] = out
 	}
-	printer.Printf(defaultYamlFormat(), m)
+	printer.Printf(printer.SetYamlAsDefaultFormat(rootOutputFormat), m)
 }
 
 func HashAlgorithm(alg string) hash.Hash {

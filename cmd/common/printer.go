@@ -141,6 +141,33 @@ func (p *printer) SetTableAlign(align int)           { p.align = align }
 func (p *printer) SetTablePadding(padding string)    { p.padding = padding }
 func (p *printer) SetTableFormatHeaders(format bool) { p.headers = format }
 
+func (*printer) SetJSONAsDefaultFormat(format string) string {
+	if format == "" {
+		return "json"
+	}
+	return format
+}
+
+func (*printer) SetNoneAsDefaultFormat(format string) string {
+	if format == "" {
+		return "none"
+	}
+	return format
+}
+
+func (*printer) SetTableAsDefaultFormat(format string) string {
+	if format == "" {
+		return "table"
+	}
+	return format
+}
+
+func (*printer) SetYamlAsDefaultFormat(format string) string {
+	if format == "" {
+		return "yaml"
+	}
+	return format
+}
 func NewPrinter() *printer {
 	return &printer{
 		indent: 2,

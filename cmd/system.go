@@ -60,7 +60,7 @@ func initSystem() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		printer.Printf(defaultJSONFormat(), resp)
+		printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), resp)
 		return err
 	}
 
