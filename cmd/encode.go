@@ -47,7 +47,7 @@ func initEncode() *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	runDecode := func(cmd *cobra.Command, args []string) error {
+	runDecode := func(cmd *cobra.Command, args []string) {
 		var err error
 		var out []byte
 		switch cmd.Name() {
@@ -63,15 +63,16 @@ func initEncode() *cobra.Command {
 			out, err = Encoder.HexDecode(args[0])
 		}
 		if err != nil {
-			return err
+			printer.Error(err)
+			return
 		}
-		PrintString(out)
-		return err
+		printer.Printf(rootOutputFormat, out)
 	}
 
-	runE := func(cmd *cobra.Command, args []string) error {
+	run := func(cmd *cobra.Command, args []string) {
 		if flags.decode {
-			return runDecode(cmd, args)
+			runDecode(cmd, args)
+			return
 		}
 		var err error
 		var out string
@@ -80,7 +81,8 @@ func initEncode() *cobra.Command {
 		case true:
 			data, err = os.ReadFile(args[0])
 			if err != nil {
-				return err
+				printer.Error(err)
+				return
 			}
 		case false:
 			data = args[0]
@@ -98,45 +100,45 @@ func initEncode() *cobra.Command {
 			out, err = Encoder.HexEncode(data)
 		}
 		if err != nil {
-			return err
+			printer.Error(err)
+			return
 		}
-		PrintString(out)
-		return err
+		printer.Printf(rootOutputFormat, out)
 	}
 
 	var encodeSubCmdBase32Hex = &cobra.Command{
 		Use:   CommandBase32Hex,
 		Args:  cobra.ExactArgs(1),
 		Short: "Base32 hex encoding or decoding",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var encodeSubCmdBase32Std = &cobra.Command{
 		Use:   CommandBase32Std,
 		Args:  cobra.ExactArgs(1),
 		Short: "Base32 standard encoding or decoding",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var encodeSubCmdBase64Std = &cobra.Command{
 		Use:   CommandBase64Std,
 		Args:  cobra.ExactArgs(1),
 		Short: "Base64 standard encoding or decoding",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var encodeSubCmdBase64URL = &cobra.Command{
 		Use:   CommandBase64URL,
 		Args:  cobra.ExactArgs(1),
 		Short: "Base64 url encoding or decoding",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var encodeSubCmdHex = &cobra.Command{
 		Use:   CommandHex,
 		Args:  cobra.ExactArgs(1),
 		Short: "Hexadecimal encoding or decoding",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	encodeCmd.PersistentFlags().BoolVarP(&flags.decode, "decode", "d", false, common.Usage("Decodes input"))

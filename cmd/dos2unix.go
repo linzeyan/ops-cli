@@ -29,9 +29,10 @@ func initDos2Unix() *cobra.Command {
 		Run: func(_ *cobra.Command, args []string) {
 			for _, f := range args {
 				if err := common.Dos2Unix(f); err != nil {
-					PrintString(f + ": " + err.Error())
+					printer.Printf("%s: %s\n", f, err)
+					continue
 				}
-				PrintString("Converting file " + f + " to Unix format...")
+				printer.Printf("Converting file %s to Unix format...\n", f)
 			}
 		},
 		DisableFlagsInUseLine: true,

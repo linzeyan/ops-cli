@@ -57,7 +57,7 @@ func initDig() *cobra.Command {
 					printer.Error(err)
 					return
 				}
-				OutputInterfaceString(&output)
+				output.String()
 				return
 			case lens > 1:
 				/* Find which arg is domain. */
