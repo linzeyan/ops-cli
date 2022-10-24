@@ -98,7 +98,7 @@ func (p *printer) json(a ...any) {
 			p.Error(ErrInvalidArg)
 			return
 		}
-		fmt.Fprintln(os.Stdout, buf.String())
+		fmt.Fprintf(os.Stdout, "%s", buf.String())
 	}
 }
 
@@ -111,7 +111,7 @@ func (p *printer) yaml(a ...any) {
 			p.Error(ErrInvalidArg)
 			return
 		}
-		fmt.Fprintln(os.Stdout, buf.String())
+		fmt.Fprintf(os.Stdout, "%s", buf.String())
 	}
 }
 
