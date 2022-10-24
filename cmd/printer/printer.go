@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/olekukonko/tablewriter"
@@ -28,6 +29,8 @@ import (
 )
 
 type Printer struct {
+	/* JSON and yaml args. */
+	indent int
 	/* Table args. */
 	headers bool
 	padding string
@@ -89,7 +92,8 @@ func (p *Printer) json(a ...any) {
 	for _, i := range a {
 		var buf bytes.Buffer
 		encoder := json.NewEncoder(&buf)
-		encoder.SetIndent("", "  ")
+		indent := strings.Repeat(" ", p.indent)
+		encoder.SetIndent("", indent)
 		if err := encoder.Encode(i); err != nil {
 			p.Error(common.ErrInvalidArg)
 			return
@@ -102,7 +106,7 @@ func (p *Printer) yaml(a ...any) {
 	for _, i := range a {
 		var buf bytes.Buffer
 		encoder := yaml.NewEncoder(&buf)
-		encoder.SetIndent(2)
+		encoder.SetIndent(p.indent)
 		if err := encoder.Encode(i); err != nil {
 			p.Error(common.ErrInvalidArg)
 			return
@@ -132,10 +136,13 @@ func (p *Printer) table(header []string, data [][]string) {
 	table.Render()
 }
 
+func (p *Printer) SetIdent(indent int)               { p.indent = indent }
 func (p *Printer) SetTableAlign(align int)           { p.align = align }
 func (p *Printer) SetTablePadding(padding string)    { p.padding = padding }
 func (p *Printer) SetTableFormatHeaders(format bool) { p.headers = format }
 
 func NewPrinter() *Printer {
-	return &Printer{}
+	return &Printer{
+		indent: 2,
+	}
 }
