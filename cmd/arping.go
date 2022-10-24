@@ -44,7 +44,7 @@ func initArping() *cobra.Command {
 		},
 		Run: func(_ *cobra.Command, args []string) {
 			if !validator.IsIPv4(args[0]) {
-				printing.Printf(rootOutputFormat, common.ErrInvalidIP)
+				printing.Error(common.ErrInvalidIP)
 				return
 			}
 			ip := net.ParseIP(args[0])
@@ -56,7 +56,7 @@ func initArping() *cobra.Command {
 				hwAddr, _, err = arping.Ping(ip)
 			}
 			if err != nil && !errors.Is(err, arping.ErrTimeout) {
-				printing.Printf(rootOutputFormat, err)
+				printing.Error(err)
 				return
 			}
 
@@ -71,6 +71,7 @@ func initArping() *cobra.Command {
 				printing.Printf(rootOutputFormat, hwAddr)
 			default:
 				var duration time.Duration
+				var j int
 				for i := 0; ; i++ {
 					if arpingFlag.iface != "" {
 						hwAddr, duration, err = arping.PingOverIfaceByName(ip, arpingFlag.iface)
@@ -79,12 +80,13 @@ func initArping() *cobra.Command {
 					}
 					if errors.Is(err, arping.ErrTimeout) {
 						printing.Printf("seq=%d timeout", i)
-						if i >= 5 {
+						j++
+						if j >= 5 {
 							break
 						}
 						continue
 					} else if err != nil {
-						printing.Printf(rootOutputFormat, err)
+						printing.Error(err)
 						return
 					}
 					printing.Printf("response from %s (%s): index=%d time=%s\n", ip, hwAddr, i, duration)

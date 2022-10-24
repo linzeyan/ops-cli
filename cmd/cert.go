@@ -47,7 +47,7 @@ func initCert() *cobra.Command {
 		Use:   CommandCert + " [host|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Check tls cert expiry time",
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			var err error
 			input := args[0]
 			resp := new(Cert)
@@ -57,13 +57,16 @@ func initCert() *cobra.Command {
 			case validator.IsDomain(input) || validator.IsIPv4(input):
 				resp, err = resp.CheckHost(net.JoinHostPort(input, flags.port))
 			default:
-				return common.ErrInvalidArg
+				printing.Error(common.ErrInvalidArg)
+				return
 			}
 			if err != nil {
-				return err
+				printing.Error(err)
+				return
 			}
 			if resp == nil {
-				return common.ErrResponse
+				printing.Error(common.ErrResponse)
+				return
 			}
 			switch {
 			default:
@@ -82,7 +85,6 @@ func initCert() *cobra.Command {
 			case flags.days:
 				printing.Printf(rootOutputFormat, resp.Days)
 			}
-			return err
 		},
 		Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
 www.google.com
