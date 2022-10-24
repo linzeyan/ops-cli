@@ -78,7 +78,7 @@ func initTelegram() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		OutputDefaultNone(t.Response)
+		printer.Printf(defaultNoneFormat(), t.Response)
 		return err
 	}
 
@@ -248,7 +248,7 @@ func (t *Telegram) GetUpdate() {
 	for update := range updates {
 		if update.Message != nil { // If we got a message
 			if update.Message.Text == CommandID {
-				PrintString(update.Message.Chat.ID)
+				printer.Printf(rootOutputFormat, update.Message.Chat.ID)
 				break
 			}
 		}

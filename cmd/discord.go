@@ -64,10 +64,7 @@ func initDiscord() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		if rootOutputFormat == "" {
-			rootOutputFormat = "none"
-		}
-		printer.Printf(rootOutputFormat, d.Response)
+		printer.Printf(defaultNoneFormat(), d.Response)
 		return err
 	}
 

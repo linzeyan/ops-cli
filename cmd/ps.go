@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/olekukonko/tablewriter"
 	"github.com/shirou/gopsutil/v3/process"
 	"github.com/spf13/cobra"
 )
@@ -316,5 +315,9 @@ func (p *Ps) VMS() string {
 }
 
 func (*Ps) String(header []string, data [][]string) {
-	PrintTable(header, data, tablewriter.ALIGN_LEFT, IndentTwoSpaces, true)
+	/* tablewriter.ALIGN_LEFT */
+	printer.SetTableAlign(3)
+	printer.SetTablePadding(IndentTwoSpaces)
+	printer.SetTableFormatHeaders(true)
+	printer.Printf(defaultTableFormat(), header, data)
 }

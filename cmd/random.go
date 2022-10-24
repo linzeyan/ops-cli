@@ -53,22 +53,22 @@ func initRandom() *cobra.Command {
 			r2 := Randoms.Rand(8)
 			id, _ := Encoder.HexEncode(r1)
 			token, _ := Encoder.HexEncode(r2)
-			PrintString(id + "." + token)
+			printer.Printf("%s.%s", id, token)
 			return
 		case CommandBase64:
 			b := Randoms.Rand(flags.length)
 			encode, _ := Encoder.PemEncode(b)
 			re := regexp.MustCompile("-.*-\n")
 			out := re.ReplaceAllString(encode, "")
-			PrintString(out)
+			printer.Printf(rootOutputFormat, out)
 			return
 		case CommandHex:
 			b := Randoms.Rand(flags.length)
 			out, _ := Encoder.HexEncode(b)
-			PrintString(out)
+			printer.Printf(rootOutputFormat, out)
 			return
 		}
-		PrintString(out)
+		printer.Printf(rootOutputFormat, out)
 	}
 
 	var randomCmd = &cobra.Command{

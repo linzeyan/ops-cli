@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/olekukonko/tablewriter"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
 )
@@ -45,7 +44,7 @@ func initFree() *cobra.Command {
 			}
 			var counter uint
 			for {
-				if flags.second == 0 {
+				if flags.second <= 0 {
 					flags.second = 2
 				}
 				err = f.Output()
@@ -56,7 +55,7 @@ func initFree() *cobra.Command {
 				if flags.count > 0 && flags.count == counter {
 					return err
 				}
-				PrintString("")
+				printer.Printf("\n")
 				time.Sleep(time.Second * time.Duration(flags.second))
 			}
 		},
@@ -101,5 +100,8 @@ func (f *Free) Output() error {
 }
 
 func (Free) String(header []string, data [][]string) {
-	PrintTable(header, data, tablewriter.ALIGN_RIGHT, "\t ", false)
+	/* tablewriter.ALIGN_RIGHT */
+	printer.SetTableAlign(2)
+	printer.SetTablePadding("\t ")
+	printer.Printf(defaultTableFormat(), header, data)
 }

@@ -42,7 +42,7 @@ func initTree() *cobra.Command {
 		},
 		Run: func(_ *cobra.Command, args []string) {
 			if flags.Limit < 1 {
-				PrintString(common.ErrInvalidArg)
+				printer.Error(common.ErrInvalidArg)
 				return
 			}
 			if len(args) == 0 {
@@ -108,17 +108,19 @@ func (t *Tree) Walk(args []string, opt *TreeOptions) {
 	for _, v := range args {
 		dirName, err := filepath.Abs(v)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 			return
 		}
 		f, err := os.Lstat(dirName)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
+
 			return
 		}
 		uid, gid, links, inode, device, err := t.getInfo(f)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
+
 			return
 		}
 		*t = Tree{
@@ -140,7 +142,8 @@ func (t *Tree) Walk(args []string, opt *TreeOptions) {
 
 		err = t.iterate(t, opt)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
+
 			return
 		}
 		t.print("", *t, opt)
@@ -230,15 +233,10 @@ func (t *Tree) iterate(trees *Tree, opt *TreeOptions) error {
 }
 
 func (t *Tree) print(prefix string, output Tree, opt *TreeOptions) {
-	switch {
-	case rootOutputFormat == CommandJSON:
-		PrintJSON(output)
-		return
-	case rootOutputFormat == CommandYaml:
-		PrintYAML(output)
+	if rootOutputFormat != "" {
+		printer.Printf(rootOutputFormat, output)
 		return
 	}
-
 	var p []string
 	if opt.Mode {
 		p = append(p, output.Mode)
@@ -272,17 +270,17 @@ func (t *Tree) print(prefix string, output Tree, opt *TreeOptions) {
 	}
 
 	if opt.Full {
-		PrintString(output.Path)
+		printer.Printf("%s\n", output.Path)
 	} else {
-		PrintString(output.Name)
+		printer.Printf("%s\n", output.Name)
 	}
 
 	for i, v := range *output.Contents {
 		if i == len(*output.Contents)-1 {
-			fmt.Print(prefix + treePerfixEnd)
+			printer.Printf("%s%s", prefix, treePerfixEnd)
 			t.print(prefix+treePerfixEmpty, v, opt)
 		} else {
-			fmt.Print(prefix + treePerfixFile)
+			printer.Printf("%s%s", prefix, treePerfixFile)
 			t.print(prefix+treePerfixLayer, v, opt)
 		}
 	}
@@ -302,6 +300,6 @@ func (t *Tree) summary() {
 	case t.fileN == 1:
 		out += ", %d file\n"
 	}
-	PrintString(fmt.Sprintf(out, t.dirN, t.fileN))
+	printer.Printf(out, t.dirN, t.fileN)
 	t.dirN, t.fileN = 0, 0
 }

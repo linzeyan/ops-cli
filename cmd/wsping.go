@@ -36,7 +36,7 @@ func initWsping() *cobra.Command {
 		},
 		Run: func(_ *cobra.Command, args []string) {
 			if !validator.IsURL(args[0]) {
-				PrintString(common.ErrInvalidURL)
+				printer.Error(common.ErrInvalidURL)
 				return
 			}
 			d := websocket.Dialer{
@@ -47,7 +47,7 @@ func initWsping() *cobra.Command {
 
 			ws, resp, err := d.DialContext(common.Context, args[0], nil)
 			if err != nil {
-				PrintString(err)
+				printer.Error(err)
 				return
 			}
 			defer ws.Close()
@@ -55,7 +55,7 @@ func initWsping() *cobra.Command {
 				defer resp.Body.Close()
 			}
 			if resp.StatusCode != http.StatusSwitchingProtocols {
-				PrintString("Status is not " + http.StatusText(http.StatusSwitchingProtocols))
+				printer.Printf("Status is not %d\n", http.StatusSwitchingProtocols)
 				return
 			}
 			// err = ws.WriteMessage(websocket.PingMessage, []byte{})
@@ -70,7 +70,7 @@ func initWsping() *cobra.Command {
 			// if string(message) == "" {
 			// 	return common.ErrResponse
 			// }
-			PrintString("Connect success")
+			printer.Printf("Connect success")
 		},
 	}
 	return wspingCmd

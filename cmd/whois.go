@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"net"
 	"reflect"
@@ -50,22 +49,26 @@ func initWhois() *cobra.Command {
 				return err
 			}
 			if flags.expiry {
-				PrintString(w.ExpiresDate)
+				printer.Printf(rootOutputFormat, w.ExpiresDate)
 				return err
 			}
 			if flags.ns {
-				PrintJSON(w.NameServers)
+				printer.Printf(defaultJSONFormat(), w.NameServers)
 				return err
 			}
 			if flags.registrar {
-				PrintString(w.Registrar)
+				printer.Printf(rootOutputFormat, w.Registrar)
 				return err
 			}
 			if flags.days {
-				PrintString(w.RemainDays)
+				printer.Printf(rootOutputFormat, w.RemainDays)
 				return err
 			}
-			OutputInterfaceString(w)
+			if rootOutputFormat == "" {
+				w.String()
+				return err
+			}
+			printer.Printf(rootOutputFormat, w)
 			return err
 		},
 		Example: common.Examples(`# Search domain
@@ -130,10 +133,10 @@ func (w *Whois) Request(domain string) error {
 			ns = append(ns, v[1])
 		}
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 		}
 		if calErr != nil {
-			PrintString(calErr)
+			printer.Error(calErr)
 			err = calErr
 		}
 	}
@@ -178,6 +181,6 @@ func (w Whois) String() {
 
 	f := reflect.ValueOf(&w).Elem()
 	for _, v := range name {
-		fmt.Printf("%s\t%v\n", v, f.FieldByName(v).Interface())
+		printer.Printf("%s\t%v\n", v, f.FieldByName(v).Interface())
 	}
 }

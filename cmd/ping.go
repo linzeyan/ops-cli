@@ -71,7 +71,7 @@ func initPing() *cobra.Command {
 
 			conn, err := p.Listen()
 			if err != nil {
-				PrintString(err)
+				printer.Error(err)
 				return
 			}
 			if conn != nil {
@@ -206,13 +206,13 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 	var out string
 	switch result.Type {
 	case ipv4.ICMPTypeEchoReply, ipv6.ICMPTypeEchoReply:
-		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v",
+		out = fmt.Sprintf("%v bytes from %v: icmp_seq=%d ttl=%d time=%v\n",
 			len(b), peer, result.Body.(*icmp.Echo).Seq, ttl, duration)
 	case ipv4.ICMPTypeDestinationUnreachable, ipv6.ICMPTypeDestinationUnreachable:
-		out = "Destination Unreachable"
+		out = "Destination Unreachable\n"
 	}
 	p.statistics(duration)
-	PrintString(out)
+	printer.Printf(rootOutputFormat, out)
 }
 
 func (p *Ping) Connect(c context.Context, host string) {
@@ -222,7 +222,7 @@ func (p *Ping) Connect(c context.Context, host string) {
 	}
 	addr, err := net.ResolveIPAddr(network, host)
 	if err != nil {
-		PrintString(err)
+		printer.Error(err)
 		return
 	}
 	if p.IPv6 {
@@ -234,15 +234,14 @@ func (p *Ping) Connect(c context.Context, host string) {
 
 	for i := 0; ; i++ {
 		if i == 0 {
-			header := fmt.Sprintf("PING %s (%v): %d data bytes", host, addr, p.Size)
-			PrintString(header)
+			printer.Printf("PING %s (%v): %d data bytes\n", host, addr, p.Size)
 		}
 		p.Data.Body.(*icmp.Echo).ID = i & 0xffff
 		p.Data.Body.(*icmp.Echo).Seq = i & 0xffff
 
 		b, err := p.Data.Marshal(nil)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 			return
 		}
 
@@ -250,16 +249,16 @@ func (p *Ping) Connect(c context.Context, host string) {
 		startTime := time.Now()
 		_, err = p.Conn.WriteTo(b, addr)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 		}
 
 		/* Wait receiving. */
 		if err = p.Conn.SetReadDeadline(time.Now().Add(p.Timeout)); err != nil {
-			PrintString(err)
+			printer.Error(err)
 		}
 		n, cm, peer, err := p.readReply(reply, i)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 			if i == p.Count-1 {
 				p.summary(host, time.Since(allTime))
 				return
@@ -280,7 +279,7 @@ func (p *Ping) Connect(c context.Context, host string) {
 		}
 		result, err := icmp.ParseMessage(proto, reply[:n])
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 		}
 		if peer.String() == host {
 			p.printMsg(result, duration, peer, cm)
@@ -306,21 +305,20 @@ func (p *Ping) summary(host string, t time.Duration) {
 
 	out := "\n"
 	out += fmt.Sprintf("--- %s ping statistics ---\n", host)
-	out += fmt.Sprintf("%d packets transmitted, %d received, %.1f%% packet loss, time %vms",
+	out += fmt.Sprintf("%d packets transmitted, %d received, %.1f%% packet loss, time %vms\n",
 		p.stat.Send, p.stat.Receive, float64(p.stat.Loss*100)/float64(p.stat.Send), t.Milliseconds())
 	if p.stat.Send == p.stat.Loss {
-		PrintString(out)
+		printer.Printf(rootOutputFormat, out)
 		return
 	}
 
-	out += "\n"
 	avg := p.stat.Avg / time.Duration(p.stat.Receive)
 	var temp float64
 	for _, v := range p.stat.Rtts {
 		temp += math.Pow(float64(v-avg), 2)
 	}
 	variance := temp / float64(len(p.stat.Rtts))
-	out += fmt.Sprintf("round-trip min/avg/max/mdev = %v/%v/%v/%v",
+	out += fmt.Sprintf("round-trip min/avg/max/mdev = %v/%v/%v/%v\n",
 		p.stat.Min, avg, p.stat.Max, time.Duration(math.Sqrt(variance)))
-	PrintString(out)
+	printer.Printf(rootOutputFormat, out)
 }

@@ -26,7 +26,7 @@ func initArping() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(_ *cobra.Command, _ []string) {
-			printer.Printf(rootOutputFormat, NotImplemented)
+			printer.Printf(NotImplemented)
 		},
 	}
 	return arpingCmd

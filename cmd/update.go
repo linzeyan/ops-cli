@@ -46,26 +46,24 @@ func initUpdate() *cobra.Command {
 			var err error
 			updater := NewUpdater(common.RepoOwner, common.RepoName, appVersion)
 			if !updater.Upgrade {
-				PrintString("up-to-date")
+				printer.Printf("up-to-date\n")
 				return nil
 			}
 
-			PrintString("Update...")
-			PrintString(common.Usage("==> Downloading file from GitHub " + updater.Repository.DownloadLink))
-			PrintString("")
+			printer.Printf("Update...\n")
+			printer.Printf("%s\n", common.Usage("==> Downloading file from GitHub "+updater.Repository.DownloadLink))
 			err = updater.Download()
 			if err != nil {
 				return err
 			}
 
-			PrintString(fmt.Sprintf("Upgrading %s %s -> %s", common.RepoName, appVersion, updater.Repository.ReleaseTag))
-			PrintString(common.Usage("==> Cleanup..."))
+			printer.Printf("Upgrading %s %s -> %s", common.RepoName, appVersion, updater.Repository.ReleaseTag)
+			printer.Printf("%s\n", common.Usage("==> Cleanup..."))
 			err = updater.Rename()
 			if err != nil {
 				return err
 			}
-			PrintString("")
-			PrintString("Update completed in " + time.Since(common.TimeNow).String())
+			printer.Printf("Update completed in %s", time.Since(common.TimeNow))
 			return err
 		},
 
@@ -285,17 +283,17 @@ func (*Updater) split(tag string) *version {
 	}
 	major, err := strconv.Atoi(s[0])
 	if err != nil {
-		PrintString(err)
+		printer.Error(err)
 		os.Exit(1)
 	}
 	minor, err := strconv.Atoi(s[1])
 	if err != nil {
-		PrintString(err)
+		printer.Error(err)
 		os.Exit(1)
 	}
 	patch, err := strconv.Atoi(s[2])
 	if err != nil {
-		PrintString(err)
+		printer.Error(err)
 		os.Exit(1)
 	}
 	return &version{
@@ -344,12 +342,12 @@ func (u *Updater) init(ver string) *Updater {
 		/* Get executable path. */
 		execute, err := os.Executable()
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 		}
 		/* Get the real path. */
 		realPath, err := filepath.EvalSymlinks(execute)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 		}
 		u.ExecutablePath = realPath
 	}

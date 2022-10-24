@@ -59,11 +59,11 @@ func initIP() *cobra.Command {
 				}
 				sort.Ints(keys)
 				for _, i := range keys {
-					PrintString(fmt.Sprintf("%d: %s", i, out[i]))
+					printer.Printf("%d: %s\n", i, out[i])
 				}
 			default:
 				for _, value := range args {
-					PrintString(fmt.Sprintf("%d: %s", idx[value], out[idx[value]]))
+					printer.Printf("%d: %s\n", idx[value], out[idx[value]])
 				}
 			}
 			return err

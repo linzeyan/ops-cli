@@ -17,13 +17,9 @@ limitations under the License.
 package cmd
 
 import (
-	"bytes"
-	"fmt"
-	"os"
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
@@ -71,113 +67,32 @@ func root() *cobra.Command {
 	return rootCmd
 }
 
-type OutputFormat interface {
-	String()
-}
-
-func OutputInterfaceString(r OutputFormat) {
-	switch rootOutputFormat {
-	case CommandJSON:
-		PrintJSON(r)
-	case CommandYaml:
-		PrintYAML(r)
-	default:
-		r.String()
+func defaultJSONFormat() string {
+	if rootOutputFormat == "" {
+		return "json"
 	}
+	return rootOutputFormat
 }
 
-func OutputDefaultJSON(i any) {
-	if rootOutputFormat == CommandYaml {
-		PrintYAML(i)
-	} else {
-		PrintJSON(i)
+func defaultNoneFormat() string {
+	if rootOutputFormat == "" {
+		return "none"
 	}
+	return rootOutputFormat
 }
 
-func OutputDefaultNone(i any) {
-	if rootOutputFormat == CommandJSON {
-		PrintJSON(i)
-	} else if rootOutputFormat == CommandYaml {
-		PrintYAML(i)
+func defaultTableFormat() string {
+	if rootOutputFormat == "" {
+		return "table"
 	}
+	return rootOutputFormat
 }
 
-func OutputDefaultString(i any) {
-	switch rootOutputFormat {
-	case CommandJSON:
-		PrintJSON(i)
-	case CommandYaml:
-		PrintYAML(i)
-	default:
-		PrintString(i)
+func defaultYamlFormat() string {
+	if rootOutputFormat == "" {
+		return "yaml"
 	}
-}
-
-func OutputDefaultYAML(i any) {
-	if rootOutputFormat == CommandJSON {
-		PrintJSON(i)
-	} else {
-		PrintYAML(i)
-	}
-}
-
-func PrintJSON(i any) {
-	out, err := Encoder.JSONEncode(i)
-	if err != nil {
-		PrintString(err)
-		os.Exit(1)
-	}
-	PrintString(out)
-}
-
-func PrintYAML(i any) {
-	out, err := Encoder.YamlEncode(i)
-	if err != nil {
-		PrintString(err)
-		os.Exit(1)
-	}
-	PrintString(out)
-}
-
-func PrintString(i any) {
-	switch data := i.(type) {
-	case string, []byte:
-		fmt.Printf("%s\n", data)
-	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		fmt.Printf("%d\n", data)
-	case map[int]string:
-		b := new(bytes.Buffer)
-		for key, value := range data {
-			fmt.Fprintf(b, "%d: %s", key, value)
-		}
-		fmt.Printf("%s\n", b.String())
-	case map[string]string:
-		b := new(bytes.Buffer)
-		for key, value := range data {
-			fmt.Fprintf(b, "%s: %s", key, value)
-		}
-		fmt.Printf("%s\n", b.String())
-	default:
-		fmt.Printf("%v\n", data)
-	}
-}
-
-func PrintTable(header []string, data [][]string, align int, padding string, format bool) {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader(header)
-	table.SetAutoWrapText(false)
-	table.SetAutoFormatHeaders(format)
-	table.SetHeaderAlignment(align)
-	table.SetAlignment(align)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderLine(false)
-	table.SetBorder(false)
-	table.SetTablePadding(padding)
-	table.SetNoWhiteSpace(true)
-	table.AppendBulk(data)
-	table.Render()
+	return rootOutputFormat
 }
 
 func ReadConfig(block string, flag any) error {

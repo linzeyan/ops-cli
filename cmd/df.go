@@ -132,11 +132,8 @@ func (d Df) String(value any) {
 	case [][]string:
 		data = i
 	}
-	if rootOutputFormat == "" {
-		rootOutputFormat = "table"
-	}
 	/* tablewriter.ALIGN_LEFT */
 	printer.SetTableAlign(3)
 	printer.SetTablePadding(IndentTwoSpaces)
-	printer.Printf(rootOutputFormat, header, data)
+	printer.Printf(defaultTableFormat(), header, data)
 }

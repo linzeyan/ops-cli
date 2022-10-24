@@ -52,7 +52,7 @@ func initICP() *cobra.Command {
 			if err := i.Request(flags.Account, flags.Key, args[0]); err != nil {
 				return err
 			}
-			OutputDefaultYAML(i)
+			printer.Printf(defaultYamlFormat(), i)
 			return nil
 		},
 		Example: common.Examples(`# Print the ICP status

@@ -19,6 +19,6 @@ package cmd
 type FileStat struct{}
 
 func (f *FileStat) String(path string) error {
-	PrintString(NotImplemented)
+	printer.Printf(NotImplemented)
 	return nil
 }

@@ -44,20 +44,17 @@ func initTCPing() *cobra.Command {
 			for i := 0; ; {
 				addr, duration, err := t.Connect(i, args)
 				if err != nil {
-					PrintString(err)
+					printer.Error(err)
 				}
 				ip, port, err := net.SplitHostPort(addr)
 				if err != nil {
-					PrintString(err)
+					printer.Error(err)
 				}
-				var p string
 				if flags.count == 1 {
-					p = fmt.Sprintf("%s response from %s (%s) port %s [open] %v", t.Protocal, args[0], ip, port, duration)
-					PrintString(p)
+					printer.Printf("%s response from %s (%s) port %s [open] %v", t.Protocal, args[0], ip, port, duration)
 					return
 				}
-				p = fmt.Sprintf("seq %d: %s response from %s (%s) port %s [open] %v", i, t.Protocal, args[0], ip, port, duration)
-				PrintString(p)
+				printer.Printf("seq %d: %s response from %s (%s) port %s [open] %v", i, t.Protocal, args[0], ip, port, duration)
 				i++
 				if i == flags.count {
 					break

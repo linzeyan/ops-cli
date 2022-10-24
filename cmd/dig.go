@@ -215,12 +215,9 @@ func (d DigList) String() {
 		data = append(data, []string{d[i].Name, d[i].TTL, d[i].Class, d[i].Type, d[i].Record})
 	}
 
-	if rootOutputFormat == "" {
-		rootOutputFormat = "table"
-	}
 	/* tablewriter.ALIGN_LEFT */
 	printer.SetTableAlign(3)
 	printer.SetTablePadding("\t")
 	printer.SetTableFormatHeaders(true)
-	printer.Printf(rootOutputFormat, header, data)
+	printer.Printf(defaultTableFormat(), header, data)
 }

@@ -46,7 +46,11 @@ func initVersion() *cobra.Command {
 				Date:    appBuildTime,
 				Runtime: fmt.Sprintf("%s %s", runtime.Version(), PlatformS),
 			}
-			OutputInterfaceString(v)
+			if rootOutputFormat == "" {
+				v.String()
+				return
+			}
+			printer.Printf(rootOutputFormat, v)
 		},
 	}
 	return versionCmd
@@ -70,5 +74,5 @@ func (r Version) String() {
 	}
 	ver.WriteString("Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>\n")
 	ver.WriteString(fmt.Sprintf("Source available at https://github.com/%s/%s", common.RepoOwner, common.RepoName))
-	PrintString(ver.String())
+	printer.Printf(ver.String())
 }

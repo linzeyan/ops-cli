@@ -65,7 +65,7 @@ func initURL() *cobra.Command {
 					return os.WriteFile(urlFlag.output, result.([]byte), FileModeRAll)
 				}
 			}
-			PrintString(result)
+			printer.Printf(rootOutputFormat, result)
 			return err
 		},
 		Example: common.Examples(`# Get the file from URL

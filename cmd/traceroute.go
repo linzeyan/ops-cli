@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"os"
 	"time"
@@ -70,7 +69,7 @@ func initTraceroute() *cobra.Command {
 
 			conn, err := t.Listen()
 			if err != nil {
-				PrintString(err)
+				printer.Error(err)
 				return
 			}
 			if conn != nil {
@@ -80,12 +79,12 @@ func initTraceroute() *cobra.Command {
 			t.Host = args[0]
 			t.Target, err = net.ResolveIPAddr("ip4", t.Host)
 			if err != nil {
-				PrintString(err)
+				printer.Error(err)
 				return
 			}
 			reply := make([]byte, 1500)
 			if err = t.Connect(common.Context, reply); err != nil {
-				PrintString(err)
+				printer.Error(err)
 				return
 			}
 		},
@@ -129,8 +128,7 @@ func (t *Traceroute) Connect(ctx context.Context, reply []byte) error {
 	var err error
 	for i := 1; i <= t.TTL; i++ {
 		if i == 1 && !t.Record {
-			header := fmt.Sprintf("traceroute to %s (%v), %d hops max, %d byte packets", t.Host, t.Target, t.TTL, t.Size)
-			PrintString(header)
+			printer.Printf("traceroute to %s (%v), %d hops max, %d byte packets\n", t.Host, t.Target, t.TTL, t.Size)
 		}
 		t.Data.Body.(*icmp.Echo).Seq = i
 		b, err := t.Data.Marshal(nil)
@@ -201,8 +199,7 @@ func (t *Traceroute) sendPacket(hop int, b, reply []byte) (string, error) {
 	if t.Record {
 		return ip, err
 	}
-	out := fmt.Sprintf("%2d. %-16v\t%-10s\t%-10s\t%-10s", hop, ip, rtt[0], rtt[1], rtt[2])
-	PrintString(out)
+	printer.Printf("%2d. %-16v\t%-10s\t%-10s\t%-10s\n", hop, ip, rtt[0], rtt[1], rtt[2])
 	return ip, err
 }
 

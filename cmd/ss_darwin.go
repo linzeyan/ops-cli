@@ -23,7 +23,7 @@ func initSs() *cobra.Command {
 		Use:   CommandSs,
 		Short: "Displays sockets informations",
 		Run: func(_ *cobra.Command, _ []string) {
-			PrintString(NotImplemented)
+			printer.Printf(NotImplemented)
 		},
 	}
 	return ssCmd

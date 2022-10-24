@@ -130,5 +130,7 @@ func (s *Ss) GetData(inet, proto string, fn netstat.AcceptFn) [][]string {
 
 func (*Ss) String(data [][]string) {
 	header := []string{"Proto", "Local Address", "Foreign Address", "State", "PID/Program name"}
-	PrintTable(header, data, tablewriter.ALIGN_LEFT, "\t", false)
+	printer.SetTableAlign(3)
+	printer.SetTablePadding("\t")
+	printer.Printf(defaultTableFormat(), header, data)
 }

@@ -77,7 +77,7 @@ func initLINE() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		OutputDefaultNone(l.Response)
+		printer.Printf(defaultNoneFormat(), l.Response)
 		return err
 	}
 
@@ -148,20 +148,20 @@ func (l *LINE) GetID() {
 	http.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
 		events, err := l.API.ParseRequest(r)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 			os.Exit(1)
 		}
 		for i := range events {
 			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == CommandID {
 				switch s := events[i].Source; s.Type {
 				case linebot.EventSourceTypeGroup:
-					PrintString(s.GroupID)
+					printer.Printf(rootOutputFormat, s.GroupID)
 					os.Exit(0)
 				case linebot.EventSourceTypeRoom:
-					PrintString(s.RoomID)
+					printer.Printf(rootOutputFormat, s.RoomID)
 					os.Exit(0)
 				case linebot.EventSourceTypeUser:
-					PrintString(s.UserID)
+					printer.Printf(rootOutputFormat, s.UserID)
 					os.Exit(0)
 				}
 			}
@@ -179,7 +179,7 @@ func (l *LINE) GetID() {
 
 	err = server.ListenAndServe()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		PrintString("error starting server: " + err.Error())
+		printer.Printf("error starting server: %s", err)
 		os.Exit(1)
 	}
 }

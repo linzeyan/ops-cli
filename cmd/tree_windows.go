@@ -27,7 +27,7 @@ func initTree() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveFilterDirs
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			PrintString(NotImplemented)
+			printer.Printf(NotImplemented)
 		},
 	}
 	treeCmd.Flags().BoolVarP(&flags.All, "all", "a", false, "List all files")

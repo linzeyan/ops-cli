@@ -60,7 +60,7 @@ func initQrcode() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			PrintString(result)
+			printer.Printf(rootOutputFormat, result)
 			return nil
 		},
 		Example: common.Examples(`# Read QR code and print message

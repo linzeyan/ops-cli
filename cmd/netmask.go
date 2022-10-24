@@ -54,7 +54,7 @@ func initNetmask() *cobra.Command {
 			if flags.ranges {
 				for _, v := range args {
 					if err = n.Range(v); err != nil {
-						PrintString(err)
+						printer.Error(err)
 					}
 				}
 				return err
@@ -83,12 +83,12 @@ func initNetmask() *cobra.Command {
 					slice := strings.Split(v, "-")
 					if len(slice) == 2 {
 						if err = n.CIDR(slice[0], slice[1], typ); err != nil {
-							PrintString(err)
+							printer.Error(err)
 						}
 						continue
 					}
 					if err = n.Address(v, typ); err != nil {
-						PrintString(err)
+						printer.Error(err)
 					}
 				}
 			}
@@ -142,10 +142,9 @@ func (n *Netmask) Range(arg string) error {
 		return common.ErrInvalidArg
 	}
 	ones, bits := ipnet.Mask.Size()
-	out := fmt.Sprintf("%v -> %v (%d)", first, last,
+	printer.Printf("%v -> %v (%d)\n", first, last,
 		/* IP counts. */
 		big.NewInt(0).Lsh(big.NewInt(1), uint(bits-ones)))
-	PrintString(out)
 	return nil
 }
 
@@ -200,7 +199,7 @@ func (n *Netmask) Address(arg, typ string) error {
 		ip = strings.TrimRight(ip, ".")
 		mask = strings.TrimRight(mask, ".")
 	}
-	PrintString(fmt.Sprintf("%s / %s", ip, mask))
+	printer.Printf("%s / %s\n", ip, mask)
 	return err
 }
 
@@ -261,7 +260,7 @@ func (n *Netmask) CIDR(a, b, typ string) error {
 				return err
 			}
 		} else {
-			PrintString(v)
+			printer.Printf(rootOutputFormat, v)
 		}
 	}
 	return err

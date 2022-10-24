@@ -112,7 +112,7 @@ func initEncrypt() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			PrintString(out)
+			printer.Printf(rootOutputFormat, out)
 			return err
 		},
 		Example: common.Examples(`# Encrypt string

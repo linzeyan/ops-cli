@@ -65,9 +65,9 @@ type SSHKeygen struct{}
 func (*SSHKeygen) Prepare(path string) (string, string) {
 	privateKeyFile := path
 	if validator.IsFile(privateKeyFile) {
-		PrintString(privateKeyFile + " exist.")
+		printer.Printf("%s exist.\n", privateKeyFile)
 		privateKeyFile += "_new"
-		PrintString("Use " + privateKeyFile)
+		printer.Printf("Use %s\n", privateKeyFile)
 	}
 	publicKeyFile := privateKeyFile + ".pub"
 	return privateKeyFile, publicKeyFile
@@ -91,7 +91,7 @@ func (r *SSHKeygen) Generate(bit int, path string) error {
 	if err = os.WriteFile(rsaFile, []byte(privateKey), FileModeROwner); err != nil {
 		return err
 	}
-	PrintString(rsaFile + " generated")
+	printer.Printf("%s generated\n", rsaFile)
 	/* Marshal public key. */
 	pub, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
@@ -102,7 +102,7 @@ func (r *SSHKeygen) Generate(bit int, path string) error {
 	if err != nil {
 		return err
 	}
-	PrintString(pubFile + " generated")
+	printer.Printf("%s generated\n", pubFile)
 	return err
 }
 
@@ -123,6 +123,6 @@ func (*SSHKeygen) GetPub(keyFile string) error {
 	if err != nil {
 		return err
 	}
-	PrintString(ssh.MarshalAuthorizedKey(pub))
+	printer.Printf(rootOutputFormat, ssh.MarshalAuthorizedKey(pub))
 	return err
 }

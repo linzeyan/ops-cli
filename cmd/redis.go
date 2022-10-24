@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"net"
 	"strings"
 
@@ -100,11 +99,10 @@ func (r *Redis) Do(rdb *redis.Client, commands []string) error {
 	switch data := out.(type) {
 	case []any:
 		for i := 0; i < len(data); i++ {
-			p := fmt.Sprintf("%d) %s", i+1, data[i])
-			PrintString(p)
+			printer.Printf("%d) %s\n", i+1, data[i])
 		}
 	default:
-		PrintJSON(out)
+		printer.Printf(defaultJSONFormat(), out)
 	}
 	return err
 }

@@ -63,7 +63,7 @@ func (f *FileStat) String(path string) error {
 	out += fmt.Sprintf("\nModify: %s", time.Unix(s.Mtimespec.Unix()).Local().Format(time.ANSIC))
 	out += fmt.Sprintf("\nChange: %s", time.Unix(s.Ctimespec.Unix()).Local().Format(time.ANSIC))
 	out += fmt.Sprintf("\n Birth: %s", time.Unix(s.Birthtimespec.Unix()).Local().Format(time.ANSIC))
-	PrintString(out)
+	printer.Printf(rootOutputFormat, out)
 	return err
 }
 

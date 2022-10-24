@@ -65,7 +65,7 @@ func initHash() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		PrintString(out)
+		printer.Printf(rootOutputFormat, out)
 		return err
 	}
 
@@ -148,7 +148,7 @@ func (h *Hash) WriteFile(hasher hash.Hash, filename string) (string, error) {
 func (h *Hash) CheckFile(filename string) {
 	f, err := os.Open(filename)
 	if err != nil {
-		PrintString(err)
+		printer.Error(err)
 		os.Exit(1)
 	}
 	defer f.Close()
@@ -168,11 +168,11 @@ func (h *Hash) CheckFile(filename string) {
 		}
 		got, err := h.WriteFile(hasher, slice[1])
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 			continue
 		}
 		if got == slice[0] {
-			PrintString(slice[1] + ": OK")
+			printer.Printf("%s: OK", slice[1])
 		}
 		hasher.Reset()
 	}
@@ -185,12 +185,12 @@ func (h *Hash) ListAll(s string) {
 		hasher := HashAlgorithm(alg)
 		out, err := h.Hash(hasher, s)
 		if err != nil {
-			PrintString(err)
+			printer.Error(err)
 			continue
 		}
 		m[strings.ToUpper(alg)] = out
 	}
-	OutputDefaultYAML(m)
+	printer.Printf(defaultYamlFormat(), m)
 }
 
 func HashAlgorithm(alg string) hash.Hash {
