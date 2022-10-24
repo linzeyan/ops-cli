@@ -50,11 +50,11 @@ func initDig() *cobra.Command {
 			case lens == 1:
 				flags.domain = args[0]
 				if output, err = output.Request(dns.TypeA, flags.domain, flags.network, flags.server); err != nil {
-					printing.Error(err)
+					printer.Error(err)
 					return
 				}
 				if output == nil {
-					printing.Error(err)
+					printer.Error(err)
 					return
 				}
 				OutputInterfaceString(&output)
@@ -93,11 +93,11 @@ func initDig() *cobra.Command {
 			typ := dns.StringToType[strings.ToUpper(argsType[0])]
 			output, err = output.Request(typ, flags.domain, flags.network, flags.server)
 			if err != nil {
-				printing.Error(err)
+				printer.Error(err)
 				return
 			}
 			if output == nil {
-				printing.Error(err)
+				printer.Error(err)
 				return
 			}
 			output.String()
@@ -219,8 +219,8 @@ func (d DigList) String() {
 		rootOutputFormat = "table"
 	}
 	/* tablewriter.ALIGN_LEFT */
-	printing.SetTableAlign(3)
-	printing.SetTablePadding("\t")
-	printing.SetTableFormatHeaders(true)
-	printing.Printf(rootOutputFormat, header, data)
+	printer.SetTableAlign(3)
+	printer.SetTablePadding("\t")
+	printer.SetTableFormatHeaders(true)
+	printer.Printf(rootOutputFormat, header, data)
 }

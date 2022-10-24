@@ -50,7 +50,7 @@ func initDf() *cobra.Command {
 				for _, v := range partition {
 					usage, err := disk.UsageWithContext(common.Context, v.Mountpoint)
 					if err != nil {
-						printing.Error(err)
+						printer.Error(err)
 					}
 					d.ParseDevices(usage, partition)
 					data = append(data, d.OutputData())
@@ -59,7 +59,7 @@ func initDf() *cobra.Command {
 				for _, v := range args {
 					usage, err := disk.UsageWithContext(common.Context, v)
 					if err != nil {
-						printing.Error(err)
+						printer.Error(err)
 						return
 					}
 					d.ParseDevices(usage, partition)
@@ -136,7 +136,7 @@ func (d Df) String(value any) {
 		rootOutputFormat = "table"
 	}
 	/* tablewriter.ALIGN_LEFT */
-	printing.SetTableAlign(3)
-	printing.SetTablePadding(IndentTwoSpaces)
-	printing.Printf(rootOutputFormat, header, data)
+	printer.SetTableAlign(3)
+	printer.SetTablePadding(IndentTwoSpaces)
+	printer.Printf(rootOutputFormat, header, data)
 }

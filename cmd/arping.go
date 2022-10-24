@@ -44,7 +44,7 @@ func initArping() *cobra.Command {
 		},
 		Run: func(_ *cobra.Command, args []string) {
 			if !validator.IsIPv4(args[0]) {
-				printing.Error(common.ErrInvalidIP)
+				printer.Error(common.ErrInvalidIP)
 				return
 			}
 			ip := net.ParseIP(args[0])
@@ -56,19 +56,19 @@ func initArping() *cobra.Command {
 				hwAddr, _, err = arping.Ping(ip)
 			}
 			if err != nil && !errors.Is(err, arping.ErrTimeout) {
-				printing.Error(err)
+				printer.Error(err)
 				return
 			}
 
 			switch {
 			case arpingFlag.check:
 				if errors.Is(err, arping.ErrTimeout) {
-					printing.Printf(rootOutputFormat, "offline")
+					printer.Printf(rootOutputFormat, "offline")
 				} else {
-					printing.Printf(rootOutputFormat, "online")
+					printer.Printf(rootOutputFormat, "online")
 				}
 			case arpingFlag.mac:
-				printing.Printf(rootOutputFormat, hwAddr)
+				printer.Printf(rootOutputFormat, hwAddr)
 			default:
 				var duration time.Duration
 				var j int
@@ -79,17 +79,17 @@ func initArping() *cobra.Command {
 						hwAddr, duration, err = arping.Ping(ip)
 					}
 					if errors.Is(err, arping.ErrTimeout) {
-						printing.Printf("seq=%d timeout", i)
+						printer.Printf("seq=%d timeout", i)
 						j++
 						if j >= 5 {
 							break
 						}
 						continue
 					} else if err != nil {
-						printing.Error(err)
+						printer.Error(err)
 						return
 					}
-					printing.Printf("response from %s (%s): index=%d time=%s\n", ip, hwAddr, i, duration)
+					printer.Printf("response from %s (%s): index=%d time=%s\n", ip, hwAddr, i, duration)
 					time.Sleep(time.Second)
 				}
 			}

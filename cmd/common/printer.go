@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package printer
+package common
 
 import (
 	"bytes"
@@ -23,12 +23,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v3"
 )
 
-type Printer struct {
+type printer struct {
 	/* JSON and yaml args. */
 	indent int
 	/* Table args. */
@@ -37,7 +36,7 @@ type Printer struct {
 	align   int
 }
 
-func (p *Printer) Printf(format string, a ...any) {
+func (p *printer) Printf(format string, a ...any) {
 	switch format {
 	case "":
 		for _, i := range a {
@@ -58,7 +57,7 @@ func (p *Printer) Printf(format string, a ...any) {
 		p.json(a...)
 	case "table":
 		if len(a) != 2 {
-			p.Error(common.ErrInvalidArg)
+			p.Error(ErrInvalidArg)
 			return
 		}
 		/* assume a[0] is header. */
@@ -76,7 +75,7 @@ func (p *Printer) Printf(format string, a ...any) {
 			p.table(h2, d2)
 			return
 		}
-		p.Error(common.ErrInvalidArg)
+		p.Error(ErrInvalidArg)
 	case "yaml":
 		p.yaml(a...)
 	default:
@@ -84,38 +83,38 @@ func (p *Printer) Printf(format string, a ...any) {
 	}
 }
 
-func (*Printer) Error(err error) {
+func (*printer) Error(err error) {
 	fmt.Fprintln(os.Stderr, err)
 }
 
-func (p *Printer) json(a ...any) {
+func (p *printer) json(a ...any) {
 	for _, i := range a {
 		var buf bytes.Buffer
 		encoder := json.NewEncoder(&buf)
 		indent := strings.Repeat(" ", p.indent)
 		encoder.SetIndent("", indent)
 		if err := encoder.Encode(i); err != nil {
-			p.Error(common.ErrInvalidArg)
+			p.Error(ErrInvalidArg)
 			return
 		}
 		fmt.Fprintln(os.Stdout, buf.String())
 	}
 }
 
-func (p *Printer) yaml(a ...any) {
+func (p *printer) yaml(a ...any) {
 	for _, i := range a {
 		var buf bytes.Buffer
 		encoder := yaml.NewEncoder(&buf)
 		encoder.SetIndent(p.indent)
 		if err := encoder.Encode(i); err != nil {
-			p.Error(common.ErrInvalidArg)
+			p.Error(ErrInvalidArg)
 			return
 		}
 		fmt.Fprintln(os.Stdout, buf.String())
 	}
 }
 
-func (p *Printer) table(header []string, data [][]string) {
+func (p *printer) table(header []string, data [][]string) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader(header)
 	table.AppendBulk(data)
@@ -136,13 +135,13 @@ func (p *Printer) table(header []string, data [][]string) {
 	table.Render()
 }
 
-func (p *Printer) SetIdent(indent int)               { p.indent = indent }
-func (p *Printer) SetTableAlign(align int)           { p.align = align }
-func (p *Printer) SetTablePadding(padding string)    { p.padding = padding }
-func (p *Printer) SetTableFormatHeaders(format bool) { p.headers = format }
+func (p *printer) SetIdent(indent int)               { p.indent = indent }
+func (p *printer) SetTableAlign(align int)           { p.align = align }
+func (p *printer) SetTablePadding(padding string)    { p.padding = padding }
+func (p *printer) SetTableFormatHeaders(format bool) { p.headers = format }
 
-func NewPrinter() *Printer {
-	return &Printer{
+func NewPrinter() *printer {
+	return &printer{
 		indent: 2,
 	}
 }

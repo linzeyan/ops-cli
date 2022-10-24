@@ -57,15 +57,15 @@ func initCert() *cobra.Command {
 			case validator.IsDomain(input) || validator.IsIPv4(input):
 				resp, err = resp.CheckHost(net.JoinHostPort(input, flags.port))
 			default:
-				printing.Error(common.ErrInvalidArg)
+				printer.Error(common.ErrInvalidArg)
 				return
 			}
 			if err != nil {
-				printing.Error(err)
+				printer.Error(err)
 				return
 			}
 			if resp == nil {
-				printing.Error(common.ErrResponse)
+				printer.Error(common.ErrResponse)
 				return
 			}
 			switch {
@@ -73,17 +73,17 @@ func initCert() *cobra.Command {
 				if rootOutputFormat == "" {
 					rootOutputFormat = CommandJSON
 				}
-				printing.Printf(rootOutputFormat, resp)
+				printer.Printf(rootOutputFormat, resp)
 			case flags.ip:
-				printing.Printf(rootOutputFormat, resp.ServerIP)
+				printer.Printf(rootOutputFormat, resp.ServerIP)
 			case flags.dns:
-				printing.Printf(rootOutputFormat, resp.DNS)
+				printer.Printf(rootOutputFormat, resp.DNS)
 			case flags.expiry:
-				printing.Printf(rootOutputFormat, resp.ExpiryTime)
+				printer.Printf(rootOutputFormat, resp.ExpiryTime)
 			case flags.issuer:
-				printing.Printf(rootOutputFormat, resp.Issuer)
+				printer.Printf(rootOutputFormat, resp.Issuer)
 			case flags.days:
-				printing.Printf(rootOutputFormat, resp.Days)
+				printer.Printf(rootOutputFormat, resp.Days)
 			}
 		},
 		Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer

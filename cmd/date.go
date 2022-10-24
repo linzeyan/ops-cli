@@ -76,7 +76,7 @@ Time zone:
 			case flags.timezone != "":
 				z, err := time.LoadLocation(flags.timezone)
 				if err != nil {
-					printing.Error(err)
+					printer.Error(err)
 					return
 				}
 				t = common.TimeNow.In(z)
@@ -89,7 +89,7 @@ Time zone:
 				}
 				r, err := strconv.ParseInt(flags.reference, 10, 64)
 				if err != nil {
-					printing.Error(err)
+					printer.Error(err)
 					return
 				}
 				t = time.Unix(r, 0)
@@ -98,31 +98,31 @@ Time zone:
 			/* Print format. */
 			switch {
 			case flags.date:
-				printing.Printf(rootOutputFormat, t.Format("2006-01-02"))
+				printer.Printf(rootOutputFormat, t.Format("2006-01-02"))
 			case flags.time:
-				printing.Printf(rootOutputFormat, t.Format("15:04:05"))
+				printer.Printf(rootOutputFormat, t.Format("15:04:05"))
 			case flags.seconds:
-				printing.Printf(rootOutputFormat, t.Unix())
+				printer.Printf(rootOutputFormat, t.Unix())
 			case flags.milliseconds:
-				printing.Printf(rootOutputFormat, t.UnixMilli())
+				printer.Printf(rootOutputFormat, t.UnixMilli())
 			case flags.microseconds:
-				printing.Printf(rootOutputFormat, t.UnixMicro())
+				printer.Printf(rootOutputFormat, t.UnixMicro())
 			case flags.nanoseconds:
-				printing.Printf(rootOutputFormat, t.UnixNano())
+				printer.Printf(rootOutputFormat, t.UnixNano())
 			case flags.week:
 				_, w := t.ISOWeek()
-				printing.Printf(rootOutputFormat, w)
+				printer.Printf(rootOutputFormat, w)
 			case flags.weekDay:
-				printing.Printf(rootOutputFormat, int(t.Weekday()))
+				printer.Printf(rootOutputFormat, int(t.Weekday()))
 			case flags.zone:
 				z, o := t.Zone()
-				printing.Printf("%s(%d)", z, o/60/60)
+				printer.Printf("%s(%d)", z, o/60/60)
 
 			/* default */
 			case flags.format == "":
-				printing.Printf(rootOutputFormat, t.Format("2006-01-02T15:04:05-07:00"))
+				printer.Printf(rootOutputFormat, t.Format("2006-01-02T15:04:05-07:00"))
 			case flags.format != "":
-				printing.Printf(rootOutputFormat, t.Format(flags.format))
+				printer.Printf(rootOutputFormat, t.Format(flags.format))
 			}
 		},
 	}
