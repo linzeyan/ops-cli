@@ -46,7 +46,7 @@ func (p *Printer) Printf(format string, a ...any) {
 			case []string, map[string]string:
 				p.json(data)
 			case error:
-				fmt.Fprintln(os.Stderr, data)
+				p.Error(data)
 			default:
 				fmt.Fprintf(os.Stdout, "%v", data)
 			}
@@ -55,7 +55,7 @@ func (p *Printer) Printf(format string, a ...any) {
 		p.json(a...)
 	case "table":
 		if len(a) != 2 {
-			fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
+			p.Error(common.ErrInvalidArg)
 			return
 		}
 		/* assume a[0] is header. */
@@ -73,7 +73,7 @@ func (p *Printer) Printf(format string, a ...any) {
 			p.table(h2, d2)
 			return
 		}
-		fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
+		p.Error(common.ErrInvalidArg)
 	case "yaml":
 		p.yaml(a...)
 	default:
@@ -81,26 +81,30 @@ func (p *Printer) Printf(format string, a ...any) {
 	}
 }
 
-func (*Printer) json(a ...any) {
+func (*Printer) Error(err error) {
+	fmt.Fprintln(os.Stderr, err)
+}
+
+func (p *Printer) json(a ...any) {
 	for _, i := range a {
 		var buf bytes.Buffer
 		encoder := json.NewEncoder(&buf)
 		encoder.SetIndent("", "  ")
 		if err := encoder.Encode(i); err != nil {
-			fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
+			p.Error(common.ErrInvalidArg)
 			return
 		}
 		fmt.Fprintln(os.Stdout, buf.String())
 	}
 }
 
-func (*Printer) yaml(a ...any) {
+func (p *Printer) yaml(a ...any) {
 	for _, i := range a {
 		var buf bytes.Buffer
 		encoder := yaml.NewEncoder(&buf)
 		encoder.SetIndent(2)
 		if err := encoder.Encode(i); err != nil {
-			fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
+			p.Error(common.ErrInvalidArg)
 			return
 		}
 		fmt.Fprintln(os.Stdout, buf.String())
