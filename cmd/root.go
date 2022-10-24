@@ -29,7 +29,7 @@ import (
 )
 
 var RootCmd = root()
-var p = printer.NewPrinter()
+var printing = printer.NewPrinter()
 
 /* Flags. */
 var (

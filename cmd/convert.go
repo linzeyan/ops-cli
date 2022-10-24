@@ -47,7 +47,7 @@ func initConvert() *cobra.Command {
 		Short:     "Convert data format, support csv, json, toml, xml, yaml",
 		Run: func(_ *cobra.Command, args []string) {
 			if !validator.IsFile(flags.inFile) {
-				p.Printf(rootOutputFormat, common.ErrInvalidFlag)
+				printing.Printf(rootOutputFormat, common.ErrInvalidFlag)
 				return
 			}
 			slice := strings.Split(args[0], "2")
@@ -59,7 +59,7 @@ func initConvert() *cobra.Command {
 			}
 			node, err := dasel.NewFromFile(flags.inFile, inType)
 			if err != nil {
-				p.Printf(rootOutputFormat, err)
+				printing.Printf(rootOutputFormat, err)
 				return
 			}
 			err = node.WriteToFile(
@@ -69,7 +69,7 @@ func initConvert() *cobra.Command {
 					storage.PrettyPrintOption(true),
 				})
 			if err != nil {
-				p.Printf(rootOutputFormat, err)
+				printing.Printf(rootOutputFormat, err)
 				return
 			}
 		},

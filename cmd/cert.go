@@ -70,17 +70,17 @@ func initCert() *cobra.Command {
 				if rootOutputFormat == "" {
 					rootOutputFormat = CommandJSON
 				}
-				p.Printf(rootOutputFormat, resp)
+				printing.Printf(rootOutputFormat, resp)
 			case flags.ip:
-				p.Printf(rootOutputFormat, resp.ServerIP)
+				printing.Printf(rootOutputFormat, resp.ServerIP)
 			case flags.dns:
-				p.Printf(rootOutputFormat, resp.DNS)
+				printing.Printf(rootOutputFormat, resp.DNS)
 			case flags.expiry:
-				p.Printf(rootOutputFormat, resp.ExpiryTime)
+				printing.Printf(rootOutputFormat, resp.ExpiryTime)
 			case flags.issuer:
-				p.Printf(rootOutputFormat, resp.Issuer)
+				printing.Printf(rootOutputFormat, resp.Issuer)
 			case flags.days:
-				p.Printf(rootOutputFormat, resp.Days)
+				printing.Printf(rootOutputFormat, resp.Days)
 			}
 			return err
 		},
