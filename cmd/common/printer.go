@@ -55,6 +55,7 @@ func (p *printer) Printf(format string, a ...any) {
 		}
 	case "json":
 		p.json(a...)
+	case "none":
 	case "table":
 		if len(a) != 2 {
 			p.Error(ErrInvalidArg)
