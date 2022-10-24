@@ -21,7 +21,6 @@ package cmd
 import (
 	"github.com/cakturk/go-netstat/netstat"
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
