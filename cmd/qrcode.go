@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -53,7 +52,7 @@ func initQrcode() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Short: "Read QR code and print message",
 		RunE: func(_ *cobra.Command, args []string) error {
-			if !validator.IsFile(args[0]) {
+			if !common.IsFile(args[0]) {
 				return common.ErrInvalidArg
 			}
 			result, err := common.ReadQRCode(args[0])

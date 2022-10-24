@@ -20,7 +20,6 @@ import (
 	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +38,7 @@ func initURL() *cobra.Command {
 		Short: "Get url content or expand shorten url or download",
 		RunE: func(_ *cobra.Command, args []string) error {
 			url := args[0]
-			if !validator.IsURL(url) {
+			if !common.IsURL(url) {
 				return common.ErrInvalidURL
 			}
 			var err error

@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/miekg/dns"
 	"github.com/spf13/cobra"
 )
@@ -62,7 +61,7 @@ func initDig() *cobra.Command {
 			case lens > 1:
 				/* Find which arg is domain. */
 				for i := range args {
-					if validator.IsDomain(args[i]) || validator.IsIP(args[i]) {
+					if common.IsDomain(args[i]) || common.IsIP(args[i]) {
 						flags.domain = args[i]
 						argsWithoutDomain = append(argsWithoutDomain, args[:i]...)
 						argsWithoutDomain = append(argsWithoutDomain, args[i+1:]...)
@@ -132,7 +131,7 @@ type Dig struct {
 type DigList []Dig
 
 func (d *DigList) GetLocalServer() (string, error) {
-	if validator.IsWindows() {
+	if common.IsWindows() {
 		return "1.1.1.1", nil
 	}
 	const resolvConfig = "/etc/resolv.conf"

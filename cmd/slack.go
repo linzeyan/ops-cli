@@ -27,7 +27,6 @@ import (
 	"path/filepath"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/slack-go/slack"
 	"github.com/spf13/cobra"
 )
@@ -128,9 +127,9 @@ func (s *Slack) Photo(channel, arg string) error {
 	var base64Image string
 	var err error
 	switch {
-	case validator.IsFile(arg):
+	case common.IsFile(arg):
 		base64Image, err = s.localFile(arg)
-	case validator.IsURL(arg):
+	case common.IsURL(arg):
 		base64Image, err = s.remoteFile(arg)
 	}
 	if err != nil {

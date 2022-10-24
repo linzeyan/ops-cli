@@ -31,7 +31,6 @@ import (
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -100,7 +99,7 @@ func (r *repository) fetchLatestVersion(username, repo string) *repository {
 	}
 	tag := path.Base(tagURL)
 	var extension string
-	if validator.IsWindows() {
+	if common.IsWindows() {
 		extension = "zip"
 		r.ExtractFunc = r.UnZip
 	} else {

@@ -22,7 +22,6 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -35,7 +34,7 @@ func initWsping() *cobra.Command {
 			return []string{"ws://", "wss://"}, cobra.ShellCompDirectiveNoSpace
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			if !validator.IsURL(args[0]) {
+			if !common.IsURL(args[0]) {
 				printer.Error(common.ErrInvalidURL)
 				return
 			}

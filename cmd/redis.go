@@ -22,7 +22,6 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -66,7 +65,7 @@ func initRedis() *cobra.Command {
 type Redis struct{}
 
 func (r *Redis) Connection(host, port, user, pass string, db int) *redis.Client {
-	if validator.IsIP(host) || validator.IsDomain(host) {
+	if common.IsIP(host) || common.IsDomain(host) {
 		return redis.NewClient(&redis.Options{
 			Username: user,
 			Password: pass,

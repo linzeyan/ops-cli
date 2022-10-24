@@ -25,7 +25,6 @@ import (
 
 	"github.com/j-keck/arping"
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +42,7 @@ func initArping() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			if !validator.IsIPv4(args[0]) {
+			if !common.IsIPv4(args[0]) {
 				printer.Error(common.ErrInvalidIP)
 				return
 			}

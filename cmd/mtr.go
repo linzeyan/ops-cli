@@ -32,7 +32,6 @@ import (
 	"github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
@@ -54,7 +53,7 @@ func initMTR() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(_ *cobra.Command, args []string) error {
-			if !validator.IsDomain(args[0]) && !validator.IsIP(args[0]) {
+			if !common.IsDomain(args[0]) && !common.IsIP(args[0]) {
 				return common.ErrInvalidArg
 			}
 

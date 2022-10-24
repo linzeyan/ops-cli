@@ -21,7 +21,6 @@ import (
 
 	tgBot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -257,9 +256,9 @@ func (t *Telegram) GetUpdate() {
 
 func (t *Telegram) parseFile(s string) tgBot.RequestFileData {
 	switch {
-	case validator.IsFile(s):
+	case common.IsFile(s):
 		return tgBot.FilePath(s)
-	case validator.IsURL(s):
+	case common.IsURL(s):
 		return tgBot.FileURL(s)
 	}
 	return nil

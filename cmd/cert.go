@@ -31,7 +31,6 @@ import (
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -52,9 +51,9 @@ func initCert() *cobra.Command {
 			input := args[0]
 			resp := new(Cert)
 			switch {
-			case validator.IsFile(input):
+			case common.IsFile(input):
 				resp, err = resp.CheckFile(input)
-			case validator.IsDomain(input) || validator.IsIPv4(input):
+			case common.IsDomain(input) || common.IsIPv4(input):
 				resp, err = resp.CheckHost(net.JoinHostPort(input, flags.port))
 			default:
 				printer.Error(common.ErrInvalidArg)

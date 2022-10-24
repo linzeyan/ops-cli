@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -86,7 +85,7 @@ type GeoIP struct {
 
 func (GeoIP) Request(ip string) (*GeoIP, error) {
 	/* Valid IP */
-	if !validator.IsIP(ip) {
+	if !common.IsIP(ip) {
 		return nil, common.ErrInvalidIP
 	}
 	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", ip)
@@ -109,7 +108,7 @@ func (GeoIPList) Request(inputs []string) (*GeoIPList, error) {
 	/* Valid IP and combine args */
 	for i := range inputs {
 		switch {
-		case validator.IsIP(inputs[i]):
+		case common.IsIP(inputs[i]):
 			ips += fmt.Sprintf(`"%s", `, inputs[i])
 		default:
 			ip, err := net.LookupIP(inputs[i])

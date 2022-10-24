@@ -26,7 +26,6 @@ import (
 	"golang.org/x/crypto/ssh"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -64,7 +63,7 @@ type SSHKeygen struct{}
 /* Prepare checks file exist or not, and return files name. */
 func (*SSHKeygen) Prepare(path string) (string, string) {
 	privateKeyFile := path
-	if validator.IsFile(privateKeyFile) {
+	if common.IsFile(privateKeyFile) {
 		printer.Printf("%s exist.\n", privateKeyFile)
 		privateKeyFile += "_new"
 		printer.Printf("Use %s\n", privateKeyFile)

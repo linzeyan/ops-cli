@@ -28,7 +28,6 @@ import (
 	"os"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -77,7 +76,7 @@ func initEncode() *cobra.Command {
 		var err error
 		var out string
 		var data any
-		switch validator.IsFile(args[0]) {
+		switch common.IsFile(args[0]) {
 		case true:
 			data, err = os.ReadFile(args[0])
 			if err != nil {

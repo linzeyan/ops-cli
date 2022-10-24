@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 )
 
 const (
@@ -20,7 +19,7 @@ const (
 var binaryCommand = "../" + common.RepoName
 
 func TestMain(m *testing.M) {
-	if validator.IsWindows() {
+	if common.IsWindows() {
 		binaryCommand += ".exe"
 	}
 	cmd := exec.Command(mainCommand, "build", "-trimpath", "-ldflags", "-s -w", "-o", binaryCommand, mainGo)

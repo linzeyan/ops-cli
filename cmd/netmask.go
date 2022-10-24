@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -156,12 +155,12 @@ func (n *Netmask) Address(arg, typ string) error {
 	var err error
 	ipnet := new(net.IPNet)
 	switch {
-	case !validator.IsIP(arg) && validator.IsCIDR(arg):
+	case !common.IsIP(arg) && common.IsCIDR(arg):
 		_, ipnet, err = net.ParseCIDR(arg)
-	case validator.IsIP(arg) && !validator.IsCIDR(arg):
-		if validator.IsIPv4(arg) {
+	case common.IsIP(arg) && !common.IsCIDR(arg):
+		if common.IsIPv4(arg) {
 			_, ipnet, err = net.ParseCIDR(arg + ipv4Len)
-		} else if validator.IsIPv6(arg) {
+		} else if common.IsIPv6(arg) {
 			_, ipnet, err = net.ParseCIDR(arg + ipv6Len)
 		}
 	default:
@@ -222,8 +221,8 @@ func (n *Netmask) iterate(ipa, ipb netip.Addr) (string, string) {
 
 func (n *Netmask) CIDR(a, b, typ string) error {
 	var err error
-	if (!validator.IsIPv4(a) && !validator.IsIPv4(b)) &&
-		(!validator.IsIPv6(a) && !validator.IsIPv6(b)) {
+	if (!common.IsIPv4(a) && !common.IsIPv4(b)) &&
+		(!common.IsIPv6(a) && !common.IsIPv6(b)) {
 		return common.ErrInvalidArg
 	}
 

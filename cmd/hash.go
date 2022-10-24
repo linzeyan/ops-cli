@@ -28,7 +28,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 )
 
@@ -117,7 +116,7 @@ func (h *Hash) Hash(hasher hash.Hash, i any) (string, error) {
 	var err error
 	switch data := i.(type) {
 	case string:
-		if validator.IsFile(data) {
+		if common.IsFile(data) {
 			return h.WriteFile(hasher, data)
 		}
 		_, err = hasher.Write([]byte(data))

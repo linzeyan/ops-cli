@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/spf13/cobra"
 	"github.com/tomwright/dasel"
 	"github.com/tomwright/dasel/storage"
@@ -46,7 +45,7 @@ func initConvert() *cobra.Command {
 		ValidArgs: validArg,
 		Short:     "Convert data format, support csv, json, toml, xml, yaml",
 		Run: func(_ *cobra.Command, args []string) {
-			if !validator.IsFile(flags.inFile) {
+			if !common.IsFile(flags.inFile) {
 				printer.Error(common.ErrInvalidFlag)
 				return
 			}

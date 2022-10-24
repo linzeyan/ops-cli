@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/linzeyan/ops-cli/cmd/validator"
+	"github.com/linzeyan/ops-cli/cmd/common"
 )
 
 func TestValidatorDomain(t *testing.T) {
@@ -21,7 +21,7 @@ func TestValidatorDomain(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(fmt.Sprintf("%s", testCases[i].input), func(t *testing.T) {
-			if got := validator.IsDomain(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsDomain(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -37,11 +37,11 @@ func TestValidatorFile(t *testing.T) {
 		{"../vendor", true},
 		{"command.json", false},
 		{"root_test.go", true},
-		{"/dev/null", !validator.IsWindows()},
+		{"/dev/null", !common.IsWindows()},
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := validator.IsFile(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsFile(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -61,7 +61,7 @@ func TestValidatorIP(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := validator.IsIP(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsIP(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -82,7 +82,7 @@ func TestValidatorIPCIDR(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := validator.IsCIDR(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsCIDR(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -102,7 +102,7 @@ func TestValidatorIPv4(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := validator.IsIPv4(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsIPv4(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -123,7 +123,7 @@ func TestValidatorIPv4CIDR(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := validator.IsIPv4CIDR(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsIPv4CIDR(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -143,7 +143,7 @@ func TestValidatorIPv6(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := validator.IsIPv6(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsIPv6(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -163,7 +163,7 @@ func TestValidatorIPv6CIDR(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := validator.IsIPv6CIDR(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsIPv6CIDR(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})
@@ -186,7 +186,7 @@ func TestValidatorUrl(t *testing.T) {
 	}
 	for i := range testCases {
 		t.Run(testCases[i].input, func(t *testing.T) {
-			if got := validator.IsURL(testCases[i].input); got != testCases[i].expected {
+			if got := common.IsURL(testCases[i].input); got != testCases[i].expected {
 				t.Errorf("Expected %t, got %t", testCases[i].expected, got)
 			}
 		})

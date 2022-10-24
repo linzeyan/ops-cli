@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/shirou/gopsutil/v3/net"
 
 	"github.com/spf13/cobra"
@@ -96,12 +95,12 @@ func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat)
 
 		var addr string
 		for _, a := range v.Addrs {
-			if validator.IsIPv4CIDR(a.Addr) {
+			if common.IsIPv4CIDR(a.Addr) {
 				addr += fmt.Sprintf("%s\n\tinet %s", addr, a.Addr)
 			}
 		}
 		for _, a := range v.Addrs {
-			if validator.IsIPv6CIDR(a.Addr) {
+			if common.IsIPv6CIDR(a.Addr) {
 				addr += fmt.Sprintf("\n\tinet6 %s", a.Addr)
 			}
 		}

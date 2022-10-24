@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/linzeyan/ops-cli/cmd"
-	"github.com/linzeyan/ops-cli/cmd/validator"
+	"github.com/linzeyan/ops-cli/cmd/common"
 )
 
 func TestDfBinary(t *testing.T) {
-	if validator.IsDarwin() {
+	if common.IsDarwin() {
 		return
 	}
 	const subCommand = cmd.CommandDf
