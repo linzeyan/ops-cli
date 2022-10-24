@@ -43,50 +43,67 @@ func (p *Printer) Printf(format string, a ...any) {
 				fmt.Fprintf(os.Stdout, "%s", data)
 			case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 				fmt.Fprintf(os.Stdout, "%d", data)
+			case []string, map[string]string:
+				p.json(data)
+			case error:
+				fmt.Fprintln(os.Stderr, data)
 			default:
 				fmt.Fprintf(os.Stdout, "%v", data)
 			}
 		}
 	case "json":
-		for _, i := range a {
-			var buf bytes.Buffer
-			encoder := json.NewEncoder(&buf)
-			encoder.SetIndent("", "  ")
-			if err := encoder.Encode(i); err != nil {
-				fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
-				return
-			}
-			fmt.Fprintln(os.Stdout, buf.String())
-		}
+		p.json(a...)
 	case "table":
 		if len(a) != 2 {
 			fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
 			return
 		}
-		header, ok := a[0].([]string)
-		if !ok {
-			fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
+		/* assume a[0] is header. */
+		h1, ok1 := a[0].([]string)
+		d1, ok2 := a[1].([][]string)
+		if ok1 && ok2 {
+			p.table(h1, d1)
 			return
 		}
-		data, ok := a[1].([][]string)
-		if !ok {
-			fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
+
+		/* assume a[1] is header. */
+		h2, ok3 := a[1].([]string)
+		d2, ok4 := a[0].([][]string)
+		if ok3 && ok4 {
+			p.table(h2, d2)
 			return
 		}
-		p.table(header, data)
+		fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
 	case "yaml":
-		for _, i := range a {
-			var buf bytes.Buffer
-			encoder := yaml.NewEncoder(&buf)
-			encoder.SetIndent(2)
-			if err := encoder.Encode(i); err != nil {
-				fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
-				return
-			}
-			fmt.Fprintln(os.Stdout, buf.String())
-		}
+		p.yaml(a...)
 	default:
 		fmt.Fprintf(os.Stdout, format, a...)
+	}
+}
+
+func (*Printer) json(a ...any) {
+	for _, i := range a {
+		var buf bytes.Buffer
+		encoder := json.NewEncoder(&buf)
+		encoder.SetIndent("", "  ")
+		if err := encoder.Encode(i); err != nil {
+			fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
+			return
+		}
+		fmt.Fprintln(os.Stdout, buf.String())
+	}
+}
+
+func (*Printer) yaml(a ...any) {
+	for _, i := range a {
+		var buf bytes.Buffer
+		encoder := yaml.NewEncoder(&buf)
+		encoder.SetIndent(2)
+		if err := encoder.Encode(i); err != nil {
+			fmt.Fprintln(os.Stderr, common.ErrInvalidArg)
+			return
+		}
+		fmt.Fprintln(os.Stdout, buf.String())
 	}
 }
 
