@@ -92,16 +92,16 @@ func TestEncode(t *testing.T) {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase32Hex, testHost}, "CTNMUPRCCKN66RRD\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase32Std, testHost}, "M5XW6Z3MMUXGG33N\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase64Std, testHost}, "Z29vZ2xlLmNvbQ==\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase64URL, testHost}, "Z29vZ2xlLmNvbQ==\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandHex, testHost}, "676f6f676c652e636f6d\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase32Hex, "-d", "ALQLICHPEH636KHJ"}, "UuY29tL3R3\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase32Std, "-d", "JBGTMTDZHEZWI==="}, "HM6Ly93d\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase64Std, "-d", "aWxsZWdhbA=="}, "illegal\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase64URL, "-d", "aHR0cHM6Ly9naXRodWIuY29t"}, "https://github.com\n"},
-		{[]string{runCommand, mainGo, subCommand, cmd.CommandHex, "-d", "64617461"}, "data\n"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase32Hex, testHost}, "CTNMUPRCCKN66RRD"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase32Std, testHost}, "M5XW6Z3MMUXGG33N"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase64Std, testHost}, "Z29vZ2xlLmNvbQ=="},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase64URL, testHost}, "Z29vZ2xlLmNvbQ=="},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandHex, testHost}, "676f6f676c652e636f6d"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase32Hex, "-d", "ALQLICHPEH636KHJ"}, "UuY29tL3R3"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase32Std, "-d", "JBGTMTDZHEZWI==="}, "HM6Ly93d"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase64Std, "-d", "aWxsZWdhbA=="}, "illegal"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandBase64URL, "-d", "aHR0cHM6Ly9naXRodWIuY29t"}, "https://github.com"},
+		{[]string{runCommand, mainGo, subCommand, cmd.CommandHex, "-d", "64617461"}, "data"},
 	}
 
 	for i := range testCases {

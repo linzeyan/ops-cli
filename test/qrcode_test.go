@@ -39,9 +39,9 @@ func TestQrcodeRead(t *testing.T) {
 		input    []string
 		expected string
 	}{
-		{[]string{runCommand, mainGo, subCommand, "read", "assets/example.png"}, "WIFI:S:your_wifi_ssid;T:WPA;P:your_password;;\n"},
-		{[]string{runCommand, mainGo, subCommand, "read", files[2]}, "otpauth://totp/aws:my@gmail.com?secret=fqowefilkjfoqwie&issuer=aws&period=30&algorithm=SHA1&digits=6\n"},
-		{[]string{runCommand, mainGo, subCommand, "read", files[0]}, "https://www.google.com\n"},
+		{[]string{runCommand, mainGo, subCommand, "read", "assets/example.png"}, "WIFI:S:your_wifi_ssid;T:WPA;P:your_password;;"},
+		{[]string{runCommand, mainGo, subCommand, "read", files[2]}, "otpauth://totp/aws:my@gmail.com?secret=fqowefilkjfoqwie&issuer=aws&period=30&algorithm=SHA1&digits=6"},
+		{[]string{runCommand, mainGo, subCommand, "read", files[0]}, "https://www.google.com"},
 	}
 
 	for i := range testCases {
