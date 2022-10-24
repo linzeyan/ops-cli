@@ -20,7 +20,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"net"
 	"time"
 
@@ -88,8 +87,7 @@ func initArping() *cobra.Command {
 						p.Printf(rootOutputFormat, err)
 						return
 					}
-					out := fmt.Sprintf("response from %s (%s): index=%d time=%s\n", ip, hwAddr, i, duration)
-					p.Printf(rootOutputFormat, out)
+					p.Printf("response from %s (%s): index=%d time=%s\n", ip, hwAddr, i, duration)
 					time.Sleep(time.Second)
 				}
 			}
