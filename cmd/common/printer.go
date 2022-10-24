@@ -53,10 +53,10 @@ func (p *printer) Printf(format string, a ...any) {
 				fmt.Fprintf(os.Stdout, "%v", data)
 			}
 		}
-	case "json":
+	case JSONFormat:
 		p.json(a...)
-	case "none":
-	case "table":
+	case NoneFormat:
+	case TableFormat:
 		if len(a) != 2 {
 			p.Error(ErrInvalidArg)
 			return
@@ -77,7 +77,7 @@ func (p *printer) Printf(format string, a ...any) {
 			return
 		}
 		p.Error(ErrInvalidArg)
-	case "yaml":
+	case YamlFormat:
 		p.yaml(a...)
 	default:
 		fmt.Fprintf(os.Stdout, format, a...)
@@ -143,28 +143,28 @@ func (p *printer) SetTableFormatHeaders(format bool) { p.headers = format }
 
 func (*printer) SetJSONAsDefaultFormat(format string) string {
 	if format == "" {
-		return "json"
+		return JSONFormat
 	}
 	return format
 }
 
 func (*printer) SetNoneAsDefaultFormat(format string) string {
 	if format == "" {
-		return "none"
+		return NoneFormat
 	}
 	return format
 }
 
 func (*printer) SetTableAsDefaultFormat(format string) string {
 	if format == "" {
-		return "table"
+		return TableFormat
 	}
 	return format
 }
 
 func (*printer) SetYamlAsDefaultFormat(format string) string {
 	if format == "" {
-		return "yaml"
+		return YamlFormat
 	}
 	return format
 }

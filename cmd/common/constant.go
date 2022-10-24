@@ -29,6 +29,13 @@ const (
 )
 
 const (
+	JSONFormat  = "json"
+	NoneFormat  = "none"
+	TableFormat = "table"
+	YamlFormat  = "yaml"
+)
+
+const (
 	RepoOwner = "linzeyan"
 	RepoName  = "ops-cli"
 
