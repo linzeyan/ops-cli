@@ -260,7 +260,7 @@ func (n *Netmask) CIDR(a, b, typ string) error {
 				return err
 			}
 		} else {
-			printer.Printf(rootOutputFormat, v)
+			printer.Printf(v)
 		}
 	}
 	return err

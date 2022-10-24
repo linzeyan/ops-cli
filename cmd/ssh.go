@@ -123,6 +123,6 @@ func (*SSHKeygen) GetPub(keyFile string) error {
 	if err != nil {
 		return err
 	}
-	printer.Printf(rootOutputFormat, ssh.MarshalAuthorizedKey(pub))
+	printer.Printf("%s", ssh.MarshalAuthorizedKey(pub))
 	return err
 }

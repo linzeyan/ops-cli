@@ -49,7 +49,7 @@ func initWhois() *cobra.Command {
 				return err
 			}
 			if flags.expiry {
-				printer.Printf(rootOutputFormat, w.ExpiresDate)
+				printer.Printf(w.ExpiresDate)
 				return err
 			}
 			if flags.ns {
@@ -57,11 +57,11 @@ func initWhois() *cobra.Command {
 				return err
 			}
 			if flags.registrar {
-				printer.Printf(rootOutputFormat, w.Registrar)
+				printer.Printf(w.Registrar)
 				return err
 			}
 			if flags.days {
-				printer.Printf(rootOutputFormat, w.RemainDays)
+				printer.Printf("%d", w.RemainDays)
 				return err
 			}
 			if rootOutputFormat == "" {

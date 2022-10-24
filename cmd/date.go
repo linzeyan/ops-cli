@@ -98,31 +98,31 @@ Time zone:
 			/* Print format. */
 			switch {
 			case flags.date:
-				printer.Printf(rootOutputFormat, t.Format("2006-01-02"))
+				printer.Printf(t.Format("2006-01-02"))
 			case flags.time:
-				printer.Printf(rootOutputFormat, t.Format("15:04:05"))
+				printer.Printf(t.Format("15:04:05"))
 			case flags.seconds:
-				printer.Printf(rootOutputFormat, t.Unix())
+				printer.Printf("%d", t.Unix())
 			case flags.milliseconds:
-				printer.Printf(rootOutputFormat, t.UnixMilli())
+				printer.Printf("%d", t.UnixMilli())
 			case flags.microseconds:
-				printer.Printf(rootOutputFormat, t.UnixMicro())
+				printer.Printf("%d", t.UnixMicro())
 			case flags.nanoseconds:
-				printer.Printf(rootOutputFormat, t.UnixNano())
+				printer.Printf("%d", t.UnixNano())
 			case flags.week:
 				_, w := t.ISOWeek()
-				printer.Printf(rootOutputFormat, w)
+				printer.Printf("%d", w)
 			case flags.weekDay:
-				printer.Printf(rootOutputFormat, int(t.Weekday()))
+				printer.Printf("%d", t.Weekday())
 			case flags.zone:
 				z, o := t.Zone()
 				printer.Printf("%s(%d)", z, o/60/60)
 
 			/* default */
 			case flags.format == "":
-				printer.Printf(rootOutputFormat, t.Format("2006-01-02T15:04:05-07:00"))
+				printer.Printf(t.Format("2006-01-02T15:04:05-07:00"))
 			case flags.format != "":
-				printer.Printf(rootOutputFormat, t.Format(flags.format))
+				printer.Printf(t.Format(flags.format))
 			}
 		},
 	}

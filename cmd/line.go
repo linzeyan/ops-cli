@@ -155,13 +155,13 @@ func (l *LINE) GetID() {
 			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == CommandID {
 				switch s := events[i].Source; s.Type {
 				case linebot.EventSourceTypeGroup:
-					printer.Printf(rootOutputFormat, s.GroupID)
+					printer.Printf(s.GroupID)
 					os.Exit(0)
 				case linebot.EventSourceTypeRoom:
-					printer.Printf(rootOutputFormat, s.RoomID)
+					printer.Printf(s.RoomID)
 					os.Exit(0)
 				case linebot.EventSourceTypeUser:
-					printer.Printf(rootOutputFormat, s.UserID)
+					printer.Printf(s.UserID)
 					os.Exit(0)
 				}
 			}

@@ -63,9 +63,9 @@ func initArping() *cobra.Command {
 			switch {
 			case arpingFlag.check:
 				if errors.Is(err, arping.ErrTimeout) {
-					printer.Printf(rootOutputFormat, "offline")
+					printer.Printf("offline")
 				} else {
-					printer.Printf(rootOutputFormat, "online")
+					printer.Printf("online")
 				}
 			case arpingFlag.mac:
 				printer.Printf(rootOutputFormat, hwAddr)

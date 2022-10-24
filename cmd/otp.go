@@ -73,7 +73,7 @@ func initOTP() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		printer.Printf(rootOutputFormat, result)
+		printer.Printf(result)
 		return err
 	}
 

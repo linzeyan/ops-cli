@@ -60,15 +60,15 @@ func initRandom() *cobra.Command {
 			encode, _ := Encoder.PemEncode(b)
 			re := regexp.MustCompile("-.*-\n")
 			out := re.ReplaceAllString(encode, "")
-			printer.Printf(rootOutputFormat, out)
+			printer.Printf(out)
 			return
 		case CommandHex:
 			b := Randoms.Rand(flags.length)
 			out, _ := Encoder.HexEncode(b)
-			printer.Printf(rootOutputFormat, out)
+			printer.Printf(out)
 			return
 		}
-		printer.Printf(rootOutputFormat, out)
+		printer.Printf("%s", out)
 	}
 
 	var randomCmd = &cobra.Command{

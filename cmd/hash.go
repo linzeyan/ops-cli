@@ -65,7 +65,7 @@ func initHash() *cobra.Command {
 		if err != nil {
 			return err
 		}
-		printer.Printf(rootOutputFormat, out)
+		printer.Printf(out)
 		return err
 	}
 

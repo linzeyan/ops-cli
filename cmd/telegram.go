@@ -248,7 +248,7 @@ func (t *Telegram) GetUpdate() {
 	for update := range updates {
 		if update.Message != nil { // If we got a message
 			if update.Message.Text == CommandID {
-				printer.Printf(rootOutputFormat, update.Message.Chat.ID)
+				printer.Printf("%d", update.Message.Chat.ID)
 				break
 			}
 		}

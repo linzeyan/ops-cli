@@ -66,7 +66,7 @@ func initEncode() *cobra.Command {
 			printer.Error(err)
 			return
 		}
-		printer.Printf(rootOutputFormat, out)
+		printer.Printf("%s", out)
 	}
 
 	run := func(cmd *cobra.Command, args []string) {
@@ -103,7 +103,7 @@ func initEncode() *cobra.Command {
 			printer.Error(err)
 			return
 		}
-		printer.Printf(rootOutputFormat, out)
+		printer.Printf(out)
 	}
 
 	var encodeSubCmdBase32Hex = &cobra.Command{

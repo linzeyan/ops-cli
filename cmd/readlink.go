@@ -47,7 +47,7 @@ func initReadlink() *cobra.Command {
 					}
 					temp = out
 				}
-				printer.Printf(rootOutputFormat, out)
+				printer.Printf(out)
 			}
 		},
 	}

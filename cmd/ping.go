@@ -212,7 +212,7 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 		out = "Destination Unreachable\n"
 	}
 	p.statistics(duration)
-	printer.Printf(rootOutputFormat, out)
+	printer.Printf(out)
 }
 
 func (p *Ping) Connect(c context.Context, host string) {
@@ -308,7 +308,7 @@ func (p *Ping) summary(host string, t time.Duration) {
 	out += fmt.Sprintf("%d packets transmitted, %d received, %.1f%% packet loss, time %vms\n",
 		p.stat.Send, p.stat.Receive, float64(p.stat.Loss*100)/float64(p.stat.Send), t.Milliseconds())
 	if p.stat.Send == p.stat.Loss {
-		printer.Printf(rootOutputFormat, out)
+		printer.Printf(out)
 		return
 	}
 
@@ -320,5 +320,5 @@ func (p *Ping) summary(host string, t time.Duration) {
 	variance := temp / float64(len(p.stat.Rtts))
 	out += fmt.Sprintf("round-trip min/avg/max/mdev = %v/%v/%v/%v\n",
 		p.stat.Min, avg, p.stat.Max, time.Duration(math.Sqrt(variance)))
-	printer.Printf(rootOutputFormat, out)
+	printer.Printf(out)
 }
