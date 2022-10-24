@@ -17,7 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -77,7 +76,7 @@ Time zone:
 			case flags.timezone != "":
 				z, err := time.LoadLocation(flags.timezone)
 				if err != nil {
-					PrintString(err)
+					printing.Error(err)
 					return
 				}
 				t = common.TimeNow.In(z)
@@ -90,7 +89,7 @@ Time zone:
 				}
 				r, err := strconv.ParseInt(flags.reference, 10, 64)
 				if err != nil {
-					PrintString(err)
+					printing.Error(err)
 					return
 				}
 				t = time.Unix(r, 0)
@@ -99,29 +98,31 @@ Time zone:
 			/* Print format. */
 			switch {
 			case flags.date:
-				PrintString(t.Format("2006-01-02"))
+				printing.Printf(rootOutputFormat, t.Format("2006-01-02"))
 			case flags.time:
-				PrintString(t.Format("15:04:05"))
+				printing.Printf(rootOutputFormat, t.Format("15:04:05"))
 			case flags.seconds:
-				PrintString(t.Unix())
+				printing.Printf(rootOutputFormat, t.Unix())
 			case flags.milliseconds:
-				PrintString(t.UnixMilli())
+				printing.Printf(rootOutputFormat, t.UnixMilli())
 			case flags.microseconds:
-				PrintString(t.UnixMicro())
+				printing.Printf(rootOutputFormat, t.UnixMicro())
 			case flags.nanoseconds:
-				PrintString(t.UnixNano())
+				printing.Printf(rootOutputFormat, t.UnixNano())
 			case flags.week:
 				_, w := t.ISOWeek()
-				PrintString(w)
+				printing.Printf(rootOutputFormat, w)
 			case flags.weekDay:
-				PrintString(int(t.Weekday()))
+				printing.Printf(rootOutputFormat, int(t.Weekday()))
 			case flags.zone:
 				z, o := t.Zone()
-				PrintString(fmt.Sprintf("%s(%d)", z, o/60/60))
+				printing.Printf("%s(%d)", z, o/60/60)
+
+			/* default */
 			case flags.format == "":
-				PrintString(t.Format("2006-01-02T15:04:05-07:00"))
+				printing.Printf(rootOutputFormat, t.Format("2006-01-02T15:04:05-07:00"))
 			case flags.format != "":
-				PrintString(t.Format(flags.format))
+				printing.Printf(rootOutputFormat, t.Format(flags.format))
 			}
 		},
 	}

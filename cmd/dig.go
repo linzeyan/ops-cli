@@ -25,7 +25,6 @@ import (
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/linzeyan/ops-cli/cmd/validator"
 	"github.com/miekg/dns"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 )
 
@@ -42,7 +41,7 @@ func initDig() *cobra.Command {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			var err error
 			var output DigList
 			var argsWithoutDomain []string
@@ -51,13 +50,15 @@ func initDig() *cobra.Command {
 			case lens == 1:
 				flags.domain = args[0]
 				if output, err = output.Request(dns.TypeA, flags.domain, flags.network, flags.server); err != nil {
-					return err
+					printing.Error(err)
+					return
 				}
 				if output == nil {
-					return err
+					printing.Error(err)
+					return
 				}
 				OutputInterfaceString(&output)
-				return nil
+				return
 			case lens > 1:
 				/* Find which arg is domain. */
 				for i := range args {
@@ -92,13 +93,14 @@ func initDig() *cobra.Command {
 			typ := dns.StringToType[strings.ToUpper(argsType[0])]
 			output, err = output.Request(typ, flags.domain, flags.network, flags.server)
 			if err != nil {
-				return err
+				printing.Error(err)
+				return
 			}
 			if output == nil {
-				return err
+				printing.Error(err)
+				return
 			}
-			OutputInterfaceString(output)
-			return err
+			output.String()
 		},
 		Example: common.Examples(`# Query A record
 google.com
@@ -120,11 +122,11 @@ google.com ANY
 }
 
 type Dig struct {
-	NAME   string `json:"name" yaml:"name"`
+	Name   string `json:"name" yaml:"name"`
 	TTL    string `json:"ttl" yaml:"ttl"`
-	CLASS  string `json:"class" yaml:"class"`
-	TYPE   string `json:"type" yaml:"type"`
-	RECORD string `json:"record" yaml:"record"`
+	Class  string `json:"class" yaml:"class"`
+	Type   string `json:"type" yaml:"type"`
+	Record string `json:"record" yaml:"record"`
 }
 
 type DigList []Dig
@@ -174,11 +176,11 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 		elements := strings.Fields(fmt.Sprintf("%s ", resp.Answer[i]))
 		if len(elements) == 5 {
 			out = Dig{
-				NAME:   elements[0],
+				Name:   elements[0],
 				TTL:    elements[1],
-				CLASS:  elements[2],
-				TYPE:   elements[3],
-				RECORD: elements[4],
+				Class:  elements[2],
+				Type:   elements[3],
+				Record: elements[4],
 			}
 		} else if len(elements) > 5 {
 			var remain string
@@ -188,11 +190,11 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 			}
 
 			out = Dig{
-				NAME:   elements[0],
+				Name:   elements[0],
 				TTL:    elements[1],
-				CLASS:  elements[2],
-				TYPE:   elements[3],
-				RECORD: remain,
+				Class:  elements[2],
+				Type:   elements[3],
+				Record: remain,
 			}
 		}
 		*d = append(*d, out)
@@ -210,7 +212,15 @@ func (d DigList) String() {
 	}
 	var data [][]string
 	for i := range d {
-		data = append(data, []string{d[i].NAME, d[i].TTL, d[i].CLASS, d[i].TYPE, d[i].RECORD})
+		data = append(data, []string{d[i].Name, d[i].TTL, d[i].Class, d[i].Type, d[i].Record})
 	}
-	PrintTable(header, data, tablewriter.ALIGN_LEFT, "\t", true)
+
+	if rootOutputFormat == "" {
+		rootOutputFormat = "table"
+	}
+	/* tablewriter.ALIGN_LEFT */
+	printing.SetTableAlign(3)
+	printing.SetTablePadding("\t")
+	printing.SetTableFormatHeaders(true)
+	printing.Printf(rootOutputFormat, header, data)
 }

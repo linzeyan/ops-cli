@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
-	"github.com/olekukonko/tablewriter"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/spf13/cobra"
 )
@@ -43,8 +42,7 @@ func initDf() *cobra.Command {
 		Short:     "Display free disk spaces",
 		ValidArgs: validArgs,
 		Args:      cobra.OnlyValidArgs,
-		RunE: func(_ *cobra.Command, args []string) error {
-			var err error
+		Run: func(_ *cobra.Command, args []string) {
 			var d Df
 			var data [][]string
 			switch {
@@ -52,7 +50,7 @@ func initDf() *cobra.Command {
 				for _, v := range partition {
 					usage, err := disk.UsageWithContext(common.Context, v.Mountpoint)
 					if err != nil {
-						return err
+						printing.Error(err)
 					}
 					d.ParseDevices(usage, partition)
 					data = append(data, d.OutputData())
@@ -61,14 +59,14 @@ func initDf() *cobra.Command {
 				for _, v := range args {
 					usage, err := disk.UsageWithContext(common.Context, v)
 					if err != nil {
-						return err
+						printing.Error(err)
+						return
 					}
 					d.ParseDevices(usage, partition)
 					data = append(data, d.OutputData())
 				}
 			}
 			d.String(data)
-			return err
 		},
 	}
 	return dfCmd
@@ -134,5 +132,11 @@ func (d Df) String(value any) {
 	case [][]string:
 		data = i
 	}
-	PrintTable(header, data, tablewriter.ALIGN_LEFT, IndentTwoSpaces, false)
+	if rootOutputFormat == "" {
+		rootOutputFormat = "table"
+	}
+	/* tablewriter.ALIGN_LEFT */
+	printing.SetTableAlign(3)
+	printing.SetTablePadding(IndentTwoSpaces)
+	printing.Printf(rootOutputFormat, header, data)
 }
