@@ -54,12 +54,12 @@ func TestWhoisRegistrar(t *testing.T) {
 		expected string
 	}{
 		{
-			[]string{runCommand, mainGo, subCommand, "godaddy.com\n", "--registrar"},
-			"GoDaddy.com",
+			[]string{runCommand, mainGo, subCommand, "godaddy.com", "--registrar"},
+			"GoDaddy.com\n",
 		},
 		{
-			[]string{runCommand, mainGo, subCommand, "cloudflare.com\n", "--registrar"},
-			"CloudFlare",
+			[]string{runCommand, mainGo, subCommand, "cloudflare.com", "--registrar"},
+			"CloudFlare\n",
 		},
 	}
 
