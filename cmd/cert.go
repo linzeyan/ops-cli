@@ -67,20 +67,26 @@ func initCert() *cobra.Command {
 				printer.Error(common.ErrResponse)
 				return
 			}
-			switch {
-			default:
-				printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), resp)
-			case flags.ip:
-				printer.Printf(resp.ServerIP)
-			case flags.dns:
-				printer.Printf(rootOutputFormat, resp.DNS)
-			case flags.expiry:
-				printer.Printf(resp.ExpiryTime)
-			case flags.issuer:
-				printer.Printf(resp.Issuer)
-			case flags.days:
-				printer.Printf("%d", resp.Days)
+
+			if flags.ip {
+				printer.Printf("%s\n", resp.ServerIP)
 			}
+			if flags.dns {
+				printer.Printf(rootOutputFormat, resp.DNS)
+			}
+			if flags.expiry {
+				printer.Printf("%s\n", resp.ExpiryTime)
+			}
+			if flags.issuer {
+				printer.Printf("%s\n", resp.Issuer)
+			}
+			if flags.days {
+				printer.Printf("%d\n", resp.Days)
+			}
+			if flags.ip || flags.dns || flags.expiry || flags.issuer || flags.days {
+				return
+			}
+			printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), resp)
 		},
 		Example: common.Examples(`# Print certificate expiration time, DNS, IP and issuer
 www.google.com
