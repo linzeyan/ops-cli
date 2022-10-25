@@ -15,9 +15,8 @@ func TestTreeBinary(t *testing.T) {
 		}
 	})
 	args := [][]string{
-		{subCommand, "-l", "1"},
-		{subCommand, "-l", "2"},
-		{subCommand, "-m"},
+		{subCommand, "-L", "1"},
+		{subCommand, "-L", "2"},
 		{subCommand, "-p"},
 		{subCommand, "-u"},
 		{subCommand, "-g"},
