@@ -18,7 +18,7 @@ package common
 
 const (
 	_            = iota
-	KiB ByteSize = 1 << (10 * iota)
+	KiB byteSize = 1 << (10 * iota)
 	MiB
 	GiB
 	TiB

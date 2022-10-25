@@ -18,9 +18,9 @@ package common
 
 import "fmt"
 
-type ByteSize float64
+type byteSize float64
 
-func (b ByteSize) String() string {
+func (b byteSize) String() string {
 	switch {
 	case b >= YiB:
 		return fmt.Sprintf("%.2fYiB", b/YiB)
@@ -45,29 +45,29 @@ func (b ByteSize) String() string {
 func ToByte(i any) string {
 	switch n := i.(type) {
 	case int:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case int8:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case int16:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case int32:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case int64:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case uint:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case uint8:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case uint16:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case uint32:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case uint64:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case float32:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	case float64:
-		return ByteSize(n).String()
+		return byteSize(n).String()
 	default:
 		return ""
 	}
