@@ -7,6 +7,10 @@ github.com/Masterminds/semver/v3
 # github.com/Masterminds/sprig/v3 v3.2.2
 ## explicit; go 1.13
 github.com/Masterminds/sprig/v3
+# github.com/a8m/tree v0.0.0-20210414114729-ce3525c5c2ef
+## explicit
+github.com/a8m/tree
+github.com/a8m/tree/ostree
 # github.com/alecthomas/chroma v0.10.0
 ## explicit; go 1.13
 github.com/alecthomas/chroma

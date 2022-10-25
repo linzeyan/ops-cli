@@ -20,20 +20,16 @@ package cmd
 
 import (
 	"fmt"
-	"io/fs"
 	"os"
-	"os/user"
-	"path/filepath"
-	"strings"
-	"syscall"
-	"time"
 
+	"github.com/a8m/tree"
+	"github.com/a8m/tree/ostree"
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
 )
 
 func initTree() *cobra.Command {
-	var flags TreeOptions
+	var flags _treeflags
 	var treeCmd = &cobra.Command{
 		Use:   CommandTree,
 		Short: "Show the contents of the giving directory as a tree",
@@ -41,265 +37,167 @@ func initTree() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveFilterDirs
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			if flags.Limit < 1 {
+			if flags.level < 1 {
 				printer.Error(common.ErrInvalidArg)
 				return
 			}
 			if len(args) == 0 {
 				args = append(args, ".")
 			}
-			var t Tree
-			t.Walk(args, &flags)
+
+			var nd, nf int
+			var outFile = os.Stdout
+			var err error
+			/* Output to file. */
+			if flags.output != "" {
+				outFile, err = os.Create(flags.output)
+				if err != nil {
+					printer.Error(err)
+					return
+				}
+				defer outFile.Close()
+			}
+			/* Check sort-type. */
+			if flags.sort != "" {
+				switch flags.sort {
+				case "version", "mtime", "ctime", "name", "size":
+				default:
+					printer.Printf("sort type '%s' not valid, should be one of: name,version,size,mtime,ctime", flags.sort)
+					return
+				}
+			}
+
+			opts := &tree.Options{
+				Fs:      new(ostree.FS),
+				OutFile: outFile,
+
+				All:        flags.all,
+				DirsOnly:   flags.dirs,
+				FullPath:   flags.full,
+				DeepLevel:  flags.level,
+				FollowLink: flags.links,
+				Pattern:    flags.pattern,
+				IPattern:   flags.ignore,
+				IgnoreCase: flags.ignoreCase,
+
+				ByteSize: flags.size,
+				UnitSize: flags.human,
+				FileMode: flags.protect,
+				ShowUid:  flags.uid,
+				ShowGid:  flags.gid,
+				LastMod:  flags.date,
+				Quotes:   flags.quote,
+				Inodes:   flags.inodes,
+				Device:   flags.device,
+
+				NoSort:    flags.unsort,
+				ReverSort: flags.reverse,
+				DirSort:   flags.dirsFirst,
+				VerSort:   flags.version || flags.sort == "version",
+				ModSort:   flags.modify || flags.sort == "mtime",
+				CTimeSort: flags.change || flags.sort == "ctime",
+				NameSort:  flags.sort == "name",
+				SizeSort:  flags.sort == "size",
+
+				NoIndent: flags.indent,
+				Colorize: flags.color,
+			}
+
+			for _, dir := range args {
+				inf := tree.New(dir)
+				d, f := inf.Visit(opts)
+				nd, nf = nd+d, nf+f
+				inf.Print(opts)
+				if !flags.noReport {
+					footer := "\n%d "
+					switch {
+					default:
+						footer += "directories"
+					case nd == 1:
+						footer += "directory"
+					}
+
+					footer = fmt.Sprintf(footer, nd)
+					if !flags.dirs {
+						switch {
+						default:
+							footer += ", %d files\n"
+						case nf == 1:
+							footer += ", %d file\n"
+						}
+						footer = fmt.Sprintf(footer, nf)
+					}
+					fmt.Fprint(outFile, footer)
+				}
+			}
 		},
 	}
-	treeCmd.Flags().BoolVarP(&flags.All, "all", "a", false, common.Usage("List all files"))
-	treeCmd.Flags().BoolVarP(&flags.Change, "change", "c", false, common.Usage("Print the date of last modification"))
-	treeCmd.Flags().BoolVarP(&flags.Dirs, "dirs", "d", false, common.Usage("List only directories"))
-	treeCmd.Flags().BoolVarP(&flags.Full, "full", "f", false, common.Usage("Print full path for each file"))
-	treeCmd.Flags().BoolVarP(&flags.Perm, "perm", "p", false, common.Usage("Print file permission"))
-	treeCmd.Flags().BoolVarP(&flags.Mode, "mode", "m", false, common.Usage("Print file mode"))
-	treeCmd.Flags().BoolVarP(&flags.Size, "size", "s", false, common.Usage("Print the size for each file"))
-	treeCmd.Flags().IntVarP(&flags.Limit, "limit", "l", 30, common.Usage("Specify directories depth"))
-	treeCmd.Flags().BoolVarP(&flags.GID, "gid", "g", false, common.Usage("Print group owner for each file"))
-	treeCmd.Flags().BoolVarP(&flags.UID, "uid", "u", false, common.Usage("Print owner for each file"))
-	treeCmd.Flags().BoolVarP(&flags.Links, "links", "", false, common.Usage("Print links for each file"))
-	treeCmd.Flags().BoolVarP(&flags.Inodes, "inodes", "", false, common.Usage("Print inode number for each file"))
-	treeCmd.Flags().BoolVarP(&flags.Device, "device", "", false, common.Usage("Print device ID number for each file"))
+	treeCmd.Flags().BoolVarP(&flags.all, "all", "a", false, common.Usage("List all files"))
+	treeCmd.Flags().BoolVarP(&flags.dirs, "dirs", "d", false, common.Usage("List only directories"))
+	treeCmd.Flags().BoolVarP(&flags.links, "links", "l", false, common.Usage("Follow symbolic links"))
+	treeCmd.Flags().BoolVarP(&flags.full, "full", "f", false, common.Usage("Print full path for each file"))
+	treeCmd.Flags().IntVarP(&flags.level, "level", "L", 3, common.Usage("Specify directory depth"))
+	treeCmd.Flags().BoolVar(&flags.ignoreCase, "ignore-case", false, common.Usage("Ignore case when pattern matching"))
+	treeCmd.Flags().BoolVar(&flags.noReport, "noreport", false, common.Usage("Disable file/directory count"))
+	treeCmd.Flags().StringVarP(&flags.pattern, "pattern", "P", "", common.Usage("List only match the pattern given"))
+	treeCmd.Flags().StringVarP(&flags.ignore, "ignore", "I", "", common.Usage("Do not list that match the given pattern"))
+	treeCmd.Flags().StringVarP(&flags.output, "outputfile", "o", "", common.Usage("Output to file instead of stdout"))
+
+	treeCmd.Flags().BoolVarP(&flags.quote, "quote", "Q", false, common.Usage("Quote filenames with double quotes"))
+	treeCmd.Flags().BoolVarP(&flags.protect, "protect", "p", false, common.Usage("Print the protections for each file"))
+	treeCmd.Flags().BoolVarP(&flags.uid, "uid", "u", false, common.Usage("Displays file owner or UID number"))
+	treeCmd.Flags().BoolVarP(&flags.gid, "gid", "g", false, common.Usage("Displays file group owner or GID number"))
+	treeCmd.Flags().BoolVarP(&flags.size, "size", "s", false, common.Usage("Print the size in bytes of each file"))
+	treeCmd.Flags().BoolVarP(&flags.human, "human", "h", false, common.Usage("Print the size in a more human readable way"))
+	treeCmd.Flags().BoolVarP(&flags.date, "date", "D", false, common.Usage("Print the date of last modification or (-c) status change"))
+	treeCmd.Flags().BoolVar(&flags.inodes, "inodes", false, common.Usage("Print inode number of each file"))
+	treeCmd.Flags().BoolVar(&flags.device, "device", false, common.Usage("Print device ID number to which each file belongs"))
+
+	treeCmd.Flags().BoolVarP(&flags.version, "version", "v", false, common.Usage("Sort files alphanumerically by version"))
+	treeCmd.Flags().BoolVarP(&flags.modify, "modify", "t", false, common.Usage("Sort files by last modification time"))
+	treeCmd.Flags().BoolVarP(&flags.change, "change", "c", false, common.Usage("Sort files by last status change time"))
+	treeCmd.Flags().BoolVarP(&flags.unsort, "unsort", "U", false, common.Usage("Leave files unsorted"))
+	treeCmd.Flags().BoolVarP(&flags.reverse, "reverse", "r", false, common.Usage("Reverse the order of the sort"))
+	treeCmd.Flags().BoolVar(&flags.dirsFirst, "dirsfirst", false, common.Usage("List directories before files (-U disables)"))
+	treeCmd.Flags().StringVar(&flags.sort, "sort", "", common.Usage("Select sort: name,version,size,mtime,ctime"))
+
+	treeCmd.Flags().BoolVarP(&flags.indent, "indent", "i", false, common.Usage("Don't print indentation lines"))
+	treeCmd.Flags().BoolVarP(&flags.color, "color", "C", false, common.Usage("Turn colorization on always"))
+
 	return treeCmd
 }
 
-type TreeOptions struct {
-	All    bool
-	Change bool
-	Dirs   bool
-	Full   bool
-	Limit  int
-	Perm   bool
-	Mode   bool
-	Size   bool
-	UID    bool
-	GID    bool
-	Inodes bool
-	Device bool
-	Links  bool
-}
-
-type Tree struct {
-	Type     string  `json:"type"`
-	Path     string  `json:"path"`
-	Name     string  `json:"name"`
-	Perm     string  `json:"perm"`
-	Mode     string  `json:"mode"`
-	Links    string  `json:"links"`
-	UID      string  `json:"uid"`
-	GID      string  `json:"gid"`
-	Size     string  `json:"size"`
-	ModTime  string  `json:"modTime"`
-	Inode    string  `json:"inode"`
-	Devide   string  `json:"device"`
-	Contents *[]Tree `json:"contents"`
-
-	layers      int
-	dirN, fileN int
-	stat        FileStat
-}
-
-func (t *Tree) Walk(args []string, opt *TreeOptions) {
-	for _, v := range args {
-		dirName, err := filepath.Abs(v)
-		if err != nil {
-			printer.Error(err)
-			return
-		}
-		f, err := os.Lstat(dirName)
-		if err != nil {
-			printer.Error(err)
-
-			return
-		}
-		uid, gid, links, inode, device, err := t.getInfo(f)
-		if err != nil {
-			printer.Error(err)
-
-			return
-		}
-		*t = Tree{
-			Type:     t.stat.FileType(f),
-			Path:     dirName,
-			Name:     v,
-			Perm:     fmt.Sprintf("%#o", f.Mode().Perm()),
-			Mode:     f.Mode().String(),
-			Size:     common.ByteSize(f.Size()),
-			ModTime:  f.ModTime().Format(time.ANSIC),
-			UID:      uid,
-			GID:      gid,
-			Links:    links,
-			Inode:    inode,
-			Devide:   device,
-			Contents: new([]Tree),
-			layers:   1,
-		}
-
-		err = t.iterate(t, opt)
-		if err != nil {
-			printer.Error(err)
-
-			return
-		}
-		t.print("", *t, opt)
-		t.summary()
-	}
-}
-
-/* getInfo returns uid, gid, inodes, device and error. */
-func (t *Tree) getInfo(fileinfo fs.FileInfo) (string, string, string, string, string, error) {
-	s, ok := fileinfo.Sys().(*syscall.Stat_t)
-	if !ok {
-		return "", "", "0", "", "", common.ErrResponse
-	}
-	uid, err := user.LookupId(fmt.Sprintf(`%d`, s.Uid))
-	if err != nil {
-		return "", "", "0", "", "", err
-	}
-	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, s.Gid))
-	if err != nil {
-		return "", "", "0", "", "", err
-	}
-	return uid.Username, gid.Name,
-		fmt.Sprintf("%d", s.Nlink),
-		fmt.Sprintf("%d", s.Ino),
-		fmt.Sprintf("%d", s.Dev), err
-}
-
-func (t *Tree) iterate(trees *Tree, opt *TreeOptions) error {
-	files, err := os.ReadDir(trees.Path)
-	if err != nil {
-		return err
-	}
-
-	for _, f := range files {
-		if !opt.All {
-			if strings.HasPrefix(f.Name(), ".") {
-				continue
-			}
-		}
-		if opt.Dirs {
-			if !f.IsDir() {
-				continue
-			}
-		}
-		fi, err := f.Info()
-		if err != nil {
-			return err
-		}
-		uid, gid, links, inode, device, err := t.getInfo(fi)
-		if err != nil {
-			return err
-		}
-		temp := &Tree{
-			Type:     t.stat.FileType(fi),
-			Path:     filepath.Join(trees.Path, f.Name()),
-			Name:     f.Name(),
-			Perm:     fmt.Sprintf("%#o", fi.Mode().Perm()),
-			Mode:     fi.Mode().String(),
-			Size:     common.ByteSize(fi.Size()),
-			ModTime:  fi.ModTime().Format(time.ANSIC),
-			Links:    links,
-			UID:      uid,
-			GID:      gid,
-			Inode:    inode,
-			Devide:   device,
-			Contents: &[]Tree{},
-			layers:   trees.layers + 1,
-		}
-
-		if trees.layers > opt.Limit {
-			continue
-		}
-
-		if f.IsDir() {
-			t.dirN++
-			*trees.Contents = append(*trees.Contents, *temp)
-			err = t.iterate(temp, opt)
-			if err != nil {
-				return err
-			}
-		} else {
-			t.fileN++
-			*trees.Contents = append(*trees.Contents, *temp)
-		}
-	}
-	return err
-}
-
-func (t *Tree) print(prefix string, output Tree, opt *TreeOptions) {
-	if rootOutputFormat != "" {
-		printer.Printf(rootOutputFormat, output)
-		return
-	}
-	var p []string
-	if opt.Mode {
-		p = append(p, output.Mode)
-	}
-	if opt.Perm {
-		p = append(p, output.Perm)
-	}
-	if opt.Links {
-		p = append(p, output.Links)
-	}
-	if opt.UID {
-		p = append(p, output.UID)
-	}
-	if opt.GID {
-		p = append(p, output.GID)
-	}
-	if opt.Size {
-		p = append(p, output.Size)
-	}
-	if opt.Change {
-		p = append(p, output.ModTime)
-	}
-	if opt.Inodes {
-		p = append(p, output.Inode)
-	}
-	if opt.Device {
-		p = append(p, output.Devide)
-	}
-	if len(p) != 0 {
-		fmt.Printf("%v ", p)
-	}
-
-	if opt.Full {
-		printer.Printf("%s\n", output.Path)
-	} else {
-		printer.Printf("%s\n", output.Name)
-	}
-
-	for i, v := range *output.Contents {
-		if i == len(*output.Contents)-1 {
-			printer.Printf("%s%s", prefix, treePerfixEnd)
-			t.print(prefix+treePerfixEmpty, v, opt)
-		} else {
-			printer.Printf("%s%s", prefix, treePerfixFile)
-			t.print(prefix+treePerfixLayer, v, opt)
-		}
-	}
-}
-
-func (t *Tree) summary() {
-	out := "\n%d "
-	switch {
-	default:
-		out += "directories"
-	case t.dirN == 1:
-		out += "directory"
-	}
-	switch {
-	default:
-		out += ", %d files\n"
-	case t.fileN == 1:
-		out += ", %d file\n"
-	}
-	printer.Printf(out, t.dirN, t.fileN)
-	t.dirN, t.fileN = 0, 0
+type _treeflags struct {
+	/* Listing options. */
+	all        bool
+	dirs       bool
+	links      bool
+	full       bool
+	level      int
+	ignoreCase bool
+	noReport   bool
+	pattern    string
+	ignore     string
+	output     string
+	/* File options. */
+	quote   bool
+	protect bool
+	uid     bool
+	gid     bool
+	size    bool
+	human   bool
+	date    bool
+	inodes  bool
+	device  bool
+	/* Sorting options. */
+	version   bool
+	modify    bool
+	change    bool
+	unsort    bool
+	reverse   bool
+	dirsFirst bool
+	sort      string
+	/* Graphics options. */
+	indent bool
+	color  bool
 }

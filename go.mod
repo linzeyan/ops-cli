@@ -3,6 +3,7 @@ module github.com/linzeyan/ops-cli
 go 1.18
 
 require (
+	github.com/a8m/tree v0.0.0-20210414114729-ce3525c5c2ef
 	github.com/bwmarrin/discordgo v0.25.0
 	github.com/cakturk/go-netstat v0.0.0-20200220111822-e5b49efee7a5
 	github.com/fatih/color v1.13.0
