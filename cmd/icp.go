@@ -30,6 +30,10 @@ func initICP() *cobra.Command {
 	var flags struct {
 		Account string `json:"account"`
 		Key     string `json:"api_key"`
+
+		domain bool
+		code   bool
+		status bool
 	}
 	var icpCmd = &cobra.Command{
 		Use:  CommandICP + " domain",
@@ -52,6 +56,18 @@ func initICP() *cobra.Command {
 			if err := i.Request(flags.Account, flags.Key, args[0]); err != nil {
 				return err
 			}
+			if flags.domain {
+				printer.Printf("%s\n", i.DomainName)
+			}
+			if flags.code {
+				printer.Printf("%s\n", i.ICPCode)
+			}
+			if flags.status {
+				printer.Printf("%s\n", i.ICPStatus)
+			}
+			if flags.code || flags.domain || flags.status {
+				return nil
+			}
 			printer.Printf(printer.SetYamlAsDefaultFormat(rootOutputFormat), i)
 			return nil
 		},
@@ -61,6 +77,9 @@ func initICP() *cobra.Command {
 
 	icpCmd.Flags().StringVarP(&flags.Account, "account", "a", "", common.Usage("Enter the WEST account"))
 	icpCmd.Flags().StringVarP(&flags.Key, "key", "k", "", common.Usage("Enter the WEST api key"))
+	icpCmd.Flags().BoolVarP(&flags.domain, "domain", "d", false, common.Usage("Print domain"))
+	icpCmd.Flags().BoolVarP(&flags.code, "code", "c", false, common.Usage("Print ICP SerialNumber"))
+	icpCmd.Flags().BoolVarP(&flags.status, "status", "s", false, common.Usage("Print ICP status"))
 	icpCmd.MarkFlagsRequiredTogether("account", "key")
 	return icpCmd
 }
