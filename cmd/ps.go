@@ -319,5 +319,9 @@ func (*Ps) String(header []string, data [][]string) {
 	printer.SetTableAlign(3)
 	printer.SetTablePadding(IndentTwoSpaces)
 	printer.SetTableFormatHeaders(true)
+	if rootOutputFormat != "" && rootOutputFormat != common.TableFormat {
+		printer.Printf(rootOutputFormat, data)
+		return
+	}
 	printer.Printf(printer.SetTableAsDefaultFormat(rootOutputFormat), header, data)
 }

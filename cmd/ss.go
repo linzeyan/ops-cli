@@ -131,5 +131,9 @@ func (*Ss) String(data [][]string) {
 	header := []string{"Proto", "Local Address", "Foreign Address", "State", "PID/Program name"}
 	printer.SetTableAlign(3)
 	printer.SetTablePadding("\t")
+	if rootOutputFormat != "" && rootOutputFormat != common.TableFormat {
+		printer.Printf(rootOutputFormat, data)
+		return
+	}
 	printer.Printf(printer.SetTableAsDefaultFormat(rootOutputFormat), header, data)
 }

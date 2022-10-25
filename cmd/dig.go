@@ -56,6 +56,10 @@ func initDig() *cobra.Command {
 					printer.Error(err)
 					return
 				}
+				if rootOutputFormat != "" && rootOutputFormat != common.TableFormat {
+					printer.Printf(rootOutputFormat, output)
+					return
+				}
 				output.String()
 				return
 			case lens > 1:
@@ -97,6 +101,10 @@ func initDig() *cobra.Command {
 			}
 			if output == nil {
 				printer.Error(err)
+				return
+			}
+			if rootOutputFormat != "" && rootOutputFormat != common.TableFormat {
+				printer.Printf(rootOutputFormat, output)
 				return
 			}
 			output.String()
