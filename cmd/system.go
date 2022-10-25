@@ -151,9 +151,9 @@ func (s *System) DiskUsage() (any, error) {
 	}{
 		Path:        info.Path,
 		FsType:      info.Fstype,
-		Total:       common.ByteSize(info.Total).String(),
-		Free:        common.ByteSize(info.Free).String(),
-		Used:        common.ByteSize(info.Used).String(),
+		Total:       common.ToByte(info.Total),
+		Free:        common.ToByte(info.Free),
+		Used:        common.ToByte(info.Used),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
 	return &resp, err
@@ -211,10 +211,10 @@ func (s *System) MemUsage() (any, error) {
 	resp := struct {
 		Total, Available, Free, Used, UsedPercent string
 	}{
-		Total:       common.ByteSize(info.Total).String(),
-		Available:   common.ByteSize(info.Available).String(),
-		Free:        common.ByteSize(info.Free).String(),
-		Used:        common.ByteSize(info.Used).String(),
+		Total:       common.ToByte(info.Total),
+		Available:   common.ToByte(info.Available),
+		Free:        common.ToByte(info.Free),
+		Used:        common.ToByte(info.Used),
 		UsedPercent: fmt.Sprintf("%0.2f%%", info.UsedPercent),
 	}
 	return &resp, err

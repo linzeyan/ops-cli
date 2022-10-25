@@ -81,17 +81,17 @@ func (f *Free) Output() error {
 	var data [][]string
 	data = append(data, []string{
 		"Mem: ",
-		common.ByteSize(memory.Total).String(),
-		common.ByteSize(memory.Used).String(),
-		common.ByteSize(memory.Free).String(),
-		common.ByteSize(memory.Available).String(),
+		common.ToByte(memory.Total),
+		common.ToByte(memory.Used),
+		common.ToByte(memory.Free),
+		common.ToByte(memory.Available),
 		fmt.Sprintf("%.2f%%", memory.UsedPercent),
 	})
 	data = append(data, []string{
 		"Swap:",
-		common.ByteSize(swap.Total).String(),
-		common.ByteSize(swap.Used).String(),
-		common.ByteSize(swap.Free).String(),
+		common.ToByte(swap.Total),
+		common.ToByte(swap.Used),
+		common.ToByte(swap.Free),
 		"",
 		fmt.Sprintf("%.2f%%", swap.UsedPercent),
 	})

@@ -41,7 +41,7 @@ func (f *FileStat) String(path string) error {
 	}
 	var out string
 	out = fmt.Sprintf(`  File: "%s"`, path)
-	out += fmt.Sprintf("\n  Size: %s", common.ByteSize(s.Size).String())
+	out += fmt.Sprintf("\n  Size: %s", common.ToByte(s.Size))
 	out += fmt.Sprintf("\t\tBlocks: %d", s.Blocks)
 	out += fmt.Sprintf("\tIO Block: %d", s.Blksize)
 	out += fmt.Sprintf("\tFileType: %s", f.FileType(stat))

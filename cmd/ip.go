@@ -109,9 +109,9 @@ func ParseInterfaces(iface net.InterfaceStatList, counters []net.IOCountersStat)
 		for _, vv := range counters {
 			if v.Name == vv.Name && len(v.Addrs) != 0 {
 				value = fmt.Sprintf("%s\n\tRX packets %d  bytes %d (%s)\n\tRX errors %d  dropped %d",
-					value, vv.PacketsRecv, vv.BytesRecv, common.ByteSize(vv.BytesRecv).String(), vv.Errin, vv.Dropin)
+					value, vv.PacketsRecv, vv.BytesRecv, common.ToByte(vv.BytesRecv), vv.Errin, vv.Dropin)
 				value = fmt.Sprintf("%s\n\tTX packets %d  bytes %d (%s)\n\tTX errors %d  dropped %d",
-					value, vv.PacketsSent, vv.BytesSent, common.ByteSize(vv.BytesSent).String(), vv.Errout, vv.Dropout)
+					value, vv.PacketsSent, vv.BytesSent, common.ToByte(vv.BytesSent), vv.Errout, vv.Dropout)
 				break
 			}
 		}
