@@ -29,7 +29,7 @@ import (
 )
 
 func initArping() *cobra.Command {
-	var arpingFlag struct {
+	var flags struct {
 		check bool
 		mac   bool
 		iface string
@@ -49,8 +49,8 @@ func initArping() *cobra.Command {
 			ip := net.ParseIP(args[0])
 			var hwAddr net.HardwareAddr
 			var err error
-			if arpingFlag.iface != "" {
-				hwAddr, _, err = arping.PingOverIfaceByName(ip, arpingFlag.iface)
+			if flags.iface != "" {
+				hwAddr, _, err = arping.PingOverIfaceByName(ip, flags.iface)
 			} else {
 				hwAddr, _, err = arping.Ping(ip)
 			}
@@ -59,43 +59,46 @@ func initArping() *cobra.Command {
 				return
 			}
 
-			switch {
-			case arpingFlag.check:
+			if flags.check {
 				if errors.Is(err, arping.ErrTimeout) {
-					printer.Printf("offline")
+					printer.Printf("offline\n")
 				} else {
-					printer.Printf("online")
+					printer.Printf("online\n")
 				}
-			case arpingFlag.mac:
+			}
+			if flags.mac {
 				printer.Printf(hwAddr.String())
-			default:
-				var duration time.Duration
-				var j int
-				for i := 0; ; i++ {
-					if arpingFlag.iface != "" {
-						hwAddr, duration, err = arping.PingOverIfaceByName(ip, arpingFlag.iface)
-					} else {
-						hwAddr, duration, err = arping.Ping(ip)
-					}
-					if errors.Is(err, arping.ErrTimeout) {
-						printer.Printf("seq=%d timeout", i)
-						j++
-						if j >= 5 {
-							break
-						}
-						continue
-					} else if err != nil {
-						printer.Error(err)
-						return
-					}
-					printer.Printf("response from %s (%s): index=%d time=%s\n", ip, hwAddr, i, duration)
-					time.Sleep(time.Second)
+			}
+			if flags.check || flags.mac {
+				return
+			}
+
+			var duration time.Duration
+			var j int
+			for i := 0; ; i++ {
+				if flags.iface != "" {
+					hwAddr, duration, err = arping.PingOverIfaceByName(ip, flags.iface)
+				} else {
+					hwAddr, duration, err = arping.Ping(ip)
 				}
+				if errors.Is(err, arping.ErrTimeout) {
+					printer.Printf("seq=%d timeout", i)
+					j++
+					if j >= 5 {
+						break
+					}
+					continue
+				} else if err != nil {
+					printer.Error(err)
+					return
+				}
+				printer.Printf("response from %s (%s): index=%d time=%s\n", ip, hwAddr, i, duration)
+				time.Sleep(time.Second)
 			}
 		},
 	}
-	arpingCmd.Flags().BoolVarP(&arpingFlag.check, "check", "c", false, common.Usage("Check if host is online"))
-	arpingCmd.Flags().BoolVarP(&arpingFlag.mac, "mac", "m", false, common.Usage("Resolve mac address"))
-	arpingCmd.Flags().StringVarP(&arpingFlag.iface, "interface", "i", "", common.Usage("Specify interface name"))
+	arpingCmd.Flags().BoolVarP(&flags.check, "check", "c", false, common.Usage("Check if host is online"))
+	arpingCmd.Flags().BoolVarP(&flags.mac, "mac", "m", false, common.Usage("Resolve mac address"))
+	arpingCmd.Flags().StringVarP(&flags.iface, "interface", "i", "", common.Usage("Specify interface name"))
 	return arpingCmd
 }
