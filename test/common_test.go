@@ -22,7 +22,7 @@ func TestCommonBytes(t *testing.T) {
 	}
 	for _, testCase := range testCases {
 		t.Run(fmt.Sprintf("%.2f", testCase.input), func(t *testing.T) {
-			got := common.ToByte(testCase.input)
+			got := common.ByteSize(testCase.input)
 			assert.Equal(t, testCase.expected, got)
 		})
 	}

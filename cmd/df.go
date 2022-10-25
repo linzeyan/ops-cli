@@ -91,9 +91,9 @@ func (d *Df) ParseDevices(usage *disk.UsageStat, partition []disk.PartitionStat)
 	for _, v := range partition {
 		if usage.Path == v.Mountpoint {
 			d.Filesystem = v.Device
-			d.Size = common.ToByte(usage.Total)
-			d.Used = common.ToByte(usage.Used)
-			d.Avail = common.ToByte(usage.Free)
+			d.Size = common.ByteSize(usage.Total)
+			d.Used = common.ByteSize(usage.Used)
+			d.Avail = common.ByteSize(usage.Free)
 			d.UsedPercent = fmt.Sprintf("%.2f%%", usage.UsedPercent)
 			d.MountedOn = v.Mountpoint
 			d.Fstype = v.Fstype

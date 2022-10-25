@@ -42,7 +42,7 @@ func (b byteSize) String() string {
 	return fmt.Sprintf("%.2fB", b)
 }
 
-func ToByte(i any) string {
+func ByteSize(i any) string {
 	switch n := i.(type) {
 	case int:
 		return byteSize(n).String()
