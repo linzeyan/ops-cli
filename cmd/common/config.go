@@ -36,7 +36,7 @@ type readConfig struct {
 }
 
 func (r *readConfig) get() (map[string]any, error) {
-	typ := []string{"json", "toml", "yaml"}
+	typ := []string{JSONFormat, TomlFormat, YamlFormat}
 	ext := strings.Replace(filepath.Ext(r.path), ".", "", 1)
 	for _, v := range typ {
 		if ext == v {

@@ -32,6 +32,7 @@ const (
 	JSONFormat  = "json"
 	NoneFormat  = "none"
 	TableFormat = "table"
+	TomlFormat  = "toml"
 	YamlFormat  = "yaml"
 )
 
