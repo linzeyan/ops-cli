@@ -58,10 +58,14 @@ func (p *printer) Printf(format string, a ...any) {
 		p.json(a...)
 	case NoneFormat:
 	case TableFormat:
-		if len(a) != 2 {
-			p.Error(ErrInvalidArg)
+		if len(a) == 1 {
+			data, ok := a[0].([][]string)
+			if ok {
+				p.table(nil, data)
+			}
 			return
 		}
+
 		/* Assume a[0] is header. */
 		h1, ok1 := a[0].([]string)
 		d1, ok2 := a[1].([][]string)
