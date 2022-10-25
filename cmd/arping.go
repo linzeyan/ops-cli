@@ -67,7 +67,7 @@ func initArping() *cobra.Command {
 					printer.Printf("online")
 				}
 			case arpingFlag.mac:
-				printer.Printf(rootOutputFormat, hwAddr)
+				printer.Printf(hwAddr.String())
 			default:
 				var duration time.Duration
 				var j int
