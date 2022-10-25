@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"net"
 	"reflect"
@@ -62,10 +63,6 @@ func initWhois() *cobra.Command {
 			}
 			if flags.days {
 				printer.Printf("%d", w.RemainDays)
-				return err
-			}
-			if rootOutputFormat == "" {
-				w.String()
 				return err
 			}
 			printer.Printf(rootOutputFormat, w)
@@ -170,7 +167,7 @@ func (w *Whois) empty() bool {
 	return true
 }
 
-func (w Whois) String() {
+func (w Whois) String() string {
 	var name []string
 	rt := reflect.TypeOf(w)
 	for _, f := range reflect.VisibleFields(rt) {
@@ -178,9 +175,11 @@ func (w Whois) String() {
 			name = append(name, f.Name)
 		}
 	}
-
+	var s strings.Builder
 	f := reflect.ValueOf(&w).Elem()
 	for _, v := range name {
-		printer.Printf("%s\t%v\n", v, f.FieldByName(v).Interface())
+		temp := fmt.Sprintf("%s\t%v\n", v, f.FieldByName(v).Interface())
+		s.WriteString(temp)
 	}
+	return s.String()
 }

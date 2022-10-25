@@ -46,10 +46,6 @@ func initVersion() *cobra.Command {
 				Date:    appBuildTime,
 				Runtime: fmt.Sprintf("%s %s", runtime.Version(), PlatformS),
 			}
-			if rootOutputFormat == "" {
-				v.String()
-				return
-			}
 			printer.Printf(rootOutputFormat, v)
 		},
 	}
@@ -63,7 +59,7 @@ type Version struct {
 	Runtime string `json:"runtime,omitempty" yaml:"runtime,omitempty"`
 }
 
-func (r Version) String() {
+func (r Version) String() string {
 	var ver strings.Builder
 	f := reflect.ValueOf(&r).Elem()
 	t := f.Type()
@@ -74,5 +70,5 @@ func (r Version) String() {
 	}
 	ver.WriteString("Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>\n")
 	ver.WriteString(fmt.Sprintf("Source available at https://github.com/%s/%s", common.RepoOwner, common.RepoName))
-	printer.Printf(ver.String())
+	return ver.String()
 }
