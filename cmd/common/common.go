@@ -24,6 +24,7 @@ import (
 	"github.com/fatih/color"
 )
 
+/* Convert crlf to lf. */
 func Dos2Unix(filename string) error {
 	f, err := os.ReadFile(filename)
 	if err != nil {
@@ -38,7 +39,7 @@ func Dos2Unix(filename string) error {
 	return os.WriteFile(filename, f, stat.Mode())
 }
 
-/* Print string with color. */
+/* Return the string with yellow color and prefix from the given string. */
 func Examples(example string, cmdName ...string) string {
 	var prefix = " "
 	prefix += SliceStringToString(cmdName, " ")
@@ -64,6 +65,7 @@ func Examples(example string, cmdName ...string) string {
 	return c.Sprintf(`%s`, out)
 }
 
+/* Return the string with green color from the given string. */
 func Usage(s string) string {
 	if IsWindows() {
 		return s
@@ -72,6 +74,7 @@ func Usage(s string) string {
 	return c.Sprintf(`%s`, s)
 }
 
+/* Return the slice interface from the given slice string. */
 func SliceStringToInterface(s []string) []any {
 	var i []any
 	for _, v := range s {
@@ -80,6 +83,7 @@ func SliceStringToInterface(s []string) []any {
 	return i
 }
 
+/* Return the string from the given slice. */
 func SliceStringToString(s []string, args ...string) string {
 	var arg string
 	for _, v := range args {
@@ -92,6 +96,7 @@ func SliceStringToString(s []string, args ...string) string {
 	return o
 }
 
+/* Return the string without spaces from the given slice. */
 func SliceStringToStringNoSpaces(s []string, args ...string) string {
 	var arg string
 	for _, v := range args {
@@ -104,6 +109,7 @@ func SliceStringToStringNoSpaces(s []string, args ...string) string {
 	return StringRemoveSpaces(o)
 }
 
+/* Return string without spaces from the given string. */
 func StringRemoveSpaces(s string) string {
 	if strings.Contains(s, " ") {
 		return strings.ReplaceAll(s, " ", "")

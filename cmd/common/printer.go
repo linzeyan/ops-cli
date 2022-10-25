@@ -27,6 +27,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+/* Print some formats easily. */
 type printer struct {
 	/* JSON and yaml args. */
 	indent int
@@ -61,7 +62,7 @@ func (p *printer) Printf(format string, a ...any) {
 			p.Error(ErrInvalidArg)
 			return
 		}
-		/* assume a[0] is header. */
+		/* Assume a[0] is header. */
 		h1, ok1 := a[0].([]string)
 		d1, ok2 := a[1].([][]string)
 		if ok1 && ok2 {
@@ -69,7 +70,7 @@ func (p *printer) Printf(format string, a ...any) {
 			return
 		}
 
-		/* assume a[1] is header. */
+		/* Assume a[1] is header. */
 		h2, ok3 := a[1].([]string)
 		d2, ok4 := a[0].([][]string)
 		if ok3 && ok4 {
@@ -84,6 +85,7 @@ func (p *printer) Printf(format string, a ...any) {
 	}
 }
 
+/* Print error to stderr. */
 func (*printer) Error(err error) {
 	fmt.Fprintln(os.Stderr, err)
 }
@@ -168,6 +170,7 @@ func (*printer) SetYamlAsDefaultFormat(format string) string {
 	}
 	return format
 }
+
 func NewPrinter() *printer {
 	return &printer{
 		indent: 2,

@@ -18,6 +18,7 @@ package common
 
 import "fmt"
 
+/* Convert value to byte size. */
 type byteSize float64
 
 func (b byteSize) String() string {
@@ -42,6 +43,7 @@ func (b byteSize) String() string {
 	return fmt.Sprintf("%.2fB", b)
 }
 
+/* ByteSize return byte size string from giving value. */
 func ByteSize(i any) string {
 	switch n := i.(type) {
 	case int:
