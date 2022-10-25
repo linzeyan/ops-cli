@@ -517,18 +517,19 @@ traceroute to 1.1.1.1 (1.1.1.1), 64 hops max, 24 byte packets
 ### `tree`
 
 ```bash
-→ ops-cli cmd/common -mg -l 1
-[staff drwxr-xr-x] cmd/common
-├── [staff -rw-r--r--] bytes.go
-├── [staff -rw-r--r--] common.go
-├── [staff -rw-r--r--] config.go
-├── [staff -rw-r--r--] constant.go
-├── [staff -rw-r--r--] hash.go
-├── [staff -rw-r--r--] http.go
-├── [staff -rw-r--r--] qrcode.go
-└── [staff -rw-r--r--] variable.go
+→ ops-cli tree cmd/common -gp
+cmd/common
+├── [-rw-r--r-- 20  ]  bytes.go
+├── [-rw-r--r-- 20  ]  common.go
+├── [-rw-r--r-- 20  ]  config.go
+├── [-rw-r--r-- 20  ]  constant.go
+├── [-rw-r--r-- 20  ]  http.go
+├── [-rw-r--r-- 20  ]  printer.go
+├── [-rw-r--r-- 20  ]  qrcode.go
+├── [-rw-r--r-- 20  ]  validator.go
+└── [-rw-r--r-- 20  ]  variable.go
 
-0 directories, 8 files
+0 directories, 9 files
 ```
 
 ### `update`
