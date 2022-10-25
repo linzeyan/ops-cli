@@ -1,5 +1,3 @@
-//go:build darwin || linux
-
 /*
 Copyright © 2022 ZeYanLin <zeyanlin@outlook.com>
 
@@ -29,7 +27,40 @@ import (
 )
 
 func initTree() *cobra.Command {
-	var flags _treeflags
+	var flags struct {
+		/* Listing options. */
+		all        bool
+		dirs       bool
+		links      bool
+		full       bool
+		level      int
+		ignoreCase bool
+		noReport   bool
+		pattern    string
+		ignore     string
+		output     string
+		/* File options. */
+		quote   bool
+		protect bool
+		uid     bool
+		gid     bool
+		size    bool
+		human   bool
+		date    bool
+		inodes  bool
+		device  bool
+		/* Sorting options. */
+		version   bool
+		modify    bool
+		change    bool
+		unsort    bool
+		reverse   bool
+		dirsFirst bool
+		sort      string
+		/* Graphics options. */
+		indent bool
+		color  bool
+	}
 	var treeCmd = &cobra.Command{
 		Use:   CommandTree,
 		Short: "Show the contents of the giving directory as a tree",
@@ -165,39 +196,4 @@ func initTree() *cobra.Command {
 	treeCmd.Flags().BoolVarP(&flags.color, "color", "C", false, common.Usage("Turn colorization on always"))
 
 	return treeCmd
-}
-
-type _treeflags struct {
-	/* Listing options. */
-	all        bool
-	dirs       bool
-	links      bool
-	full       bool
-	level      int
-	ignoreCase bool
-	noReport   bool
-	pattern    string
-	ignore     string
-	output     string
-	/* File options. */
-	quote   bool
-	protect bool
-	uid     bool
-	gid     bool
-	size    bool
-	human   bool
-	date    bool
-	inodes  bool
-	device  bool
-	/* Sorting options. */
-	version   bool
-	modify    bool
-	change    bool
-	unsort    bool
-	reverse   bool
-	dirsFirst bool
-	sort      string
-	/* Graphics options. */
-	indent bool
-	color  bool
 }
