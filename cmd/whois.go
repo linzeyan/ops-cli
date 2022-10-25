@@ -40,33 +40,31 @@ func initWhois() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Short: "List domain name information",
-		RunE: func(_ *cobra.Command, args []string) error {
-			var err error
+		Run: func(_ *cobra.Command, args []string) {
 			var w Whois
-			if err = w.Request(args[0]); err != nil {
-				return err
+			if err := w.Request(args[0]); err != nil {
+				printer.Error(err)
+				return
 			}
 			if w.empty() {
-				return err
+				return
 			}
 			if flags.expiry {
-				printer.Printf(w.ExpiresDate)
-				return err
+				printer.Printf("%s\n", w.ExpiresDate)
 			}
 			if flags.ns {
-				printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), w.NameServers)
-				return err
+				printer.Printf(rootOutputFormat, w.NameServers)
 			}
 			if flags.registrar {
-				printer.Printf(w.Registrar)
-				return err
+				printer.Printf("%s\n", w.Registrar)
 			}
 			if flags.days {
-				printer.Printf("%d", w.RemainDays)
-				return err
+				printer.Printf("%d\n", w.RemainDays)
+			}
+			if flags.expiry || flags.ns || flags.registrar || flags.days {
+				return
 			}
 			printer.Printf(rootOutputFormat, w)
-			return err
 		},
 		Example: common.Examples(`# Search domain
 apple.com`, CommandWhois),
