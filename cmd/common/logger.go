@@ -60,22 +60,34 @@ func (l *logger) DefaultConfig() zap.Config {
 	}
 }
 
-func (l *logger) Debug()      { l.Config.Level.SetLevel(zap.DebugLevel) }
-func (l *logger) Info()       { l.Config.Level.SetLevel(zap.InfoLevel) }
-func (l *logger) Warn()       { l.Config.Level.SetLevel(zap.WarnLevel) }
-func (l *logger) Error()      { l.Config.Level.SetLevel(zap.ErrorLevel) }
-func (l *logger) DPanic()     { l.Config.Level.SetLevel(zap.DPanicLevel) }
-func (l *logger) Panic()      { l.Config.Level.SetLevel(zap.PanicLevel) }
-func (l *logger) Fatal()      { l.Config.Level.SetLevel(zap.FatalLevel) }
 func (l *logger) Sync() error { return l.Log.Sync() }
 
 func newLogger() *logger {
-	l := new(logger)
-	l.Config = l.DefaultConfig()
-	l.Log, _ = l.Config.Build()
-	return l
+	log := new(logger)
+	log.Config = log.DefaultConfig()
+	log.Log, _ = log.Config.Build()
+	return log
 }
 
-func NewLogger() *logger {
-	return stdLogger
+func SetLoggerLevel(level int8) {
+	switch level {
+	case -1:
+		stdLogger.Config.Level.SetLevel(zap.DebugLevel)
+	case 0:
+		stdLogger.Config.Level.SetLevel(zap.InfoLevel)
+	case 1:
+		stdLogger.Config.Level.SetLevel(zap.WarnLevel)
+	case 2:
+		stdLogger.Config.Level.SetLevel(zap.ErrorLevel)
+	case 3:
+		stdLogger.Config.Level.SetLevel(zap.DPanicLevel)
+	case 4:
+		stdLogger.Config.Level.SetLevel(zap.PanicLevel)
+	case 5:
+		stdLogger.Config.Level.SetLevel(zap.FatalLevel)
+	}
+}
+
+func NewLogger() *zap.Logger {
+	return stdLogger.Log
 }
