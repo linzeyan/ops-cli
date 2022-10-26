@@ -31,12 +31,12 @@ var stdPrinter = &printer{indent: 2}
 
 /* Print some formats easily. */
 type printer struct {
-	/* JSON and yaml args. */
-	indent int
 	/* Table args. */
 	headers bool
 	padding string
 	align   int
+	/* JSON and yaml args. */
+	indent int
 }
 
 func (p *printer) Printf(format string, a ...any) {
@@ -46,8 +46,6 @@ func (p *printer) Printf(format string, a ...any) {
 			switch data := i.(type) {
 			case string, []byte:
 				fmt.Fprintf(os.Stdout, "%s", data)
-			case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-				fmt.Fprintf(os.Stdout, "%d", data)
 			case []string, map[string]string:
 				p.json(data)
 			case error:
@@ -89,6 +87,10 @@ func (p *printer) Printf(format string, a ...any) {
 	default:
 		fmt.Fprintf(os.Stdout, format, a...)
 	}
+}
+
+func (*printer) Sprintf(format string, a ...any) string {
+	return fmt.Sprintf(format, a...)
 }
 
 /* Print error to stderr. */
