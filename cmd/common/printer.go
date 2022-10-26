@@ -27,6 +27,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var stdPrinter = &printer{indent: 2}
+
 /* Print some formats easily. */
 type printer struct {
 	/* JSON and yaml args. */
@@ -176,7 +178,5 @@ func (*printer) SetYamlAsDefaultFormat(format string) string {
 }
 
 func NewPrinter() *printer {
-	return &printer{
-		indent: 2,
-	}
+	return stdPrinter
 }

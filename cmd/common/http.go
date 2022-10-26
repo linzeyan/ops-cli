@@ -18,7 +18,6 @@ package common
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -81,12 +80,12 @@ func HTTPRequestContent(url string, config ...HTTPConfig) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(string(reqDump))
+		stdPrinter.Printf("%s\n", reqDump)
 		respDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(string(respDump))
+		stdPrinter.Printf("%s\n", respDump)
 	}
 	return io.ReadAll(resp.Body)
 }
