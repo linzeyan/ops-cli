@@ -44,8 +44,8 @@ func initCert() *cobra.Command {
 	}
 	var certCmd = &cobra.Command{
 		Use:   CommandCert + " [host|file]",
-		Args:  cobra.ExactArgs(1),
 		Short: "Check tls cert expiry time",
+		Args:  cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
 			var err error
 			input := args[0]
@@ -205,20 +205,29 @@ func (c *Cert) CheckFile(fileName string) (*Cert, error) {
 }
 
 func (*Cert) defaultSubject() pkix.Name {
+	const (
+		defaultCountry            = "TW"
+		defaultState              = "TP"
+		defaultLocality           = "Xinyi"
+		defaultOrganization       = common.RepoName
+		defaultOrganizationalUnit = "Root CA"
+		defaultCommonName         = "Self-Sign Root CA"
+	)
 	return pkix.Name{
-		Organization:       []string{"OPS-CLI"},
-		OrganizationalUnit: []string{"Root CA"},
-		Country:            []string{"TW"},
-		Locality:           []string{"Taipei"},
-		CommonName:         "Self-Sign Root CA",
+		Organization:       []string{defaultOrganization},
+		OrganizationalUnit: []string{defaultOrganizationalUnit},
+		Country:            []string{defaultCountry},
+		Province:           []string{defaultState},
+		Locality:           []string{defaultLocality},
+		CommonName:         defaultCommonName,
 	}
 }
 
-func (*Cert) serverSubject() *x509.Certificate {
+func (c *Cert) serverSubject() *x509.Certificate {
 	type cnf struct {
 		Country        string   `json:"C"`
 		CommonName     string   `json:"CN"`
-		Location       string   `json:"L"`
+		Locality       string   `json:"L"`
 		Org            string   `json:"O"`
 		OrgUnit        string   `json:"OU"`
 		State          string   `json:"ST"`
@@ -234,30 +243,58 @@ func (*Cert) serverSubject() *x509.Certificate {
 		if err := ReadConfig(CommandCert, &info); err != nil {
 			return nil
 		}
-	}
-	var ip []net.IP
-	for _, v := range info.IPAddresses {
-		ip = append(ip, net.ParseIP(v))
-	}
-	var uri []*url.URL
-	for _, v := range info.URIs {
-		u, err := url.ParseRequestURI(v)
-		if err == nil {
-			uri = append(uri, u)
+
+		var ip []net.IP
+		for _, v := range info.IPAddresses {
+			ip = append(ip, net.ParseIP(v))
+		}
+		var uri []*url.URL
+		for _, v := range info.URIs {
+			u, err := url.ParseRequestURI(v)
+			if err == nil {
+				uri = append(uri, u)
+			}
+		}
+		return &x509.Certificate{
+			SerialNumber: big.NewInt(common.TimeNow.Unix()),
+			Subject: pkix.Name{
+				Country:            []string{info.Country},
+				Organization:       []string{info.Org},
+				OrganizationalUnit: []string{info.OrgUnit},
+				Province:           []string{info.State},
+				Locality:           []string{info.Locality},
+				CommonName:         info.CommonName,
+			},
+			NotBefore: common.TimeNow.UTC(),
+			NotAfter:  common.TimeNow.UTC().AddDate(info.Year, 0, 0),
+			KeyUsage:  x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
+
+			BasicConstraintsValid: true,
+			IsCA:                  true,
+
+			ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
+
+			DNSNames:       info.DNSNames,
+			EmailAddresses: info.EmailAddresses,
+			IPAddresses:    ip,
+			URIs:           uri,
+
+			SubjectKeyId: []byte{1, 1, 1, 1, 1, 1},
 		}
 	}
+	d := c.defaultSubject()
 	return &x509.Certificate{
 		SerialNumber: big.NewInt(common.TimeNow.Unix()),
 		Subject: pkix.Name{
-			Country:            []string{info.Country},
-			Organization:       []string{info.Org},
-			OrganizationalUnit: []string{info.OrgUnit},
-			Province:           []string{info.State},
-			Locality:           []string{info.Location},
-			CommonName:         info.CommonName,
+			Country:            d.Country,
+			Organization:       d.Organization,
+			OrganizationalUnit: d.OrganizationalUnit,
+			Province:           d.Province,
+			Locality:           d.Locality,
+			CommonName:         d.CommonName,
 		},
 		NotBefore: common.TimeNow.UTC(),
-		NotAfter:  common.TimeNow.UTC().AddDate(info.Year, 0, 0),
+		NotAfter:  common.TimeNow.UTC().AddDate(1, 0, 0),
 		KeyUsage:  x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment,
 
 		BasicConstraintsValid: true,
@@ -265,12 +302,12 @@ func (*Cert) serverSubject() *x509.Certificate {
 
 		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth, x509.ExtKeyUsageServerAuth},
 
-		DNSNames:       info.DNSNames,
-		EmailAddresses: info.EmailAddresses,
-		IPAddresses:    ip,
-		URIs:           uri,
+		DNSNames:       []string{"localhost", "*.localhost"},
+		EmailAddresses: nil,
+		IPAddresses:    nil,
+		URIs:           nil,
 
-		SubjectKeyId: []byte{1, 1, 1, 1, 1, 1},
+		SubjectKeyId: []byte{0, 1, 1, 1, 1, 1},
 	}
 }
 
