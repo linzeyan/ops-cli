@@ -43,8 +43,8 @@ func initArping() *cobra.Command {
 		},
 		Run: func(_ *cobra.Command, args []string) {
 			if !common.IsIPv4(args[0]) {
-				printer.Error(common.ErrInvalidIP)
 				logger.Info(common.ErrInvalidIP.Error(), common.NewField("arg", args[0]))
+				printer.Error(common.ErrInvalidIP)
 				return
 			}
 			ip := net.ParseIP(args[0])
@@ -56,8 +56,8 @@ func initArping() *cobra.Command {
 				hwAddr, _, err = arping.Ping(ip)
 			}
 			if err != nil && !errors.Is(err, arping.ErrTimeout) {
-				printer.Error(err)
 				logger.Info(err.Error())
+				printer.Error(err)
 				return
 			}
 
@@ -91,8 +91,7 @@ func initArping() *cobra.Command {
 					}
 					continue
 				} else if err != nil {
-					logger.Error(err.Error())
-					return
+					logger.Fatal(err.Error())
 				}
 				printer.Printf("response from %s (%s): index=%d time=%s\n", ip, hwAddr, i, duration)
 				time.Sleep(time.Second)
