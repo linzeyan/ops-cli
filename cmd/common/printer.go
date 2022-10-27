@@ -105,7 +105,7 @@ func (p *printer) json(a ...any) {
 		indent := strings.Repeat(" ", p.indent)
 		encoder.SetIndent("", indent)
 		if err := encoder.Encode(i); err != nil {
-			p.Error(ErrInvalidArg)
+			stdLogger.Log.Debug(err.Error(), NewField("arg", i))
 			return
 		}
 		fmt.Fprintf(os.Stdout, "%s", buf.String())
@@ -118,7 +118,7 @@ func (p *printer) yaml(a ...any) {
 		encoder := yaml.NewEncoder(&buf)
 		encoder.SetIndent(p.indent)
 		if err := encoder.Encode(i); err != nil {
-			p.Error(ErrInvalidArg)
+			stdLogger.Log.Debug(err.Error(), NewField("arg", i))
 			return
 		}
 		fmt.Fprintf(os.Stdout, "%s", buf.String())

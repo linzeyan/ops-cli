@@ -37,18 +37,23 @@ func IsDomain(i any) bool {
 		if l > 1 {
 			n, err := strconv.Atoi(slice[l-1])
 			if err != nil {
+				stdLogger.Log.Debug(err.Error(), NewField("arg", slice[l-1]))
 				return true
 			}
 			s := strconv.Itoa(n)
 			return slice[l-1] != s
 		}
 	}
+	stdLogger.Log.Debug("invalid domain", NewField("arg", i))
 	return false
 }
 
 /* If f is a valid path return true. */
 func IsFile(f string) bool {
 	_, err := os.Stat(f)
+	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", f))
+	}
 	return err == nil
 }
 
@@ -56,6 +61,7 @@ func IsFile(f string) bool {
 func IsIP(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
 		return false
 	}
 	return ip.IsValid()
@@ -64,6 +70,7 @@ func IsIP(i string) bool {
 func IsCIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
 		return false
 	}
 	return ip.IsValid()
@@ -73,6 +80,7 @@ func IsCIDR(i string) bool {
 func IsIPv4(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
 		return false
 	}
 	return ip.Is4()
@@ -81,6 +89,7 @@ func IsIPv4(i string) bool {
 func IsIPv4CIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
 		return false
 	}
 	return ip.IsValid() && ip.Addr().Is4()
@@ -90,6 +99,7 @@ func IsIPv4CIDR(i string) bool {
 func IsIPv6(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
 		return false
 	}
 	return ip.Is6()
@@ -98,6 +108,7 @@ func IsIPv6(i string) bool {
 func IsIPv6CIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
 		return false
 	}
 	return ip.IsValid() && ip.Addr().Is6()
@@ -106,6 +117,9 @@ func IsIPv6CIDR(i string) bool {
 /* If u is a valid url return true. */
 func IsURL(u string) bool {
 	_, err := url.ParseRequestURI(u)
+	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", u))
+	}
 	return err == nil
 }
 

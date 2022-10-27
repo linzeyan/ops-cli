@@ -56,12 +56,18 @@ func HTTPRequestContent(url string, config ...HTTPConfig) ([]byte, error) {
 	body := strings.NewReader(config[0].Body)
 	req, err := http.NewRequestWithContext(Context, config[0].Method, url, body)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(),
+			NewField("method", config[0].Method),
+			NewField("url", url),
+			NewField("body", body),
+		)
 		return nil, err
 	}
 	if config[0].Headers != "" {
 		header := make(map[string]string, 0)
 		err = json.Unmarshal([]byte(config[0].Headers), &header)
 		if err != nil {
+			stdLogger.Log.Debug(err.Error(), NewField("data", config[0].Headers))
 			return nil, err
 		}
 		for k, v := range header {
@@ -73,16 +79,19 @@ func HTTPRequestContent(url string, config ...HTTPConfig) ([]byte, error) {
 		defer resp.Body.Close()
 	}
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", req))
 		return nil, err
 	}
 	if config[0].Verbose {
 		reqDump, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
+			stdLogger.Log.Debug(err.Error(), NewField("arg", req))
 			return nil, err
 		}
 		stdPrinter.Printf("%s\n", reqDump)
 		respDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
+			stdLogger.Log.Debug(err.Error(), NewField("arg", resp))
 			return nil, err
 		}
 		stdPrinter.Printf("%s\n", respDump)
@@ -112,6 +121,11 @@ func HTTPRequestContentGB18030(url string, body io.Reader, methods ...string) ([
 	}
 	req, err := http.NewRequestWithContext(Context, method, url, body)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(),
+			NewField("method", method),
+			NewField("url", url),
+			NewField("body", body),
+		)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
@@ -120,6 +134,7 @@ func HTTPRequestContentGB18030(url string, body io.Reader, methods ...string) ([
 		defer resp.Body.Close()
 	}
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", req))
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
@@ -150,6 +165,7 @@ func HTTPRequestRedirectURL(uri string) (string, error) {
 	}
 	req, err := http.NewRequestWithContext(Context, http.MethodGet, uri, nil)
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("url", uri))
 		return result, err
 	}
 	req.Header.Set("User-Agent", UserAgent)
@@ -159,6 +175,7 @@ func HTTPRequestRedirectURL(uri string) (string, error) {
 		defer resp.Body.Close()
 	}
 	if err != nil {
+		stdLogger.Log.Debug(err.Error(), NewField("arg", req))
 		return result, err
 	}
 	if req.Host == "reurl.cc" && resp.Header.Get("Target") != "" {

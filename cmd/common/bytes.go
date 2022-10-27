@@ -18,8 +18,6 @@ package common
 
 import (
 	"fmt"
-
-	"go.uber.org/zap"
 )
 
 /* Convert value to byte size. */
@@ -75,7 +73,7 @@ func ByteSize(i any) string {
 	case float64:
 		return byteSize(n).String()
 	default:
-		stdLogger.Log.Debug(ErrInvalidArg.Error(), zap.Any("value", i))
+		stdLogger.Log.Debug(ErrInvalidArg.Error(), NewField("arg", i))
 		return ""
 	}
 }

@@ -91,3 +91,7 @@ func SetLoggerLevel(level string) {
 func NewLogger() *zap.Logger {
 	return stdLogger.Log
 }
+
+func NewField(key string, value any) zapcore.Field {
+	return zap.Any(key, value)
+}

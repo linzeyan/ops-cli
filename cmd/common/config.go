@@ -17,8 +17,6 @@ limitations under the License.
 package common
 
 import (
-	"log"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -47,6 +45,7 @@ func (r *readConfig) get() (map[string]any, error) {
 	}
 	viper.SetConfigFile(r.path)
 	if err := viper.ReadInConfig(); err != nil {
+		stdLogger.Log.Debug(err.Error())
 		return nil, err
 	}
 	all := viper.AllSettings()
@@ -66,8 +65,7 @@ func Config(path, table string) map[string]any {
 	r := &readConfig{path: path, table: table}
 	v, err := r.get()
 	if err != nil {
-		log.Println(err)
-		os.Exit(1)
+		stdLogger.Log.Fatal(err.Error(), NewField("path", path), NewField("table", table))
 	}
 	return v
 }
