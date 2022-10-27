@@ -95,6 +95,7 @@ Available Commands:
   redis       Opens a connection to a Redis server
   ss          Displays sockets informations
   ssh-keygen  Generate SSH keypair
+  ssl         Genreate self-sign certificate
   stat        Display file informations
   system      Display system informations
   tcping      Connect to a port of a host
@@ -457,6 +458,14 @@ Proto Local Address Foreign Address  State PID/Program name
 → ops-cli ssh-keygen --bits 4096 -f /tmp/rsa
 /tmp/rsa generated
 /tmp/rsa.pub generated
+```
+
+### `ssl`
+
+```bash
+→ ops-cli ssl generate
+→ ls
+ca.crt     ca.key     root.crt   root.key   server.crt server.key
 ```
 
 ### `stat`
