@@ -69,21 +69,21 @@ func newLogger() *logger {
 	return log
 }
 
-func SetLoggerLevel(level int8) {
+func SetLoggerLevel(level string) {
 	switch level {
-	case -1:
+	case zap.DebugLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.DebugLevel)
-	case 0:
+	case zap.InfoLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.InfoLevel)
-	case 1:
+	case zap.WarnLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.WarnLevel)
-	case 2:
+	case zap.ErrorLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.ErrorLevel)
-	case 3:
+	case zap.DPanicLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.DPanicLevel)
-	case 4:
+	case zap.PanicLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.PanicLevel)
-	case 5:
+	case zap.FatalLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.FatalLevel)
 	}
 }

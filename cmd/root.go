@@ -24,12 +24,16 @@ import (
 )
 
 var RootCmd = root()
-var printer = common.NewPrinter()
+var (
+	printer = common.NewPrinter()
+	logger  = common.NewLogger()
+)
 
 /* Flags. */
 var (
 	rootConfig       string
 	rootOutputFormat string
+	rootVerbose      string
 )
 
 func root() *cobra.Command {
@@ -42,6 +46,7 @@ func root() *cobra.Command {
 	}
 	rootCmd.PersistentFlags().StringVar(&rootOutputFormat, "output", "", common.Usage("Output format, can be json/yaml"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
+	rootCmd.PersistentFlags().StringVar(&rootVerbose, "verbose", "warn", common.Usage("Specify log level (debug/info/warn/error/panic/fatal"))
 	rootCmd.PersistentFlags().BoolP("help", "", false, common.Usage("Help for this command"))
 
 	rootCmd.AddCommand(initArping())
@@ -64,6 +69,10 @@ func root() *cobra.Command {
 	rootCmd.AddCommand(initUpdate(), initURL())
 	rootCmd.AddCommand(initVersion())
 	rootCmd.AddCommand(initWhois(), initWsping())
+	initLogger := func() {
+		common.SetLoggerLevel(rootVerbose)
+	}
+	cobra.OnInitialize(initLogger)
 	return rootCmd
 }
 

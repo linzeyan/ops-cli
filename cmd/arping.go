@@ -26,6 +26,7 @@ import (
 	"github.com/j-keck/arping"
 	"github.com/linzeyan/ops-cli/cmd/common"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 func initArping() *cobra.Command {
@@ -44,6 +45,7 @@ func initArping() *cobra.Command {
 		Run: func(_ *cobra.Command, args []string) {
 			if !common.IsIPv4(args[0]) {
 				printer.Error(common.ErrInvalidIP)
+				logger.Warn(common.ErrInvalidIP.Error(), zap.String("arg", args[0]))
 				return
 			}
 			ip := net.ParseIP(args[0])
