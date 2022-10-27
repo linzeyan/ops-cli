@@ -28,35 +28,36 @@ type logger struct {
 	Log    *zap.Logger
 }
 
-func (*logger) DefaultEncoderConfig() zapcore.EncoderConfig {
-	return zapcore.EncoderConfig{
-		TimeKey:        "timestamp",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		CallerKey:      "caller",
-		FunctionKey:    zapcore.OmitKey,
-		MessageKey:     "message",
-		StacktraceKey:  "stacktrace",
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.RFC3339TimeEncoder,
-		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.FullCallerEncoder,
-	}
-}
-
 func (l *logger) DefaultConfig() zap.Config {
 	return zap.Config{
-		Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
-		Development: false,
+		Level:             zap.NewAtomicLevelAt(zap.InfoLevel),
+		Development:       false,
+		DisableCaller:     false,
+		DisableStacktrace: false,
 		Sampling: &zap.SamplingConfig{
-			Initial:    100,
-			Thereafter: 100,
+			Initial:    10, /* Log number in same level output per second. */
+			Thereafter: 10, /* If greater than 10 then output. */
 		},
-		Encoding:         "json",
-		EncoderConfig:    l.DefaultEncoderConfig(),
+		Encoding: "json",
+		EncoderConfig: zapcore.EncoderConfig{
+			TimeKey:        "time",
+			LevelKey:       "level",
+			NameKey:        "logger",
+			CallerKey:      "call",
+			FunctionKey:    zapcore.OmitKey,
+			MessageKey:     "msg",
+			StacktraceKey:  "stacktrace",
+			LineEnding:     zapcore.DefaultLineEnding,
+			EncodeLevel:    zapcore.LowercaseLevelEncoder,
+			EncodeTime:     zapcore.RFC3339TimeEncoder,
+			EncodeDuration: zapcore.NanosDurationEncoder,
+			EncodeCaller:   zapcore.ShortCallerEncoder,
+			EncodeName:     zapcore.FullNameEncoder,
+			// ConsoleSeparator: "\t",
+		},
 		OutputPaths:      []string{"stderr"},
 		ErrorOutputPaths: []string{"stderr"},
+		// InitialFields:    map[string]any{},
 	}
 }
 
@@ -85,6 +86,8 @@ func SetLoggerLevel(level string) {
 		stdLogger.Config.Level.SetLevel(zap.PanicLevel)
 	case zap.FatalLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.FatalLevel)
+	default:
+		stdLogger.Log.Fatal(ErrInvalidArg.Error(), NewField("arg", level))
 	}
 }
 
