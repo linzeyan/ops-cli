@@ -137,6 +137,11 @@ const (
 )
 
 const (
+	groupIM      = "IM:"
+	groupNetwork = "Network:"
+)
+
+const (
 	HashMd5        = "md5"
 	HashSha1       = "sha1"
 	HashSha224     = "sha224"

@@ -78,26 +78,26 @@ func root() *cobra.Command {
 }
 
 var groupings = map[string]string{
-	CommandDiscord:  "1",
-	CommandLINE:     "1",
-	CommandSlack:    "1",
-	CommandTelegram: "1",
+	CommandDiscord:  groupIM,
+	CommandLINE:     groupIM,
+	CommandSlack:    groupIM,
+	CommandTelegram: groupIM,
 
-	CommandArping:     "2",
-	CommandIP:         "2",
-	CommandMTR:        "2",
-	CommandNetmask:    "2",
-	CommandPing:       "2",
-	CommandSs:         "2",
-	CommandTCPing:     "2",
-	CommandTraceroute: "2",
-	CommandWsping:     "2",
+	CommandArping:     groupNetwork,
+	CommandIP:         groupNetwork,
+	CommandMTR:        groupNetwork,
+	CommandNetmask:    groupNetwork,
+	CommandPing:       groupNetwork,
+	CommandSs:         groupNetwork,
+	CommandTCPing:     groupNetwork,
+	CommandTraceroute: groupNetwork,
+	CommandWsping:     groupNetwork,
 }
 
 func addGroup(cmd *cobra.Command) {
 	var groups []*cobra.Group
-	im := &cobra.Group{ID: groupings[CommandDiscord], Title: "IM:"}
-	network := &cobra.Group{ID: groupings[CommandArping], Title: "Network:"}
+	im := &cobra.Group{ID: groupings[CommandDiscord], Title: groupings[CommandDiscord]}
+	network := &cobra.Group{ID: groupings[CommandArping], Title: groupings[CommandArping]}
 
 	groups = append(groups, im, network)
 	cmd.AddGroup(groups...)
