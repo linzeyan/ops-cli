@@ -63,12 +63,24 @@ Usage:
   ops-cli
   ops-cli [command]
 
-Available Commands:
-  Discord     Send message to Discord
-  LINE        Send message to LINE
-  Slack       Send message to Slack
-  Telegram    Send message to Telegram
+IM:
+  discord     Send message to Discord
+  line        Send message to LINE
+  slack       Send message to Slack
+  telegram    Send message to Telegram
+
+Network:
   arping      Discover and probe hosts in a network using the ARP protocol
+  ip          View interfaces configuration
+  mtr         Combined traceroute and ping
+  netmask     Print IP/Mask pair, list address ranges
+  ping        Send ICMP ECHO_REQUEST packets to network hosts
+  ss          Displays sockets informations
+  tcping      Connect to a port of a host
+  traceroute  Print the route packets trace to network host
+  wsping      Connect to a websocket server
+
+Additional Commands:
   cert        Check tls cert expiry time
   completion  Generate the autocompletion script for the specified shell
   convert     Convert data format, support csv, json, toml, xml, yaml
@@ -84,33 +96,27 @@ Available Commands:
   hash        Hash string or file
   help        Help about any command
   icp         Check ICP status
-  ip          View interfaces configuration
-  mtr         Combined traceroute and ping
-  netmask     Print IP/Mask pair, list address ranges
   otp         Calculate passcode or generate secret
-  ping        Send ICMP ECHO_REQUEST packets to network hosts
+  ps          Display process status
   qrcode      Read or generate QR Code
   random      Generate random string
   readlink    Get symlink information
   redis       Opens a connection to a Redis server
-  ss          Displays sockets informations
   ssh-keygen  Generate SSH keypair
   ssl         Genreate self-sign certificate
   stat        Display file informations
   system      Display system informations
-  tcping      Connect to a port of a host
-  traceroute  Print the route packets trace to network host
   tree        Show the contents of the giving directory as a tree
   update      Update ops-cli to the latest release
   url         Get url content or expand shorten url or download
   version     Print version information
   whois       List domain name information
-  wsping      Connect to a websocket server
 
 Flags:
-      --config string   Specify config path
-  -h, --help            help for ops-cli
-      --output string   Output format, can be json/yaml
+      --config string    Specify config path
+      --help             Help for this command
+      --output string    Output format, can be json/yaml
+      --verbose string   Specify log level (debug/info/warn/error/panic/fatal (default "warn")
 ```
 
 ### `arping`
