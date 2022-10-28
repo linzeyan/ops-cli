@@ -31,8 +31,9 @@ func initSs() *cobra.Command {
 		tcp, udp   bool
 	}
 	var ssCmd = &cobra.Command{
-		Use:   CommandSs,
-		Short: "Displays sockets informations",
+		GroupID: groupings[CommandSs],
+		Use:     CommandSs,
+		Short:   "Displays sockets informations",
 		Run: func(_ *cobra.Command, _ []string) {
 			var fn netstat.AcceptFn
 			switch {

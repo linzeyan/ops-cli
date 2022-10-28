@@ -43,7 +43,7 @@ const (
 	CommandDate       = "date"
 	CommandDf         = "df"
 	CommandDig        = "dig"
-	CommandDiscord    = "Discord"
+	CommandDiscord    = "discord"
 	CommandDisk       = "disk"
 	CommandDoc        = "doc"
 	CommandDos2Unix   = "dos2unix"
@@ -64,7 +64,7 @@ const (
 	CommandJSON2Toml  = CommandJSON + "2" + CommandToml
 	CommandJSON2XML   = CommandJSON + "2" + CommandXML
 	CommandJSON2Yaml  = CommandJSON + "2" + CommandYaml
-	CommandLINE       = "LINE"
+	CommandLINE       = "line"
 	CommandLoad       = "load"
 	CommandLowercase  = "lowercase"
 	CommandMan        = "man"
@@ -85,7 +85,7 @@ const (
 	CommandRedis      = "redis"
 	CommandReST       = "rest"
 	CommandSign       = "sign"
-	CommandSlack      = "Slack"
+	CommandSlack      = "slack"
 	CommandSs         = "ss"
 	CommandSSH        = "ssh-keygen"
 	CommandSSL        = "ssl"
@@ -94,7 +94,7 @@ const (
 	CommandSymbol     = "symbol"
 	CommandSystem     = "system"
 	CommandTCPing     = "tcping"
-	CommandTelegram   = "Telegram"
+	CommandTelegram   = "telegram"
 	CommandText       = "text"
 	CommandToml       = "toml"
 	CommandToml2Csv   = CommandToml + "2" + CommandCsv

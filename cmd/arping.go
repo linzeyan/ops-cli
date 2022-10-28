@@ -35,9 +35,10 @@ func initArping() *cobra.Command {
 		iface string
 	}
 	var arpingCmd = &cobra.Command{
-		Use:   CommandArping,
-		Args:  cobra.ExactArgs(1),
-		Short: "Discover and probe hosts in a network using the ARP protocol",
+		GroupID: groupings[CommandArping],
+		Use:     CommandArping,
+		Args:    cobra.ExactArgs(1),
+		Short:   "Discover and probe hosts in a network using the ARP protocol",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},

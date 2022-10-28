@@ -27,9 +27,10 @@ import (
 
 func initWsping() *cobra.Command {
 	var wspingCmd = &cobra.Command{
-		Use:   CommandWsping + " host",
-		Args:  cobra.ExactArgs(1),
-		Short: "Connect to a websocket server",
+		GroupID: groupings[CommandWsping],
+		Use:     CommandWsping + " host",
+		Args:    cobra.ExactArgs(1),
+		Short:   "Connect to a websocket server",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return []string{"ws://", "wss://"}, cobra.ShellCompDirectiveNoSpace
 		},

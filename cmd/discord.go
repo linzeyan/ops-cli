@@ -32,9 +32,10 @@ func initDiscord() *cobra.Command {
 		arg     string
 	}
 	var discordCmd = &cobra.Command{
-		Use:   CommandDiscord,
-		Short: "Send message to Discord",
-		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+		GroupID: groupings[CommandDiscord],
+		Use:     CommandDiscord,
+		Short:   "Send message to Discord",
+		Run:     func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
 		DisableFlagsInUseLine: true,
 	}

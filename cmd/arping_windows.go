@@ -20,8 +20,9 @@ import "github.com/spf13/cobra"
 
 func initArping() *cobra.Command {
 	var arpingCmd = &cobra.Command{
-		Use:   CommandArping,
-		Short: "Discover and probe hosts in a network using the ARP protocol",
+		GroupID: groupings[CommandArping],
+		Use:     CommandArping,
+		Short:   "Discover and probe hosts in a network using the ARP protocol",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},

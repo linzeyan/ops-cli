@@ -46,9 +46,10 @@ func initMTR() *cobra.Command {
 		timeout  time.Duration
 	}
 	var mtrCmd = &cobra.Command{
-		Use:   CommandMTR,
-		Short: "Combined traceroute and ping",
-		Args:  cobra.ExactArgs(1),
+		GroupID: groupings[CommandMTR],
+		Use:     CommandMTR,
+		Short:   "Combined traceroute and ping",
+		Args:    cobra.ExactArgs(1),
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},

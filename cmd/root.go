@@ -69,11 +69,38 @@ func root() *cobra.Command {
 	rootCmd.AddCommand(initUpdate(), initURL())
 	rootCmd.AddCommand(initVersion())
 	rootCmd.AddCommand(initWhois(), initWsping())
-	initLogger := func() {
+	initalize := func() {
 		common.SetLoggerLevel(rootVerbose)
 	}
-	cobra.OnInitialize(initLogger)
+	cobra.OnInitialize(initalize)
+	addGroup(rootCmd)
 	return rootCmd
+}
+
+var groupings = map[string]string{
+	CommandDiscord:  "1",
+	CommandLINE:     "1",
+	CommandSlack:    "1",
+	CommandTelegram: "1",
+
+	CommandArping:     "2",
+	CommandIP:         "2",
+	CommandMTR:        "2",
+	CommandNetmask:    "2",
+	CommandPing:       "2",
+	CommandSs:         "2",
+	CommandTCPing:     "2",
+	CommandTraceroute: "2",
+	CommandWsping:     "2",
+}
+
+func addGroup(cmd *cobra.Command) {
+	var groups []*cobra.Group
+	im := &cobra.Group{ID: groupings[CommandDiscord], Title: "IM:"}
+	network := &cobra.Group{ID: groupings[CommandArping], Title: "Network:"}
+
+	groups = append(groups, im, network)
+	cmd.AddGroup(groups...)
 }
 
 func ReadConfig(block string, flag any) error {

@@ -39,8 +39,9 @@ func initNetmask() *cobra.Command {
 		cidr    bool
 	}
 	var netmaskCmd = &cobra.Command{
-		Use:   CommandNetmask,
-		Short: "Print IP/Mask pair, list address ranges",
+		GroupID: groupings[CommandNetmask],
+		Use:     CommandNetmask,
+		Short:   "Print IP/Mask pair, list address ranges",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},

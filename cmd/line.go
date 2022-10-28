@@ -35,9 +35,10 @@ func initLINE() *cobra.Command {
 		arg    string
 	}
 	var lineCmd = &cobra.Command{
-		Use:   CommandLINE,
-		Short: "Send message to LINE",
-		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+		GroupID: groupings[CommandLINE],
+		Use:     CommandLINE,
+		Short:   "Send message to LINE",
+		Run:     func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 
 		DisableFlagsInUseLine: true,
 	}
