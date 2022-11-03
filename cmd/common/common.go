@@ -28,12 +28,12 @@ import (
 func Dos2Unix(filename string) error {
 	f, err := os.ReadFile(filename)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", filename))
+		stdLogger.Log.Debug(err.Error(), DefaultField(filename))
 		return err
 	}
 	stat, err := os.Stat(filename)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", filename))
+		stdLogger.Log.Debug(err.Error(), DefaultField(filename))
 		return err
 	}
 	eol := regexp.MustCompile(`\r\n`)

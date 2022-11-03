@@ -63,6 +63,7 @@ func (l *logger) DefaultConfig() zap.Config {
 
 func (l *logger) Sync() error { return l.Log.Sync() }
 
+/* newLogger returns logger with configured zap.Config. */
 func newLogger() *logger {
 	log := new(logger)
 	log.Config = log.DefaultConfig()
@@ -70,6 +71,7 @@ func newLogger() *logger {
 	return log
 }
 
+/* SetLoggerLevel set log level from given level. */
 func SetLoggerLevel(level string) {
 	switch level {
 	case zap.DebugLevel.String():
@@ -87,14 +89,21 @@ func SetLoggerLevel(level string) {
 	case zap.FatalLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.FatalLevel)
 	default:
-		stdLogger.Log.Fatal(ErrInvalidArg.Error(), NewField("arg", level))
+		stdLogger.Log.Fatal(ErrInvalidArg.Error(), DefaultField(level))
 	}
 }
 
+/* NewLogger return field Log of global variable stdLogger. */
 func NewLogger() *zap.Logger {
 	return stdLogger.Log
 }
 
+/* DefaultField calls zap.Any and gives key name "arg". */
+func DefaultField(value any) zapcore.Field {
+	return zap.Any("arg", value)
+}
+
+/* NewField calls zap.Any. */
 func NewField(key string, value any) zapcore.Field {
 	return zap.Any(key, value)
 }

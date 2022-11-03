@@ -37,14 +37,14 @@ func IsDomain(i any) bool {
 		if l > 1 {
 			n, err := strconv.Atoi(slice[l-1])
 			if err != nil {
-				stdLogger.Log.Debug(err.Error(), NewField("arg", slice[l-1]))
+				stdLogger.Log.Debug(err.Error(), DefaultField(slice[l-1]))
 				return true
 			}
 			s := strconv.Itoa(n)
 			return slice[l-1] != s
 		}
 	}
-	stdLogger.Log.Debug("invalid domain", NewField("arg", i))
+	stdLogger.Log.Debug("invalid domain", DefaultField(i))
 	return false
 }
 
@@ -52,7 +52,7 @@ func IsDomain(i any) bool {
 func IsFile(f string) bool {
 	_, err := os.Stat(f)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", f))
+		stdLogger.Log.Debug(err.Error(), DefaultField(f))
 	}
 	return err == nil
 }
@@ -61,7 +61,7 @@ func IsFile(f string) bool {
 func IsIP(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
+		stdLogger.Log.Debug(err.Error(), DefaultField(i))
 		return false
 	}
 	return ip.IsValid()
@@ -70,7 +70,7 @@ func IsIP(i string) bool {
 func IsCIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
+		stdLogger.Log.Debug(err.Error(), DefaultField(i))
 		return false
 	}
 	return ip.IsValid()
@@ -80,7 +80,7 @@ func IsCIDR(i string) bool {
 func IsIPv4(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
+		stdLogger.Log.Debug(err.Error(), DefaultField(i))
 		return false
 	}
 	return ip.Is4()
@@ -89,7 +89,7 @@ func IsIPv4(i string) bool {
 func IsIPv4CIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
+		stdLogger.Log.Debug(err.Error(), DefaultField(i))
 		return false
 	}
 	return ip.IsValid() && ip.Addr().Is4()
@@ -99,7 +99,7 @@ func IsIPv4CIDR(i string) bool {
 func IsIPv6(i string) bool {
 	ip, err := netip.ParseAddr(i)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
+		stdLogger.Log.Debug(err.Error(), DefaultField(i))
 		return false
 	}
 	return ip.Is6()
@@ -108,7 +108,7 @@ func IsIPv6(i string) bool {
 func IsIPv6CIDR(i string) bool {
 	ip, err := netip.ParsePrefix(i)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", i))
+		stdLogger.Log.Debug(err.Error(), DefaultField(i))
 		return false
 	}
 	return ip.IsValid() && ip.Addr().Is6()
@@ -118,7 +118,7 @@ func IsIPv6CIDR(i string) bool {
 func IsURL(u string) bool {
 	_, err := url.ParseRequestURI(u)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", u))
+		stdLogger.Log.Debug(err.Error(), DefaultField(u))
 	}
 	return err == nil
 }

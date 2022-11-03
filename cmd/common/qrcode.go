@@ -41,7 +41,7 @@ func GenerateQRCode(content string, size int, dest string) error {
 		dest = "qrcode.png"
 	}
 	if content == "" {
-		stdLogger.Log.Debug(ErrInvalidArg.Error(), NewField("arg", content))
+		stdLogger.Log.Debug(ErrInvalidArg.Error(), DefaultField(content))
 		return ErrInvalidArg
 	}
 	return qrcode.WriteColorFile(content, qrcode.Medium, size, color.White, color.Black, dest)
@@ -50,24 +50,24 @@ func GenerateQRCode(content string, size int, dest string) error {
 func ReadQRCode(filename string) (string, error) {
 	f, err := os.Open(filename)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", filename))
+		stdLogger.Log.Debug(err.Error(), DefaultField(filename))
 		return "", err
 	}
 	defer f.Close()
 	img, _, err := image.Decode(f)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", f))
+		stdLogger.Log.Debug(err.Error(), DefaultField(f))
 		return "", err
 	}
 	png, err := gozxing.NewBinaryBitmapFromImage(img)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", img))
+		stdLogger.Log.Debug(err.Error(), DefaultField(img))
 		return "", err
 	}
 	qrReader := qrread.NewQRCodeReader()
 	result, err := qrReader.Decode(png, nil)
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", png))
+		stdLogger.Log.Debug(err.Error(), DefaultField(png))
 		return "", err
 	}
 	return result.String(), nil

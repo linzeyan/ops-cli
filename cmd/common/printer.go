@@ -105,7 +105,7 @@ func (p *printer) json(a ...any) {
 		indent := strings.Repeat(" ", p.indent)
 		encoder.SetIndent("", indent)
 		if err := encoder.Encode(i); err != nil {
-			stdLogger.Log.Debug(err.Error(), NewField("arg", i))
+			stdLogger.Log.Debug(err.Error(), DefaultField(i))
 			return
 		}
 		fmt.Fprintf(os.Stdout, "%s", buf.String())
@@ -118,7 +118,7 @@ func (p *printer) yaml(a ...any) {
 		encoder := yaml.NewEncoder(&buf)
 		encoder.SetIndent(p.indent)
 		if err := encoder.Encode(i); err != nil {
-			stdLogger.Log.Debug(err.Error(), NewField("arg", i))
+			stdLogger.Log.Debug(err.Error(), DefaultField(i))
 			return
 		}
 		fmt.Fprintf(os.Stdout, "%s", buf.String())
@@ -146,7 +146,7 @@ func (p *printer) table(header []string, data [][]string) {
 	table.Render()
 }
 
-func (p *printer) SetIdent(indent int)               { p.indent = indent }
+func (p *printer) SetIndent(indent int)              { p.indent = indent }
 func (p *printer) SetTableAlign(align int)           { p.align = align }
 func (p *printer) SetTablePadding(padding string)    { p.padding = padding }
 func (p *printer) SetTableFormatHeaders(format bool) { p.headers = format }

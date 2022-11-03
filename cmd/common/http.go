@@ -79,19 +79,19 @@ func HTTPRequestContent(url string, config ...HTTPConfig) ([]byte, error) {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", req))
+		stdLogger.Log.Debug(err.Error(), DefaultField(req))
 		return nil, err
 	}
 	if config[0].Verbose {
 		reqDump, err := httputil.DumpRequestOut(req, true)
 		if err != nil {
-			stdLogger.Log.Debug(err.Error(), NewField("arg", req))
+			stdLogger.Log.Debug(err.Error(), DefaultField(req))
 			return nil, err
 		}
 		stdPrinter.Printf("%s\n", reqDump)
 		respDump, err := httputil.DumpResponse(resp, true)
 		if err != nil {
-			stdLogger.Log.Debug(err.Error(), NewField("arg", resp))
+			stdLogger.Log.Debug(err.Error(), DefaultField(resp))
 			return nil, err
 		}
 		stdPrinter.Printf("%s\n", respDump)
@@ -134,7 +134,7 @@ func HTTPRequestContentGB18030(url string, body io.Reader, methods ...string) ([
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", req))
+		stdLogger.Log.Debug(err.Error(), DefaultField(req))
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
@@ -175,7 +175,7 @@ func HTTPRequestRedirectURL(uri string) (string, error) {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		stdLogger.Log.Debug(err.Error(), NewField("arg", req))
+		stdLogger.Log.Debug(err.Error(), DefaultField(req))
 		return result, err
 	}
 	if req.Host == "reurl.cc" && resp.Header.Get("Target") != "" {

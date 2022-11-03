@@ -73,7 +73,7 @@ func ByteSize(i any) string {
 	case float64:
 		return byteSize(n).String()
 	default:
-		stdLogger.Log.Debug(ErrInvalidArg.Error(), NewField("arg", i))
+		stdLogger.Log.Debug(ErrInvalidArg.Error(), DefaultField(i))
 		return ""
 	}
 }
