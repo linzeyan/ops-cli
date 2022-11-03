@@ -49,14 +49,17 @@ func initCert() *cobra.Command {
 			case common.IsDomain(input) || common.IsIPv4(input):
 				resp, err = resp.CheckHost(net.JoinHostPort(input, flags.port))
 			default:
+				logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(input))
 				printer.Error(common.ErrInvalidArg)
 				return
 			}
 			if err != nil {
+				logger.Debug(err.Error())
 				printer.Error(err)
 				return
 			}
 			if resp == nil {
+				logger.Debug(common.ErrResponse.Error())
 				printer.Error(common.ErrResponse)
 				return
 			}
@@ -114,6 +117,7 @@ type Cert struct {
 func (c *Cert) CheckHost(host string) (*Cert, error) {
 	conn, err := tls.Dial("tcp", host, nil)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	defer conn.Close()
@@ -133,6 +137,7 @@ func (c *Cert) CheckHost(host string) (*Cert, error) {
 func (c *Cert) CheckFile(fileName string) (*Cert, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	defer f.Close()
@@ -154,13 +159,16 @@ func (c *Cert) CheckFile(fileName string) (*Cert, error) {
 	buf = buf[0:t]
 	crtPem, err := Encoder.PemDecode(buf)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	cert, err := x509.ParseCertificates(crtPem)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	if cert == nil {
+		logger.Debug(common.ErrInvalidFile.Error())
 		return nil, common.ErrInvalidFile
 	}
 

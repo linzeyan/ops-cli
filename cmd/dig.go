@@ -49,10 +49,12 @@ func initDig() *cobra.Command {
 			case lens == 1:
 				flags.domain = args[0]
 				if output, err = output.Request(dns.TypeA, flags.domain, flags.network, flags.server); err != nil {
+					logger.Debug(err.Error())
 					printer.Error(err)
 					return
 				}
 				if output == nil {
+					logger.Info(common.ErrResponse.Error())
 					printer.Error(err)
 					return
 				}
@@ -96,10 +98,12 @@ func initDig() *cobra.Command {
 			typ := dns.StringToType[strings.ToUpper(argsType[0])]
 			output, err = output.Request(typ, flags.domain, flags.network, flags.server)
 			if err != nil {
+				logger.Debug(err.Error())
 				printer.Error(err)
 				return
 			}
 			if output == nil {
+				logger.Info(common.ErrResponse.Error())
 				printer.Error(err)
 				return
 			}
@@ -145,6 +149,7 @@ func (d *DigList) GetLocalServer() (string, error) {
 	const resolvConfig = "/etc/resolv.conf"
 	s, err := dns.ClientConfigFromFile(resolvConfig)
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	return s.Servers[0], err
@@ -156,6 +161,7 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 	if dns.TypeToString[digType] == "PTR" {
 		domain, err = dns.ReverseAddr(domain)
 		if err != nil {
+			logger.Debug(err.Error())
 			return nil, err
 		}
 		domain = strings.TrimRight(domain, ".")
@@ -167,11 +173,13 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 	if server == "" {
 		server, err = d.GetLocalServer()
 		if err != nil {
+			logger.Debug(err.Error())
 			return nil, err
 		}
 	}
 	resp, _, err := client.Exchange(&message, net.JoinHostPort(server, "53"))
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	if len(resp.Answer) == 0 {
