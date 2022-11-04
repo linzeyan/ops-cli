@@ -62,6 +62,7 @@ func initEncode() *cobra.Command {
 			out, err = Encoder.HexDecode(args[0])
 		}
 		if err != nil {
+			logger.Info(err.Error())
 			printer.Error(err)
 			return
 		}
@@ -80,6 +81,7 @@ func initEncode() *cobra.Command {
 		case true:
 			data, err = os.ReadFile(args[0])
 			if err != nil {
+				logger.Info(err.Error())
 				printer.Error(err)
 				return
 			}
@@ -99,6 +101,7 @@ func initEncode() *cobra.Command {
 			out, err = Encoder.HexEncode(data)
 		}
 		if err != nil {
+			logger.Info(err.Error())
 			printer.Error(err)
 			return
 		}
@@ -157,12 +160,18 @@ func (*Encode) Base32HexEncode(i any) (string, error) {
 	case []byte:
 		return base32.HexEncoding.EncodeToString(data), err
 	default:
+		logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(i))
 		return "", common.ErrInvalidArg
 	}
 }
 
 func (*Encode) Base32HexDecode(s string) ([]byte, error) {
-	return base32.HexEncoding.DecodeString(s)
+	b, err := base32.HexEncoding.DecodeString(s)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(s))
+		return nil, err
+	}
+	return b, err
 }
 
 func (*Encode) Base32StdEncode(i any) (string, error) {
@@ -173,12 +182,18 @@ func (*Encode) Base32StdEncode(i any) (string, error) {
 	case []byte:
 		return base32.StdEncoding.EncodeToString(data), err
 	default:
+		logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(i))
 		return "", common.ErrInvalidArg
 	}
 }
 
 func (*Encode) Base32StdDecode(s string) ([]byte, error) {
-	return base32.StdEncoding.DecodeString(s)
+	b, err := base32.StdEncoding.DecodeString(s)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(s))
+		return nil, err
+	}
+	return b, err
 }
 
 func (*Encode) Base64StdEncode(i any) (string, error) {
@@ -189,12 +204,18 @@ func (*Encode) Base64StdEncode(i any) (string, error) {
 	case []byte:
 		return base64.StdEncoding.EncodeToString(data), err
 	default:
+		logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(i))
 		return "", common.ErrInvalidArg
 	}
 }
 
 func (*Encode) Base64StdDecode(s string) ([]byte, error) {
-	return base64.StdEncoding.DecodeString(s)
+	b, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(s))
+		return nil, err
+	}
+	return b, err
 }
 
 func (*Encode) Base64URLEncode(i any) (string, error) {
@@ -205,12 +226,18 @@ func (*Encode) Base64URLEncode(i any) (string, error) {
 	case []byte:
 		return base64.URLEncoding.EncodeToString(data), err
 	default:
+		logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(i))
 		return "", common.ErrInvalidArg
 	}
 }
 
 func (*Encode) Base64URLDecode(s string) ([]byte, error) {
-	return base64.URLEncoding.DecodeString(s)
+	b, err := base64.URLEncoding.DecodeString(s)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(s))
+		return nil, err
+	}
+	return b, err
 }
 
 func (*Encode) HexEncode(i any) (string, error) {
@@ -221,12 +248,18 @@ func (*Encode) HexEncode(i any) (string, error) {
 	case []byte:
 		return hex.EncodeToString(data), err
 	default:
+		logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(i))
 		return "", common.ErrInvalidArg
 	}
 }
 
 func (*Encode) HexDecode(s string) ([]byte, error) {
-	return hex.DecodeString(s)
+	b, err := hex.DecodeString(s)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(s))
+		return nil, err
+	}
+	return b, err
 }
 
 func (*Encode) JSONEncode(i any) (string, error) {
@@ -234,12 +267,18 @@ func (*Encode) JSONEncode(i any) (string, error) {
 	encoder := json.NewEncoder(&buf)
 	encoder.SetIndent("", IndentTwoSpaces)
 	err := encoder.Encode(i)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(i))
+	}
 	return buf.String(), err
 }
 
 func (*Encode) JSONDecode(r io.Reader, i any) (any, error) {
 	decoder := json.NewDecoder(r)
 	err := decoder.Decode(i)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(i))
+	}
 	return i, err
 }
 
@@ -248,18 +287,31 @@ func (*Encode) JSONMarshaler(src, dst any) error {
 	switch data := src.(type) {
 	case string:
 		if err = json.Unmarshal([]byte(data), dst); err != nil {
+			logger.Debug(err.Error(),
+				common.NewField("src", src),
+				common.NewField("dst", dst),
+			)
 			return err
 		}
 	case []byte:
 		if err = json.Unmarshal(data, dst); err != nil {
+			logger.Debug(err.Error(),
+				common.NewField("src", src),
+				common.NewField("dst", dst),
+			)
 			return err
 		}
 	default:
 		bytes, err := json.Marshal(data)
 		if err != nil {
+			logger.Debug(err.Error(), common.DefaultField(data))
 			return err
 		}
 		if err = json.Unmarshal(bytes, dst); err != nil {
+			logger.Debug(err.Error(),
+				common.NewField("bytes", bytes),
+				common.NewField("dst", dst),
+			)
 			return err
 		}
 	}
@@ -280,16 +332,24 @@ func (*Encode) PemEncode(i any, t ...string) (string, error) {
 	case *pem.Block:
 		block = data
 	default:
+		logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(i))
 		return "", common.ErrInvalidArg
 	}
 	var buf bytes.Buffer
 	err = pem.Encode(&buf, block)
+	if err != nil {
+		logger.Debug(err.Error(),
+			common.NewField("buf", buf),
+			common.NewField("block", block),
+		)
+	}
 	return buf.String(), err
 }
 
 func (*Encode) PemDecode(b []byte) ([]byte, error) {
 	p, _ := pem.Decode(b)
 	if p == nil {
+		logger.Debug(common.ErrInvalidFile.Error(), common.DefaultField(b))
 		return nil, common.ErrInvalidFile
 	}
 	return p.Bytes, nil
@@ -300,12 +360,18 @@ func (*Encode) XMLEncode(i any) (string, error) {
 	encoder := xml.NewEncoder(&buf)
 	encoder.Indent("", IndentTwoSpaces)
 	err := encoder.Encode(i)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(i))
+	}
 	return buf.String(), err
 }
 
 func (*Encode) XMLDecode(r io.Reader, i any) (any, error) {
 	decoder := xml.NewDecoder(r)
 	err := decoder.Decode(i)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(i))
+	}
 	return i, err
 }
 
@@ -314,11 +380,17 @@ func (*Encode) YamlEncode(i any) (string, error) {
 	encoder := yaml.NewEncoder(&buf)
 	encoder.SetIndent(2)
 	err := encoder.Encode(i)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(i))
+	}
 	return buf.String(), err
 }
 
 func (*Encode) YamlDecode(r io.Reader, i any) (any, error) {
 	decoder := yaml.NewDecoder(r)
 	err := decoder.Decode(i)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(i))
+	}
 	return i, err
 }

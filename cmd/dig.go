@@ -49,7 +49,7 @@ func initDig() *cobra.Command {
 			case lens == 1:
 				flags.domain = args[0]
 				if output, err = output.Request(dns.TypeA, flags.domain, flags.network, flags.server); err != nil {
-					logger.Debug(err.Error())
+					logger.Info(err.Error())
 					printer.Error(err)
 					return
 				}
@@ -98,7 +98,7 @@ func initDig() *cobra.Command {
 			typ := dns.StringToType[strings.ToUpper(argsType[0])]
 			output, err = output.Request(typ, flags.domain, flags.network, flags.server)
 			if err != nil {
-				logger.Debug(err.Error())
+				logger.Info(err.Error())
 				printer.Error(err)
 				return
 			}

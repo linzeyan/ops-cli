@@ -51,7 +51,7 @@ func initDf() *cobra.Command {
 				for _, v := range partition {
 					usage, err := disk.UsageWithContext(common.Context, v.Mountpoint)
 					if err != nil {
-						logger.Debug(err.Error())
+						logger.Info(err.Error())
 						printer.Error(err)
 					}
 					d.ParseDevices(usage, partition)
@@ -61,7 +61,7 @@ func initDf() *cobra.Command {
 				for _, v := range args {
 					usage, err := disk.UsageWithContext(common.Context, v)
 					if err != nil {
-						logger.Debug(err.Error())
+						logger.Info(err.Error())
 						printer.Error(err)
 						return
 					}

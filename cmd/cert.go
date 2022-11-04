@@ -49,17 +49,17 @@ func initCert() *cobra.Command {
 			case common.IsDomain(input) || common.IsIPv4(input):
 				resp, err = resp.CheckHost(net.JoinHostPort(input, flags.port))
 			default:
-				logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(input))
+				logger.Info(common.ErrInvalidArg.Error(), common.DefaultField(input))
 				printer.Error(common.ErrInvalidArg)
 				return
 			}
 			if err != nil {
-				logger.Debug(err.Error())
+				logger.Info(err.Error())
 				printer.Error(err)
 				return
 			}
 			if resp == nil {
-				logger.Debug(common.ErrResponse.Error())
+				logger.Info(common.ErrResponse.Error())
 				printer.Error(common.ErrResponse)
 				return
 			}

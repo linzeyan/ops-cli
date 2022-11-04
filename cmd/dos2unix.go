@@ -29,6 +29,7 @@ func initDos2Unix() *cobra.Command {
 		Run: func(_ *cobra.Command, args []string) {
 			for _, f := range args {
 				if err := common.Dos2Unix(f); err != nil {
+					logger.Info(err.Error(), common.DefaultField(f))
 					printer.Printf("%s: %s\n", f, err)
 					continue
 				}

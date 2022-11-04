@@ -34,12 +34,13 @@ func initDoc(command *cobra.Command) *cobra.Command {
 		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
 	}
 
-	runE := func(cmd *cobra.Command, _ []string) error {
+	run := func(cmd *cobra.Command, _ []string) {
 		_, err := os.Stat(flags.dir)
 		if err != nil {
 			/* Create directory if not exist. */
 			if err = os.Mkdir(flags.dir, os.ModePerm); err != nil {
-				return err
+				logger.Info(err.Error(), common.DefaultField(flags.dir))
+				return
 			}
 		}
 		switch cmd.Name() {
@@ -56,31 +57,33 @@ func initDoc(command *cobra.Command) *cobra.Command {
 		case CommandYaml:
 			err = doc.GenYamlTree(command, flags.dir)
 		}
-		return err
+		if err != nil {
+			logger.Info(err.Error())
+		}
 	}
 
 	var docSubCmdMan = &cobra.Command{
 		Use:   CommandMan,
 		Short: "Generate man page documentation",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var docSubCmdMarkdown = &cobra.Command{
 		Use:   CommandMarkdown,
 		Short: "Generate markdown documentation",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var docSubCmdRest = &cobra.Command{
 		Use:   CommandReST,
 		Short: "Generate rest documentation",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var docSubCmdYaml = &cobra.Command{
 		Use:   CommandYaml,
 		Short: "Generate yaml documentation",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	docCmd.PersistentFlags().StringVarP(&flags.dir, "dir", "d", "doc", common.Usage("Specify the path to generate documentation"))

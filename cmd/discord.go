@@ -40,19 +40,25 @@ func initDiscord() *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	runE := func(cmd *cobra.Command, _ []string) error {
+	run := func(cmd *cobra.Command, _ []string) {
 		if flags.arg == "" {
-			return common.ErrInvalidFlag
+			logger.Info(common.ErrInvalidFlag.Error())
+			printer.Error(common.ErrInvalidFlag)
+			return
 		}
 		var err error
 		if rootConfig != "" {
 			if err = ReadConfig(CommandDiscord, &flags); err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 		}
 		var d Discord
 		if err = d.Init(flags.Token); err != nil {
-			return err
+			logger.Info(err.Error())
+			printer.Error(err)
+			return
 		}
 		switch cmd.Name() {
 		case CommandFile:
@@ -63,28 +69,29 @@ func initDiscord() *cobra.Command {
 			err = d.TextTTS(flags.Channel, flags.arg)
 		}
 		if err != nil {
-			return err
+			logger.Info(err.Error())
+			printer.Error(err)
+			return
 		}
 		printer.Printf(printer.SetNoneAsDefaultFormat(rootOutputFormat), d.Response)
-		return err
 	}
 
 	var discordSubCmdFile = &cobra.Command{
 		Use:   CommandFile,
 		Short: "Send file to Discord",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var discordSubCmdText = &cobra.Command{
 		Use:   CommandText,
 		Short: "Send text to Discord",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var discordSubCmdTextTS = &cobra.Command{
 		Use:   CommandText + "TS",
 		Short: "Send text to speech to Discord",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	discordCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Token"))
@@ -103,10 +110,12 @@ type Discord struct {
 func (d *Discord) Init(token string) error {
 	var err error
 	if token == "" {
+		logger.Debug(common.ErrInvalidToken.Error(), common.DefaultField(token))
 		return common.ErrInvalidToken
 	}
 	d.API, err = discordgo.New("Bot " + token)
 	if d.API == nil {
+		logger.Debug(common.ErrFailedInitial.Error())
 		return common.ErrFailedInitial
 	}
 	return err
@@ -116,22 +125,42 @@ func (d *Discord) File(channel, arg string) error {
 	var err error
 	f, err := os.Open(arg)
 	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(arg))
 		return err
 	}
 	filename := filepath.Base(arg)
 	defer f.Close()
 	d.Response, err = d.API.ChannelFileSend(channel, filename, f)
+	if err != nil {
+		logger.Debug(err.Error(),
+			common.NewField("channel", channel),
+			common.NewField("filename", filename),
+			common.NewField("f", f),
+		)
+	}
 	return err
 }
 
 func (d *Discord) Text(channel, arg string) error {
 	var err error
 	d.Response, err = d.API.ChannelMessageSend(channel, arg)
+	if err != nil {
+		logger.Debug(err.Error(),
+			common.NewField("channel", channel),
+			common.DefaultField(arg),
+		)
+	}
 	return err
 }
 
 func (d *Discord) TextTTS(channel, arg string) error {
 	var err error
 	d.Response, err = d.API.ChannelMessageSendTTS(channel, arg)
+	if err != nil {
+		logger.Debug(err.Error(),
+			common.NewField("channel", channel),
+			common.DefaultField(arg),
+		)
+	}
 	return err
 }
