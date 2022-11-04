@@ -49,11 +49,13 @@ func initEncrypt() *cobra.Command {
 		Use:   CommandFile,
 		Args:  cobra.ExactArgs(1),
 		Short: "Encrypt or decrypt file",
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			/* Read key in the config. */
 			if rootConfig != "" {
 				if err := ReadConfig(CommandEncrypt, &flags); err != nil {
-					return common.ErrInvalidArg
+					logger.Info(err.Error())
+					printer.Error(common.ErrInvalidArg)
+					return
 				}
 			}
 
@@ -61,16 +63,24 @@ func initEncrypt() *cobra.Command {
 			filename := args[0]
 			if flags.decrypt {
 				if Encryptor.CheckSecret(flags.Key) == nil {
-					return common.ErrInvalidArg
+					logger.Info(common.ErrInvalidArg.Error())
+					printer.Error(common.ErrInvalidArg)
+					return
 				}
 				err = Encryptor.DecryptFile(flags.Key, filename, flags.mode)
 			} else {
 				err = Encryptor.EncryptFile(flags.Key, filename, flags.mode)
 			}
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
-			return os.Rename(filename+tempFileExtension, filename)
+			err = os.Rename(filename+tempFileExtension, filename)
+			if err != nil {
+				logger.Info(err.Error())
+				printer.Error(err)
+			}
 		},
 		Example: common.Examples(`# Encrypt file
 ~/README.md
@@ -89,16 +99,20 @@ func initEncrypt() *cobra.Command {
 		Use:   CommandString,
 		Args:  cobra.ExactArgs(1),
 		Short: "Encrypt or decrypt string",
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			text := args[0]
 			/* Read key in the config. */
 			if rootConfig != "" {
 				if err := ReadConfig(CommandEncrypt, &flags); err != nil {
-					return common.ErrInvalidArg
+					logger.Info(err.Error())
+					printer.Error(common.ErrInvalidArg)
+					return
 				}
 			}
 			if Encryptor.CheckSecret(flags.Key) == nil {
-				return common.ErrInvalidArg
+				logger.Info(common.ErrInvalidArg.Error())
+				printer.Error(common.ErrInvalidArg)
+				return
 			}
 
 			var err error
@@ -109,10 +123,10 @@ func initEncrypt() *cobra.Command {
 				out, err = Encryptor.EncryptString(flags.Key, text, flags.mode)
 			}
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
 			}
 			printer.Printf(out)
-			return err
 		},
 		Example: common.Examples(`# Encrypt string
 "Hello World!" --config ~/config.toml
@@ -141,6 +155,7 @@ func (*Encrypt) CheckSecret(secret string) []byte {
 	if common.IsFile(secret) {
 		key, err := os.ReadFile(secret)
 		if err != nil {
+			logger.Debug(err.Error(), common.DefaultField(secret))
 			return nil
 		}
 		switch len(key) {
@@ -169,6 +184,7 @@ func (e *Encrypt) GetKey(secret, filename string, perm os.FileMode) []byte {
 	key := Randoms.GenerateString(32, AllSet)
 	err := os.WriteFile(f, key, perm)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil
 	}
 	return key
@@ -193,23 +209,28 @@ func (*Encrypt) stream(b cipher.Block, iv []byte, mode string, decrypt bool) cip
 func (e *Encrypt) EncryptFile(secret, filename, mode string) error {
 	f, err := os.Open(filename)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	defer f.Close()
 	fInfo, err := f.Stat()
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	block, err := aes.NewCipher(e.GetKey(secret, filename, fInfo.Mode()))
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	iv := make([]byte, block.BlockSize())
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	out, err := os.OpenFile(filename+tempFileExtension, os.O_RDWR|os.O_CREATE, fInfo.Mode())
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	defer out.Close()
@@ -221,6 +242,7 @@ func (e *Encrypt) EncryptFile(secret, filename, mode string) error {
 			stream.XORKeyStream(buf, buf[:n])
 			_, wrErr := out.Write(buf[:n])
 			if wrErr != nil {
+				logger.Debug(wrErr.Error())
 				return wrErr
 			}
 		}
@@ -228,35 +250,44 @@ func (e *Encrypt) EncryptFile(secret, filename, mode string) error {
 			break
 		}
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 	}
 	_, err = out.Write(iv)
+	if err != nil {
+		logger.Debug(err.Error())
+	}
 	return err
 }
 
 func (e *Encrypt) DecryptFile(secret, filename, mode string) error {
 	f, err := os.Open(filename)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	defer f.Close()
 	fInfo, err := f.Stat()
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	block, err := aes.NewCipher(e.GetKey(secret, filename, fInfo.Mode()))
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	iv := make([]byte, block.BlockSize())
 	fLen := fInfo.Size() - int64(len(iv))
 	_, err = f.ReadAt(iv, fLen)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	out, err := os.OpenFile(filename+tempFileExtension, os.O_RDWR|os.O_CREATE, fInfo.Mode())
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	defer out.Close()
@@ -272,6 +303,7 @@ func (e *Encrypt) DecryptFile(secret, filename, mode string) error {
 			stream.XORKeyStream(buf, buf[:n])
 			_, wrErr := out.Write(buf[:n])
 			if wrErr != nil {
+				logger.Debug(wrErr.Error())
 				return wrErr
 			}
 		}
@@ -279,6 +311,7 @@ func (e *Encrypt) DecryptFile(secret, filename, mode string) error {
 			return nil
 		}
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 	}
@@ -291,6 +324,7 @@ func (e *Encrypt) EncryptString(secret, text, mode string) (string, error) {
 	plainText := []byte(text)
 	block, err := aes.NewCipher(key)
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	switch mode {
@@ -298,6 +332,7 @@ func (e *Encrypt) EncryptString(secret, text, mode string) (string, error) {
 		out = make([]byte, aes.BlockSize+len(plainText))
 		iv := out[:aes.BlockSize]
 		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+			logger.Debug(err.Error())
 			return "", err
 		}
 		stream := e.stream(block, iv, mode, false)
@@ -305,6 +340,7 @@ func (e *Encrypt) EncryptString(secret, text, mode string) (string, error) {
 	case EncryptModeGCM:
 		gcm, err := cipher.NewGCM(block)
 		if err != nil {
+			logger.Debug(err.Error())
 			return "", err
 		}
 		nonce := make([]byte, gcm.NonceSize())
@@ -321,10 +357,12 @@ func (e *Encrypt) DecryptString(secret, text, mode string) (string, error) {
 	key := []byte(secret)
 	cipherText, err := Encoder.Base64URLDecode(text)
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	block, err := aes.NewCipher(key)
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	switch mode {
@@ -336,12 +374,14 @@ func (e *Encrypt) DecryptString(secret, text, mode string) (string, error) {
 	case EncryptModeGCM:
 		gcm, err := cipher.NewGCM(block)
 		if err != nil {
+			logger.Debug(err.Error())
 			return "", err
 		}
 		nonceSize := gcm.NonceSize()
 		nonce, enc := cipherText[:nonceSize], cipherText[nonceSize:]
 		out, err = gcm.Open(nil, nonce, enc, nil)
 		if err != nil {
+			logger.Debug(err.Error())
 			return "", err
 		}
 	default:
