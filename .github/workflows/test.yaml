@@ -97,4 +97,4 @@ jobs:
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: Run go test
-        run: go test ./test/. -fuzztime 15s
+        run: go test ./test/. -fuzz=Fuzz -fuzztime 15s

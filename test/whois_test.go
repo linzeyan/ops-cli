@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWhois(t *testing.T) {
+func TestWhoisNameServer(t *testing.T) {
 	const subCommand = cmd.CommandWhois
 	testCases := []struct {
 		input    []string
