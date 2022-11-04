@@ -36,11 +36,14 @@ func initFree() *cobra.Command {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			var err error
 			var f Free
 			if flags.count == 0 && flags.second == 0 {
-				return f.Output()
+				if err = f.Output(); err != nil {
+					logger.Info(err.Error())
+				}
+				return
 			}
 			var counter uint
 			for {
@@ -49,11 +52,12 @@ func initFree() *cobra.Command {
 				}
 				err = f.Output()
 				if err != nil {
-					return err
+					logger.Info(err.Error())
+					return
 				}
 				counter++
 				if flags.count > 0 && flags.count == counter {
-					return err
+					return
 				}
 				printer.Printf("\n")
 				time.Sleep(time.Second * time.Duration(flags.second))
@@ -71,10 +75,12 @@ func (f *Free) Output() error {
 	var err error
 	swap, err := mem.SwapMemory()
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	memory, err := mem.VirtualMemory()
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	var header = []string{"", "total", "used", "free", "available", "use%"}

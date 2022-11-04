@@ -57,22 +57,22 @@ func initHash() *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	runE := func(cmd *cobra.Command, args []string) error {
+	run := func(cmd *cobra.Command, args []string) {
 		var err error
 		hasher := HashAlgorithm(cmd.Name())
 		out, err := Hasher.Hash(hasher, args[0])
 		if err != nil {
-			return err
+			logger.Info(err.Error())
+			return
 		}
 		printer.Printf(out)
-		return err
 	}
 
 	var hashSubCmdMd5 = &cobra.Command{
 		Use:   HashMd5 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print MD5 Checksums",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -81,7 +81,7 @@ func initHash() *cobra.Command {
 		Use:   HashSha1 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-1 Checksums",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -90,7 +90,7 @@ func initHash() *cobra.Command {
 		Use:   HashSha256 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-256 Checksums",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -99,7 +99,7 @@ func initHash() *cobra.Command {
 		Use:   HashSha512 + " [string|file]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Print SHA-512 Checksums",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -126,6 +126,7 @@ func (h *Hash) Hash(hasher hash.Hash, i any) (string, error) {
 		return "", common.ErrInvalidArg
 	}
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	return Encoder.HexEncode(hasher.Sum(nil))
@@ -134,11 +135,13 @@ func (h *Hash) Hash(hasher hash.Hash, i any) (string, error) {
 func (h *Hash) WriteFile(hasher hash.Hash, filename string) (string, error) {
 	f, err := os.Open(filename)
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	defer f.Close()
 	_, err = io.Copy(hasher, f)
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	return Encoder.HexEncode(hasher.Sum(nil))
@@ -147,8 +150,7 @@ func (h *Hash) WriteFile(hasher hash.Hash, filename string) (string, error) {
 func (h *Hash) CheckFile(filename string) {
 	f, err := os.Open(filename)
 	if err != nil {
-		printer.Error(err)
-		os.Exit(1)
+		logger.Fatal(err.Error())
 	}
 	defer f.Close()
 	reader := bufio.NewScanner(f)
@@ -167,6 +169,7 @@ func (h *Hash) CheckFile(filename string) {
 		}
 		got, err := h.WriteFile(hasher, slice[1])
 		if err != nil {
+			logger.Debug(err.Error())
 			printer.Error(err)
 			continue
 		}
@@ -184,6 +187,7 @@ func (h *Hash) ListAll(s string) {
 		hasher := HashAlgorithm(alg)
 		out, err := h.Hash(hasher, s)
 		if err != nil {
+			logger.Debug(err.Error())
 			printer.Error(err)
 			continue
 		}
@@ -206,5 +210,6 @@ func HashAlgorithm(alg string) hash.Hash {
 	if h, ok := m[alg]; ok {
 		return h
 	}
+	logger.Debug("algorithm not found")
 	return nil
 }

@@ -53,9 +53,11 @@ func initMTR() *cobra.Command {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			if !common.IsDomain(args[0]) && !common.IsIP(args[0]) {
-				return common.ErrInvalidArg
+				logger.Info(common.ErrInvalidArg.Error(), common.DefaultField(args))
+				printer.Error(common.ErrInvalidArg)
+				return
 			}
 
 			if flags.interval < 50*time.Millisecond {
@@ -69,11 +71,15 @@ func initMTR() *cobra.Command {
 			m.trace.Count = flags.count
 			err := m.init()
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 
 			if err := termui.Init(); err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 			defer termui.Close()
 
@@ -173,12 +179,16 @@ func initMTR() *cobra.Command {
 					for _, i := range m.Statistics {
 						buf.WriteString(i[0] + "\n")
 					}
-					return os.WriteFile(flags.output, buf.Bytes(), FileModeRAll)
+					wrErr := os.WriteFile(flags.output, buf.Bytes(), FileModeRAll)
+					if wrErr != nil {
+						logger.Info(wrErr.Error())
+						printer.Error(wrErr)
+					}
 				}
 			} else if err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
 			}
-			return nil
 		},
 	}
 	mtrCmd.Flags().StringVarP(&flags.output, "output", "o", "", common.Usage("Specify output file name"))
@@ -202,10 +212,12 @@ func (m *MTR) init() error {
 	var err error
 	hostname, err := os.Hostname()
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	conn, err := net.Dial("udp", "8.8.8.8:53")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	if conn != nil {
@@ -217,6 +229,7 @@ func (m *MTR) init() error {
 	}
 	m.trace.Target, err = net.ResolveIPAddr(network, m.trace.Host)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	m.RemoteHostname = fmt.Sprintf("%s (%s)", m.trace.Host, m.trace.Target)
@@ -240,6 +253,7 @@ func (m *MTR) Run(ctx context.Context) error {
 
 	conn, err := m.trace.Listen()
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	if conn != nil {
@@ -315,6 +329,8 @@ func (m *MTR) trim(s string) string {
 		if err == nil {
 			ms := num / 1000
 			s = fmt.Sprintf("%f", ms)
+		} else {
+			logger.Debug(err.Error())
 		}
 	}
 

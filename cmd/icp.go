@@ -42,19 +42,25 @@ func initICP() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Short: "Check ICP status",
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			if rootConfig != "" {
 				if err := ReadConfig(CommandICP, &flags); err != nil {
-					return err
+					logger.Info(err.Error())
+					printer.Error(err)
+					return
 				}
 			}
 			if flags.Account == "" || flags.Key == "" {
-				return common.ErrInvalidToken
+				logger.Info(common.ErrInvalidToken.Error())
+				printer.Error(common.ErrInvalidToken)
+				return
 			}
 
 			var i ICP
 			if err := i.Request(flags.Account, flags.Key, args[0]); err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 			if flags.domain {
 				printer.Printf("%s\n", i.DomainName)
@@ -66,10 +72,9 @@ func initICP() *cobra.Command {
 				printer.Printf("%s\n", i.ICPStatus)
 			}
 			if flags.code || flags.domain || flags.status {
-				return nil
+				return
 			}
 			printer.Printf(printer.SetYamlAsDefaultFormat(rootOutputFormat), i)
-			return nil
 		},
 		Example: common.Examples(`# Print the ICP status
 -a account -k api_key google.com`, CommandICP),
@@ -95,6 +100,7 @@ func (i *ICP) requestURI(account, key, domain string) (string, error) {
 	hashData := account + key + "domainname"
 	sig, err := Hasher.Hash(HashAlgorithm(HashMd5), hashData)
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	rawCmd := fmt.Sprintf("domainname\r\ncheck\r\nentityname:icp\r\ndomains:%s\r\n.\r\n", domain)
@@ -106,10 +112,12 @@ func (i *ICP) requestURI(account, key, domain string) (string, error) {
 func (i *ICP) Request(account, key, domain string) error {
 	uri, err := i.requestURI(account, key, domain)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	resp, err := common.HTTPRequestContentGB18030(uri, nil, http.MethodPost)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	/* Find String */

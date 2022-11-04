@@ -43,28 +43,36 @@ func initLINE() *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	runE := func(cmd *cobra.Command, args []string) error {
+	run := func(cmd *cobra.Command, args []string) {
 		if flags.arg == "" {
-			return common.ErrInvalidFlag
+			logger.Info(common.ErrInvalidFlag.Error())
+			printer.Error(common.ErrInvalidFlag)
+			return
 		}
 		var err error
 		if rootConfig != "" {
 			if err = ReadConfig(CommandLINE, &flags); err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 		}
 		var l LINE
 		if err = l.Init(flags.Secret, flags.Token); err != nil {
-			return err
+			logger.Info(err.Error())
+			printer.Error(err)
+			return
 		}
 		switch cmd.Name() {
 		case CommandID:
 			l.Response, err = l.API.SetWebhookEndpointURL(args[0]).Do()
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 			l.GetID()
-			return err
+			return
 		case CommandText:
 			input := linebot.NewTextMessage(flags.arg)
 			l.Response, err = l.API.PushMessage(flags.ID, input).Do()
@@ -76,10 +84,11 @@ func initLINE() *cobra.Command {
 			l.Response, err = l.API.PushMessage(flags.ID, input).Do()
 		}
 		if err != nil {
-			return err
+			logger.Info(err.Error())
+			printer.Error(err)
+			return
 		}
 		printer.Printf(printer.SetNoneAsDefaultFormat(rootOutputFormat), l.Response)
-		return err
 	}
 
 	var lineSubCmdText = &cobra.Command{
@@ -87,7 +96,7 @@ func initLINE() *cobra.Command {
 		Short: "Send message to LINE",
 		Example: common.Examples(`# Send text to LINE chat
 -s secret -t token --id GroupID -a 'Hello LINE'`, CommandLINE, CommandText),
-		RunE: runE,
+		Run: run,
 	}
 
 	var lineSubCmdID = &cobra.Command{
@@ -99,7 +108,7 @@ func initLINE() *cobra.Command {
 # type and sent 'id' in the chat,
 # then console will print ID.
 https://callback_url`, CommandLINE, CommandID),
-		RunE: runE,
+		Run: run,
 	}
 
 	var lineSubCmdPhoto = &cobra.Command{
@@ -107,7 +116,7 @@ https://callback_url`, CommandLINE, CommandID),
 		Short: "Send photo to LINE",
 		Example: common.Examples(`# Send photo to LINE chat
 -s secret -t token --id GroupID -a https://img.url`, CommandLINE, CommandPhoto),
-		RunE: runE,
+		Run: run,
 	}
 
 	var lineSubCmdVideo = &cobra.Command{
@@ -115,7 +124,7 @@ https://callback_url`, CommandLINE, CommandID),
 		Short: "Send video to LINE",
 		Example: common.Examples(`# Send video to LINE chat
 -s secret -t token --id GroupID -a https://video.url`, CommandLINE, CommandVideo),
-		RunE: runE,
+		Run: run,
 	}
 
 	lineCmd.PersistentFlags().StringVarP(&flags.Secret, "secret", "s", "", common.Usage("Channel Secret"))
@@ -135,10 +144,12 @@ type LINE struct {
 func (l *LINE) Init(secret, token string) error {
 	var err error
 	if secret == "" || token == "" {
+		logger.Debug(common.ErrInvalidToken.Error())
 		return common.ErrInvalidToken
 	}
 	l.API, err = linebot.New(secret, token)
 	if l.API == nil {
+		logger.Debug(common.ErrFailedInitial.Error())
 		return common.ErrFailedInitial
 	}
 	return err
@@ -149,8 +160,7 @@ func (l *LINE) GetID() {
 	http.HandleFunc("/", func(_ http.ResponseWriter, r *http.Request) {
 		events, err := l.API.ParseRequest(r)
 		if err != nil {
-			printer.Error(err)
-			os.Exit(1)
+			logger.Fatal(err.Error())
 		}
 		for i := range events {
 			if events[i].Type == linebot.EventTypeMessage && events[i].Message.(*linebot.TextMessage).Text == CommandID {
@@ -180,7 +190,6 @@ func (l *LINE) GetID() {
 
 	err = server.ListenAndServe()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
-		printer.Printf("error starting server: %s", err)
-		os.Exit(1)
+		logger.Fatal(err.Error())
 	}
 }

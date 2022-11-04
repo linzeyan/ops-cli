@@ -30,6 +30,7 @@ import (
 func initIP() *cobra.Command {
 	iface, err := net.Interfaces()
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil
 	}
 	var validArgs []string
@@ -44,11 +45,12 @@ func initIP() *cobra.Command {
 		Args:      cobra.MinimumNArgs(1),
 		ValidArgs: validArgs,
 		Short:     "View interfaces configuration",
-		RunE: func(_ *cobra.Command, args []string) error {
-			var err error
+		Run: func(_ *cobra.Command, args []string) {
 			counters, err := net.IOCounters(true)
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 			idx, out := ParseInterfaces(iface, counters)
 			switch args[0] {
@@ -66,7 +68,6 @@ func initIP() *cobra.Command {
 					printer.Printf("%d: %s\n", idx[value], out[idx[value]])
 				}
 			}
-			return err
 		},
 		DisableFlagsInUseLine: true,
 		DisableFlagParsing:    true,

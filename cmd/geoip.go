@@ -33,7 +33,7 @@ func initGeoip() *cobra.Command {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			var out any
 			var err error
 			switch len(args) {
@@ -49,10 +49,10 @@ func initGeoip() *cobra.Command {
 				out, err = r.Request(args)
 			}
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				return
 			}
 			printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), out)
-			return err
 		},
 		Example: common.Examples(`# Print IP geographic information
 1.1.1.1
@@ -92,10 +92,12 @@ func (GeoIP) Request(ip string) (*GeoIP, error) {
 
 	content, err := common.HTTPRequestContent(apiURL)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	var data GeoIP
 	if err = Encoder.JSONMarshaler(content, &data); err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	return &data, err
@@ -113,6 +115,7 @@ func (GeoIPList) Request(inputs []string) (*GeoIPList, error) {
 		default:
 			ip, err := net.LookupIP(inputs[i])
 			if err != nil {
+				logger.Debug(err.Error())
 				return nil, err
 			}
 			ips += fmt.Sprintf(`"%s", `, ip[0])
@@ -123,10 +126,12 @@ func (GeoIPList) Request(inputs []string) (*GeoIPList, error) {
 	apiURL := "http://ip-api.com/batch?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting"
 	content, err := common.HTTPRequestContent(apiURL, common.HTTPConfig{Method: http.MethodPost, Body: ips})
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	var data GeoIPList
 	if err = Encoder.JSONMarshaler(content, &data); err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	return &data, err
