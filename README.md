@@ -63,14 +63,16 @@ Usage:
   ops-cli
   ops-cli [command]
 
-IM:
+IM Commands:
   discord     Send message to Discord
   line        Send message to LINE
   slack       Send message to Slack
   telegram    Send message to Telegram
 
-Network:
+Network Commands:
   arping      Discover and probe hosts in a network using the ARP protocol
+  dig         Resolve domain name
+  geoip       Print IP geographic information
   ip          View interfaces configuration
   mtr         Combined traceroute and ping
   netmask     Print IP/Mask pair, list address ranges
@@ -78,6 +80,8 @@ Network:
   ss          Displays sockets informations
   tcping      Connect to a port of a host
   traceroute  Print the route packets trace to network host
+  url         Get url content or expand shorten url or download
+  whois       List domain name information
   wsping      Connect to a websocket server
 
 Additional Commands:
@@ -86,13 +90,11 @@ Additional Commands:
   convert     Convert data format, support csv, json, toml, xml, yaml
   date        Print date time
   df          Display free disk spaces
-  dig         Resolve domain name
   doc         Generate documentation
   dos2unix    Convert file eol to unix style
   encode      Encode and decode string or file
   encrypt     Encrypt or decrypt
   free        Display free memory spaces
-  geoip       Print IP geographic information
   hash        Hash string or file
   help        Help about any command
   icp         Check ICP status
@@ -108,9 +110,7 @@ Additional Commands:
   system      Display system informations
   tree        Show the contents of the giving directory as a tree
   update      Update ops-cli to the latest release
-  url         Get url content or expand shorten url or download
   version     Print version information
-  whois       List domain name information
 
 Flags:
       --config string    Specify config path
