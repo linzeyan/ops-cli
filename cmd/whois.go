@@ -43,10 +43,12 @@ func initWhois() *cobra.Command {
 		Run: func(_ *cobra.Command, args []string) {
 			var w Whois
 			if err := w.Request(args[0]); err != nil {
+				logger.Info(err.Error(), common.DefaultField(args))
 				printer.Error(err)
 				return
 			}
 			if w.empty() {
+				logger.Info(common.ErrResponse.Error())
 				return
 			}
 			if flags.expiry {
@@ -88,6 +90,7 @@ type Whois struct {
 func (w *Whois) Request(domain string) error {
 	conn, err := net.Dial("tcp", net.JoinHostPort("whois.verisign-grs.com", "43"))
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	if conn != nil {
@@ -95,10 +98,12 @@ func (w *Whois) Request(domain string) error {
 	}
 	_, err = conn.Write([]byte(domain + "\n"))
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	result, err := io.ReadAll(conn)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	replace := strings.ReplaceAll(string(result), ": ", ";")
@@ -128,9 +133,11 @@ func (w *Whois) Request(domain string) error {
 			ns = append(ns, v[1])
 		}
 		if err != nil {
+			logger.Debug(err.Error())
 			printer.Error(err)
 		}
 		if calErr != nil {
+			logger.Debug(calErr.Error())
 			printer.Error(calErr)
 			err = calErr
 		}
@@ -144,6 +151,7 @@ func (w *Whois) ParseTime(t string) (string, error) {
 	/* 1997-09-15T04:00:00Z */
 	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
+		logger.Debug(err.Error())
 		return "", err
 	}
 	return s.Local().Format(time.RFC3339), err
@@ -153,6 +161,7 @@ func (w *Whois) ParseTime(t string) (string, error) {
 func (w *Whois) CalculateDays(t string) (int, error) {
 	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
+		logger.Debug(err.Error())
 		return 0, err
 	}
 	return int(s.Local().Sub(common.TimeNow.Local()).Hours() / 24), err

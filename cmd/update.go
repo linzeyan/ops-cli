@@ -41,29 +41,29 @@ func initUpdate() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Short: fmt.Sprintf("Update %s to the latest release", common.RepoName),
-		RunE: func(_ *cobra.Command, _ []string) error {
-			var err error
+		Run: func(_ *cobra.Command, _ []string) {
 			updater := NewUpdater(common.RepoOwner, common.RepoName, appVersion)
 			if !updater.Upgrade {
+				logger.Info("", common.DefaultField(updater))
 				printer.Printf("up-to-date\n")
-				return nil
+				return
 			}
 
 			printer.Printf("Update...\n")
 			printer.Printf("%s\n", common.Usage("==> Downloading file from GitHub "+updater.Repository.DownloadLink))
-			err = updater.Download()
+			err := updater.Download()
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				return
 			}
 
 			printer.Printf("Upgrading %s %s -> %s", common.RepoName, appVersion, updater.Repository.ReleaseTag)
 			printer.Printf("%s\n", common.Usage("==> Cleanup..."))
 			err = updater.Rename()
 			if err != nil {
-				return err
+				logger.Info(err.Error())
 			}
 			printer.Printf("Update completed in %s", time.Since(common.TimeNow))
-			return err
 		},
 
 		DisableFlagsInUseLine: true,
@@ -95,6 +95,7 @@ func (r *repository) fetchLatestVersion(username, repo string) *repository {
 	getTagURL := fmt.Sprintf("%s%s", urlBase, "latest")
 	tagURL, err := common.HTTPRequestRedirectURL(getTagURL)
 	if err != nil {
+		logger.Debug(err.Error())
 		tagURL = ""
 	}
 	tag := path.Base(tagURL)
@@ -132,6 +133,7 @@ func (*repository) copy(dst io.Writer, src io.Reader) error {
 	for {
 		_, err := io.CopyN(dst, src, 1024)
 		if err != nil {
+			logger.Debug(err.Error())
 			if errors.Is(err, io.EOF) {
 				return nil
 			}
@@ -144,12 +146,14 @@ func (*repository) copy(dst io.Writer, src io.Reader) error {
 func (r *repository) UnGzip() error {
 	f, err := os.Open(r.DownloadPath)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	defer f.Close()
 	/* Decompress */
 	ungzip, err := gzip.NewReader(f)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	defer ungzip.Close()
@@ -159,6 +163,7 @@ func (r *repository) UnGzip() error {
 
 	for {
 		header, err := reader.Next()
+		logger.Debug(err.Error())
 		if errors.Is(err, io.EOF) {
 			return nil
 		}
@@ -170,15 +175,19 @@ func (r *repository) UnGzip() error {
 		}
 		downloadPath, err := filepath.Abs(r.DownloadPath)
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		paths, err := r.sanitizeExtractPath(header.Name, filepath.Dir(downloadPath))
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		_, err = os.Stat(filepath.Dir(paths))
 		if err != nil {
+			logger.Debug(err.Error())
 			if mkErr := os.MkdirAll(filepath.Dir(paths), os.ModePerm); mkErr != nil {
+				logger.Debug(mkErr.Error())
 				return mkErr
 			}
 		}
@@ -191,11 +200,13 @@ func (r *repository) UnGzip() error {
 
 		file, err := os.OpenFile(paths, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, header.FileInfo().Mode())
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		defer file.Close()
 		err = r.copy(file, reader)
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 	}
@@ -205,22 +216,27 @@ func (r *repository) UnGzip() error {
 func (r *repository) UnZip() error {
 	unzip, err := zip.OpenReader(r.DownloadPath)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	defer unzip.Close()
 	for _, f := range unzip.File {
 		downloadPath, err := filepath.Abs(r.DownloadPath)
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		paths, err := r.sanitizeExtractPath(f.Name, filepath.Dir(downloadPath))
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		dir := filepath.Dir(paths)
 		_, err = os.Stat(dir)
 		if err != nil {
+			logger.Debug(err.Error())
 			if mkErr := os.MkdirAll(dir, os.ModePerm); mkErr != nil {
+				logger.Debug(mkErr.Error())
 				return mkErr
 			}
 		}
@@ -233,16 +249,19 @@ func (r *repository) UnZip() error {
 
 		dstFile, err := os.OpenFile(paths, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, f.Mode())
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		defer dstFile.Close()
 		zipFile, err := f.Open()
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		defer zipFile.Close()
 		err = r.copy(dstFile, zipFile)
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 	}
@@ -282,18 +301,15 @@ func (*Updater) split(tag string) *version {
 	}
 	major, err := strconv.Atoi(s[0])
 	if err != nil {
-		printer.Error(err)
-		os.Exit(1)
+		logger.Fatal(err.Error())
 	}
 	minor, err := strconv.Atoi(s[1])
 	if err != nil {
-		printer.Error(err)
-		os.Exit(1)
+		logger.Fatal(err.Error())
 	}
 	patch, err := strconv.Atoi(s[2])
 	if err != nil {
-		printer.Error(err)
-		os.Exit(1)
+		logger.Fatal(err.Error())
 	}
 	return &version{
 		Ver:   tag,
@@ -358,6 +374,7 @@ func (u *Updater) Download() error {
 	var err error
 	resp, err := common.HTTPRequestContent(u.Repository.DownloadLink)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	return os.WriteFile(u.Repository.DownloadPath, resp, FileModeRAll)
@@ -368,16 +385,19 @@ func (u *Updater) Rename() error {
 	/* Decompress */
 	err := u.Repository.ExtractFunc()
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	/* Replace file. */
 	err = os.Rename(u.Repository.ExtractPath, u.ExecutablePath)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	/* Remove useless files. */
 	err = os.Remove(u.Repository.DownloadPath)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	extractDir := filepath.Dir(u.Repository.ExtractPath)

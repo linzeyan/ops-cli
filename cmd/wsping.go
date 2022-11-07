@@ -36,6 +36,7 @@ func initWsping() *cobra.Command {
 		},
 		Run: func(_ *cobra.Command, args []string) {
 			if !common.IsURL(args[0]) {
+				logger.Info(common.ErrInvalidURL.Error(), common.DefaultField(args))
 				printer.Error(common.ErrInvalidURL)
 				return
 			}
@@ -47,6 +48,7 @@ func initWsping() *cobra.Command {
 
 			ws, resp, err := d.DialContext(common.Context, args[0], nil)
 			if err != nil {
+				logger.Info(err.Error())
 				printer.Error(err)
 				return
 			}

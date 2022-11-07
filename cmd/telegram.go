@@ -42,24 +42,32 @@ func initTelegram() *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	runE := func(cmd *cobra.Command, _ []string) error {
+	run := func(cmd *cobra.Command, _ []string) {
 		if flags.arg == "" {
-			return common.ErrInvalidFlag
+			logger.Info(common.ErrInvalidFlag.Error())
+			printer.Error(common.ErrInvalidFlag)
+			return
 		}
 		var err error
 		if rootConfig != "" {
 			if err = ReadConfig(CommandTelegram, &flags); err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 			i, err := strconv.ParseInt(flags.ChatID, 10, 64)
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 			flags.Chat = i
 		}
 		var t Telegram
 		if err = t.Init(flags.Token); err != nil {
-			return err
+			logger.Info(err.Error())
+			printer.Error(err)
+			return
 		}
 		switch cmd.Name() {
 		case CommandAudio:
@@ -76,22 +84,23 @@ func initTelegram() *cobra.Command {
 			err = t.Voice(flags.Chat, flags.arg, flags.caption)
 		}
 		if err != nil {
-			return err
+			logger.Info(err.Error())
+			printer.Error(err)
+			return
 		}
 		printer.Printf(printer.SetNoneAsDefaultFormat(rootOutputFormat), t.Response)
-		return err
 	}
 
 	var telegramSubCmdAudio = &cobra.Command{
 		Use:   CommandAudio,
 		Short: "Send audio file to Telegram",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var telegramSubCmdFile = &cobra.Command{
 		Use:   CommandFile,
 		Short: "Send file to Telegram",
-		RunE:  runE,
+		Run:   run,
 		Example: common.Examples(`# Send file
 -t bot_token -c chat_id -a '~/readme.md'`, CommandTelegram, CommandFile),
 	}
@@ -99,19 +108,22 @@ func initTelegram() *cobra.Command {
 	var telegramSubCmdID = &cobra.Command{
 		Use:   CommandID,
 		Short: "Get chat ID",
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			var err error
 			if rootConfig != "" {
 				if err = ReadConfig(CommandTelegram, &flags); err != nil {
-					return err
+					logger.Info(err.Error())
+					printer.Error(err)
+					return
 				}
 			}
 			var t Telegram
 			if err = t.Init(flags.Token); err != nil {
-				return err
+				logger.Info(err.Error())
+				printer.Error(err)
+				return
 			}
 			t.GetUpdate()
-			return err
 		},
 		Example: common.Examples(`# Execute the command and enter 'id' in the chat to get the chat id.
 --config ~/.config.toml`, CommandTelegram, CommandID),
@@ -120,7 +132,7 @@ func initTelegram() *cobra.Command {
 	var telegramSubCmdText = &cobra.Command{
 		Use:   CommandText,
 		Short: "Send text to Telegram",
-		RunE:  runE,
+		Run:   run,
 		Example: common.Examples(`# Send message
 -t bot_token -c chat_id -a 'Hello word'`, CommandTelegram, CommandText),
 	}
@@ -128,7 +140,7 @@ func initTelegram() *cobra.Command {
 	var telegramSubCmdPhoto = &cobra.Command{
 		Use:   CommandPhoto,
 		Short: "Send photo to Telegram",
-		RunE:  runE,
+		Run:   run,
 		Example: common.Examples(`# Send photo
 -t bot_token -c chat_id -a 'https://zh.wikipedia.org/wiki/File:Google_Chrome_icon_(February_2022).svg'
 -t bot_token -c chat_id -a '~/photo/cat.png'`, CommandTelegram, CommandPhoto),
@@ -137,13 +149,13 @@ func initTelegram() *cobra.Command {
 	var telegramSubCmdVideo = &cobra.Command{
 		Use:   CommandVideo,
 		Short: "Send video file to Telegram",
-		RunE:  runE,
+		Run:   run,
 	}
 
 	var telegramSubCmdVoice = &cobra.Command{
 		Use:   CommandVoice,
 		Short: "Send voice file to Telegram",
-		RunE:  runE,
+		Run:   run,
 	}
 	telegramCmd.PersistentFlags().StringVarP(&flags.Token, "token", "t", "", common.Usage("Bot token (required)"))
 	telegramCmd.PersistentFlags().Int64VarP(&flags.Chat, "chat-id", "c", 0, common.Usage("Chat ID"))
@@ -168,10 +180,12 @@ type Telegram struct {
 func (t *Telegram) Init(token string) error {
 	var err error
 	if token == "" {
+		logger.Debug(common.ErrInvalidToken.Error())
 		return common.ErrInvalidToken
 	}
 	t.API, err = tgBot.NewBotAPI(token)
 	if t.API == nil {
+		logger.Debug(common.ErrFailedInitial.Error())
 		return common.ErrFailedInitial
 	}
 	return err
@@ -268,5 +282,8 @@ func (t *Telegram) parseFile(s string) tgBot.RequestFileData {
 func (t *Telegram) send(c tgBot.Chattable) error {
 	var err error
 	t.Response, err = t.API.Send(c)
+	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(c))
+	}
 	return err
 }

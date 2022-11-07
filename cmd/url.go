@@ -36,10 +36,11 @@ func initURL() *cobra.Command {
 		Use:   CommandURL,
 		Args:  cobra.ExactArgs(1),
 		Short: "Get url content or expand shorten url or download",
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			url := args[0]
 			if !common.IsURL(url) {
-				return common.ErrInvalidURL
+				logger.Info(common.ErrInvalidURL.Error(), common.DefaultField(url))
+				return
 			}
 			var err error
 			var result any
@@ -47,7 +48,8 @@ func initURL() *cobra.Command {
 			case urlFlag.expand:
 				result, err = common.HTTPRequestRedirectURL(url)
 				if err != nil {
-					return err
+					logger.Info(err.Error())
+					return
 				}
 			default:
 				body := common.HTTPConfig{
@@ -58,14 +60,16 @@ func initURL() *cobra.Command {
 				}
 				result, err = common.HTTPRequestContent(url, body)
 				if err != nil || urlFlag.verbose {
-					return err
+					logger.Info(err.Error())
+					return
 				}
 				if urlFlag.output != "" {
-					return os.WriteFile(urlFlag.output, result.([]byte), FileModeRAll)
+					if err = os.WriteFile(urlFlag.output, result.([]byte), FileModeRAll); err != nil {
+						logger.Info(err.Error())
+					}
 				}
 			}
 			printer.Printf(rootOutputFormat, result)
-			return err
 		},
 		Example: common.Examples(`# Get the file from URL
 https://raw.githubusercontent.com/golangci/golangci-lint/master/.golangci.reference.yml -o config.yaml

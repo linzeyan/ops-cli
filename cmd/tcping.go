@@ -45,10 +45,12 @@ func initTCPing() *cobra.Command {
 			for i := 0; ; {
 				addr, duration, err := t.Connect(i, args)
 				if err != nil {
+					logger.Info(err.Error())
 					printer.Error(err)
 				}
 				ip, port, err := net.SplitHostPort(addr)
 				if err != nil {
+					logger.Info(err.Error())
 					printer.Error(err)
 				}
 				if flags.count == 1 {
@@ -80,6 +82,7 @@ func (t *TCPing) Connect(counter int, args []string) (string, time.Duration, err
 	startTime := time.Now()
 	conn, err := net.DialTimeout(t.Protocal, net.JoinHostPort(args[0], args[1]), t.Timeout)
 	if err != nil {
+		logger.Debug(err.Error())
 		p = fmt.Sprintf("Connect error: %s", err.Error())
 		return "", 0, errors.New(p)
 	}

@@ -44,6 +44,7 @@ func initTraceroute() *cobra.Command {
 		Short: "Print the route packets trace to network host",
 		Run: func(_ *cobra.Command, args []string) {
 			if flags.size <= 0 || flags.maxTTL <= 0 {
+				logger.Info(common.ErrInvalidArg.Error())
 				return
 			}
 			if flags.maxTTL > 64 {
@@ -70,6 +71,7 @@ func initTraceroute() *cobra.Command {
 
 			conn, err := t.Listen()
 			if err != nil {
+				logger.Info(err.Error())
 				printer.Error(err)
 				return
 			}
@@ -80,11 +82,13 @@ func initTraceroute() *cobra.Command {
 			t.Host = args[0]
 			t.Target, err = net.ResolveIPAddr("ip4", t.Host)
 			if err != nil {
+				logger.Info(err.Error())
 				printer.Error(err)
 				return
 			}
 			reply := make([]byte, 1500)
 			if err = t.Connect(common.Context, reply); err != nil {
+				logger.Info(err.Error())
 				printer.Error(err)
 				return
 			}
@@ -116,10 +120,12 @@ type Traceroute struct {
 func (*Traceroute) Listen() (*icmp.PacketConn, error) {
 	conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	err = conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL|ipv4.FlagDst|ipv4.FlagInterface|ipv4.FlagSrc, true)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	return conn, err
@@ -134,17 +140,21 @@ func (t *Traceroute) Connect(ctx context.Context, reply []byte) error {
 		t.Data.Body.(*icmp.Echo).Seq = i
 		b, err := t.Data.Marshal(nil)
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 
 		if err = t.Connetion.IPv4PacketConn().SetTTL(i); err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		peer, err := t.sendPacket(i, b, reply)
 		if err != nil {
+			logger.Debug(err.Error())
 			return err
 		}
 		if peer == t.Target.String() {
+			logger.Debug("peer == target")
 			break
 		}
 		time.Sleep(t.Interval)
@@ -161,25 +171,30 @@ func (t *Traceroute) sendPacket(hop int, b, reply []byte) (string, error) {
 		startTime := time.Now()
 		_, err = t.Connetion.IPv4PacketConn().WriteTo(b, nil, t.Target)
 		if err != nil {
+			logger.Debug(err.Error())
 			return "", err
 		}
 		/* Wait receiving. */
 		if err = t.Connetion.SetReadDeadline(time.Now().Add(t.Timeout)); err != nil {
+			logger.Debug(err.Error())
 			return "", err
 		}
 		n, _, peer, err := t.Connetion.IPv4PacketConn().ReadFrom(reply)
 		if err != nil {
+			logger.Debug(err.Error())
 			t.lost = true
 			t.statistics(hop, "*", 0)
 			rtt = append(rtt, "*")
 			continue
 		}
 		if peer.String() == inetLocalhostIP && (t.Host == inetLocalhost || t.Host == inetLocalhostIP) {
+			logger.Debug("peer == localhost")
 			continue
 		}
 		duration := time.Since(startTime)
 		result, err := icmp.ParseMessage(1, reply[:n])
 		if err != nil {
+			logger.Debug(err.Error())
 			return peer.String(), err
 		}
 		switch result.Type {
