@@ -33,10 +33,12 @@ func (f *FileStat) String(path string) error {
 	var err error
 	stat, err := os.Lstat(path)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	s, ok := stat.Sys().(*syscall.Stat_t)
 	if !ok {
+		logger.Debug(common.ErrResponse.Error())
 		return common.ErrResponse
 	}
 	var out string
@@ -48,11 +50,13 @@ func (f *FileStat) String(path string) error {
 	out += fmt.Sprintf("\n  Mode: (%#o/%s)", stat.Mode().Perm(), stat.Mode())
 	uid, err := user.LookupId(fmt.Sprintf(`%d`, s.Uid))
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	out += fmt.Sprintf("\tUid: (%5d/%8s)", s.Uid, uid.Username)
 	gid, err := user.LookupGroupId(fmt.Sprintf(`%d`, s.Gid))
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	out += fmt.Sprintf("\tGid: (%5d/%8s)", s.Gid, gid.Name)

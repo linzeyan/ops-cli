@@ -39,7 +39,7 @@ func initSystem() *cobra.Command {
 		DisableFlagsInUseLine: true,
 	}
 
-	runE := func(cmd *cobra.Command, _ []string) error {
+	run := func(cmd *cobra.Command, _ []string) {
 		var s System
 		var err error
 		var resp any
@@ -58,16 +58,16 @@ func initSystem() *cobra.Command {
 			resp, err = s.NetInfo()
 		}
 		if err != nil {
-			return err
+			logger.Info(err.Error())
+			return
 		}
 		printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), resp)
-		return err
 	}
 
 	var systemSubCmdCPU = &cobra.Command{
 		Use:   CommandCPU,
 		Short: "Display cpu informations",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -75,7 +75,7 @@ func initSystem() *cobra.Command {
 	var systemSubCmdDisk = &cobra.Command{
 		Use:   CommandDisk,
 		Short: "Display disk informations",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -83,7 +83,7 @@ func initSystem() *cobra.Command {
 	var systemSubCmdHost = &cobra.Command{
 		Use:   CommandHost,
 		Short: "Display host informations",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -91,7 +91,7 @@ func initSystem() *cobra.Command {
 	var systemSubCmdLoad = &cobra.Command{
 		Use:   CommandLoad,
 		Short: "Display load informations",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -99,7 +99,7 @@ func initSystem() *cobra.Command {
 	var systemSubCmdMemory = &cobra.Command{
 		Use:   CommandMemory,
 		Short: "Display memory informations",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -107,7 +107,7 @@ func initSystem() *cobra.Command {
 	var systemSubCmdNetwork = &cobra.Command{
 		Use:   CommandNetwork,
 		Short: "Display network informations",
-		RunE:  runE,
+		Run:   run,
 
 		DisableFlagsInUseLine: true,
 	}
@@ -125,6 +125,7 @@ type System struct{}
 func (s *System) CPUInfo() (any, error) {
 	info, err := cpu.InfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	resp := struct {
@@ -144,6 +145,7 @@ func (s *System) CPUInfo() (any, error) {
 func (s *System) DiskUsage() (any, error) {
 	info, err := disk.UsageWithContext(common.Context, "/")
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	resp := struct {
@@ -162,6 +164,7 @@ func (s *System) DiskUsage() (any, error) {
 func (s *System) HostInfo() (any, error) {
 	info, err := host.InfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	resp := struct {
@@ -191,6 +194,7 @@ func (s *System) HostInfo() (any, error) {
 func (s *System) LoadAvg() (any, error) {
 	info, err := load.AvgWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	resp := struct {
@@ -206,6 +210,7 @@ func (s *System) LoadAvg() (any, error) {
 func (s *System) MemUsage() (any, error) {
 	info, err := mem.VirtualMemoryWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	resp := struct {
@@ -223,6 +228,7 @@ func (s *System) MemUsage() (any, error) {
 func (s *System) NetInfo() (any, error) {
 	info, err := net.IOCountersWithContext(common.Context, false)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, err
 	}
 	type systemNetIOResponse struct {
@@ -242,12 +248,16 @@ func (s *System) NetInfo() (any, error) {
 	var netResp systemNetIOResponse
 	err = Encoder.JSONMarshaler(info[0], &netResp)
 	if err != nil {
+		logger.Debug(err.Error())
 		return &netResp, err
 	}
 	inet, err := net.InterfacesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return &netResp, err
 	}
-	err = Encoder.JSONMarshaler(inet, &netResp.Interfaces)
+	if err = Encoder.JSONMarshaler(inet, &netResp.Interfaces); err != nil {
+		logger.Debug(err.Error())
+	}
 	return &netResp, err
 }

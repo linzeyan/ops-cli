@@ -171,9 +171,11 @@ func (Random) GenerateString(length int, charSet RandomCharacter) Random {
 	for i := 0; i < length; i++ {
 		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))
 		if err != nil {
+			logger.Debug(err.Error())
 			return nil
 		}
 		if err = buf.WriteByte(charSet[n.Int64()]); err != nil {
+			logger.Debug(err.Error())
 			return nil
 		}
 	}
@@ -199,6 +201,7 @@ func (r Random) GenerateAll(length, minLower, minUpper, minSymbol, minNumber int
 	}
 	leave := length - minLower - minUpper - minSymbol - minNumber
 	if leave < 0 {
+		logger.Debug(common.ErrInvalidArg.Error(), common.DefaultField(leave))
 		return nil
 	}
 	lower := r.GenerateString(minLower, LowercaseLetters)
@@ -230,6 +233,7 @@ func (Random) Rand(length int) []byte {
 	b := make([]byte, length)
 	_, err := rand.Read(b)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil
 	}
 	return b

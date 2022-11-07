@@ -77,6 +77,7 @@ func (*Ss) getTCPSocks(inet string, fn netstat.AcceptFn) [][]string {
 	if inet == IPv4 || inet == All {
 		socks, err := netstat.TCPSocks(fn)
 		if err != nil {
+			logger.Debug(err.Error())
 			return nil
 		}
 		for _, v := range socks {
@@ -88,6 +89,7 @@ func (*Ss) getTCPSocks(inet string, fn netstat.AcceptFn) [][]string {
 	}
 	socks6, err := netstat.TCP6Socks(fn)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil
 	}
 	for _, v := range socks6 {
@@ -101,6 +103,7 @@ func (*Ss) getUDPSocks(inet string, fn netstat.AcceptFn) [][]string {
 	if inet == IPv4 || inet == All {
 		socks, err := netstat.UDPSocks(fn)
 		if err != nil {
+			logger.Debug(err.Error())
 			return nil
 		}
 		for _, v := range socks {

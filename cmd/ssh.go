@@ -41,15 +41,21 @@ func initSSHKeyGen() *cobra.Command {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			var k SSHKeygen
 			if flags.key != "" {
-				return k.GetPub(flags.key)
+				if err := k.GetPub(flags.key); err != nil {
+					logger.Info(err.Error())
+					printer.Error(err)
+				}
 			}
 			if flags.bit < 4096 {
 				flags.bit = 4096
 			}
-			return k.Generate(flags.bit, flags.path)
+			if err := k.Generate(flags.bit, flags.path); err != nil {
+				logger.Info(err.Error())
+				printer.Error(err)
+			}
 		},
 	}
 	sshkeygenCmd.Flags().IntVarP(&flags.bit, "bits", "b", 4096, common.Usage("Specifies the number of bits in the key to create"))
@@ -77,6 +83,7 @@ func (r *SSHKeygen) Generate(bit int, path string) error {
 	/* Generate rsa keypair. */
 	key, err := rsa.GenerateKey(rand.Reader, bit)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	/* Encode and write private key to file. */
@@ -85,20 +92,24 @@ func (r *SSHKeygen) Generate(bit int, path string) error {
 		Bytes: x509.MarshalPKCS1PrivateKey(key),
 	})
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	if err = os.WriteFile(rsaFile, []byte(privateKey), FileModeROwner); err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	printer.Printf("%s generated\n", rsaFile)
 	/* Marshal public key. */
 	pub, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	publicKey := ssh.MarshalAuthorizedKey(pub)
 	err = os.WriteFile(pubFile, publicKey, FileModeROwner)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	printer.Printf("%s generated\n", pubFile)
@@ -108,18 +119,22 @@ func (r *SSHKeygen) Generate(bit int, path string) error {
 func (*SSHKeygen) GetPub(keyFile string) error {
 	f, err := os.ReadFile(keyFile)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	decode, err := Encoder.PemDecode(f)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	key, err := x509.ParsePKCS1PrivateKey(decode)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	pub, err := ssh.NewPublicKey(&key.PublicKey)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	printer.Printf("%s", ssh.MarshalAuthorizedKey(pub))

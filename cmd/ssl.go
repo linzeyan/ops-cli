@@ -44,20 +44,27 @@ func initSSL() *cobra.Command {
 	var sslSubCmdGenerate = &cobra.Command{
 		Use:   CommandGenerate,
 		Short: "Generate certificates",
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			var s SSL
-			return s.Generate()
+			if err := s.Generate(); err != nil {
+				logger.Info(err.Error())
+				printer.Error(err)
+			}
 		}}
 
 	var sslSubCmdSign = &cobra.Command{
 		Use:   CommandSign,
 		Short: "Sign certificates from giving ca files",
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			if flags.ca == "" || flags.key == "" {
-				return nil
+				logger.Info(common.ErrInvalidFlag.Error())
+				return
 			}
 			var s SSL
-			return s.Sign(flags.ca, flags.key)
+			if err := s.Sign(flags.ca, flags.key); err != nil {
+				logger.Info(err.Error())
+				printer.Error(err)
+			}
 		}}
 	sslSubCmdSign.Flags().StringVarP(&flags.ca, "ca", "c", "", common.Usage("Specify CA file"))
 	sslSubCmdSign.Flags().StringVarP(&flags.key, "key", "k", "", common.Usage("Specify private key file"))
@@ -104,6 +111,7 @@ func (s *SSL) serverSubject() *x509.Certificate {
 	var info cnf
 	if rootConfig != "" {
 		if err := ReadConfig(CommandCert, &info); err != nil {
+			logger.Debug(err.Error())
 			return nil
 		}
 
@@ -116,6 +124,8 @@ func (s *SSL) serverSubject() *x509.Certificate {
 			u, err := url.ParseRequestURI(v)
 			if err == nil {
 				uri = append(uri, u)
+			} else {
+				logger.Debug(err.Error(), common.DefaultField(v))
 			}
 		}
 		return &x509.Certificate{
@@ -190,19 +200,23 @@ func (s *SSL) Generate() error {
 	}
 	caKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	caCert, err := x509.CreateCertificate(rand.Reader, ca, ca, &caKey.PublicKey, caKey)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	var caCertPem, caKeyPem string
 	caKeyPem, err = Encoder.PemEncode(x509.MarshalPKCS1PrivateKey(caKey), "RSA PRIVATE KEY")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	caCertPem, err = Encoder.PemEncode(caCert, "CERTIFICATE")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 
@@ -220,38 +234,46 @@ func (s *SSL) Generate() error {
 	}
 	privKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	crt, err := x509.CreateCertificate(rand.Reader, subCa, ca, &privKey.PublicKey, caKey)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	var crtPem, keyPem string
 	keyPem, err = Encoder.PemEncode(x509.MarshalPKCS1PrivateKey(privKey), "RSA PRIVATE KEY")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	crtPem, err = Encoder.PemEncode(crt, "CERTIFICATE")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 
 	server := s.serverSubject()
 	serverKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	serverCert, err := x509.CreateCertificate(rand.Reader, server, subCa, &serverKey.PublicKey, privKey)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	var serverCertPem, serverKeyPem string
 	serverKeyPem, err = Encoder.PemEncode(x509.MarshalPKCS1PrivateKey(serverKey), "RSA PRIVATE KEY")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	serverCertPem, err = Encoder.PemEncode(serverCert, "CERTIFICATE")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 
@@ -268,49 +290,66 @@ func (s *SSL) Sign(caCert, caKey string) error {
 	bits := 4096
 	caCertFile, err := os.ReadFile(caCert)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	caKeyFile, err := os.ReadFile(caKey)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	caCertDecode, err := Encoder.PemDecode(caCertFile)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	caKeyDecode, err := Encoder.PemDecode(caKeyFile)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	key, err := x509.ParsePKCS1PrivateKey(caKeyDecode)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	ca, err := x509.ParseCertificate(caCertDecode)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 
 	server := s.serverSubject()
 	serverKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	serverCert, err := x509.CreateCertificate(rand.Reader, server, ca, &serverKey.PublicKey, key)
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	var serverCertPem, serverKeyPem string
 	serverKeyPem, err = Encoder.PemEncode(x509.MarshalPKCS1PrivateKey(serverKey), "RSA PRIVATE KEY")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 	serverCertPem, err = Encoder.PemEncode(serverCert, "CERTIFICATE")
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 
-	_ = os.WriteFile("server.key", []byte(serverKeyPem), FileModeROwner)
+	err = os.WriteFile("server.key", []byte(serverKeyPem), FileModeROwner)
+	if err != nil {
+		logger.Debug(err.Error())
+		return err
+	}
 	err = os.WriteFile("server.crt", []byte(serverCertPem), FileModeRAll)
+	if err != nil {
+		logger.Debug(err.Error())
+	}
 	return err
 }

@@ -39,18 +39,22 @@ func initRedis() *cobra.Command {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: func(_ *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			var r Redis
 			if rootConfig != "" {
 				if err := ReadConfig(CommandRedis, &flags); err != nil {
-					return err
+					logger.Info(err.Error())
+					return
 				}
 			}
 			conn := r.Connection(flags.Host, flags.Port, flags.Username, flags.Password, flags.DB)
 			if conn == nil {
-				return common.ErrFailedInitial
+				logger.Info(common.ErrFailedInitial.Error())
+				return
 			}
-			return r.Do(conn, args)
+			if err := r.Do(conn, args); err != nil {
+				logger.Info(err.Error())
+			}
 		},
 	}
 
@@ -73,12 +77,13 @@ func (r *Redis) Connection(host, port, user, pass string, db int) *redis.Client 
 			DB:       db,
 		})
 	}
-
+	logger.Debug(common.ErrInvalidArg.Error(), common.NewField("host", host))
 	return nil
 }
 
 func (r *Redis) Do(rdb *redis.Client, commands []string) error {
 	if len(commands) == 0 {
+		logger.Debug(common.ErrInvalidArg.Error(), common.NewField("commands", commands))
 		return nil
 	}
 	var args []string
@@ -92,6 +97,7 @@ func (r *Redis) Do(rdb *redis.Client, commands []string) error {
 	cmd := rdb.Do(common.Context, arg...)
 	out, err := cmd.Result()
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 

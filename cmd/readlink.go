@@ -36,6 +36,7 @@ func initReadlink() *cobra.Command {
 				for {
 					out, err = os.Readlink(temp)
 					if err != nil {
+						logger.Info(err.Error())
 						if !flags {
 							break
 						}

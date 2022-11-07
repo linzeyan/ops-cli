@@ -25,16 +25,14 @@ func initStat() *cobra.Command {
 		Use:   CommandStat + " path...",
 		Short: "Display file informations",
 		Args:  cobra.MinimumNArgs(1),
-		RunE: func(_ *cobra.Command, args []string) error {
-			var err error
+		Run: func(_ *cobra.Command, args []string) {
 			for _, v := range args {
 				var s FileStat
-				err = s.String(v)
-				if err != nil {
-					return err
+				if err := s.String(v); err != nil {
+					logger.Info(err.Error())
+					return
 				}
 			}
-			return err
 		},
 		DisableFlagsInUseLine: true,
 	}
