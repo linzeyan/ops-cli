@@ -33,9 +33,10 @@ func initURL() *cobra.Command {
 		headers string
 	}
 	var urlCmd = &cobra.Command{
-		Use:   CommandURL,
-		Args:  cobra.ExactArgs(1),
-		Short: "Get url content or expand shorten url or download",
+		GroupID: groupings[CommandURL],
+		Use:     CommandURL,
+		Args:    cobra.ExactArgs(1),
+		Short:   "Get url content or expand shorten url or download",
 		Run: func(_ *cobra.Command, args []string) {
 			url := args[0]
 			if !common.IsURL(url) {

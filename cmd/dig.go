@@ -34,9 +34,10 @@ func initDig() *cobra.Command {
 		server  string
 	}
 	var digCmd = &cobra.Command{
-		Use:   CommandDig + " [host] [@server] [type]",
-		Args:  cobra.MinimumNArgs(1),
-		Short: "Resolve domain name",
+		GroupID: groupings[CommandDig],
+		Use:     CommandDig + " [host] [@server] [type]",
+		Args:    cobra.MinimumNArgs(1),
+		Short:   "Resolve domain name",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},

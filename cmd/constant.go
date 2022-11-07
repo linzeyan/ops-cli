@@ -137,8 +137,8 @@ const (
 )
 
 const (
-	groupIM      = "IM:"
-	groupNetwork = "Network:"
+	groupIM      = "IM Commands:"
+	groupNetwork = "Network Commands:"
 )
 
 const (

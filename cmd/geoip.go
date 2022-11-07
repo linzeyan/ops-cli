@@ -28,8 +28,9 @@ import (
 
 func initGeoip() *cobra.Command {
 	var geoipCmd = &cobra.Command{
-		Use:   CommandGeoip + " IP...",
-		Short: "Print IP geographic information",
+		GroupID: groupings[CommandGeoip],
+		Use:     CommandGeoip + " IP...",
+		Short:   "Print IP geographic information",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},

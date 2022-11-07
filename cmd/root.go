@@ -84,6 +84,8 @@ var groupings = map[string]string{
 	CommandTelegram: groupIM,
 
 	CommandArping:     groupNetwork,
+	CommandDig:        groupNetwork,
+	CommandGeoip:      groupNetwork,
 	CommandIP:         groupNetwork,
 	CommandMTR:        groupNetwork,
 	CommandNetmask:    groupNetwork,
@@ -91,6 +93,8 @@ var groupings = map[string]string{
 	CommandSs:         groupNetwork,
 	CommandTCPing:     groupNetwork,
 	CommandTraceroute: groupNetwork,
+	CommandURL:        groupNetwork,
+	CommandWhois:      groupNetwork,
 	CommandWsping:     groupNetwork,
 }
 
