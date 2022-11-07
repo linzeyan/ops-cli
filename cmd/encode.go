@@ -41,7 +41,7 @@ func initEncode() *cobra.Command {
 	var encodeCmd = &cobra.Command{
 		Use:   CommandEncode,
 		Short: "Encode and decode string or file",
-		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+		RunE:  func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 
 		DisableFlagsInUseLine: true,
 	}

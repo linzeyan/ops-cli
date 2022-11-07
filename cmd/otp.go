@@ -44,11 +44,11 @@ func initOTP() *cobra.Command {
 	var otpCmd = &cobra.Command{
 		Use:   CommandOTP,
 		Short: "Calculate passcode or generate secret",
-		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+		RunE:  func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 
 		DisableFlagsInUseLine: true,
 	}
-	runE := func(cmd *cobra.Command, args []string) error {
+	run := func(cmd *cobra.Command, args []string) {
 		o := OTP{
 			Period:    flags.period,
 			Digit:     flags.digit,
@@ -71,17 +71,17 @@ func initOTP() *cobra.Command {
 			result, err = o.GenSecret()
 		}
 		if err != nil {
-			return err
+			logger.Info(err.Error())
+			return
 		}
 		printer.Printf(result)
-		return err
 	}
 
 	var otpSubCmdCalculate = &cobra.Command{
 		Use:   CommandCalculate,
 		Args:  cobra.MinimumNArgs(1),
 		Short: "Calculate passcode",
-		RunE:  runE,
+		Run:   run,
 		Example: common.Examples(`# Calculate the passcode for the specified secret
 6BDRT7ATRRCZV5ISFLOHAHQLYF4ZORG7
 6BDR T7AT RRCZ V5IS FLOH AHQL YF4Z ORG7
@@ -93,7 +93,7 @@ T7L756M2FEL6CHISIXVSGT4VUDA4ZLIM -p 15 -d 7`, CommandOTP, CommandCalculate),
 	var otpSubCmdGenerate = &cobra.Command{
 		Use:   CommandGenerate,
 		Short: "Generate otp secret",
-		RunE:  runE,
+		Run:   run,
 		Example: common.Examples(`# Generate OTP and specify a period of 15 seconds
 -p 15
 
@@ -154,6 +154,7 @@ func (o *OTP) SetAlgorithm() func() hash.Hash {
 func (o *OTP) HOTP(secret string, timeInterval int64) (string, error) {
 	key, err := Encoder.Base32StdDecode(strings.ToUpper(secret))
 	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(secret))
 		return "", err
 	}
 	buf := make([]byte, 8)
@@ -161,6 +162,7 @@ func (o *OTP) HOTP(secret string, timeInterval int64) (string, error) {
 	hasher := hmac.New(o.SetAlgorithm(), key)
 	_, err = hasher.Write(buf)
 	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(buf))
 		return "", err
 	}
 	h := hasher.Sum(nil)
@@ -169,6 +171,7 @@ func (o *OTP) HOTP(secret string, timeInterval int64) (string, error) {
 
 	var data uint32
 	if err = binary.Read(r, binary.BigEndian, &data); err != nil {
+		logger.Debug(err.Error(), common.DefaultField(data))
 		return "", err
 	}
 	var digits = o.SetDigits()
@@ -193,6 +196,7 @@ func (o *OTP) GenSecret() (string, error) {
 	buf := bytes.Buffer{}
 	err := binary.Write(&buf, binary.BigEndian, o.SetTimeInterval())
 	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(o.SetTimeInterval()))
 		return "", err
 	}
 	hasher := hmac.New(o.SetAlgorithm(), buf.Bytes())

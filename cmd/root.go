@@ -40,7 +40,7 @@ func root() *cobra.Command {
 	var rootCmd = &cobra.Command{
 		Use:   common.RepoName,
 		Short: "OPS useful tools",
-		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+		RunE:  func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 
 		DisableFlagsInUseLine: true,
 	}

@@ -35,10 +35,11 @@ func initPs() *cobra.Command {
 	var psCmd = &cobra.Command{
 		Use:   CommandPs,
 		Short: "Display process status",
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Run: func(_ *cobra.Command, _ []string) {
 			p, err := process.ProcessesWithContext(common.Context)
 			if err != nil {
-				return err
+				logger.Info(err.Error())
+				return
 			}
 
 			/* Generate header. */
@@ -69,7 +70,6 @@ func initPs() *cobra.Command {
 				data = append(data, out)
 			}
 			ps.String(header, data)
-			return nil
 		},
 	}
 	psCmd.Flags().BoolVarP(&flags.command, "command", "c", false, "Print full command")
@@ -85,6 +85,7 @@ type Ps struct {
 func (p *Ps) CPUGuestTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.Guest)
@@ -93,6 +94,7 @@ func (p *Ps) CPUGuestTime() string {
 func (p *Ps) CPUGuestNiceTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.GuestNice)
@@ -101,6 +103,7 @@ func (p *Ps) CPUGuestNiceTime() string {
 func (p *Ps) CPUIdleTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.Idle)
@@ -109,6 +112,7 @@ func (p *Ps) CPUIdleTime() string {
 func (p *Ps) CPUIowaitTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.Iowait)
@@ -117,6 +121,7 @@ func (p *Ps) CPUIowaitTime() string {
 func (p *Ps) CPUIrqTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.Irq)
@@ -125,6 +130,7 @@ func (p *Ps) CPUIrqTime() string {
 func (p *Ps) CPUNiceTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.Nice)
@@ -133,6 +139,7 @@ func (p *Ps) CPUNiceTime() string {
 func (p *Ps) CPUPercent() string {
 	cpuPercent, err := p.Process.CPUPercentWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f%%", cpuPercent)
@@ -141,6 +148,7 @@ func (p *Ps) CPUPercent() string {
 func (p *Ps) CPUSoftirqTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.Softirq)
@@ -149,6 +157,7 @@ func (p *Ps) CPUSoftirqTime() string {
 func (p *Ps) CPUStealTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.Steal)
@@ -157,6 +166,7 @@ func (p *Ps) CPUStealTime() string {
 func (p *Ps) CPUSystemTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.System)
@@ -165,6 +175,7 @@ func (p *Ps) CPUSystemTime() string {
 func (p *Ps) CPUUserTime() string {
 	cpu, err := p.Process.TimesWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f", cpu.User)
@@ -173,6 +184,7 @@ func (p *Ps) CPUUserTime() string {
 func (p *Ps) CreateTime() string {
 	createTime, err := p.Process.CreateTimeWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	procTime := time.Unix(createTime/1000, 0)
@@ -185,6 +197,7 @@ func (p *Ps) CreateTime() string {
 func (p *Ps) Data() string {
 	mem, err := p.Process.MemoryInfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", mem.Data)
@@ -194,6 +207,7 @@ func (p *Ps) Exe(b bool) string {
 	const width = 30
 	exe, err := p.Process.ExeWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	if b {
@@ -209,6 +223,7 @@ func (p *Ps) Exe(b bool) string {
 func (p *Ps) HWM() string {
 	mem, err := p.Process.MemoryInfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", mem.HWM)
@@ -217,6 +232,7 @@ func (p *Ps) HWM() string {
 func (p *Ps) Locked() string {
 	mem, err := p.Process.MemoryInfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", mem.Locked)
@@ -225,6 +241,7 @@ func (p *Ps) Locked() string {
 func (p *Ps) MemPercent() string {
 	memoryPercent, err := p.Process.MemoryPercentWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%.1f%%", memoryPercent)
@@ -233,6 +250,7 @@ func (p *Ps) MemPercent() string {
 func (p *Ps) Nice() string {
 	nice, err := p.Process.NiceWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", nice)
@@ -245,6 +263,7 @@ func (p *Ps) Pid() string {
 func (p *Ps) Ppid() string {
 	ppid, err := p.Process.PpidWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", ppid)
@@ -253,6 +272,7 @@ func (p *Ps) Ppid() string {
 func (p *Ps) ProcessName() string {
 	name, err := p.Process.NameWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return name
@@ -261,6 +281,7 @@ func (p *Ps) ProcessName() string {
 func (p *Ps) RSS() string {
 	mem, err := p.Process.MemoryInfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", mem.RSS)
@@ -269,6 +290,7 @@ func (p *Ps) RSS() string {
 func (p *Ps) Stack() string {
 	mem, err := p.Process.MemoryInfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", mem.Stack)
@@ -277,6 +299,7 @@ func (p *Ps) Stack() string {
 func (p *Ps) Status() string {
 	status, err := p.Process.StatusWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%v", status)
@@ -285,6 +308,7 @@ func (p *Ps) Status() string {
 func (p *Ps) Swap() string {
 	mem, err := p.Process.MemoryInfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", mem.Swap)
@@ -293,6 +317,7 @@ func (p *Ps) Swap() string {
 func (p *Ps) Thread() string {
 	threads, err := p.Process.NumThreadsWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", threads)
@@ -301,6 +326,7 @@ func (p *Ps) Thread() string {
 func (p *Ps) Username() string {
 	username, err := p.Process.UsernameWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return username
@@ -309,6 +335,7 @@ func (p *Ps) Username() string {
 func (p *Ps) VMS() string {
 	mem, err := p.Process.MemoryInfoWithContext(common.Context)
 	if err != nil {
+		logger.Debug(err.Error())
 		return ""
 	}
 	return fmt.Sprintf("%d", mem.VMS)

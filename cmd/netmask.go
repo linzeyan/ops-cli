@@ -45,19 +45,21 @@ func initNetmask() *cobra.Command {
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(_ *cobra.Command, args []string) {
 			var err error
 			if len(args) == 0 {
-				return cmd.Help()
+				logger.Info(common.ErrInvalidFlag.Error(), common.DefaultField(args))
+				return
 			}
 			var n Netmask
 			if flags.ranges {
 				for _, v := range args {
 					if err = n.Range(v); err != nil {
+						logger.Info(err.Error(), common.DefaultField(v))
 						printer.Error(err)
 					}
 				}
-				return err
+				return
 			}
 
 			if flags.binary ||
@@ -83,16 +85,17 @@ func initNetmask() *cobra.Command {
 					slice := strings.Split(v, "-")
 					if len(slice) == 2 {
 						if err = n.CIDR(slice[0], slice[1], typ); err != nil {
+							logger.Info(err.Error(), common.DefaultField(args))
 							printer.Error(err)
 						}
 						continue
 					}
 					if err = n.Address(v, typ); err != nil {
+						logger.Info(err.Error(), common.DefaultField(v))
 						printer.Error(err)
 					}
 				}
 			}
-			return err
 		},
 		Example: common.Examples(`# Print IP address and mask in different format
 -b 1.2.3.4/32
@@ -124,6 +127,7 @@ type Netmask struct{}
 func (*Netmask) ipRange(arg string) (*net.IPNet, netip.Addr, netip.Addr) {
 	_, ipnet, err := net.ParseCIDR(arg)
 	if err != nil {
+		logger.Debug(err.Error())
 		return nil, netip.Addr{}, netip.Addr{}
 	}
 	l := len(ipnet.IP)
@@ -139,6 +143,7 @@ func (*Netmask) ipRange(arg string) (*net.IPNet, netip.Addr, netip.Addr) {
 func (n *Netmask) Range(arg string) error {
 	ipnet, first, last := n.ipRange(arg)
 	if ipnet == nil {
+		logger.Debug(common.ErrInvalidArg.Error())
 		return common.ErrInvalidArg
 	}
 	ones, bits := ipnet.Mask.Size()
@@ -165,9 +170,11 @@ func (n *Netmask) Address(arg, typ string) error {
 			_, ipnet, err = net.ParseCIDR(arg + ipv6Len)
 		}
 	default:
+		logger.Debug(common.ErrInvalidIP.Error())
 		return common.ErrInvalidArg
 	}
 	if err != nil {
+		logger.Debug(err.Error())
 		return err
 	}
 
@@ -224,6 +231,7 @@ func (n *Netmask) CIDR(a, b, typ string) error {
 	var err error
 	if (!common.IsIPv4(a) && !common.IsIPv4(b)) &&
 		(!common.IsIPv6(a) && !common.IsIPv6(b)) {
+		logger.Debug(common.ErrInvalidIP.Error())
 		return common.ErrInvalidArg
 	}
 
@@ -257,6 +265,7 @@ func (n *Netmask) CIDR(a, b, typ string) error {
 	for _, v := range out {
 		if typ == TypeCisco {
 			if err = n.Address(v, typ); err != nil {
+				logger.Debug(err.Error(), common.DefaultField(v))
 				return err
 			}
 		} else {

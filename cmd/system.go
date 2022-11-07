@@ -34,7 +34,7 @@ func initSystem() *cobra.Command {
 	var systemCmd = &cobra.Command{
 		Use:   CommandSystem,
 		Short: "Display system informations",
-		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+		RunE:  func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 
 		DisableFlagsInUseLine: true,
 	}

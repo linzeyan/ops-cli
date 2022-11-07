@@ -40,7 +40,7 @@ func initEncrypt() *cobra.Command {
 	var encryptCmd = &cobra.Command{
 		Use:   CommandEncrypt,
 		Short: "Encrypt or decrypt",
-		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+		RunE:  func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 
 		DisableFlagsInUseLine: true,
 	}

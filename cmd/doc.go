@@ -31,7 +31,7 @@ func initDoc(command *cobra.Command) *cobra.Command {
 	var docCmd = &cobra.Command{
 		Use:   CommandDoc,
 		Short: "Generate documentation",
-		Run:   func(cmd *cobra.Command, _ []string) { _ = cmd.Help() },
+		RunE:  func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 	}
 
 	run := func(cmd *cobra.Command, _ []string) {
