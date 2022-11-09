@@ -35,25 +35,29 @@ func initGeoip() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		Run: func(_ *cobra.Command, args []string) {
-			var out any
-			var err error
-			switch len(args) {
+			switch l := len(args); l {
 			case 0:
 				var resp []byte
-				resp, err = common.HTTPRequestContent("https://myexternalip.com/raw")
-				out = map[string]string{"ip": string(resp)}
-			case 1:
-				var r GeoIP
-				out, err = r.Request(args[0])
+				resp, err := common.HTTPRequestContent("https://myexternalip.com/raw")
+				if err != nil {
+					logger.Info(err.Error())
+					return
+				}
+				printer.Printf("%s", resp)
 			default:
-				var r GeoIPList
-				out, err = r.Request(args)
+				var r GeoIP
+				out, err := r.Request(args)
+				if err != nil {
+					logger.Info(err.Error())
+					return
+				}
+				outFormat := printer.SetJSONAsDefaultFormat(rootOutputFormat)
+				if l == 1 {
+					printer.Printf(outFormat, out[0])
+					return
+				}
+				printer.Printf(outFormat, out)
 			}
-			if err != nil {
-				logger.Info(err.Error())
-				return
-			}
-			printer.Printf(printer.SetJSONAsDefaultFormat(rootOutputFormat), out)
 		},
 		Example: common.Examples(`# Print IP geographic information
 1.1.1.1
@@ -84,29 +88,7 @@ type GeoIP struct {
 	Query       string `json:"query"`
 }
 
-func (GeoIP) Request(ip string) (*GeoIP, error) {
-	/* Valid IP */
-	if !common.IsIP(ip) {
-		return nil, common.ErrInvalidIP
-	}
-	apiURL := fmt.Sprintf("http://ip-api.com/json/%s?fields=continent,countryCode,country,regionName,city,district,query,isp,org,as,asname,currency,timezone,mobile,proxy,hosting", ip)
-
-	content, err := common.HTTPRequestContent(apiURL)
-	if err != nil {
-		logger.Debug(err.Error())
-		return nil, err
-	}
-	var data GeoIP
-	if err = Encoder.JSONMarshaler(content, &data); err != nil {
-		logger.Debug(err.Error())
-		return nil, err
-	}
-	return &data, err
-}
-
-type GeoIPList []GeoIP
-
-func (GeoIPList) Request(inputs []string) (*GeoIPList, error) {
+func (GeoIP) Request(inputs []string) ([]GeoIP, error) {
 	var ips = `[`
 	/* Valid IP and combine args */
 	for i := range inputs {
@@ -130,10 +112,10 @@ func (GeoIPList) Request(inputs []string) (*GeoIPList, error) {
 		logger.Debug(err.Error())
 		return nil, err
 	}
-	var data GeoIPList
+	var data []GeoIP
 	if err = Encoder.JSONMarshaler(content, &data); err != nil {
 		logger.Debug(err.Error())
 		return nil, err
 	}
-	return &data, err
+	return data, err
 }
