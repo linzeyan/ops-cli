@@ -27,6 +27,15 @@ import (
 )
 
 func initGeoip() *cobra.Command {
+	var flags struct {
+		country  bool
+		region   bool
+		city     bool
+		timezone bool
+		isp      bool
+		org      bool
+		as       bool
+	}
 	var geoipCmd = &cobra.Command{
 		GroupID: groupings[CommandGeoip],
 		Use:     CommandGeoip + " IP...",
@@ -52,11 +61,36 @@ func initGeoip() *cobra.Command {
 					return
 				}
 				outFormat := printer.SetJSONAsDefaultFormat(rootOutputFormat)
-				if l == 1 {
+				switch l {
+				case 1:
+					if flags.country {
+						printer.Printf(outFormat, out[0].Country)
+					}
+					if flags.region {
+						printer.Printf(outFormat, out[0].RegionName)
+					}
+					if flags.city {
+						printer.Printf(outFormat, out[0].City)
+					}
+					if flags.timezone {
+						printer.Printf(outFormat, out[0].Timezone)
+					}
+					if flags.isp {
+						printer.Printf(outFormat, out[0].ISP)
+					}
+					if flags.org {
+						printer.Printf(outFormat, out[0].Org)
+					}
+					if flags.as {
+						printer.Printf(outFormat, out[0].As)
+					}
+					if flags.as || flags.city || flags.country || flags.isp || flags.org || flags.region || flags.timezone {
+						return
+					}
 					printer.Printf(outFormat, out[0])
-					return
+				default:
+					printer.Printf(outFormat, out)
 				}
-				printer.Printf(outFormat, out)
 			}
 		},
 		Example: common.Examples(`# Print IP geographic information
@@ -66,6 +100,13 @@ func initGeoip() *cobra.Command {
 1.1.1.1 8.8.8.8`, CommandGeoip),
 		DisableFlagsInUseLine: true,
 	}
+	geoipCmd.Flags().BoolVar(&flags.country, "country", false, common.Usage("Print country"))
+	geoipCmd.Flags().BoolVar(&flags.region, "region", false, common.Usage("Print region"))
+	geoipCmd.Flags().BoolVar(&flags.city, "city", false, common.Usage("Print city"))
+	geoipCmd.Flags().BoolVar(&flags.timezone, "timezone", false, common.Usage("Print timezone"))
+	geoipCmd.Flags().BoolVar(&flags.isp, "isp", false, common.Usage("Print ISP"))
+	geoipCmd.Flags().BoolVar(&flags.org, "org", false, common.Usage("Print organization"))
+	geoipCmd.Flags().BoolVar(&flags.as, "as", false, common.Usage("Print AS number"))
 	return geoipCmd
 }
 
