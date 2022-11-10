@@ -17,6 +17,8 @@ limitations under the License.
 package common
 
 import (
+	"strings"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -33,7 +35,7 @@ func (l *logger) DefaultConfig() zap.Config {
 		Level:             zap.NewAtomicLevelAt(zap.InfoLevel),
 		Development:       false,
 		DisableCaller:     false,
-		DisableStacktrace: false,
+		DisableStacktrace: true,
 		Sampling: &zap.SamplingConfig{
 			Initial:    10, /* Log number in same level output per second. */
 			Thereafter: 10, /* If greater than 10 then output. */
@@ -73,7 +75,7 @@ func newLogger() *logger {
 
 /* SetLoggerLevel set log level from given level. */
 func SetLoggerLevel(level string) {
-	switch level {
+	switch strings.ToLower(level) {
 	case zap.DebugLevel.String():
 		stdLogger.Config.Level.SetLevel(zap.DebugLevel)
 	case zap.InfoLevel.String():
