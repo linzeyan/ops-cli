@@ -51,10 +51,12 @@ func (r *readConfig) get() (map[string]any, error) {
 	all := viper.AllSettings()
 	values, ok := all[r.table]
 	if !ok {
+		stdLogger.Log.Debug(ErrConfigTable.Error(), DefaultField(r.table))
 		return nil, ErrConfigTable
 	}
 	r.value, ok = values.(map[string]any)
 	if !ok {
+		stdLogger.Log.Debug(ErrConfigContent.Error())
 		return nil, ErrConfigContent
 	}
 	return r.value, nil
