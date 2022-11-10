@@ -50,7 +50,7 @@ func initPing() *cobra.Command {
 		Short: "Send ICMP ECHO_REQUEST packets to network hosts",
 		Run: func(_ *cobra.Command, args []string) {
 			if flags.count == 0 || flags.ttl <= 0 || flags.size <= 0 {
-				logger.Info(common.ErrInvalidArg.Error())
+				logger.Error(common.ErrInvalidArg.Error())
 				return
 			}
 			if flags.interval < 50*time.Millisecond {
@@ -73,7 +73,7 @@ func initPing() *cobra.Command {
 
 			conn, err := p.Listen()
 			if err != nil {
-				logger.Info(err.Error(), common.DefaultField(p))
+				logger.Warn(err.Error(), common.DefaultField(p))
 				printer.Error(err)
 				return
 			}
@@ -134,11 +134,11 @@ func (p *Ping) Listen() (*icmp.PacketConn, error) {
 			return nil, err
 		}
 		if err = conn.IPv6PacketConn().SetHopLimit(p.TTL); err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.DefaultField(p.TTL))
 			return nil, err
 		}
 		if err = conn.IPv6PacketConn().SetControlMessage(ipv6.FlagHopLimit, true); err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.DefaultField(ipv6.FlagHopLimit))
 			return nil, err
 		}
 		return conn, err
@@ -149,11 +149,11 @@ func (p *Ping) Listen() (*icmp.PacketConn, error) {
 		return nil, err
 	}
 	if err = conn.IPv4PacketConn().SetTTL(p.TTL); err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(p.TTL))
 		return nil, err
 	}
 	if err = conn.IPv4PacketConn().SetControlMessage(ipv4.FlagTTL, true); err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(ipv4.FlagTTL))
 		return nil, err
 	}
 	return conn, err
@@ -195,10 +195,10 @@ func (p *Ping) readReply(reply []byte, counter int) (int, any, net.Addr, error) 
 		n, cm, peer, err = p.Conn.IPv4PacketConn().ReadFrom(reply)
 	}
 	if err != nil {
+		logger.Debug(err.Error(), common.DefaultField(reply))
 		p.stat.Lost = true
 		p.statistics(0)
 		e := fmt.Sprintf("Request timeout for icmp_seq %d", counter)
-		logger.Debug(err.Error())
 		return 0, nil, nil, errors.New(e)
 	}
 	return n, cm, peer, err
@@ -220,6 +220,8 @@ func (p *Ping) printMsg(result *icmp.Message, duration time.Duration, peer net.A
 			len(b), peer, result.Body.(*icmp.Echo).Seq, ttl, duration)
 	case ipv4.ICMPTypeDestinationUnreachable, ipv6.ICMPTypeDestinationUnreachable:
 		out = "Destination Unreachable\n"
+	default:
+		logger.Debug("icmp.Type", common.DefaultField(result.Type))
 	}
 	p.statistics(duration)
 	printer.Printf(out)
@@ -233,7 +235,6 @@ func (p *Ping) Connect(c context.Context, host string) {
 	addr, err := net.ResolveIPAddr(network, host)
 	if err != nil {
 		logger.Debug(err.Error())
-		printer.Error(err)
 		return
 	}
 	if p.IPv6 {
@@ -253,7 +254,6 @@ func (p *Ping) Connect(c context.Context, host string) {
 		b, err := p.Data.Marshal(nil)
 		if err != nil {
 			logger.Debug(err.Error())
-			printer.Error(err)
 			return
 		}
 
@@ -262,18 +262,15 @@ func (p *Ping) Connect(c context.Context, host string) {
 		_, err = p.Conn.WriteTo(b, addr)
 		if err != nil {
 			logger.Debug(err.Error())
-			printer.Error(err)
 		}
 
 		/* Wait receiving. */
 		if err = p.Conn.SetReadDeadline(time.Now().Add(p.Timeout)); err != nil {
 			logger.Debug(err.Error())
-			printer.Error(err)
 		}
 		n, cm, peer, err := p.readReply(reply, i)
 		if err != nil {
 			logger.Debug(err.Error())
-			printer.Error(err)
 			if i == p.Count-1 {
 				p.summary(host, time.Since(allTime))
 				return
@@ -295,7 +292,6 @@ func (p *Ping) Connect(c context.Context, host string) {
 		result, err := icmp.ParseMessage(proto, reply[:n])
 		if err != nil {
 			logger.Debug(err.Error())
-			printer.Error(err)
 		}
 		if peer.String() == host {
 			p.printMsg(result, duration, peer, cm)
