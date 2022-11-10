@@ -76,8 +76,7 @@ Time zone:
 			case flags.timezone != "":
 				z, err := time.LoadLocation(flags.timezone)
 				if err != nil {
-					logger.Info(err.Error())
-					printer.Error(err)
+					logger.Error(err.Error())
 					return
 				}
 				t = common.TimeNow.In(z)
@@ -90,8 +89,7 @@ Time zone:
 				}
 				r, err := strconv.ParseInt(flags.reference, 10, 64)
 				if err != nil {
-					logger.Info(err.Error())
-					printer.Error(err)
+					logger.Error(err.Error())
 					return
 				}
 				t = time.Unix(r, 0)

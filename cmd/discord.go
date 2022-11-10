@@ -42,22 +42,19 @@ func initDiscord() *cobra.Command {
 
 	run := func(cmd *cobra.Command, _ []string) {
 		if flags.arg == "" {
-			logger.Info(common.ErrInvalidFlag.Error())
-			printer.Error(common.ErrInvalidFlag)
+			logger.Error(common.ErrInvalidFlag.Error(), common.DefaultField(flags.arg))
 			return
 		}
 		var err error
 		if rootConfig != "" {
 			if err = ReadConfig(CommandDiscord, &flags); err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 		}
 		var d Discord
 		if err = d.Init(flags.Token); err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		switch cmd.Name() {
@@ -69,8 +66,7 @@ func initDiscord() *cobra.Command {
 			err = d.TextTTS(flags.Channel, flags.arg)
 		}
 		if err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		printer.Printf(printer.SetNoneAsDefaultFormat(rootOutputFormat), d.Response)

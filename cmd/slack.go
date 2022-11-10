@@ -48,21 +48,19 @@ func initSlack() *cobra.Command {
 
 	run := func(cmd *cobra.Command, _ []string) {
 		if flags.arg == "" {
-			logger.Info(common.ErrInvalidFlag.Error(), common.DefaultField(flags.arg))
+			logger.Error(common.ErrInvalidFlag.Error(), common.DefaultField(flags.arg))
 			return
 		}
 		var err error
 		if rootConfig != "" {
 			if err = ReadConfig(CommandSlack, &flags); err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 		}
 		var s Slack
 		if err = s.Init(flags.Token); err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		switch cmd.Name() {
@@ -74,8 +72,7 @@ func initSlack() *cobra.Command {
 			err = s.Text(flags.Channel, flags.arg)
 		}
 		if err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 		}
 	}
 
@@ -117,7 +114,7 @@ type Slack struct {
 
 func (s *Slack) Init(token string) error {
 	if token == "" {
-		logger.Debug(common.ErrInvalidToken.Error())
+		logger.Debug(common.ErrInvalidToken.Error(), common.DefaultField(token))
 		return common.ErrInvalidToken
 	}
 	s.API = slack.New(token)
@@ -132,7 +129,10 @@ func (s *Slack) Text(channel, arg string) error {
 	input := slack.MsgOptionText(arg, false)
 	_, _, _, err := s.API.SendMessageContext(common.Context, channel, input)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(),
+			common.DefaultField(channel),
+			common.NewField("slack.MsgOption", input),
+		)
 	}
 	return err
 }
@@ -147,25 +147,25 @@ func (s *Slack) Photo(channel, arg string) error {
 		base64Image, err = s.remoteFile(arg)
 	}
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(arg))
 		return err
 	}
 
 	uploadFileKey := fmt.Sprintf("upload-f-to-slack-%d", common.TimeNow.UnixNano())
 	decode, err := Encoder.Base64StdDecode(base64Image)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(base64Image))
 		return err
 	}
 
 	f, err := os.Create(uploadFileKey)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(uploadFileKey))
 		return err
 	}
 	defer f.Close()
 	if _, err := f.Write(decode); err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(decode))
 		return err
 	}
 	if err := f.Sync(); err != nil {
@@ -184,7 +184,7 @@ func (s *Slack) Photo(channel, arg string) error {
 	}
 	if uploadFileKey != "" {
 		if err := os.Remove(uploadFileKey); err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.DefaultField(uploadFileKey))
 			return err
 		}
 	}
@@ -194,14 +194,14 @@ func (s *Slack) Photo(channel, arg string) error {
 func (s *Slack) localFile(arg string) (string, error) {
 	content, err := os.ReadFile(arg)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(arg))
 		return "", err
 	}
 	contentType := http.DetectContentType(content)
 	if contentType == "image/jpeg" {
 		img, err := jpeg.Decode(bytes.NewReader(content))
 		if err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.DefaultField(content))
 			return "", err
 		}
 		var buf bytes.Buffer
@@ -217,13 +217,13 @@ func (s *Slack) localFile(arg string) (string, error) {
 func (s *Slack) remoteFile(arg string) (string, error) {
 	content, err := common.HTTPRequestContent(arg)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(arg))
 		return "", err
 	}
 	if http.DetectContentType(content) == "image/jpeg" {
 		img, err := jpeg.Decode(bytes.NewReader(content))
 		if err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.DefaultField(content))
 			return "", err
 		}
 		var buf bytes.Buffer

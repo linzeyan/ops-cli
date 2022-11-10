@@ -43,17 +43,17 @@ func initRedis() *cobra.Command {
 			var r Redis
 			if rootConfig != "" {
 				if err := ReadConfig(CommandRedis, &flags); err != nil {
-					logger.Info(err.Error())
+					logger.Error(err.Error())
 					return
 				}
 			}
 			conn := r.Connection(flags.Host, flags.Port, flags.Username, flags.Password, flags.DB)
 			if conn == nil {
-				logger.Info(common.ErrFailedInitial.Error())
+				logger.Error(common.ErrFailedInitial.Error())
 				return
 			}
 			if err := r.Do(conn, args); err != nil {
-				logger.Info(err.Error())
+				logger.Warn(err.Error())
 			}
 		},
 	}
@@ -77,7 +77,13 @@ func (r *Redis) Connection(host, port, user, pass string, db int) *redis.Client 
 			DB:       db,
 		})
 	}
-	logger.Debug(common.ErrInvalidArg.Error(), common.NewField("host", host))
+	logger.Debug(common.ErrInvalidArg.Error(),
+		common.NewField("host", host),
+		common.NewField("port", port),
+		common.NewField("user", user),
+		common.NewField("pass", pass),
+		common.NewField("db", db),
+	)
 	return nil
 }
 

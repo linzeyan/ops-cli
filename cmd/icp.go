@@ -45,21 +45,19 @@ func initICP() *cobra.Command {
 		Run: func(_ *cobra.Command, args []string) {
 			if rootConfig != "" {
 				if err := ReadConfig(CommandICP, &flags); err != nil {
-					logger.Info(err.Error())
-					printer.Error(err)
+					logger.Error(err.Error())
 					return
 				}
 			}
 			if flags.Account == "" || flags.Key == "" {
-				logger.Info(common.ErrInvalidToken.Error())
+				logger.Warn(common.ErrInvalidToken.Error())
 				printer.Error(common.ErrInvalidToken)
 				return
 			}
 
 			var i ICP
 			if err := i.Request(flags.Account, flags.Key, args[0]); err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 			if flags.domain {
@@ -100,7 +98,7 @@ func (i *ICP) requestURI(account, key, domain string) (string, error) {
 	hashData := account + key + "domainname"
 	sig, err := Hasher.Hash(HashAlgorithm(HashMd5), hashData)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.NewField("data", hashData))
 		return "", err
 	}
 	rawCmd := fmt.Sprintf("domainname\r\ncheck\r\nentityname:icp\r\ndomains:%s\r\n.\r\n", domain)

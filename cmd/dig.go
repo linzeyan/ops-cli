@@ -50,13 +50,11 @@ func initDig() *cobra.Command {
 			case lens == 1:
 				flags.domain = args[0]
 				if output, err = output.Request(dns.TypeA, flags.domain, flags.network, flags.server); err != nil {
-					logger.Info(err.Error())
-					printer.Error(err)
+					logger.Error(err.Error())
 					return
 				}
 				if output == nil {
-					logger.Info(common.ErrResponse.Error())
-					printer.Error(err)
+					logger.Warn(common.ErrResponse.Error())
 					return
 				}
 				if rootOutputFormat != "" && rootOutputFormat != common.TableFormat {
@@ -99,13 +97,11 @@ func initDig() *cobra.Command {
 			typ := dns.StringToType[strings.ToUpper(argsType[0])]
 			output, err = output.Request(typ, flags.domain, flags.network, flags.server)
 			if err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 			if output == nil {
-				logger.Info(common.ErrResponse.Error())
-				printer.Error(err)
+				logger.Warn(common.ErrResponse.Error())
 				return
 			}
 			if rootOutputFormat != "" && rootOutputFormat != common.TableFormat {
@@ -150,7 +146,7 @@ func (d *DigList) GetLocalServer() (string, error) {
 	const resolvConfig = "/etc/resolv.conf"
 	s, err := dns.ClientConfigFromFile(resolvConfig)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.NewField("config", resolvConfig))
 		return "", err
 	}
 	return s.Servers[0], err
@@ -162,7 +158,7 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 	if dns.TypeToString[digType] == "PTR" {
 		domain, err = dns.ReverseAddr(domain)
 		if err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.NewField("domain", domain))
 			return nil, err
 		}
 		domain = strings.TrimRight(domain, ".")
@@ -180,10 +176,11 @@ func (d *DigList) Request(digType uint16, domain, network, server string) (DigLi
 	}
 	resp, _, err := client.Exchange(&message, net.JoinHostPort(server, "53"))
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.NewField("dns.Msg", message), common.NewField("server", server))
 		return nil, err
 	}
 	if len(resp.Answer) == 0 {
+		logger.Debug("response is empty")
 		return nil, err
 	}
 

@@ -40,7 +40,7 @@ func initURL() *cobra.Command {
 		Run: func(_ *cobra.Command, args []string) {
 			url := args[0]
 			if !common.IsURL(url) {
-				logger.Info(common.ErrInvalidURL.Error(), common.DefaultField(url))
+				logger.Warn(common.ErrInvalidURL.Error(), common.DefaultField(url))
 				return
 			}
 			var err error
@@ -49,7 +49,7 @@ func initURL() *cobra.Command {
 			case urlFlag.expand:
 				result, err = common.HTTPRequestRedirectURL(url)
 				if err != nil {
-					logger.Info(err.Error())
+					logger.Error(err.Error())
 					return
 				}
 			default:
@@ -61,12 +61,12 @@ func initURL() *cobra.Command {
 				}
 				result, err = common.HTTPRequestContent(url, body)
 				if err != nil || urlFlag.verbose {
-					logger.Info(err.Error())
+					logger.Error(err.Error())
 					return
 				}
 				if urlFlag.output != "" {
 					if err = os.WriteFile(urlFlag.output, result.([]byte), FileModeRAll); err != nil {
-						logger.Info(err.Error())
+						logger.Error(err.Error())
 					}
 				}
 			}

@@ -49,18 +49,15 @@ func initCert() *cobra.Command {
 			case common.IsDomain(input) || common.IsIPv4(input):
 				resp, err = resp.CheckHost(net.JoinHostPort(input, flags.port))
 			default:
-				logger.Info(common.ErrInvalidArg.Error(), common.DefaultField(input))
-				printer.Error(common.ErrInvalidArg)
+				logger.Error(common.ErrInvalidArg.Error(), common.DefaultField(input))
 				return
 			}
 			if err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 			if resp == nil {
-				logger.Info(common.ErrResponse.Error())
-				printer.Error(common.ErrResponse)
+				logger.Error(common.ErrResponse.Error())
 				return
 			}
 
@@ -117,7 +114,7 @@ type Cert struct {
 func (c *Cert) CheckHost(host string) (*Cert, error) {
 	conn, err := tls.Dial("tcp", host, nil)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.NewField("host", host))
 		return nil, err
 	}
 	defer conn.Close()
@@ -137,7 +134,7 @@ func (c *Cert) CheckHost(host string) (*Cert, error) {
 func (c *Cert) CheckFile(fileName string) (*Cert, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.NewField("file", fileName))
 		return nil, err
 	}
 	defer f.Close()
@@ -151,6 +148,7 @@ func (c *Cert) CheckFile(fileName string) (*Cert, error) {
 				if err == io.EOF {
 					break
 				}
+				logger.Debug(err.Error())
 				return nil, err
 			}
 		}

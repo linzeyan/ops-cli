@@ -44,12 +44,11 @@ func initWhois() *cobra.Command {
 		Run: func(_ *cobra.Command, args []string) {
 			var w Whois
 			if err := w.Request(args[0]); err != nil {
-				logger.Info(err.Error(), common.DefaultField(args))
-				printer.Error(err)
+				logger.Error(err.Error(), common.DefaultField(args))
 				return
 			}
 			if w.empty() {
-				logger.Info(common.ErrResponse.Error())
+				logger.Error(common.ErrResponse.Error())
 				return
 			}
 			if flags.expiry {
@@ -135,11 +134,9 @@ func (w *Whois) Request(domain string) error {
 		}
 		if err != nil {
 			logger.Debug(err.Error())
-			printer.Error(err)
 		}
 		if calErr != nil {
 			logger.Debug(calErr.Error())
-			printer.Error(calErr)
 			err = calErr
 		}
 	}
@@ -152,7 +149,7 @@ func (w *Whois) ParseTime(t string) (string, error) {
 	/* 1997-09-15T04:00:00Z */
 	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(t))
 		return "", err
 	}
 	return s.Local().Format(time.RFC3339), err
@@ -162,7 +159,7 @@ func (w *Whois) ParseTime(t string) (string, error) {
 func (w *Whois) CalculateDays(t string) (int, error) {
 	s, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(t))
 		return 0, err
 	}
 	return int(s.Local().Sub(common.TimeNow.Local()).Hours() / 24), err

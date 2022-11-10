@@ -44,7 +44,7 @@ func initUpdate() *cobra.Command {
 		Run: func(_ *cobra.Command, _ []string) {
 			updater := NewUpdater(common.RepoOwner, common.RepoName, appVersion)
 			if !updater.Upgrade {
-				logger.Info("", common.DefaultField(updater))
+				logger.Warn("", common.DefaultField(updater))
 				printer.Printf("up-to-date\n")
 				return
 			}
@@ -53,7 +53,7 @@ func initUpdate() *cobra.Command {
 			printer.Printf("%s\n", common.Usage("==> Downloading file from GitHub "+updater.Repository.DownloadLink))
 			err := updater.Download()
 			if err != nil {
-				logger.Info(err.Error())
+				logger.Error(err.Error())
 				return
 			}
 
@@ -61,7 +61,7 @@ func initUpdate() *cobra.Command {
 			printer.Printf("%s\n", common.Usage("==> Cleanup..."))
 			err = updater.Rename()
 			if err != nil {
-				logger.Info(err.Error())
+				logger.Warn(err.Error())
 			}
 			printer.Printf("Update completed in %s", time.Since(common.TimeNow))
 		},
@@ -133,7 +133,7 @@ func (*repository) copy(dst io.Writer, src io.Reader) error {
 	for {
 		_, err := io.CopyN(dst, src, 1024)
 		if err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.NewField("src", src), common.NewField("dst", dst))
 			if errors.Is(err, io.EOF) {
 				return nil
 			}
@@ -146,7 +146,7 @@ func (*repository) copy(dst io.Writer, src io.Reader) error {
 func (r *repository) UnGzip() error {
 	f, err := os.Open(r.DownloadPath)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(r.DownloadPath))
 		return err
 	}
 	defer f.Close()
@@ -175,7 +175,7 @@ func (r *repository) UnGzip() error {
 		}
 		downloadPath, err := filepath.Abs(r.DownloadPath)
 		if err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.DefaultField(r.DownloadPath))
 			return err
 		}
 		paths, err := r.sanitizeExtractPath(header.Name, filepath.Dir(downloadPath))
@@ -223,7 +223,7 @@ func (r *repository) UnZip() error {
 	for _, f := range unzip.File {
 		downloadPath, err := filepath.Abs(r.DownloadPath)
 		if err != nil {
-			logger.Debug(err.Error())
+			logger.Debug(err.Error(), common.DefaultField(r.DownloadPath))
 			return err
 		}
 		paths, err := r.sanitizeExtractPath(f.Name, filepath.Dir(downloadPath))
@@ -357,12 +357,12 @@ func (u *Updater) init(ver string) *Updater {
 		/* Get executable path. */
 		execute, err := os.Executable()
 		if err != nil {
-			printer.Error(err)
+			logger.Fatal(err.Error())
 		}
 		/* Get the real path. */
 		realPath, err := filepath.EvalSymlinks(execute)
 		if err != nil {
-			printer.Error(err)
+			logger.Fatal(err.Error())
 		}
 		u.ExecutablePath = realPath
 	}
@@ -374,7 +374,7 @@ func (u *Updater) Download() error {
 	var err error
 	resp, err := common.HTTPRequestContent(u.Repository.DownloadLink)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Debug(err.Error(), common.DefaultField(u.Repository.DownloadLink))
 		return err
 	}
 	return os.WriteFile(u.Repository.DownloadPath, resp, FileModeRAll)

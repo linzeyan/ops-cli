@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"os"
 	"strconv"
 
 	tgBot "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -44,29 +45,25 @@ func initTelegram() *cobra.Command {
 
 	run := func(cmd *cobra.Command, _ []string) {
 		if flags.arg == "" {
-			logger.Info(common.ErrInvalidFlag.Error())
-			printer.Error(common.ErrInvalidFlag)
+			logger.Error(common.ErrInvalidFlag.Error(), common.DefaultField(flags.arg))
 			return
 		}
 		var err error
 		if rootConfig != "" {
 			if err = ReadConfig(CommandTelegram, &flags); err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 			i, err := strconv.ParseInt(flags.ChatID, 10, 64)
 			if err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 			flags.Chat = i
 		}
 		var t Telegram
 		if err = t.Init(flags.Token); err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		switch cmd.Name() {
@@ -84,8 +81,7 @@ func initTelegram() *cobra.Command {
 			err = t.Voice(flags.Chat, flags.arg, flags.caption)
 		}
 		if err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		printer.Printf(printer.SetNoneAsDefaultFormat(rootOutputFormat), t.Response)
@@ -112,15 +108,13 @@ func initTelegram() *cobra.Command {
 			var err error
 			if rootConfig != "" {
 				if err = ReadConfig(CommandTelegram, &flags); err != nil {
-					logger.Info(err.Error())
-					printer.Error(err)
+					logger.Error(err.Error())
 					return
 				}
 			}
 			var t Telegram
 			if err = t.Init(flags.Token); err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 			t.GetUpdate()
@@ -263,7 +257,7 @@ func (t *Telegram) GetUpdate() {
 		if update.Message != nil { // If we got a message
 			if update.Message.Text == CommandID {
 				printer.Printf("%d", update.Message.Chat.ID)
-				break
+				os.Exit(0)
 			}
 		}
 	}

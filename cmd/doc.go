@@ -39,7 +39,7 @@ func initDoc(command *cobra.Command) *cobra.Command {
 		if err != nil {
 			/* Create directory if not exist. */
 			if err = os.Mkdir(flags.dir, os.ModePerm); err != nil {
-				logger.Info(err.Error(), common.DefaultField(flags.dir))
+				logger.Error(err.Error(), common.DefaultField(flags.dir))
 				return
 			}
 		}
@@ -58,7 +58,7 @@ func initDoc(command *cobra.Command) *cobra.Command {
 			err = doc.GenYamlTree(command, flags.dir)
 		}
 		if err != nil {
-			logger.Info(err.Error())
+			logger.Error(err.Error())
 		}
 	}
 

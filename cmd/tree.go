@@ -69,8 +69,7 @@ func initTree() *cobra.Command {
 		},
 		Run: func(_ *cobra.Command, args []string) {
 			if flags.level < 1 {
-				logger.Info("level < 1")
-				printer.Error(common.ErrInvalidArg)
+				logger.Error("level < 1")
 				return
 			}
 			if len(args) == 0 {
@@ -84,8 +83,7 @@ func initTree() *cobra.Command {
 			if flags.output != "" {
 				outFile, err = os.Create(flags.output)
 				if err != nil {
-					logger.Info(err.Error())
-					printer.Error(err)
+					logger.Error(err.Error())
 					return
 				}
 				defer outFile.Close()

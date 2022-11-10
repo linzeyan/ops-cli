@@ -62,8 +62,7 @@ func initEncode() *cobra.Command {
 			out, err = Encoder.HexDecode(args[0])
 		}
 		if err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		printer.Printf("%s", out)
@@ -81,8 +80,7 @@ func initEncode() *cobra.Command {
 		case true:
 			data, err = os.ReadFile(args[0])
 			if err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 		case false:
@@ -101,8 +99,7 @@ func initEncode() *cobra.Command {
 			out, err = Encoder.HexEncode(data)
 		}
 		if err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		printer.Printf(out)

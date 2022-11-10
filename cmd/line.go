@@ -45,29 +45,26 @@ func initLINE() *cobra.Command {
 
 	run := func(cmd *cobra.Command, args []string) {
 		if flags.arg == "" {
-			logger.Info(common.ErrInvalidFlag.Error())
-			printer.Error(common.ErrInvalidFlag)
+			logger.Error(common.ErrInvalidFlag.Error(), common.DefaultField(flags.arg))
 			return
 		}
 		var err error
 		if rootConfig != "" {
 			if err = ReadConfig(CommandLINE, &flags); err != nil {
-				logger.Info(err.Error())
-				printer.Error(err)
+				logger.Error(err.Error())
 				return
 			}
 		}
 		var l LINE
 		if err = l.Init(flags.Secret, flags.Token); err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		switch cmd.Name() {
 		case CommandID:
 			l.Response, err = l.API.SetWebhookEndpointURL(args[0]).Do()
 			if err != nil {
-				logger.Info(err.Error())
+				logger.Warn(err.Error())
 				printer.Error(err)
 				return
 			}
@@ -84,8 +81,7 @@ func initLINE() *cobra.Command {
 			l.Response, err = l.API.PushMessage(flags.ID, input).Do()
 		}
 		if err != nil {
-			logger.Info(err.Error())
-			printer.Error(err)
+			logger.Error(err.Error())
 			return
 		}
 		printer.Printf(printer.SetNoneAsDefaultFormat(rootOutputFormat), l.Response)

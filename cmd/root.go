@@ -46,7 +46,7 @@ func root() *cobra.Command {
 	}
 	rootCmd.PersistentFlags().StringVar(&rootOutputFormat, "output", "", common.Usage("Output format, can be json/yaml"))
 	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
-	rootCmd.PersistentFlags().StringVar(&rootVerbose, "verbose", "warn", common.Usage("Specify log level (debug/info/warn/error/panic/fatal"))
+	rootCmd.PersistentFlags().StringVar(&rootVerbose, "verbose", "error", common.Usage("Specify log level (debug/info/warn/error/panic/fatal"))
 	rootCmd.PersistentFlags().BoolP("help", "", false, common.Usage("Help for this command"))
 
 	rootCmd.AddCommand(initArping())
