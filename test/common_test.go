@@ -33,32 +33,32 @@ func FuzzCommonBytes(t *testing.F) {
 		v := input / (1 << 10)
 		switch {
 		case input >= 1<<80:
-			a.Contains(common.ByteSize(input), "YiB")
+			a.Contains(common.ByteSize(input), common.YiB.String())
 			if v >= 1<<80 {
-				a.Contains(common.ByteSize(v), "YiB")
+				a.Contains(common.ByteSize(v), common.YiB.String())
 			} else {
-				a.Contains(common.ByteSize(v), "ZiB")
+				a.Contains(common.ByteSize(v), common.ZiB.String())
 			}
 		case input >= 1<<70:
-			a.Contains(common.ByteSize(input), "ZiB")
-			a.Contains(common.ByteSize(v), "EiB")
+			a.Contains(common.ByteSize(input), common.ZiB.String())
+			a.Contains(common.ByteSize(v), common.EiB.String())
 		case input >= 1<<60:
-			a.Contains(common.ByteSize(input), "EiB")
-			a.Contains(common.ByteSize(v), "PiB")
+			a.Contains(common.ByteSize(input), common.EiB.String())
+			a.Contains(common.ByteSize(v), common.PiB.String())
 		case input >= 1<<50:
-			a.Contains(common.ByteSize(input), "PiB")
-			a.Contains(common.ByteSize(v), "TiB")
+			a.Contains(common.ByteSize(input), common.PiB.String())
+			a.Contains(common.ByteSize(v), common.TiB.String())
 		case input >= 1<<40:
-			a.Contains(common.ByteSize(input), "TiB")
-			a.Contains(common.ByteSize(v), "GiB")
+			a.Contains(common.ByteSize(input), common.TiB.String())
+			a.Contains(common.ByteSize(v), common.GiB.String())
 		case input >= 1<<30:
-			a.Contains(common.ByteSize(input), "GiB")
-			a.Contains(common.ByteSize(v), "MiB")
+			a.Contains(common.ByteSize(input), common.GiB.String())
+			a.Contains(common.ByteSize(v), common.MiB.String())
 		case input >= 1<<20:
-			a.Contains(common.ByteSize(input), "MiB")
-			a.Contains(common.ByteSize(v), "KiB")
+			a.Contains(common.ByteSize(input), common.MiB.String())
+			a.Contains(common.ByteSize(v), common.KiB.String())
 		case input >= 1<<10:
-			a.Contains(common.ByteSize(input), "KiB")
+			a.Contains(common.ByteSize(input), common.KiB.String())
 			a.Contains(common.ByteSize(v), "B")
 		case input < 0:
 			a.Equal(common.ByteSize(input), "")

@@ -23,7 +23,7 @@ import (
 /* Convert value to byte size. */
 type byteSize float64
 
-func (b byteSize) String() string {
+func (b byteSize) Convert() string {
 	switch {
 	case b >= YiB:
 		return fmt.Sprintf("%.2fYiB", b/YiB)
@@ -47,33 +47,56 @@ func (b byteSize) String() string {
 	return fmt.Sprintf("%.2fB", b)
 }
 
+func (b byteSize) String() string {
+	switch b {
+	case YiB:
+		return "YiB"
+	case ZiB:
+		return "ZiB"
+	case EiB:
+		return "EiB"
+	case PiB:
+		return "PiB"
+	case TiB:
+		return "TiB"
+	case GiB:
+		return "GiB"
+	case MiB:
+		return "MiB"
+	case KiB:
+		return "KiB"
+	default:
+		return fmt.Sprintf("byteSize(%f)", b)
+	}
+}
+
 /* ByteSize return byte size string from giving value. */
 func ByteSize(i any) string {
 	switch n := i.(type) {
 	case int:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case int8:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case int16:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case int32:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case int64:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case uint:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case uint8:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case uint16:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case uint32:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case uint64:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case float32:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	case float64:
-		return byteSize(n).String()
+		return byteSize(n).Convert()
 	default:
 		stdLogger.Log.Debug(ErrInvalidArg.Error(), DefaultField(i))
 		return ""
