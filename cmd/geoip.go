@@ -37,7 +37,7 @@ func initGeoip() *cobra.Command {
 		as       bool
 	}
 	var geoipCmd = &cobra.Command{
-		GroupID: groupings[CommandGeoip],
+		GroupID: getGroupID(CommandGeoip),
 		Use:     CommandGeoip + " IP...",
 		Short:   "Print IP geographic information",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {

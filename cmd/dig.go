@@ -34,7 +34,7 @@ func initDig() *cobra.Command {
 		server  string
 	}
 	var digCmd = &cobra.Command{
-		GroupID: groupings[CommandDig],
+		GroupID: getGroupID(CommandDig),
 		Use:     CommandDig + " [host] [@server] [type]",
 		Args:    cobra.MinimumNArgs(1),
 		Short:   "Resolve domain name",

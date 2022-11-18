@@ -20,7 +20,7 @@ import "github.com/spf13/cobra"
 
 func initSs() *cobra.Command {
 	var ssCmd = &cobra.Command{
-		GroupID: groupings[CommandSs],
+		GroupID: getGroupID(CommandSs),
 		Use:     CommandSs,
 		Short:   "Displays sockets informations",
 		Run: func(_ *cobra.Command, _ []string) {

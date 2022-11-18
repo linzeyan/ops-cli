@@ -35,7 +35,7 @@ func initTelegram() *cobra.Command {
 		caption string
 	}
 	var telegramCmd = &cobra.Command{
-		GroupID: groupings[CommandTelegram],
+		GroupID: getGroupID(CommandTelegram),
 		Use:     CommandTelegram,
 		Short:   "Send message to Telegram",
 		RunE:    func(cmd *cobra.Command, _ []string) error { return cmd.Help() },

@@ -33,7 +33,7 @@ func initTCPing() *cobra.Command {
 		timeout  time.Duration
 	}
 	var tcpingCmd = &cobra.Command{
-		GroupID: groupings[CommandTCPing],
+		GroupID: getGroupID(CommandTCPing),
 		Use:     CommandTCPing + " [host] [port]",
 		Args:    cobra.ExactArgs(2),
 		Short:   "Connect to a port of a host",

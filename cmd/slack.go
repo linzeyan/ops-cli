@@ -38,7 +38,7 @@ func initSlack() *cobra.Command {
 		arg     string
 	}
 	var slackCmd = &cobra.Command{
-		GroupID: groupings[CommandSlack],
+		GroupID: getGroupID(CommandSlack),
 		Use:     CommandSlack,
 		Short:   "Send message to Slack",
 		RunE:    func(cmd *cobra.Command, _ []string) error { return cmd.Help() },

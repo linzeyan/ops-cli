@@ -46,7 +46,7 @@ func initMTR() *cobra.Command {
 		timeout  time.Duration
 	}
 	var mtrCmd = &cobra.Command{
-		GroupID: groupings[CommandMTR],
+		GroupID: getGroupID(CommandMTR),
 		Use:     CommandMTR,
 		Short:   "Combined traceroute and ping",
 		Args:    cobra.ExactArgs(1),

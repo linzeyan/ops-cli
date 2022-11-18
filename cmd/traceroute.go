@@ -35,7 +35,7 @@ func initTraceroute() *cobra.Command {
 		timeout      time.Duration
 	}
 	var tracerouteCmd = &cobra.Command{
-		GroupID: groupings[CommandTraceroute],
+		GroupID: getGroupID(CommandTraceroute),
 		Use:     CommandTraceroute + " [host]",
 		Args:    cobra.ExactArgs(1),
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {

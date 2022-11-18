@@ -39,7 +39,7 @@ func initNetmask() *cobra.Command {
 		cidr    bool
 	}
 	var netmaskCmd = &cobra.Command{
-		GroupID: groupings[CommandNetmask],
+		GroupID: getGroupID(CommandNetmask),
 		Use:     CommandNetmask,
 		Short:   "Print IP/Mask pair, list address ranges",
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {

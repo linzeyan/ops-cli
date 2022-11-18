@@ -32,7 +32,7 @@ func initDiscord() *cobra.Command {
 		arg     string
 	}
 	var discordCmd = &cobra.Command{
-		GroupID: groupings[CommandDiscord],
+		GroupID: getGroupID(CommandDiscord),
 		Use:     CommandDiscord,
 		Short:   "Send message to Discord",
 		RunE:    func(cmd *cobra.Command, _ []string) error { return cmd.Help() },

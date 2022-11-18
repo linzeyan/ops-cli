@@ -35,7 +35,7 @@ func initArping() *cobra.Command {
 		iface string
 	}
 	var arpingCmd = &cobra.Command{
-		GroupID: groupings[CommandArping],
+		GroupID: getGroupID(CommandArping),
 		Use:     CommandArping,
 		Args:    cobra.ExactArgs(1),
 		Short:   "Discover and probe hosts in a network using the ARP protocol",

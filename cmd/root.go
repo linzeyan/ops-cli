@@ -23,8 +23,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var RootCmd = root()
 var (
+	rootCmd = root()
 	printer = common.NewPrinter()
 	logger  = common.NewLogger()
 )
@@ -37,43 +37,47 @@ var (
 )
 
 func root() *cobra.Command {
-	var rootCmd = &cobra.Command{
+	var cmd = &cobra.Command{
 		Use:   common.RepoName,
 		Short: "OPS useful tools",
 		RunE:  func(cmd *cobra.Command, _ []string) error { return cmd.Help() },
 
 		DisableFlagsInUseLine: true,
 	}
-	rootCmd.PersistentFlags().StringVar(&rootOutputFormat, "output", "", common.Usage("Output format, can be json/yaml"))
-	rootCmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
-	rootCmd.PersistentFlags().StringVar(&rootVerbose, "verbose", "error", common.Usage("Specify log level (debug/info/warn/error/panic/fatal"))
-	rootCmd.PersistentFlags().BoolP("help", "", false, common.Usage("Help for this command"))
+	cmd.PersistentFlags().StringVar(&rootOutputFormat, "output", "", common.Usage("Output format, can be json/yaml"))
+	cmd.PersistentFlags().StringVar(&rootConfig, "config", "", common.Usage("Specify config path"))
+	cmd.PersistentFlags().StringVar(&rootVerbose, "verbose", "error", common.Usage("Specify log level (debug/info/warn/error/panic/fatal"))
+	cmd.PersistentFlags().BoolP("help", "", false, common.Usage("Help for this command"))
 
-	rootCmd.AddCommand(initArping())
-	rootCmd.AddCommand(initCert(), initConvert())
-	rootCmd.AddCommand(initDate(), initDf(), initDig(), initDiscord(), initDoc(rootCmd), initDos2Unix())
-	rootCmd.AddCommand(initEncode(), initEncrypt())
-	rootCmd.AddCommand(initFree())
-	rootCmd.AddCommand(initGeoip())
-	rootCmd.AddCommand(initHash())
-	rootCmd.AddCommand(initICP(), initIP())
-	rootCmd.AddCommand(initLINE())
-	rootCmd.AddCommand(initMTR())
-	rootCmd.AddCommand(initNetmask())
-	rootCmd.AddCommand(initOTP())
-	rootCmd.AddCommand(initPing(), initPs())
-	rootCmd.AddCommand(initQrcode())
-	rootCmd.AddCommand(initRandom(), initReadlink(), initRedis())
-	rootCmd.AddCommand(initSlack(), initSs(), initSSHKeyGen(), initSSL(), initStat(), initSystem())
-	rootCmd.AddCommand(initTCPing(), initTelegram(), initTraceroute(), initTree())
-	rootCmd.AddCommand(initUpdate(), initURL())
-	rootCmd.AddCommand(initVersion())
-	rootCmd.AddCommand(initWhois(), initWsping())
+	cmd.AddCommand(initArping())
+	cmd.AddCommand(initCert(), initConvert())
+	cmd.AddCommand(initDate(), initDf(), initDig(), initDiscord(), initDoc(cmd), initDos2Unix())
+	cmd.AddCommand(initEncode(), initEncrypt())
+	cmd.AddCommand(initFree())
+	cmd.AddCommand(initGeoip())
+	cmd.AddCommand(initHash())
+	cmd.AddCommand(initICP(), initIP())
+	cmd.AddCommand(initLINE())
+	cmd.AddCommand(initMTR())
+	cmd.AddCommand(initNetmask())
+	cmd.AddCommand(initOTP())
+	cmd.AddCommand(initPing(), initPs())
+	cmd.AddCommand(initQrcode())
+	cmd.AddCommand(initRandom(), initReadlink(), initRedis())
+	cmd.AddCommand(initSlack(), initSs(), initSSHKeyGen(), initSSL(), initStat(), initSystem())
+	cmd.AddCommand(initTCPing(), initTelegram(), initTraceroute(), initTree())
+	cmd.AddCommand(initUpdate(), initURL())
+	cmd.AddCommand(initVersion())
+	cmd.AddCommand(initWhois(), initWsping())
 	initalize := func() {
 		common.SetLoggerLevel(rootVerbose)
 	}
 	cobra.OnInitialize(initalize)
-	addGroup(rootCmd)
+	addGroup(cmd)
+	return cmd
+}
+
+func Run() *cobra.Command {
 	return rootCmd
 }
 
@@ -105,6 +109,14 @@ func addGroup(cmd *cobra.Command) {
 
 	groups = append(groups, im, network)
 	cmd.AddGroup(groups...)
+}
+
+func getGroupID(cmd string) string {
+	group, ok := groupings[cmd]
+	if ok {
+		return group
+	}
+	return ""
 }
 
 func ReadConfig(block string, flag any) error {

@@ -34,7 +34,7 @@ func initWhois() *cobra.Command {
 		ns, expiry, registrar, days bool
 	}
 	var whoisCmd = &cobra.Command{
-		GroupID: groupings[CommandWhois],
+		GroupID: getGroupID(CommandWhois),
 		Use:     CommandWhois + " domain",
 		Args:    cobra.ExactArgs(1),
 		ValidArgsFunction: func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {

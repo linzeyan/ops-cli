@@ -33,7 +33,7 @@ func initURL() *cobra.Command {
 		headers string
 	}
 	var urlCmd = &cobra.Command{
-		GroupID: groupings[CommandURL],
+		GroupID: getGroupID(CommandURL),
 		Use:     CommandURL,
 		Args:    cobra.ExactArgs(1),
 		Short:   "Get url content or expand shorten url or download",

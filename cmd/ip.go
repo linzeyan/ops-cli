@@ -40,7 +40,7 @@ func initIP() *cobra.Command {
 	validArgs = append(validArgs, "all")
 
 	var ipCmd = &cobra.Command{
-		GroupID:   groupings[CommandIP],
+		GroupID:   getGroupID(CommandIP),
 		Use:       CommandIP + " {all|interface}",
 		Args:      cobra.MinimumNArgs(1),
 		ValidArgs: validArgs,

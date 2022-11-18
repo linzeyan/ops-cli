@@ -31,7 +31,7 @@ func initSs() *cobra.Command {
 		tcp, udp   bool
 	}
 	var ssCmd = &cobra.Command{
-		GroupID: groupings[CommandSs],
+		GroupID: getGroupID(CommandSs),
 		Use:     CommandSs,
 		Short:   "Displays sockets informations",
 		Run: func(_ *cobra.Command, _ []string) {

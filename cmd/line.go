@@ -35,7 +35,7 @@ func initLINE() *cobra.Command {
 		arg    string
 	}
 	var lineCmd = &cobra.Command{
-		GroupID: groupings[CommandLINE],
+		GroupID: getGroupID(CommandLINE),
 		Use:     CommandLINE,
 		Short:   "Send message to LINE",
 		RunE:    func(cmd *cobra.Command, _ []string) error { return cmd.Help() },

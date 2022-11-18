@@ -27,7 +27,7 @@ import (
 
 func initWsping() *cobra.Command {
 	var wspingCmd = &cobra.Command{
-		GroupID: groupings[CommandWsping],
+		GroupID: getGroupID(CommandWsping),
 		Use:     CommandWsping + " host",
 		Args:    cobra.ExactArgs(1),
 		Short:   "Connect to a websocket server",
