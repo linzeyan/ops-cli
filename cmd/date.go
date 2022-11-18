@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -31,14 +32,16 @@ func initDate() *cobra.Command {
 		milliseconds bool
 		microseconds bool
 		nanoseconds  bool
-		format       string
-		timezone     string
-		reference    string
 		date         bool
 		time         bool
 		weekDay      bool
 		week         bool
 		zone         bool
+
+		format    string
+		timezone  string
+		reference string
+		duration  string
 	}
 	var dateCmd = &cobra.Command{
 		Use:   CommandDate,
@@ -117,6 +120,29 @@ Time zone:
 			case flags.zone:
 				z, o := t.Zone()
 				printer.Printf("%s(%d)", z, o/60/60)
+			case flags.duration != "":
+				arg, err := time.Parse(flags.format, flags.duration)
+				if err != nil {
+					printer.Error(err)
+					return
+				}
+				duration := t.Sub(arg)
+				split := strings.Split(duration.String(), "h")
+				hour, err := strconv.Atoi(split[0])
+				if err != nil {
+					printer.Error(err)
+					return
+				}
+				var y, d int
+				if hour > 24 {
+					d = hour / 24
+					hour %= 24
+				}
+				if d > 365 {
+					y = d / 365
+					d %= 365
+				}
+				printer.Printf("%dy%dd%dh%s", y, d, hour, split[1])
 
 			/* default */
 			case flags.format == "":
@@ -128,6 +154,7 @@ Time zone:
 	}
 
 	dateCmd.Flags().StringVarP(&flags.format, "format", "f", "", common.Usage("Print date using specific format"))
+	dateCmd.Flags().StringVar(&flags.duration, "duration", "", common.Usage("Print duration from giving time"))
 	dateCmd.Flags().StringVarP(&flags.timezone, "timezone", "z", "", common.Usage("Specify timezone"))
 	dateCmd.Flags().StringVarP(&flags.reference, "reference", "r", "", common.Usage("Output date specified by reference time"))
 	dateCmd.Flags().BoolVarP(&flags.seconds, "seconds", "s", false, common.Usage("Print Unix time"))
