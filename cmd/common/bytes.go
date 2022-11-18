@@ -26,25 +26,26 @@ type byteSize float64
 func (b byteSize) Convert() string {
 	switch {
 	case b >= YiB:
-		return fmt.Sprintf("%.2fYiB", b/YiB)
+		return fmt.Sprintf("%.2f%s", b/YiB, YiB)
 	case b >= ZiB:
-		return fmt.Sprintf("%.2fZiB", b/ZiB)
+		return fmt.Sprintf("%.2f%s", b/ZiB, ZiB)
 	case b >= EiB:
-		return fmt.Sprintf("%.2fEiB", b/EiB)
+		return fmt.Sprintf("%.2f%s", b/EiB, EiB)
 	case b >= PiB:
-		return fmt.Sprintf("%.2fPiB", b/PiB)
+		return fmt.Sprintf("%.2f%s", b/PiB, PiB)
 	case b >= TiB:
-		return fmt.Sprintf("%.2fTiB", b/TiB)
+		return fmt.Sprintf("%.2f%s", b/TiB, TiB)
 	case b >= GiB:
-		return fmt.Sprintf("%.2fGiB", b/GiB)
+		return fmt.Sprintf("%.2f%s", b/GiB, GiB)
 	case b >= MiB:
-		return fmt.Sprintf("%.2fMiB", b/MiB)
+		return fmt.Sprintf("%.2f%s", b/MiB, MiB)
 	case b >= KiB:
-		return fmt.Sprintf("%.2fKiB", b/KiB)
+		return fmt.Sprintf("%.2f%s", b/KiB, KiB)
 	case b < 0:
 		return ""
+	default:
+		return fmt.Sprintf("%.2fB", b)
 	}
-	return fmt.Sprintf("%.2fB", b)
 }
 
 func (b byteSize) String() string {
