@@ -27,13 +27,15 @@ jobs:
       - name: Check config
         uses: goreleaser/goreleaser-action@v3
         with:
-          version: latest
+          version: v1.13.1
+          # version: latest
           args: check
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
         with:
-          version: latest
+          version: v1.13.1
+          # version: latest
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.OPSCLI_TOKEN }}
