@@ -52,6 +52,7 @@ func initTCPing() *cobra.Command {
 				if err != nil {
 					logger.Info(err.Error())
 					printer.Error(err)
+					return
 				}
 				if flags.count == 1 {
 					printer.Printf("%s response from %s (%s) port %s [open] %v", t.Protocal, args[0], ip, port, duration)
