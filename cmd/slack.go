@@ -63,6 +63,12 @@ func initSlack() *cobra.Command {
 			logger.Error(err.Error())
 			return
 		}
+		if cmd.Name() != CommandText {
+			if !common.IsFile(flags.arg) && !common.IsURL(flags.arg) {
+				logger.Error(common.ErrInvalidFile.Error())
+				return
+			}
+		}
 		switch cmd.Name() {
 		case CommandFile:
 			err = s.Photo(flags.Channel, flags.arg)

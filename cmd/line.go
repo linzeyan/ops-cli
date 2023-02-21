@@ -60,6 +60,12 @@ func initLINE() *cobra.Command {
 			logger.Error(err.Error())
 			return
 		}
+		if cmd.Name() != CommandText {
+			if !common.IsFile(flags.arg) && !common.IsURL(flags.arg) {
+				logger.Error(common.ErrInvalidFile.Error())
+				return
+			}
+		}
 		switch cmd.Name() {
 		case CommandID:
 			l.Response, err = l.API.SetWebhookEndpointURL(args[0]).Do()
