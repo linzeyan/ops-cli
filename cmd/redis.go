@@ -81,7 +81,6 @@ func (r *Redis) Connection(host, port, user, pass string, db int) *redis.Client 
 		common.NewField("host", host),
 		common.NewField("port", port),
 		common.NewField("user", user),
-		common.NewField("pass", pass),
 		common.NewField("db", db),
 	)
 	return nil
