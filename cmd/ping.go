@@ -22,8 +22,11 @@ import (
 	"fmt"
 	"math"
 	"net"
+	"net/netip"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/linzeyan/ops-cli/cmd/common"
@@ -232,9 +235,17 @@ func (p *Ping) Connect(c context.Context, host string) {
 	if p.IPv6 {
 		network = "ip6"
 	}
+	if network == "ip4" {
+		addr, err := ParseAnyIPv4Netip(host)
+		if err != nil {
+			logger.Error(err.Error())
+			return
+		}
+		host = addr.String()
+	}
 	addr, err := net.ResolveIPAddr(network, host)
 	if err != nil {
-		logger.Debug(err.Error())
+		logger.Error(err.Error())
 		return
 	}
 	if p.IPv6 {
@@ -333,4 +344,83 @@ func (p *Ping) summary(host string, t time.Duration) {
 	out += fmt.Sprintf("round-trip min/avg/max/mdev = %v/%v/%v/%v\n",
 		p.stat.Min, avg, p.stat.Max, time.Duration(math.Sqrt(variance)))
 	printer.Printf(out)
+}
+
+func ParseAnyIPv4Netip(input string) (netip.Addr, error) {
+	parts := strings.Split(input, ".")
+	switch len(parts) {
+	case 1:
+		val, err := strconv.ParseUint(parts[0], 10, 32)
+		if err != nil {
+			return netip.Addr{}, err
+		}
+		ip := netip.AddrFrom4([4]byte{
+			byte(val >> 24),
+			byte(val >> 16),
+			byte(val >> 8),
+			byte(val),
+		})
+
+		return ip, nil
+	case 2:
+		a, err := strconv.Atoi(parts[0])
+		if err != nil {
+			return netip.Addr{}, err
+		}
+		b, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return netip.Addr{}, err
+		}
+		ip := netip.AddrFrom4([4]byte{
+			byte(a),
+			byte(b >> 16),
+			byte((b >> 8) & 0xFF),
+			byte(b & 0xFF),
+		})
+		return ip, nil
+	case 3:
+		a, err := strconv.Atoi(parts[0])
+		if err != nil {
+			return netip.Addr{}, err
+		}
+		b, err := strconv.Atoi(parts[1])
+		if err != nil {
+			return netip.Addr{}, err
+		}
+		c, err := strconv.Atoi(parts[2])
+		if err != nil {
+			return netip.Addr{}, err
+		}
+		ip := netip.AddrFrom4([4]byte{
+			byte(a),
+			byte(b),
+			byte(c >> 8),
+			byte(c & 0xFF),
+		})
+		return ip, nil
+	case 4:
+		ip, err := netip.ParseAddr(input)
+		if err != nil || !ip.Is4() {
+			return netip.Addr{}, errors.New("invalid IPv4 address")
+		}
+		return ip, nil
+	default:
+		return netip.Addr{}, errors.New("invalid format")
+	}
+}
+
+func IPv4NetipToAllForms(ip netip.Addr) (string, string, string, string) {
+	if !ip.Is4() {
+		panic("not an IPv4 address")
+	}
+	b := ip.As4()
+
+	f3 := uint32(b[2])<<8 | uint32(b[3])
+	f2 := uint32(b[1])<<16 | f3
+	f1 := uint32(b[0])<<24 | f2
+	form2 := fmt.Sprintf("%d.%d", b[0], f2)
+	form3 := fmt.Sprintf("%d.%d.%d", b[0], b[1], f3)
+	form4 := ip.String()
+
+	return strconv.FormatUint(uint64(f1), 10), form2, form3, form4
 }
