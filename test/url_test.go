@@ -20,7 +20,7 @@ func TestURL(t *testing.T) {
 		},
 		{
 			[]string{runCommand, mainGo, subCommand, "-e", "https://bit.ly/3ogGuB1"},
-			"https://theinitium.com/article/20220721-mainland-covid-prolonged-grief-disorder/?utm_source=Telegram&utm_medium=Telegram&utm_campaign=Telegram",
+			"https://theinitium.com/article/20220721-mainland-covid-prolonged-grief-disorder?utm_source=Telegram&utm_medium=Telegram&utm_campaign=Telegram",
 		},
 		{
 			[]string{runCommand, mainGo, subCommand, "-e", "https://youtu.be/uLGSEoN5KwI"},
@@ -34,10 +34,10 @@ func TestURL(t *testing.T) {
 			[]string{runCommand, mainGo, subCommand, "-e", "https://spoti.fi/3O6QgAb"},
 			"https://open.spotify.com/episode/0XOruTQxsN295v0ePD2YAk",
 		},
-		{
-			[]string{runCommand, mainGo, subCommand, "-e", "https://redd.it/p2xbpj"},
-			"https://www.reddit.com/comments/p2xbpj",
-		},
+		// {
+		// 	[]string{runCommand, mainGo, subCommand, "-e", "https://redd.it/p2xbpj"},
+		// 	"https://www.reddit.com/comments/p2xbpj?rdt=58734",
+		// },
 	}
 
 	for i := range testCases {

@@ -1,5 +1,8 @@
 # This is an example .goreleaser.yml file with some sensible defaults.
 # Make sure to check the documentation at https://goreleaser.com
+# https://github.com/goreleaser/goreleaser/blob/main/.goreleaser.yaml
+
+version: 2
 env:
   - GO111MODULE=on
   - CGO_ENABLED=0
@@ -42,12 +45,11 @@ archives:
     wrap_in_directory: true
 
 changelog:
-  skip: true
-  # sort: asc
-  # filters:
-  #   exclude:
-  #     - "^docs:"
-  #     - "^test:"
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
 
 nfpms:
   - id: packages
@@ -90,6 +92,7 @@ nfpms:
 brews:
   - name: "{{ .ProjectName }}"
     homepage: https://github.com/linzeyan/homebrew-tools
-    tap:
+    license: Apache-2.0
+  - repository:
       owner: linzeyan
       name: homebrew-tools

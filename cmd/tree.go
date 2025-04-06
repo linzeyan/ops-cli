@@ -141,19 +141,19 @@ func initTree() *cobra.Command {
 				inf.Print(opts)
 				if !flags.noReport {
 					footer := "\n%d "
-					switch {
+					switch nd {
 					default:
 						footer += "directories"
-					case nd == 1:
+					case 1:
 						footer += "directory"
 					}
 
 					footer = fmt.Sprintf(footer, nd)
 					if !flags.dirs {
-						switch {
+						switch nf {
 						default:
 							footer += ", %d files\n"
-						case nf == 1:
+						case 1:
 							footer += ", %d file\n"
 						}
 						footer = fmt.Sprintf(footer, nf)

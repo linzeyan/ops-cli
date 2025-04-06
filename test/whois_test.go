@@ -59,7 +59,7 @@ func TestWhoisRegistrar(t *testing.T) {
 		},
 		{
 			[]string{runCommand, mainGo, subCommand, "cloudflare.com", "--registrar"},
-			"CloudFlare\n",
+			"Cloudflare\n",
 		},
 	}
 

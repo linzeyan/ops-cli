@@ -32,7 +32,7 @@ jobs:
       fail-fast: false
       matrix:
         goVersion:
-          - 18
+          - 24
         os:
           - macos
           - ubuntu
@@ -44,20 +44,32 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     steps:
       - name: "Install go1.${{ matrix.goVersion }}.x"
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: 1.${{ matrix.goVersion }}.x
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/.cache/golangci-lint
+            ~/Library/Caches/go-build
+            ~\AppData\Local\go-build
+          key: ${{ runner.os }}-go-${{ matrix.goVersion }}-${{ hashFiles('.golangci.yaml') }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
+
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v7.0.0
         with:
           args: --timeout=5m
-          version: v1.48.0
+          version: v2.0.2
 
   go-test:
     needs:
@@ -66,7 +78,7 @@ jobs:
       fail-fast: false
       matrix:
         goVersion:
-          - 18
+          - 24
         os:
           - macos
           - ubuntu
@@ -76,16 +88,16 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     steps:
       - name: "Install go1.${{ matrix.goVersion }}.x"
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
           go-version: 1.${{ matrix.goVersion }}.x
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/go/pkg/mod

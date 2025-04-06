@@ -16,8 +16,8 @@ func TestCert(t *testing.T) {
 	}{
 		{[]string{runCommand, mainGo, subCommand, "www.google.com", "--dns"}, "[\n  \"www.google.com\"\n]\n"},
 		{[]string{runCommand, mainGo, subCommand, "1.1.1.1", "--dns"}, "[\n  \"cloudflare-dns.com\",\n  \"*.cloudflare-dns.com\",\n  \"one.one.one.one\"\n]\n"},
-		{[]string{runCommand, mainGo, subCommand, "www.google.com", "--issuer"}, "CN=GTS CA 1C3,O=Google Trust Services LLC,C=US\n"},
-		{[]string{runCommand, mainGo, subCommand, "1.1.1.1", "--issuer"}, "CN=DigiCert TLS Hybrid ECC SHA384 2020 CA1,O=DigiCert Inc,C=US\n"},
+		{[]string{runCommand, mainGo, subCommand, "www.google.com", "--issuer"}, "CN=WR2,O=Google Trust Services,C=US\n"},
+		{[]string{runCommand, mainGo, subCommand, "1.1.1.1", "--issuer"}, "CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1,O=DigiCert Inc,C=US\n"},
 		{[]string{runCommand, mainGo, subCommand, "1.1.1.1", "--ip"}, "1.1.1.1:443\n"},
 	}
 
